@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>LearnPath — Heutagogy Platform</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --purple: #7F77DD; --purple-light: #EEEDFE; --purple-dark: #3C3489;
+    --teal: #1D9E75; --teal-light: #E1F5EE; --teal-dark: #085041;
+    --amber: #BA7517; --amber-light: #FAEEDA;
+    --coral: #D85A30; --coral-light: #FAECE7;
+    --gray: #5F5E5A; --gray-light: #F1EFE8; --gray-border: #D3D1C7;
+    --text: #2C2C2A; --text-muted: #5F5E5A; --text-hint: #888780;
+    --bg2: #F7F6F2; --radius: 12px; --radius-sm: 8px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg2); color: var(--text); min-height: 100vh; }
+  #auth-screen { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; background:linear-gradient(135deg,var(--purple-light) 0%,var(--teal-light) 100%); }
+  .auth-card { background:white; border-radius:24px; padding:48px 40px; max-width:420px; width:100%; text-align:center; box-shadow:0 8px 40px rgba(0,0,0,0.12); }
+  .auth-logo { width:64px; height:64px; background:var(--purple); border-radius:20px; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; }
+  .auth-logo svg { width:34px; height:34px; stroke:white; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .auth-card h1 { font-size:26px; font-weight:700; margin-bottom:8px; }
+  .auth-card > p { color:var(--text-muted); font-size:14px; margin-bottom:28px; line-height:1.5; }
+  .google-btn { display:flex; align-items:center; justify-content:center; gap:12px; width:100%; padding:14px 24px; border:2px solid var(--gray-border); border-radius:var(--radius); background:white; font-size:15px; font-weight:600; color:var(--text); cursor:pointer; transition:all 0.2s; }
+  .google-btn:hover { border-color:var(--purple); background:var(--purple-light); }
+  .google-btn img { width:20px; }
+  .auth-note { margin-top:14px; font-size:12px; color:var(--text-hint); }
+  #role-screen { min-height:100vh; display:none; flex-direction:column; align-items:center; justify-content:center; padding:24px; }
+  .role-inner { max-width:460px; width:100%; text-align:center; }
+  .role-inner h2 { font-size:22px; font-weight:700; margin-bottom:6px; }
+  .role-inner > p { color:var(--text-muted); margin-bottom:28px; font-size:14px; }
+  .role-cards { display:flex; flex-direction:column; gap:14px; }
+  .role-card { padding:20px; border-radius:var(--radius); border:2px solid var(--gray-border); background:white; cursor:pointer; transition:all 0.2s; text-align:left; display:flex; align-items:center; gap:18px; }
+  .role-card:hover { border-color:var(--purple); transform:translateY(-2px); box-shadow:var(--shadow); }
+  .role-icon { width:52px; height:52px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:26px; flex-shrink:0; }
+  .role-card h3 { font-size:17px; font-weight:700; margin-bottom:3px; }
+  .role-card p { font-size:13px; color:var(--text-muted); margin:0; }
+  #app { display:none; min-height:100vh; flex-direction:column; }
+  .top-bar { background:white; border-bottom:1px solid var(--gray-border); padding:0 16px; height:56px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
+  .top-bar-left { display:flex; align-items:center; gap:10px; }
+  .app-logo { width:34px; height:34px; background:var(--purple); border-radius:9px; display:flex; align-items:center; justify-content:center; }
+  .app-logo svg { width:18px; height:18px; stroke:white; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .app-name { font-size:16px; font-weight:700; }
+  .user-info { display:flex; align-items:center; gap:8px; }
+  .user-avatar { width:32px; height:32px; border-radius:50%; object-fit:cover; }
+  .user-name { font-size:13px; font-weight:600; }
+  .signout-btn { font-size:12px; color:var(--text-muted); cursor:pointer; border:1px solid var(--gray-border); padding:3px 9px; border-radius:6px; background:none; }
+  .signout-btn:hover { color:var(--coral); border-color:var(--coral); }
+  .main-content { flex:1; overflow-y:auto; padding:16px; max-width:680px; margin:0 auto; width:100%; padding-bottom:76px; }
+  .bottom-nav { background:white; border-top:1px solid var(--gray-border); display:flex; position:fixed; bottom:0; left:0; right:0; z-index:100; }
+  .nav-item { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:9px 4px; cursor:pointer; gap:3px; border:none; background:none; color:var(--text-muted); font-size:10px; font-weight:500; transition:color 0.2s; }
+  .nav-item.active { color:var(--purple); }
+  .nav-item svg { width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+  .page-title { font-size:20px; font-weight:700; margin-bottom:4px; }
+  .page-sub { font-size:13px; color:var(--text-muted); margin-bottom:20px; }
+  .card { background:white; border-radius:var(--radius); padding:18px; margin-bottom:14px; box-shadow:var(--shadow); border:1px solid var(--gray-border); }
+  .card-title { font-size:15px; font-weight:700; margin-bottom:10px; }
+  .btn { padding:11px 22px; border-radius:var(--radius-sm); font-size:14px; font-weight:600; cursor:pointer; border:none; transition:all 0.18s; }
+  .btn-primary { background:var(--purple); color:white; }
+  .btn-primary:hover { background:var(--purple-dark); }
+  .btn-secondary { background:var(--gray-light); color:var(--text); }
+  .btn-success { background:var(--teal); color:white; }
+  .btn-full { width:100%; }
+  .btn:disabled { opacity:0.4; cursor:not-allowed; }
+  .quiz-prog { height:5px; background:var(--gray-border); border-radius:3px; margin-bottom:28px; overflow:hidden; }
+  .quiz-prog-fill { height:100%; background:var(--purple); border-radius:3px; transition:width 0.4s; }
+  .quiz-q { font-size:18px; font-weight:700; text-align:center; margin-bottom:6px; line-height:1.4; }
+  .quiz-sub { font-size:13px; color:var(--text-muted); text-align:center; margin-bottom:24px; }
+  .quiz-opts { display:flex; flex-direction:column; gap:10px; }
+  .quiz-opt { padding:14px 16px; border-radius:var(--radius); border:2px solid var(--gray-border); background:white; cursor:pointer; text-align:left; font-size:14px; font-weight:500; transition:all 0.18s; display:flex; align-items:center; gap:12px; }
+  .quiz-opt:hover { border-color:var(--purple); background:var(--purple-light); }
+  .quiz-opt.selected { border-color:var(--purple); background:var(--purple-light); color:var(--purple-dark); }
+  .opt-em { font-size:20px; width:28px; text-align:center; flex-shrink:0; }
+  .quiz-nav { display:flex; justify-content:space-between; margin-top:24px; }
+  .profile-result { text-align:center; padding:20px 16px; }
+  .profile-badge { width:80px; height:80px; border-radius:22px; margin:0 auto 14px; display:flex; align-items:center; justify-content:center; font-size:40px; }
+  .profile-result h2 { font-size:22px; font-weight:800; margin-bottom:6px; }
+  .profile-result .desc { font-size:14px; color:var(--text-muted); line-height:1.6; margin-bottom:16px; }
+  .ptags { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-bottom:16px; }
+  .tag { padding:4px 12px; border-radius:20px; font-size:12px; font-weight:600; }
+  .contract-section h3 { font-size:14px; font-weight:700; color:var(--purple-dark); margin-bottom:10px; }
+  .form-group { margin-bottom:10px; }
+  .form-label { font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:5px; display:block; }
+  .form-input,.form-select,.form-textarea { width:100%; padding:9px 12px; border:1.5px solid var(--gray-border); border-radius:var(--radius-sm); font-size:14px; color:var(--text); background:white; font-family:inherit; transition:border-color 0.2s; }
+  .form-input:focus,.form-select:focus,.form-textarea:focus { outline:none; border-color:var(--purple); }
+  .form-textarea { min-height:72px; resize:vertical; }
+  .tip-box { background:var(--amber-light); border-left:3px solid var(--amber); padding:9px 12px; border-radius:0 var(--radius-sm) var(--radius-sm) 0; font-size:12px; color:var(--text-muted); margin-top:7px; }
+  .chip-row { display:flex; flex-wrap:wrap; gap:7px; }
+  .chip { padding:7px 14px; border-radius:20px; border:2px solid var(--gray-border); font-size:13px; font-weight:600; cursor:pointer; background:white; transition:all 0.18s; }
+  .chip.selected { border-color:var(--teal); background:var(--teal-light); color:var(--teal-dark); }
+  .ev-grid { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+  .ev-card { padding:12px; border-radius:var(--radius-sm); border:2px solid var(--gray-border); cursor:pointer; text-align:center; transition:all 0.18s; background:white; }
+  .ev-card.selected { border-color:var(--teal); background:var(--teal-light); }
+  .ev-icon { font-size:22px; margin-bottom:5px; }
+  .ev-label { font-size:12px; font-weight:600; }
+  .divider { height:1px; background:var(--gray-border); margin:16px 0; }
+  .sbadge { display:inline-flex; align-items:center; gap:4px; padding:3px 9px; border-radius:20px; font-size:11px; font-weight:700; }
+  .s-pending { background:var(--amber-light); color:var(--amber); }
+  .s-approved { background:var(--teal-light); color:var(--teal-dark); }
+  .s-draft { background:var(--gray-light); color:var(--gray); }
+  .flex-between { display:flex; align-items:center; justify-content:space-between; }
+  .feed-item { background:white; border-radius:var(--radius); padding:14px; margin-bottom:10px; border:1px solid var(--gray-border); }
+  .feed-hdr { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+  .feed-av { width:38px; height:38px; border-radius:50%; background:var(--purple-light); display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:700; color:var(--purple); flex-shrink:0; }
+  .feed-name { font-size:14px; font-weight:700; }
+  .feed-detail { font-size:12px; color:var(--text-muted); }
+  .feed-goal { font-size:14px; line-height:1.5; margin-bottom:8px; }
+  .feed-tags { display:flex; flex-wrap:wrap; gap:5px; }
+  .feed-tag { padding:2px 8px; border-radius:8px; font-size:11px; font-weight:600; background:var(--gray-light); color:var(--gray); }
+  .filter-row { display:flex; gap:7px; margin-bottom:14px; overflow-x:auto; padding-bottom:3px; }
+  .filter-chip { padding:5px 13px; border-radius:20px; border:1.5px solid var(--gray-border); font-size:12px; font-weight:600; cursor:pointer; background:white; white-space:nowrap; transition:all 0.18s; }
+  .filter-chip.active { background:var(--purple); border-color:var(--purple); color:white; }
+  .res-card { background:white; border-radius:var(--radius); padding:14px; margin-bottom:10px; border:1px solid var(--gray-border); }
+  .res-type { display:inline-flex; align-items:center; gap:5px; padding:2px 9px; border-radius:9px; font-size:11px; font-weight:700; background:var(--purple-light); color:var(--purple-dark); margin-bottom:8px; }
+  .res-title { font-size:15px; font-weight:700; margin-bottom:3px; }
+  .res-why { font-size:13px; color:var(--text-muted); margin-bottom:8px; line-height:1.5; }
+  .res-footer { display:flex; align-items:center; justify-content:space-between; }
+  .res-author { font-size:12px; color:var(--text-hint); }
+  .open-btn { padding:4px 12px; border-radius:20px; border:1.5px solid var(--gray-border); font-size:12px; font-weight:600; cursor:pointer; background:none; color:var(--text-muted); text-decoration:none; transition:all 0.18s; }
+  .open-btn:hover { border-color:var(--teal); color:var(--teal); }
+  .prog-bar-wrap { background:var(--gray-border); border-radius:6px; height:8px; margin:7px 0 14px; overflow:hidden; }
+  .prog-bar-fill { height:100%; border-radius:6px; background:var(--teal); transition:width 0.5s; }
+  .step-item { display:flex; align-items:center; gap:12px; padding:11px 14px; border-radius:var(--radius-sm); border:1.5px solid var(--gray-border); background:white; margin-bottom:9px; }
+  .step-check { width:22px; height:22px; border-radius:50%; border:2px solid var(--gray-border); cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all 0.18s; font-size:12px; font-weight:700; }
+  .step-check.done { background:var(--teal); border-color:var(--teal); color:white; }
+  .step-text { font-size:13px; font-weight:500; flex:1; }
+  .step-text.done { text-decoration:line-through; color:var(--text-muted); }
+  .likert-wrap { margin:12px 0; }
+  .likert-label { font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:7px; }
+  .likert-scale { display:flex; gap:7px; }
+  .likert-btn { flex:1; padding:9px 0; border-radius:var(--radius-sm); border:2px solid var(--gray-border); font-size:14px; font-weight:700; cursor:pointer; background:white; transition:all 0.18s; text-align:center; }
+  .likert-btn:hover { border-color:var(--purple); background:var(--purple-light); }
+  .likert-btn.selected { border-color:var(--purple); background:var(--purple); color:white; }
+  .likert-anchors { display:flex; justify-content:space-between; font-size:10px; color:var(--text-hint); margin-top:3px; }
+  .student-row { display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:var(--radius-sm); border:1.5px solid var(--gray-border); background:white; margin-bottom:9px; }
+  .s-name { font-size:14px; font-weight:700; }
+  .s-meta { font-size:12px; color:var(--text-muted); }
+  .prog-mini { height:4px; background:var(--gray-border); border-radius:3px; margin-top:4px; overflow:hidden; width:90px; }
+  .prog-mini-fill { height:100%; background:var(--teal); border-radius:3px; }
+  .empty-state { text-align:center; padding:36px 16px; color:var(--text-muted); }
+  .empty-icon { font-size:36px; margin-bottom:10px; }
+  .toast { position:fixed; bottom:82px; left:50%; transform:translateX(-50%); background:#2C2C2A; color:white; padding:11px 22px; border-radius:var(--radius-sm); font-size:13px; font-weight:600; z-index:999; opacity:0; transition:opacity 0.3s; pointer-events:none; white-space:nowrap; max-width:90vw; }
+  .toast.show { opacity:1; }
+  .loading { text-align:center; padding:40px; color:var(--text-muted); font-size:14px; }
+  .mb-10 { margin-bottom:10px; }
+  .mt-10 { margin-top:10px; }
+</style>
+</head>
+<body>
+
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5M2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+    <h1>LearnPath</h1>
+    <p>Your heutagogy-powered English learning platform. Sign in with your school Google account.</p>
+    <button class="google-btn" id="gsignin">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G">
+      Continue with Google
+    </button>
+    <p class="auth-note">Use your school email address to sign in.</p>
+  </div>
+</div>
+
+<div id="role-screen">
+  <div class="role-inner">
+    <h2>Welcome! Who are you?</h2>
+    <p>This helps us set up the right experience for you.</p>
+    <div class="role-cards">
+      <div class="role-card" id="role-student">
+        <div class="role-icon" style="background:#EEEDFE">🎒</div>
+        <div><h3>I'm a Student</h3><p>Set goals, track progress, and share work with my class.</p></div>
+      </div>
+      <div class="role-card" id="role-teacher">
+        <div class="role-icon" style="background:#E1F5EE">👩‍🏫</div>
+        <div><h3>I'm a Teacher</h3><p>Monitor contracts, give feedback, and manage the class.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <div class="app-logo"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5M2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+      <span class="app-name">LearnPath</span>
+    </div>
+    <div class="user-info">
+      <img id="uavatar" class="user-avatar" src="" alt="">
+      <span id="uname" class="user-name"></span>
+      <button class="signout-btn" id="signout">Sign out</button>
+    </div>
+  </div>
+  <div class="main-content" id="main"></div>
+  <div class="bottom-nav" id="bnav"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getDatabase, ref, set, get, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+const fbApp = initializeApp({
+  apiKey:"AIzaSyDFC_bMD8MFxRPyBGO7kqgn7YWLWyEFR4M",
+  authDomain:"let-s-practice-2eda9.firebaseapp.com",
+  projectId:"let-s-practice-2eda9",
+  storageBucket:"let-s-practice-2eda9.firebasestorage.app",
+  messagingSenderId:"329452880269",
+  appId:"1:329452880269:web:f64e787d55ca3f56b67dc4",
+  databaseURL:"https://let-s-practice-2eda9-default-rtdb.firebaseio.com"
+});
+
+const auth = getAuth(fbApp);
+const db = getDatabase(fbApp);
+const provider = new GoogleAuthProvider();
+
+let CU=null, UP=null;
+let qAnswers=[], qIdx=0;
+let selSkill='', selEvidence='';
+let likertV=[0,0,0,0], stepsDone={}, cSteps=[];
+
+const rubric=[
+  {label:'Language accuracy',desc:'Grammar and sentence structure'},
+  {label:'Fluency & vocabulary',desc:'Range and variety of words'},
+  {label:'Communicative impact',desc:'How clearly the message comes across'},
+  {label:'Self-regulation',desc:'Evidence of reflection and improvement'}
+];
+
+const quizData=[
+  {q:"When you learn something new, you prefer to...",sub:"Choose what feels most like you",opts:[
+    {e:"📺",t:"Watch a video or listen to someone explain it"},
+    {e:"📖",t:"Read about it and take notes"},
+    {e:"💬",t:"Talk about it with someone"},
+    {e:"🛠️",t:"Try it yourself straight away"}]},
+  {q:"Your dream English project would be...",sub:"Pick the one that excites you most",opts:[
+    {e:"🎬",t:"A short film or video diary"},
+    {e:"📝",t:"A blog post or written story"},
+    {e:"🎙️",t:"A podcast or audio recording"},
+    {e:"🎨",t:"An infographic or presentation"}]},
+  {q:"You feel most confident when...",sub:"Be honest — no wrong answers",opts:[
+    {e:"✨",t:"You can be creative and make something original"},
+    {e:"📋",t:"You have clear steps to follow"},
+    {e:"🤝",t:"You're working and sharing with others"},
+    {e:"🔍",t:"You can research and explore on your own"}]},
+  {q:"Outside school, you usually learn English by...",sub:"What do you actually do?",opts:[
+    {e:"🎮",t:"Playing games or watching videos/series"},
+    {e:"📱",t:"Using apps or following content online"},
+    {e:"🎵",t:"Listening to music or podcasts"},
+    {e:"📚",t:"Reading books, articles or captions"}]},
+  {q:"When you get feedback, you prefer it from...",sub:"How do you like to grow?",opts:[
+    {e:"🪞",t:"Myself — I reflect on my own work first"},
+    {e:"👥",t:"My classmates — peer opinions matter to me"},
+    {e:"👩‍🏫",t:"My teacher — expert guidance is most useful"},
+    {e:"🔀",t:"A mix of all three"}]}
+];
+
+const profiles=[
+  {id:'storyteller',name:'The Storyteller',emoji:'📖',color:'#EEEDFE',tag:'Writing & Speaking',desc:'You learn best by creating narratives and sharing your voice. Blogs, videos, and presentations are where you shine.',skills:['Writing','Speaking'],evidence:['Blog post','Short video','Written story'],tags:['Creative','Expressive','Narrative']},
+  {id:'explorer',name:'The Explorer',emoji:'🔍',color:'#E1F5EE',tag:'Reading & Research',desc:'You love diving deep into topics on your own. Research projects and detailed reading fit you perfectly.',skills:['Reading','Listening'],evidence:['Infographic','Blog post','Presentation'],tags:['Curious','Independent','Analytical']},
+  {id:'connector',name:'The Connector',emoji:'🤝',color:'#FAEEDA',tag:'Speaking & Listening',desc:'You thrive in social learning. Conversations, podcasts and collaborative projects are your strength.',skills:['Speaking','Listening'],evidence:['Podcast episode','Short video','Presentation'],tags:['Social','Collaborative','Communicative']},
+  {id:'creator',name:'The Creator',emoji:'🎨',color:'#FAECE7',tag:'Multimodal Production',desc:'You express learning through making things. Visual, digital and multimedia projects are where you shine.',skills:['Writing','Speaking'],evidence:['Infographic','Short video','Presentation'],tags:['Visual','Creative','Digital']}
+];
+
+function getProfile(ans){const c=[0,0,0,0];ans.forEach(a=>c[a]++);return profiles[c.indexOf(Math.max(...c))]||profiles[0];}
+
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
+window.toast=toast;
+
+const skillColor=s=>({Speaking:'#EEEDFE',Writing:'#E1F5EE',Reading:'#FAEEDA',Listening:'#FAECE7'}[s]||'#F1EFE8');
+
+// AUTH
+document.getElementById('gsignin').onclick=async()=>{try{await signInWithPopup(auth,provider);}catch(e){toast('Error: '+e.message);}};
+document.getElementById('signout').onclick=async()=>{await signOut(auth);location.reload();};
+document.getElementById('role-student').onclick=()=>setRole('student');
+document.getElementById('role-teacher').onclick=()=>setRole('teacher');
+
+onAuthStateChanged(auth,async user=>{
+  if(!user){document.getElementById('auth-screen').style.display='flex';document.getElementById('app').style.display='none';document.getElementById('role-screen').style.display='none';return;}
+  CU=user;
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('uavatar').src=user.photoURL||'';
+  document.getElementById('uname').textContent=(user.displayName||'User').split(' ')[0];
+  const snap=await get(ref(db,`users/${user.uid}`));
+  if(!snap.exists()||!snap.val().role){document.getElementById('role-screen').style.display='flex';}
+  else{UP=snap.val();launchApp(UP.role);}
+});
+
+async function setRole(role){
+  await set(ref(db,`users/${CU.uid}`),{role,name:CU.displayName,email:CU.email,photo:CU.photoURL||'',uid:CU.uid,createdAt:Date.now()});
+  UP={role,name:CU.displayName};
+  document.getElementById('role-screen').style.display='none';
+  launchApp(role);
+}
+
+function launchApp(role){
+  document.getElementById('app').style.display='flex';
+  document.getElementById('app').style.flexDirection='column';
+  if(role==='teacher')renderTeacher();
+  else renderStudent();
+}
+
+// STUDENT
+const sNav=[
+  {id:'discover',lbl:'Discover',ic:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
+  {id:'contract',lbl:'Contract',ic:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>'},
+  {id:'class',lbl:'Class',ic:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'},
+  {id:'resources',lbl:'Resources',ic:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>'},
+  {id:'progress',lbl:'Progress',ic:'<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>'}
+];
+
+function renderStudent(){
+  document.getElementById('bnav').innerHTML=sNav.map(n=>`<button class="nav-item ${n.id==='discover'?'active':''}" id="nav-${n.id}" onclick="go('${n.id}')"><svg viewBox="0 0 24 24">${n.ic}</svg>${n.lbl}</button>`).join('');
+  go('discover');
+}
+
+window.go=function(page){
+  document.querySelectorAll('#bnav .nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('nav-'+page)?.classList.add('active');
+  document.getElementById('main').innerHTML='<div class="loading">Loading...</div>';
+  ({discover:renderDiscover,contract:renderContract,class:renderClass,resources:renderResources,progress:renderProgress}[page]||renderDiscover)();
+};
+
+// QUIZ
+function renderDiscover(){
+  const mc=document.getElementById('main');
+  if(qIdx>=quizData.length){showResult(mc);return;}
+  const q=quizData[qIdx];
+  mc.innerHTML=`
+    <div class="quiz-prog"><div class="quiz-prog-fill" style="width:${Math.round(qIdx/quizData.length*100)}%"></div></div>
+    <div class="quiz-q">${q.q}</div><div class="quiz-sub">${q.sub}</div>
+    <div class="quiz-opts">${q.opts.map((o,i)=>`<button class="quiz-opt" data-i="${i}"><span class="opt-em">${o.e}</span><span>${o.t}</span></button>`).join('')}</div>
+    <div class="quiz-nav">
+      <button class="btn btn-secondary" ${qIdx===0?'disabled':''} onclick="qBack()">← Back</button>
+      <button class="btn btn-primary" id="qnext" disabled onclick="qNext()">Next →</button>
+    </div>`;
+  mc.querySelectorAll('.quiz-opt').forEach(b=>{
+    if(qAnswers[qIdx]===parseInt(b.dataset.i)){b.classList.add('selected');document.getElementById('qnext').disabled=false;}
+    b.onclick=()=>{mc.querySelectorAll('.quiz-opt').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');qAnswers[qIdx]=parseInt(b.dataset.i);document.getElementById('qnext').disabled=false;};
+  });
+}
+
+window.qNext=()=>{if(qAnswers[qIdx]!==undefined){qIdx++;renderDiscover();}};
+window.qBack=()=>{if(qIdx>0){qIdx--;renderDiscover();}};
+
+function showResult(mc){
+  const p=getProfile(qAnswers);
+  mc.innerHTML=`<div class="card"><div class="profile-result">
+    <div class="profile-badge" style="background:${p.color}">${p.emoji}</div>
+    <h2>You are ${p.name}!</h2>
+    <p class="desc">${p.desc}</p>
+    <div class="ptags">${p.tags.map(t=>`<span class="tag" style="background:${p.color}">${t}</span>`).join('')}</div>
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:18px"><strong>Suggested focus:</strong> ${p.tag}<br><strong>Great evidence types:</strong> ${p.evidence.join(', ')}</p>
+    <button class="btn btn-primary btn-full" onclick="gotoContract('${p.skills[0]}','${p.evidence[0]}')">Build My Learning Contract →</button>
+    <button class="btn btn-secondary btn-full mt-10" onclick="retakeQuiz()">Retake quiz</button>
+  </div></div>`;
+}
+
+window.retakeQuiz=()=>{qIdx=0;qAnswers=[];renderDiscover();};
+window.gotoContract=(sk,ev)=>{selSkill=sk;selEvidence=ev;go('contract');};
+
+// CONTRACT
+async function renderContract(){
+  const mc=document.getElementById('main');
+  const snap=await get(ref(db,`contracts/${CU.uid}`));
+  if(snap.exists()){
+    const c=snap.val();cSteps=c.steps||[];
+    mc.innerHTML=`
+      <div class="page-title">My Learning Contract</div>
+      <div class="page-sub">Your contract is ${c.status==='approved'?'approved and active':'waiting for teacher approval'}.</div>
+      <div class="card" style="border-color:${c.status==='approved'?'var(--teal)':'var(--amber)'};border-width:2px">
+        <div class="flex-between mb-10">
+          <span class="card-title">Learning Contract</span>
+          <span class="sbadge ${c.status==='approved'?'s-approved':'s-pending'}">${c.status==='approved'?'✓ Approved':'⏳ Pending'}</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px">
+          <span class="tag" style="background:${skillColor(c.skill)}">${c.skill}</span>
+          <span class="tag" style="background:var(--gray-light)">${c.evidence}</span>
+          ${c.frequency?`<span class="tag" style="background:var(--gray-light)">${c.frequency} per week</span>`:''}
+        </div>
+        <p style="font-size:14px;margin-bottom:10px"><strong>Goal:</strong> ${c.focus}</p>
+        ${(c.steps||[]).map((s,i)=>`<p style="font-size:13px;color:var(--text-muted);margin-bottom:3px">${i+1}. ${s}</p>`).join('')}
+        ${c.teacherComment?`<div class="tip-box mt-10"><strong>Teacher's note:</strong> ${c.teacherComment}</div>`:''}
+        <button class="btn btn-secondary mt-10" style="font-size:13px;padding:8px 16px" onclick="clearContract()">Request New Contract</button>
+      </div>`;
+  } else {
+    mc.innerHTML=contractFormHTML();
+    if(selSkill) mc.querySelectorAll('.sk-chip').forEach(c=>{if(c.dataset.v===selSkill)c.classList.add('selected');});
+    if(selEvidence) mc.querySelectorAll('.ev-card').forEach(c=>{if(c.dataset.v===selEvidence)c.classList.add('selected');});
+  }
+}
+
+function contractFormHTML(){return `
+  <div class="page-title">My Learning Contract</div>
+  <div class="page-sub">Define your goals, plan your journey, and choose how you'll be assessed.</div>
+  <div class="card">
+    <div class="contract-section">
+      <h3>🎯 Section 1: My Learning Goal</h3>
+      <div class="form-group">
+        <label class="form-label">I want to improve my English...</label>
+        <div class="chip-row" id="sk-chips">
+          ${['Speaking','Writing','Reading','Listening'].map(s=>`<div class="chip sk-chip" data-v="${s}" onclick="selOne(this,'sk-chips','sk-chip')">${s==='Speaking'?'🗣️':s==='Writing'?'✍️':s==='Reading'?'📖':'🎧'} ${s}</div>`).join('')}
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">My specific focus is...</label>
+        <input class="form-input" id="c-focus" placeholder="e.g. I want to give a 2-minute presentation about my hobby">
+        <div class="tip-box">💡 A good goal is specific. Instead of "improve speaking", try "give a 2-minute presentation about my hobby".</div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="contract-section">
+      <h3>📅 Section 2: My Plan</h3>
+      <div class="form-group">
+        <label class="form-label">I will work on this per week:</label>
+        <div class="chip-row" id="fr-chips">
+          ${['1×','2×','3×+'].map(f=>`<div class="chip fr-chip" data-v="${f}" onclick="selOne(this,'fr-chips','fr-chip')">${f}</div>`).join('')}
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Resources I plan to use:</label>
+        <div class="chip-row">
+          ${['📺 YouTube','🎙️ Podcast','📱 App','📚 Book','🌐 Website','🤖 AI tool'].map(r=>`<div class="chip rc-chip" onclick="this.classList.toggle('selected')">${r}</div>`).join('')}
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">My learning steps:</label>
+        <input class="form-input mb-10" id="s1" placeholder="Step 1: e.g. Find 3 YouTube videos about my topic">
+        <input class="form-input mb-10" id="s2" placeholder="Step 2: e.g. Take notes and learn new vocabulary">
+        <input class="form-input" id="s3" placeholder="Step 3: e.g. Record myself and share with my group">
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="contract-section">
+      <h3>📦 Section 3: My Evidence</h3>
+      <label class="form-label" style="margin-bottom:9px;display:block">I will show my learning by creating a...</label>
+      <div class="ev-grid">
+        ${[['🎬','Short video'],['📝','Blog post'],['🎙️','Podcast episode'],['📊','Presentation'],['📖','Written story'],['🗺️','Infographic']].map(([e,l])=>`<div class="ev-card" data-v="${l}" onclick="selEv(this)"><div class="ev-icon">${e}</div><div class="ev-label">${l}</div></div>`).join('')}
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="contract-section">
+      <h3>⭐ Section 4: Assessment Preferences</h3>
+      <div class="form-group">
+        <label class="form-label">I would like feedback from:</label>
+        <div class="chip-row">
+          ${['🪞 Myself','👥 My peers','👩‍🏫 My teacher'].map(f=>`<div class="chip fb-chip" onclick="this.classList.toggle('selected')">${f}</div>`).join('')}
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes for your teacher (optional):</label>
+        <textarea class="form-textarea" id="c-note" placeholder="Anything you'd like your teacher to know..."></textarea>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="submitContract()">Submit for Teacher Approval</button>
+  </div>`;}
+
+window.selOne=function(el,gid,cls){document.querySelectorAll(`#${gid} .${cls}`).forEach(c=>c.classList.remove('selected'));el.classList.add('selected');};
+window.selEv=function(el){document.querySelectorAll('.ev-card').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');};
+window.clearContract=async function(){if(!confirm('Remove your current contract?'))return;await remove(ref(db,`contracts/${CU.uid}`));renderContract();};
+
+window.submitContract=async function(){
+  const mc=document.getElementById('main');
+  const skill=mc.querySelector('.sk-chip.selected')?.dataset.v;
+  const focus=document.getElementById('c-focus')?.value.trim();
+  const ev=mc.querySelector('.ev-card.selected')?.dataset.v;
+  if(!skill||!focus||!ev){toast('Please fill in your skill, goal and evidence type');return;}
+  const freq=mc.querySelector('.fr-chip.selected')?.dataset.v||'';
+  const res=[...mc.querySelectorAll('.rc-chip.selected')].map(c=>c.textContent.trim());
+  const fb=[...mc.querySelectorAll('.fb-chip.selected')].map(c=>c.textContent.trim());
+  const steps=['s1','s2','s3'].map(id=>document.getElementById(id)?.value.trim()).filter(Boolean);
+  await set(ref(db,`contracts/${CU.uid}`),{
+    skill,focus,frequency:freq,resources:res,evidence:ev,steps,feedbackFrom:fb,
+    note:document.getElementById('c-note')?.value||'',
+    status:'pending',studentName:CU.displayName,studentEmail:CU.email,
+    studentPhoto:CU.photoURL||'',studentId:CU.uid,createdAt:Date.now()
+  });
+  cSteps=steps;
+  toast('Contract submitted! Waiting for teacher approval.');
+  renderContract();
+};
+
+// CLASS FEED
+let feedUnsub=null;
+function renderClass(){
+  const mc=document.getElementById('main');
+  mc.innerHTML=`
+    <div class="page-title">Class Contracts</div>
+    <div class="page-sub">See what your classmates are working on.</div>
+    <div class="filter-row" id="ff">
+      <div class="filter-chip active" onclick="filterFeed(this,'all')">All</div>
+      ${['Speaking','Writing','Reading','Listening'].map(s=>`<div class="filter-chip" onclick="filterFeed(this,'${s}')">${s}</div>`).join('')}
+    </div>
+    <div id="feed-list"><div class="loading">Loading...</div></div>`;
+  onValue(ref(db,'contracts'),snap=>{
+    window._fd=[];
+    if(snap.exists())snap.forEach(c=>window._fd.push(c.val()));
+    const a=document.querySelector('#ff .filter-chip.active');
+    renderFeedItems(window._fd,a?.textContent==='All'?'all':a?.textContent||'all');
+  });
+}
+
+function renderFeedItems(items,filter){
+  const l=document.getElementById('feed-list');if(!l)return;
+  const f=filter==='all'?items:items.filter(i=>i.skill===filter);
+  if(!f.length){l.innerHTML='<div class="empty-state"><div class="empty-icon">📋</div><p>No contracts here yet.</p></div>';return;}
+  l.innerHTML=f.map(item=>`
+    <div class="feed-item">
+      <div class="feed-hdr">
+        ${item.studentPhoto?`<img src="${item.studentPhoto}" class="user-avatar" style="width:38px;height:38px">`:`<div class="feed-av">${(item.studentName||'?')[0]}</div>`}
+        <div style="flex:1"><div class="feed-name">${item.studentName||'Student'}</div><div class="feed-detail">${item.evidence||''} · ${item.frequency||''} per week</div></div>
+        <span class="sbadge ${item.status==='approved'?'s-approved':'s-pending'}">${item.status==='approved'?'✓':'⏳'} ${item.status||'pending'}</span>
+      </div>
+      <div class="feed-goal">${item.focus||''}</div>
+      <div class="feed-tags">
+        <span class="feed-tag" style="background:${skillColor(item.skill)}">${item.skill||''}</span>
+        ${(item.resources||[]).slice(0,3).map(r=>`<span class="feed-tag">${r}</span>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+window.filterFeed=function(el,f){document.querySelectorAll('#ff .filter-chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');renderFeedItems(window._fd||[],f);};
+
+// RESOURCES
+function renderResources(){
+  const mc=document.getElementById('main');
+  mc.innerHTML=`
+    <div class="page-title">Resource Pool</div>
+    <div class="page-sub">Share and discover learning resources.</div>
+    <div class="filter-row" id="rf">
+      <div class="filter-chip active" onclick="filterRes(this,'all')">All</div>
+      ${['Video','Website','App','Podcast','Book'].map(t=>`<div class="filter-chip" onclick="filterRes(this,'${t}')">${t}</div>`).join('')}
+    </div>
+    <button class="btn btn-primary btn-full mb-10" onclick="toggleAddRes()">+ Add a Resource</button>
+    <div id="add-res" style="display:none" class="card">
+      <div class="card-title">Share a Resource</div>
+      <div class="form-group"><label class="form-label">Type</label><select class="form-select" id="rt"><option>Video</option><option>Website</option><option>App</option><option>Podcast</option><option>Book</option><option>Other</option></select></div>
+      <div class="form-group"><label class="form-label">Title</label><input class="form-input" id="rtitle" placeholder="Resource name"></div>
+      <div class="form-group"><label class="form-label">Link (optional)</label><input class="form-input" id="rlink" placeholder="https://..."></div>
+      <div class="form-group"><label class="form-label">Why did you choose this?</label><textarea class="form-textarea" id="rwhy" placeholder="Explain why this helps your goal..."></textarea></div>
+      <div style="display:flex;gap:9px"><button class="btn btn-primary" onclick="addRes()">Share</button><button class="btn btn-secondary" onclick="toggleAddRes()">Cancel</button></div>
+    </div>
+    <div id="res-list"><div class="loading">Loading...</div></div>`;
+  onValue(ref(db,'resources'),snap=>{
+    window._rd=[];
+    if(snap.exists())snap.forEach(c=>window._rd.push({id:c.key,...c.val()}));
+    window._rd.reverse();
+    const a=document.querySelector('#rf .filter-chip.active');
+    renderResList(window._rd,a?.textContent==='All'?'all':a?.textContent||'all');
+  });
+}
+
+function renderResList(items,filter){
+  const l=document.getElementById('res-list');if(!l)return;
+  const f=filter==='all'?items:items.filter(i=>i.type===filter);
+  if(!f.length){l.innerHTML='<div class="empty-state"><div class="empty-icon">📚</div><p>No resources yet. Be the first!</p></div>';return;}
+  l.innerHTML=f.map(item=>`
+    <div class="res-card">
+      <div class="res-type">📌 ${item.type||'Resource'}</div>
+      <div class="res-title">${item.title||'Untitled'}</div>
+      <div class="res-why">${item.why||''}</div>
+      <div class="res-footer">
+        <span class="res-author">by ${item.addedBy||'Student'}</span>
+        ${item.link?`<a href="${item.link}" target="_blank" class="open-btn">Open ↗</a>`:`<button class="open-btn" onclick="toast('Saved!')">Save</button>`}
+      </div>
+    </div>`).join('');
+}
+
+window.filterRes=function(el,f){document.querySelectorAll('#rf .filter-chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');renderResList(window._rd||[],f);};
+window.toggleAddRes=function(){const f=document.getElementById('add-res');f.style.display=f.style.display==='none'?'block':'none';};
+window.addRes=async function(){
+  const title=document.getElementById('rtitle')?.value.trim();
+  const why=document.getElementById('rwhy')?.value.trim();
+  if(!title||!why){toast('Please add a title and reason');return;}
+  await push(ref(db,'resources'),{type:document.getElementById('rt').value,title,why,link:document.getElementById('rlink')?.value||'',addedBy:CU.displayName,addedById:CU.uid,createdAt:Date.now()});
+  toast('Resource shared!');toggleAddRes();
+};
+
+// PROGRESS
+function renderProgress(){
+  const mc=document.getElementById('main');
+  const done=cSteps.filter((_,i)=>stepsDone[i]).length;
+  const pct=cSteps.length?Math.round(done/cSteps.length*100):0;
+  mc.innerHTML=`
+    <div class="page-title">My Progress</div>
+    <div class="page-sub">Track your steps, upload evidence, and reflect.</div>
+    <div class="card">
+      <div class="flex-between"><span class="card-title">My Steps</span><span style="font-size:12px;color:var(--teal);font-weight:700">${pct}% complete</span></div>
+      <div class="prog-bar-wrap"><div class="prog-bar-fill" style="width:${pct}%"></div></div>
+      ${cSteps.length?cSteps.map((s,i)=>`
+        <div class="step-item">
+          <div class="step-check ${stepsDone[i]?'done':''}" onclick="toggleStep(${i})">${stepsDone[i]?'✓':''}</div>
+          <span class="step-text ${stepsDone[i]?'done':''}">${s}</span>
+        </div>`).join(''):'<p style="font-size:13px;color:var(--text-muted)">Submit your contract first to see your steps here.</p>'}
+    </div>
+    <div class="card">
+      <div class="card-title">Upload Evidence</div>
+      <div class="form-group"><label class="form-label">What are you sharing?</label><input class="form-input" id="ev-title" placeholder="e.g. My first podcast recording"></div>
+      <div class="form-group"><label class="form-label">Link to your work</label><input class="form-input" id="ev-link" placeholder="Google Drive / YouTube / Canva link..."></div>
+      <button class="btn btn-primary btn-full" onclick="uploadEv()">Upload & Self-Assess</button>
+    </div>
+    <div class="card" id="assess-card" style="display:none">
+      <div class="card-title">Self-Assessment</div>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">Rate your work on each dimension (1 = beginning, 4 = excellent):</p>
+      <div id="likert-rows"></div>
+      <div class="divider"></div>
+      <div class="card-title" style="font-size:14px;margin-bottom:10px">Weekly Reflection</div>
+      <div class="form-group"><label class="form-label">What did I learn this week?</label><textarea class="form-textarea" id="ref-l"></textarea></div>
+      <div class="form-group"><label class="form-label">How did I learn it? What strategies did I use?</label><textarea class="form-textarea" id="ref-h"></textarea></div>
+      <div class="form-group"><label class="form-label">What is my next goal?</label><textarea class="form-textarea" id="ref-n"></textarea></div>
+      <button class="btn btn-success btn-full" onclick="saveRef()">Save Reflection ✓</button>
+    </div>`;
+  renderLikert();
+}
+
+window.toggleStep=function(i){stepsDone[i]=!stepsDone[i];renderProgress();};
+
+function renderLikert(){
+  const w=document.getElementById('likert-rows');if(!w)return;
+  w.innerHTML=rubric.map((r,i)=>`
+    <div class="likert-wrap">
+      <div class="likert-label">${r.label} <span style="font-weight:400;color:var(--text-hint)">— ${r.desc}</span></div>
+      <div class="likert-scale">${[1,2,3,4].map(n=>`<button class="likert-btn ${likertV[i]===n?'selected':''}" onclick="setL(${i},${n})">${n}</button>`).join('')}</div>
+      <div class="likert-anchors"><span>Beginning</span><span>Excellent</span></div>
+    </div>`).join('');
+}
+
+window.setL=function(d,v){likertV[d]=v;renderLikert();};
+window.uploadEv=function(){
+  if(!document.getElementById('ev-title')?.value.trim()){toast('Please add a title');return;}
+  document.getElementById('assess-card').style.display='block';
+  toast('Now complete your self-assessment below.');
+};
+window.saveRef=async function(){
+  await push(ref(db,`reflections/${CU.uid}`),{
+    studentId:CU.uid,studentName:CU.displayName,likert:likertV,
+    learnedWhat:document.getElementById('ref-l')?.value||'',
+    learnedHow:document.getElementById('ref-h')?.value||'',
+    nextGoal:document.getElementById('ref-n')?.value||'',
+    evidenceTitle:document.getElementById('ev-title')?.value||'',
+    evidenceLink:document.getElementById('ev-link')?.value||'',
+    createdAt:Date.now()
+  });
+  likertV=[0,0,0,0];
+  document.getElementById('assess-card').style.display='none';
+  toast('Reflection saved! Great work. 🎉');
+};
+
+// TEACHER
+function renderTeacher(){
+  document.getElementById('bnav').innerHTML=`
+    <button class="nav-item active" id="tnav-overview" onclick="tgo('overview')">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Overview
+    </button>
+    <button class="nav-item" id="tnav-rubric" onclick="tgo('rubric')">
+      <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Rubric
+    </button>`;
+  tgo('overview');
+}
+
+window.tgo=function(page){
+  document.querySelectorAll('#bnav .nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById(`tnav-${page}`)?.classList.add('active');
+  if(page==='overview')renderTOverview();
+  else renderRubricEd();
+};
+
+function renderTOverview(){
+  const mc=document.getElementById('main');
+  mc.innerHTML=`
+    <div class="page-title">Class Overview</div>
+    <div class="page-sub">Monitor student contracts and progress.</div>
+    <div class="card"><div class="card-title">All Students</div><div id="slist"><div class="loading">Loading...</div></div></div>
+    <div class="card"><div class="card-title">⏳ Pending Approvals</div><div id="plist"></div></div>`;
+  onValue(ref(db,'contracts'),snap=>{
+    const all=[],pend=[];
+    if(snap.exists())snap.forEach(c=>{const d={id:c.key,...c.val()};all.push(d);if(d.status==='pending')pend.push(d);});
+    const sl=document.getElementById('slist');
+    const pl=document.getElementById('plist');
+    if(!sl||!pl)return;
+    if(!all.length){sl.innerHTML='<div class="empty-state"><div class="empty-icon">👥</div><p>No students yet.</p></div>';return;}
+    sl.innerHTML=all.map(s=>`
+      <div class="student-row">
+        ${s.studentPhoto?`<img src="${s.studentPhoto}" class="user-avatar">`:`<div class="feed-av">${(s.studentName||'?')[0]}</div>`}
+        <div style="flex:1">
+          <div class="s-name">${s.studentName||'Student'}</div>
+          <div class="s-meta">${s.skill||''} · ${s.evidence||''}</div>
+          <div class="prog-mini"><div class="prog-mini-fill" style="width:${s.status==='approved'?65:25}%"></div></div>
+        </div>
+        <span class="sbadge ${s.status==='approved'?'s-approved':'s-pending'}">${s.status==='approved'?'✓ Approved':'⏳ Pending'}</span>
+      </div>`).join('');
+    if(!pend.length){pl.innerHTML='<div class="empty-state"><div class="empty-icon">✅</div><p>No pending approvals.</p></div>';return;}
+    pl.innerHTML=pend.map(s=>`
+      <div class="feed-item">
+        <div class="feed-hdr"><div class="feed-av">${(s.studentName||'?')[0]}</div>
+          <div style="flex:1"><div class="feed-name">${s.studentName}</div><div class="feed-detail">${s.skill} · ${s.evidence}</div></div>
+        </div>
+        <div class="feed-goal">${s.focus||''}</div>
+        <p style="font-size:12px;color:var(--text-muted);margin:8px 0 4px"><strong>Steps:</strong> ${(s.steps||[]).join(' → ')}</p>
+        <div class="form-group mt-10"><label class="form-label">Comment for student (optional)</label><textarea class="form-textarea" id="cm-${s.id}" placeholder="Feedback or suggestions..." style="min-height:56px"></textarea></div>
+        <div style="display:flex;gap:9px;margin-top:9px">
+          <button class="btn btn-success" style="font-size:13px;padding:9px 16px" onclick="approveC('${s.id}','${s.studentName}')">✓ Approve</button>
+          <button class="btn btn-secondary" style="font-size:13px;padding:9px 16px" onclick="sendCm('${s.id}')">Send Comment</button>
+        </div>
+      </div>`).join('');
+  });
+}
+
+window.approveC=async function(id,name){await update(ref(db,`contracts/${id}`),{status:'approved'});toast(`${name}'s contract approved! ✓`);};
+window.sendCm=async function(id){
+  const cm=document.getElementById(`cm-${id}`)?.value.trim();
+  if(!cm){toast('Please write a comment first');return;}
+  await update(ref(db,`contracts/${id}`),{teacherComment:cm});toast('Comment sent to student!');
+};
+
+function renderRubricEd(){
+  const mc=document.getElementById('main');
+  mc.innerHTML=`
+    <div class="page-title">Rubric Editor</div>
+    <div class="page-sub">Customise the assessment dimensions for your class.</div>
+    <div class="card">
+      ${rubric.map((r,i)=>`
+        <div class="form-group">
+          <label class="form-label">Dimension ${i+1} — Name</label>
+          <input class="form-input mb-10" id="rl${i}" value="${r.label}" placeholder="Dimension name">
+          <label class="form-label">Description</label>
+          <input class="form-input" id="rd${i}" value="${r.desc}" placeholder="Short description">
+        </div>${i<rubric.length-1?'<div class="divider"></div>':''}`).join('')}
+      <button class="btn btn-primary btn-full mt-10" onclick="saveRub()">Save Rubric</button>
+    </div>`;
+}
+
+window.saveRub=function(){
+  rubric.forEach((_,i)=>{rubric[i].label=document.getElementById(`rl${i}`)?.value||rubric[i].label;rubric[i].desc=document.getElementById(`rd${i}`)?.value||rubric[i].desc;});
+  toast('Rubric saved!');
+};
+</script>
+</body>
+</html>
