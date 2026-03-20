@@ -199,6 +199,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="uinfo">
       <img id="uav" class="uav" src="" alt="">
       <span id="uname" class="uname"></span>
+      <button id="notif-btn" onclick="openNotifications()" style="position:relative;background:none;border:none;cursor:pointer;padding:4px 6px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--tm)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span id="notif-count" style="display:none;position:absolute;top:0;right:0;background:var(--c);color:#fff;font-size:9px;font-weight:700;width:16px;height:16px;border-radius:50%;align-items:center;justify-content:center">0</span></button>
       <button class="sob" id="sob">Sign out</button>
     </div>
   </div>
@@ -309,7 +310,7 @@ function launchApp(role){
   document.getElementById('app').style.display='flex';
   document.getElementById('app').style.flexDirection='column';
   if(role==='teacher')renderTeacher();
-  else renderStudent();
+  else{renderStudent();setTimeout(loadNotifications,1000);}
 }
 
 // ── AI CHAT ──
@@ -801,8 +802,6 @@ function loadMyEvidence(){
           <span style="font-size:13px;font-weight:700">📎 ${it.title}</span>
           ${it.link?`<a href="${it.link}" target="_blank" class="obtn">View ↗</a>`:''}
         </div>
-        <div id="peer-form-${it.id}" style="display:none"></div>
-        <button class="btn bts" style="font-size:12px;padding:6px 11px" onclick="togglePeer('${it.id}')">👥 Add Peer Feedback</button>
       </div>`).join('');
   },{onlyOnce:true});
 }
@@ -830,57 +829,6 @@ window.savePeer=async function(evId){
 };
 
 // ── PROFILE ──
-window.renderProfile=async function(uid,isOwn){
-  const mc=document.getElementById('mc');
-  mc.innerHTML='<div class="loading">Loading profile...</div>';
-  const [uSnap,cSnap,rSnap,sSnap,eSnap]=await Promise.all([
-    get(ref(db,`users/${uid}`)),get(ref(db,`contracts/${uid}`)),
-    get(ref(db,`reflections/${uid}`)),get(ref(db,`savedResources/${uid}`)),get(ref(db,`evidence/${uid}`))
-  ]);
-  const u=uSnap.val()||{name:'Student',photo:''};
-  const c=cSnap.val();
-  const refls=[];if(rSnap.exists())rSnap.forEach(r=>refls.push(r.val()));
-  const saved=[];if(sSnap.exists())sSnap.forEach(r=>saved.push({id:r.key,...r.val()}));
-  const evs=[];if(eSnap.exists())eSnap.forEach(e=>evs.push({id:e.key,...e.val()}));
-
-  mc.innerHTML=`
-    <div class="prof-header">
-      ${u.photo?`<img src="${u.photo}" class="prof-av">`:`<div class="prof-avp">${(u.name||'?')[0]}</div>`}
-      <div class="prof-name">${u.name||'Student'}</div>
-      <div class="prof-sub">${c?.skills?(c.skills.join(' · ')):'No contract yet'}</div>
-      ${!isOwn?`<button class="btn bts mt10" style="font-size:12px;padding:7px 13px" onclick="go('class')">← Back</button>`:''}
-    </div>
-    ${c?`<div class="card">
-      <div class="ctitle">📋 Learning Contract</div>
-      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">${(c.skills||[]).map(s=>`<span class="tag" style="background:${sc(s)}">${s}</span>`).join('')}<span class="tag" style="background:var(--gl)">${c.evidence||''}</span></div>
-      <p style="font-size:13px"><strong>Focus 1:</strong> ${c.focus1||''}</p>
-      <p style="font-size:13px"><strong>Focus 2:</strong> ${c.focus2||''}</p>
-      <p style="font-size:13px"><strong>Focus 3:</strong> ${c.focus3||''}</p>
-    </div>`:''}
-    <div class="card">
-      <div class="ctitle">📦 Evidence Portfolio</div>
-      ${evs.length?evs.map(ev=>`
-        <div style="padding:10px;border-radius:var(--rs);border:1.5px solid var(--gb);margin-bottom:8px">
-          <div class="fb mb10">
-            <span style="font-size:13px;font-weight:700">📎 ${ev.title||'Untitled'}</span>
-            ${ev.link?`<a href="${ev.link}" target="_blank" class="obtn">View ↗</a>`:''}
-          </div>
-          ${!isOwn?`
-            <div id="vis-rub-${ev.id}" style="display:none"></div>
-            <button class="btn bts" style="font-size:11px;padding:5px 10px" onclick="toggleVisFeedback('${ev.id}','${uid}')">💬 Leave Feedback on This Work</button>
-          `:''}
-        </div>`).join(''):'<p style="font-size:13px;color:var(--tm)">No evidence yet.</p>'}
-    </div>
-    ${saved.length?`<div class="card">
-      <div class="ctitle">💾 Saved Resources</div>
-      ${saved.map(r=>`<div style="padding:8px;border-radius:var(--rs);border:1.5px solid var(--gb);margin-bottom:7px"><div class="fb"><span style="font-size:13px;font-weight:700">${r.title||''}</span>${r.link?`<a href="${r.link}" target="_blank" class="obtn">Open ↗</a>`:''}</div><p style="font-size:12px;color:var(--tm)">${r.type||''}</p></div>`).join('')}
-    </div>`:''}
-    ${refls.length?`<div class="card">
-      <div class="ctitle">📔 Recent Reflections</div>
-      ${refls.slice(-2).reverse().map(r=>`<div style="padding:9px;border-radius:var(--rs);border:1.5px solid var(--gb);margin-bottom:8px">${r.well?`<p style="font-size:13px;margin-bottom:4px"><strong>Did well:</strong> ${r.well}</p>`:''} ${r.next?`<p style="font-size:13px"><strong>Next step:</strong> ${r.next}</p>`:''}</div>`).join('')}
-    </div>`:''}`;
-};
-
 window.toggleVisFeedback=function(evId,targetUid){
   window._visTgt={evId,targetUid};
   peerV=[0,0,0,0,0,0];
@@ -898,9 +846,6 @@ window.toggleVisFeedback=function(evId,targetUid){
   }else d.style.display='none';
 };
 
-window.submitVisFeedback=async function(evId,targetUid){
-  await push(ref(db,`evidence/${targetUid}/${evId}/peerFeedback`),{rubric:peerV,strong:document.getElementById(`vf-s-${evId}`)?.value||'',imp:document.getElementById(`vf-i-${evId}`)?.value||'',learn:document.getElementById(`vf-l-${evId}`)?.value||'',from:CU.displayName,fromId:CU.uid,createdAt:Date.now()});
-  toast('Feedback submitted on this work!');document.getElementById(`vis-rub-${evId}`).style.display='none';
 };
 
 // ── GROUP FORUM ──
@@ -1158,6 +1103,270 @@ function renderTRubric(){
       </div>`).join('')}
     </div>`;
 }
+
+
+// ── NOTIFICATIONS ──
+async function loadNotifications(){
+  if(!CU)return;
+  onValue(ref(db,`notifications/${CU.uid}`),snap=>{
+    const btn=document.getElementById('notif-count');if(!btn)return;
+    if(!snap.exists()){btn.style.display='none';return;}
+    let unread=0;
+    snap.forEach(n=>{if(!n.val().read)unread++;});
+    if(unread>0){btn.style.display='flex';btn.textContent=unread>9?'9+':unread;}
+    else btn.style.display='none';
+  });
+}
+
+window.openNotifications=async function(){
+  const mc=document.getElementById('mc');
+  mc.innerHTML='<div class="loading">Loading notifications...</div>';
+  setNav('profile');
+  const snap=await get(ref(db,`notifications/${CU.uid}`));
+  const items=[];
+  if(snap.exists())snap.forEach(n=>items.push({id:n.key,...n.val()}));
+  items.reverse();
+  // Mark all as read
+  for(const item of items){
+    if(!item.read)await update(ref(db,`notifications/${CU.uid}/${item.id}`),{read:true});
+  }
+  document.getElementById('notif-count').style.display='none';
+  mc.innerHTML=`
+    <div class="pt">🔔 Notifications</div>
+    <div class="ps">Feedback and updates from your class.</div>
+    ${items.length?items.map(n=>`
+      <div class="card" style="border-left:3px solid ${n.read?'var(--gb)':'var(--p)'}">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:22px">${n.type==='peer_feedback'?'💬':n.type==='teacher_eval'?'👩‍🏫':'📢'}</span>
+          <div style="flex:1">
+            <p style="font-size:14px;font-weight:${n.read?'400':'700'}">${n.message||''}</p>
+            <p style="font-size:12px;color:var(--th);margin-top:2px">${new Date(n.createdAt).toLocaleString()}</p>
+          </div>
+        </div>
+        ${n.evId?`<button class="btn bts mt10" style="font-size:12px;padding:6px 12px" onclick="renderProfile('${CU.uid}',true)">View My Profile →</button>`:''}
+      </div>`).join(''):'<div class="empty"><div class="ei">🔔</div><p>No notifications yet. When classmates give you feedback, it will appear here.</p></div>'}
+    <button class="btn bts btf mt10" onclick="go('profile')">← Back to Profile</button>`;
+};
+
+// Send notification helper
+async function sendNotif(toUid,type,message,evId=''){
+  await push(ref(db,`notifications/${toUid}`),{type,message,evId,read:false,createdAt:Date.now()});
+}
+
+// ── PROFILE (FULL REWRITE) ──
+window.renderProfile=async function(uid,isOwn){
+  const mc=document.getElementById('mc');
+  mc.innerHTML='<div class="loading">Loading profile...</div>';
+  const [uSnap,cSnap,rSnap,sSnap,eSnap,tSnap]=await Promise.all([
+    get(ref(db,`users/${uid}`)),
+    get(ref(db,`contracts/${uid}`)),
+    get(ref(db,`reflections/${uid}`)),
+    get(ref(db,`savedResources/${uid}`)),
+    get(ref(db,`evidence/${uid}`)),
+    get(ref(db,`teacherEvals/${uid}`))
+  ]);
+  const u=uSnap.val()||{name:'Student',photo:''};
+  const c=cSnap.val();
+  const refls=[];if(rSnap.exists())rSnap.forEach(r=>refls.push(r.val()));
+  const saved=[];if(sSnap.exists())sSnap.forEach(r=>saved.push({id:r.key,...r.val()}));
+  const evs=[];if(eSnap.exists())eSnap.forEach(e=>evs.push({id:e.key,...e.val()}));
+  const teachEvals=[];if(tSnap.exists())tSnap.forEach(t=>teachEvals.push(t.val()));
+
+  // Group info
+  const groupId=u.groupId||null;
+  const groupName=u.groupName||null;
+
+  mc.innerHTML=`
+    <div class="prof-header">
+      ${u.photo?`<img src="${u.photo}" class="prof-av">`:`<div class="prof-avp">${(u.name||'?')[0]}</div>`}
+      <div class="prof-name">${u.name||'Student'}</div>
+      <div class="prof-sub">${c?.skills?(c.skills.join(' · ')):'No contract yet'}</div>
+      ${groupName?`<div style="margin-top:6px"><span class="tag" style="background:var(--pl)">👥 ${groupName}</span></div>`:''}
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap">
+        ${isOwn&&groupId?`<button class="btn btp" style="font-size:12px;padding:7px 13px" onclick="openForum('${groupId}','${groupName||'My Group'}')">💬 Open Group Forum</button>`:''}
+        ${isOwn?`<button class="btn bts" style="font-size:12px;padding:7px 13px" onclick="generateAIReport('${uid}')">🤖 Get AI Feedback Report</button>`:''}
+        ${!isOwn?`<button class="btn bts" style="font-size:12px;padding:7px 13px" onclick="go('class')">← Back</button>`:''}
+      </div>
+    </div>
+
+    ${c?`<div class="card">
+      <div class="ctitle">📋 Learning Contract</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">
+        ${(c.skills||[]).map(s=>`<span class="tag" style="background:${sc(s)}">${s}</span>`).join('')}
+        <span class="tag" style="background:var(--gl)">${c.evidence||''}</span>
+      </div>
+      <p style="font-size:13px;margin-bottom:2px"><strong>Focus 1:</strong> ${c.focus1||''}</p>
+      <p style="font-size:13px;margin-bottom:2px"><strong>Focus 2:</strong> ${c.focus2||''}</p>
+      <p style="font-size:13px"><strong>Focus 3:</strong> ${c.focus3||''}</p>
+    </div>`:''}
+
+    <div class="card">
+      <div class="ctitle">📦 Evidence Portfolio (${evs.length})</div>
+      ${evs.length?evs.map(ev=>{
+        const peerFeedbacks=ev.peerFeedback?Object.values(ev.peerFeedback):[];
+        const peerCount=peerFeedbacks.length;
+        return`<div style="padding:11px;border-radius:var(--rs);border:1.5px solid var(--gb);margin-bottom:8px">
+          <div class="fb">
+            <span style="font-size:13px;font-weight:700;cursor:pointer" onclick="toggleEvDetails('ev-det-${ev.id}')">📎 ${ev.title||'Untitled'} ${peerCount?`<span class="sb sa" style="font-size:10px;margin-left:4px">${peerCount} feedback</span>`:''}</span>
+            <div style="display:flex;gap:6px">
+              ${ev.link?`<a href="${ev.link}" target="_blank" class="obtn">View ↗</a>`:''}
+            </div>
+          </div>
+          <div id="ev-det-${ev.id}" style="display:none;margin-top:10px">
+            ${isOwn&&peerCount?`<div style="margin-bottom:10px">
+              <p style="font-size:12px;font-weight:700;color:var(--tm);margin-bottom:8px">Peer Feedback Received:</p>
+              ${peerFeedbacks.map(pf=>`
+                <div style="padding:9px;border-radius:var(--rs);background:var(--pl);margin-bottom:7px">
+                  <p style="font-size:12px;font-weight:700;color:var(--pd);margin-bottom:5px">From: ${pf.from||'Classmate'}</p>
+                  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:7px">
+                    ${RUBRIC.map((r,i)=>pf.rubric&&pf.rubric[i]>0?`<div style="padding:5px;border-radius:5px;background:#fff;font-size:11px"><strong>${r.label.split(' ')[0]}:</strong> ${pf.rubric[i]}/4</div>`:''  ).filter(Boolean).join('')}
+                  </div>
+                  ${pf.strong?`<p style="font-size:12px;margin-bottom:3px">💪 <strong>Strong point:</strong> ${pf.strong}</p>`:''}
+                  ${pf.imp?`<p style="font-size:12px;margin-bottom:3px">📈 <strong>Suggestion:</strong> ${pf.imp}</p>`:''}
+                  ${pf.learn?`<p style="font-size:12px">💡 <strong>What I learned:</strong> ${pf.learn}</p>`:''}
+                </div>`).join('')}
+            </div>`:''}
+            ${!isOwn&&uid!==CU.uid?`
+              <div id="vis-rub-${ev.id}" style="display:none"></div>
+              <button class="btn bts" style="font-size:11px;padding:5px 10px" onclick="toggleVisFeedback('${ev.id}','${uid}')">💬 Leave Feedback on This Work</button>
+            `:''}
+          </div>
+        </div>`;
+      }).join(''):'<p style="font-size:13px;color:var(--tm)">No evidence yet.</p>'}
+    </div>
+
+    ${isOwn&&teachEvals.length?`<div class="card">
+      <div class="ctitle">👩‍🏫 Teacher Evaluations</div>
+      ${teachEvals.map(te=>`
+        <div style="padding:10px;border-radius:var(--rs);border:1.5px solid var(--tl);background:var(--tl);margin-bottom:8px">
+          <p style="font-size:12px;font-weight:700;color:var(--td);margin-bottom:6px">From: ${te.teacherName||'Teacher'} · ${new Date(te.createdAt).toLocaleDateString()}</p>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:7px">
+            ${RUBRIC.map((r,i)=>te.rubric&&te.rubric[i]>0?`<div style="padding:5px;border-radius:5px;background:#fff;font-size:11px"><strong>${r.label.split(' ')[0]}:</strong> ${te.rubric[i]}/4</div>`:'').filter(Boolean).join('')}
+          </div>
+          ${te.comment?`<p style="font-size:13px;color:var(--td)">${te.comment}</p>`:''}
+        </div>`).join('')}
+    </div>`:''}
+
+    ${saved.length?`<div class="card">
+      <div class="ctitle">💾 Saved Resources</div>
+      ${saved.map(r=>`<div style="padding:8px;border-radius:var(--rs);border:1.5px solid var(--gb);margin-bottom:7px"><div class="fb"><span style="font-size:13px;font-weight:700">${r.title||''}</span>${r.link?`<a href="${r.link}" target="_blank" class="obtn">Open ↗</a>`:''}</div><p style="font-size:12px;color:var(--tm)">${r.type||''}</p></div>`).join('')}
+    </div>`:''}
+
+    ${refls.length?`<div class="card">
+      <div class="ctitle">📔 Recent Reflections</div>
+      ${refls.slice(-3).reverse().map(r=>`<div style="padding:9px;border-radius:var(--rs);border:1.5px solid var(--gb);margin-bottom:8px">
+        ${r.well?`<p style="font-size:13px;margin-bottom:3px">💪 <strong>Did well:</strong> ${r.well}</p>`:''}
+        ${r.imp?`<p style="font-size:13px;margin-bottom:3px">📈 <strong>Improve:</strong> ${r.imp}</p>`:''}
+        ${r.next?`<p style="font-size:13px">🎯 <strong>Next step:</strong> ${r.next}</p>`:''}
+      </div>`).join('')}
+    </div>`:''}
+
+    <div id="ai-report-section"></div>`;
+};
+
+window.toggleEvDetails=function(id){
+  const el=document.getElementById(id);if(!el)return;
+  el.style.display=el.style.display==='none'?'block':'none';
+};
+
+// ── AI FEEDBACK REPORT ──
+window.generateAIReport=async function(uid){
+  const sec=document.getElementById('ai-report-section');if(!sec)return;
+  sec.innerHTML=`<div class="card"><div class="ctitle">🤖 AI Feedback Report</div><div class="loading">Analysing your feedback and reflections...</div></div>`;
+  sec.scrollIntoView({behavior:'smooth'});
+
+  // Gather all data
+  const [eSnap,rSnap,tSnap]=await Promise.all([
+    get(ref(db,`evidence/${uid}`)),
+    get(ref(db,`reflections/${uid}`)),
+    get(ref(db,`teacherEvals/${uid}`))
+  ]);
+
+  const evs=[];if(eSnap.exists())eSnap.forEach(e=>evs.push({id:e.key,...e.val()}));
+  const refls=[];if(rSnap.exists())rSnap.forEach(r=>refls.push(r.val()));
+  const teachEvals=[];if(tSnap.exists())tSnap.forEach(t=>teachEvals.push(t.val()));
+
+  // Build context string
+  let context=`Student's learning evidence, peer feedback, teacher evaluations, and reflections:\n\n`;
+
+  evs.forEach(ev=>{
+    context+=`Evidence: "${ev.title}"\n`;
+    const peers=ev.peerFeedback?Object.values(ev.peerFeedback):[];
+    peers.forEach(pf=>{
+      context+=`  Peer feedback from ${pf.from}:\n`;
+      if(pf.strong)context+=`    Strong point: ${pf.strong}\n`;
+      if(pf.imp)context+=`    Suggestion: ${pf.imp}\n`;
+      if(pf.learn)context+=`    What peer learned: ${pf.learn}\n`;
+      if(pf.rubric){RUBRIC.forEach((r,i)=>{if(pf.rubric[i])context+=`    ${r.label}: ${pf.rubric[i]}/4\n`;});}
+    });
+  });
+
+  teachEvals.forEach(te=>{
+    context+=`Teacher evaluation:\n`;
+    if(te.comment)context+=`  Comment: ${te.comment}\n`;
+    if(te.rubric){RUBRIC.forEach((r,i)=>{if(te.rubric[i])context+=`  ${r.label}: ${te.rubric[i]}/4\n`;});}
+  });
+
+  refls.forEach(r=>{
+    context+=`Student reflection:\n`;
+    if(r.well)context+=`  Did well: ${r.well}\n`;
+    if(r.imp)context+=`  Wants to improve: ${r.imp}\n`;
+    if(r.next)context+=`  Next step: ${r.next}\n`;
+  });
+
+  if(evs.length===0&&refls.length===0&&teachEvals.length===0){
+    sec.innerHTML=`<div class="card"><div class="ctitle">🤖 AI Feedback Report</div><p style="font-size:14px;color:var(--tm)">Upload some evidence and complete your self-assessments first — then I can generate a personalised report!</p></div>`;
+    return;
+  }
+
+  const prompt=`You are a supportive English teacher assistant for a 7th grade student on a heutagogy learning platform. Based on the feedback data below, write a personalised learning report for the student. 
+
+Structure your report as:
+1. 🌟 What You're Doing Well (2-3 specific strengths based on the feedback)
+2. 📈 Areas to Focus On (2-3 specific improvement areas)  
+3. 🎯 Your Next Steps (3 concrete, actionable suggestions)
+4. 💬 A short encouraging message
+
+Be specific, warm, and encouraging. Reference actual feedback when possible. Write directly to the student using "you".
+
+${context}`;
+
+  const reply=await askAI(prompt);
+  sec.innerHTML=`<div class="card">
+    <div class="ctitle">🤖 Your Personal AI Feedback Report</div>
+    <div style="font-size:13px;line-height:1.7;color:var(--tx);white-space:pre-wrap">${reply}</div>
+    <button class="btn bts btf mt10" onclick="generateAIReport('${uid}')">🔄 Regenerate Report</button>
+  </div>`;
+};
+
+// ── UPDATE submitVisFeedback TO SEND NOTIFICATION ──
+window.submitVisFeedback=async function(evId,targetUid){
+  await push(ref(db,`evidence/${targetUid}/${evId}/peerFeedback`),{
+    rubric:peerV,
+    strong:document.getElementById(`vf-s-${evId}`)?.value||'',
+    imp:document.getElementById(`vf-i-${evId}`)?.value||'',
+    learn:document.getElementById(`vf-l-${evId}`)?.value||'',
+    from:CU.displayName,fromId:CU.uid,createdAt:Date.now()
+  });
+  // Send notification
+  await sendNotif(targetUid,'peer_feedback',`${CU.displayName} left feedback on your work!`,evId);
+  toast('Feedback submitted!');
+  const d=document.getElementById(`vis-rub-${evId}`);if(d)d.style.display='none';
+};
+
+// ── UPDATE saveTeachEval TO SEND NOTIFICATION ──
+const _origSaveTeachEval=window.saveTeachEval;
+window.saveTeachEval=async function(sid,name){
+  const vals=window._teachRV[sid]||[];
+  const comment=document.getElementById(`tcm-${sid}`)?.value||'';
+  await push(ref(db,`teacherEvals/${sid}`),{rubric:vals,comment,teacherName:CU.displayName,createdAt:Date.now()});
+  await sendNotif(sid,'teacher_eval',`Your teacher ${CU.displayName} evaluated your work!`);
+  toast(`Evaluation saved for ${name}!`);
+  const f=document.getElementById(`teach-eval-${sid}`);if(f)f.style.display='none';
+};
+
+// Auto-load notifications when student logs in
+
 </script>
 </body>
 </html>
