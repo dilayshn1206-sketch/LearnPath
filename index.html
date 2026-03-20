@@ -691,7 +691,7 @@ function renderResList(items,filter){
         <span class="rauth">by ${item.addedBy||'Student'}</span>
         <div style="display:flex;gap:6px">
           ${item.link?`<a href="${item.link}" target="_blank" class="obtn">Open ↗</a>`:''}
-          <button class="obtn" onclick="saveRes('${item.id}','${(item.title||'').replace(/'/g,'\\'')}','${item.type||''}','${(item.why||'').replace(/'/g,'\\'')}','${item.link||''}')">💾 Save</button>
+          <button class="obtn" onclick="saveRes('${item.id}')">💾 Save</button>
         </div>
       </div>
     </div>`).join('');
@@ -710,8 +710,10 @@ window.addRes=async function(){
   toast('Resource shared!');toggleAddRes();loadResources(window._resTab||'class');
 };
 
-window.saveRes=async function(id,title,type,why,link){
-  await set(ref(db,`savedResources/${CU.uid}/${id}`),{title,type,why,link,savedAt:Date.now()});
+window.saveRes=async function(id){
+  const path=(window._resTab==='group'&&myGroupId)?`groupResources/${myGroupId}/${id}`:`resources/${id}`;
+  const snap=await get(ref(db,path));
+  if(snap.exists()){const d=snap.val();await set(ref(db,`savedResources/${CU.uid}/${id}`),{title:d.title||'',type:d.type||'',why:d.why||'',link:d.link||'',savedAt:Date.now()});}
   toast('Saved to your profile!');
 };
 
