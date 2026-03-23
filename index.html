@@ -791,7 +791,8 @@ function renderResources(){
   var html='<div class="pt">Resource Pool</div><div class="ps">Share and discover learning resources.</div>';
   html+='<div style="display:flex;gap:0;margin-bottom:14px;border-radius:var(--rs);overflow:hidden;border:1.5px solid var(--gb)">';
   html+='<button class="tab-btn act" id="rtab-class" onclick="switchResTab(\'class\')" style="flex:1;padding:9px 0;font-size:13px;font-weight:600;cursor:pointer;border:none;background:var(--p);color:#fff;">Whole Class</button>';
-  html+='<button class="tab-btn" id="rtab-group" onclick="switchResTab(\'group\')" style="flex:1;padding:9px 0;font-size:13px;font-weight:600;cursor:pointer;border:none;background:#fff;color:var(--tm);">My Group'+(myGname?" ("+myGname+")")+"</button>";
+  var grpLabel = myGname ? "My Group (" + myGname + ")" : "My Group";
+  html+='<button class="tab-btn" id="rtab-group" onclick="switchResTab(\'group\')" style="flex:1;padding:9px 0;font-size:13px;font-weight:600;cursor:pointer;border:none;background:#fff;color:var(--tm);">'+grpLabel+'</button>';
   html+='</div>';
   html+='<div class="frow" id="rf">';
   ["All","Video","Website","App","Podcast","Book","Other"].forEach(function(t,i){
