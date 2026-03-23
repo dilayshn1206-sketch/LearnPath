@@ -608,6 +608,44 @@ function showQuizResult(mc){
     </div>`;
 }
 
+
+function renderProfileCategories(u, isOwn){
+  const uProfile = PROFILES.find(p => p.id === u.profileId);
+  if(!uProfile) return '';
+  const levelColor = {Starter:'#E1F5EE', Intermediate:'#EEEDFE', Advanced:'#FAEEDA'};
+  const levelText  = {Starter:'var(--td)', Intermediate:'var(--pd)', Advanced:'var(--a)'};
+  const catsHTML = uProfile.categories.map((cat,i) => {
+    const bg  = levelColor[cat.level]  || '#F1EFE8';
+    const col = levelText[cat.level]   || 'var(--g)';
+    return '<div style="padding:9px 11px;border-radius:var(--rs);border:1.5px solid ' + uProfile.color + ';margin-bottom:7px;cursor:pointer" onclick="toggleCat('pcat-' + i + '')">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between">'
+        + '<span style="font-size:13px;font-weight:700">' + cat.name + '</span>'
+        + '<div style="display:flex;align-items:center;gap:6px">'
+          + '<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;background:' + bg + ';color:' + col + '">' + cat.level + '</span>'
+          + '<span style="color:var(--tm)">›</span>'
+        + '</div>'
+      + '</div>'
+      + '<div id="pcat-' + i + '" style="display:none;margin-top:8px">'
+        + '<p style="font-size:12px;color:var(--tm);margin-bottom:6px;line-height:1.5">' + cat.desc + '</p>'
+        + '<p style="font-size:11px;font-weight:700;color:var(--th);margin-bottom:3px">EXAMPLE PRODUCTS</p>'
+        + '<p style="font-size:12px;color:var(--tx)">' + cat.products + '</p>'
+      + '</div>'
+    + '</div>';
+  }).join('');
+
+  return '<div class="card" style="border-top:3px solid ' + uProfile.color + '">'
+    + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">'
+      + '<div style="width:44px;height:44px;border-radius:12px;background:' + uProfile.color + ';display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">' + uProfile.emoji + '</div>'
+      + '<div>'
+        + '<p style="font-size:15px;font-weight:700">' + uProfile.name + '</p>'
+        + '<p style="font-size:12px;font-style:italic;color:' + uProfile.textColor + '">' + uProfile.tagline + '</p>'
+      + '</div>'
+    + '</div>'
+    + '<p style="font-size:12px;font-weight:700;color:var(--th);margin-bottom:8px">WHAT ' + (isOwn ? 'YOU CAN' : 'THEY CAN') + ' EXPLORE</p>'
+    + catsHTML
+  + '</div>';
+}
+
 window.toggleCat=function(id){
   const el=document.getElementById(id);if(!el)return;
   el.style.display=el.style.display==='none'?'block':'none';
@@ -1379,37 +1417,7 @@ window.renderProfile=async function(uid,isOwn){
         ${!isOwn?`<button class="btn bts" style="font-size:12px;padding:7px 13px" onclick="go('class')">← Back</button>`:''}
       </div>
     </div>
-    ${(()=>{
-      const uProfile=PROFILES.find(p=>p.id===u.profileId);
-      if(!uProfile)return '';
-      const levelColor={Starter:'#E1F5EE',Intermediate:'#EEEDFE',Advanced:'#FAEEDA'};
-      const levelText={Starter:'var(--td)',Intermediate:'var(--pd)',Advanced:'var(--a)'};
-      return \`<div class="card" style="border-top:3px solid \${uProfile.color}">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-          <div style="width:44px;height:44px;border-radius:12px;background:\${uProfile.color};display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">\${uProfile.emoji}</div>
-          <div>
-            <p style="font-size:15px;font-weight:700">\${uProfile.name}</p>
-            <p style="font-size:12px;font-style:italic;color:\${uProfile.textColor}">\${uProfile.tagline}</p>
-          </div>
-        </div>
-        <p style="font-size:12px;font-weight:700;color:var(--th);margin-bottom:8px">WHAT \${isOwn?'YOU CAN':'THEY CAN'} EXPLORE</p>
-        \${uProfile.categories.map((cat,i)=>\`
-          <div style="padding:9px 11px;border-radius:var(--rs);border:1.5px solid \${uProfile.color};margin-bottom:7px;cursor:pointer" onclick="toggleCat('pcat-\${i}')">
-            <div style="display:flex;align-items:center;justify-content:space-between">
-              <span style="font-size:13px;font-weight:700">\${cat.name}</span>
-              <div style="display:flex;align-items:center;gap:6px">
-                <span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;background:\${levelColor[cat.level]||'#F1EFE8'};color:\${levelText[cat.level]||'var(--g)'}">\${cat.level}</span>
-                <span style="color:var(--tm)">›</span>
-              </div>
-            </div>
-            <div id="pcat-\${i}" style="display:none;margin-top:8px">
-              <p style="font-size:12px;color:var(--tm);margin-bottom:6px;line-height:1.5">\${cat.desc}</p>
-              <p style="font-size:11px;font-weight:700;color:var(--th);margin-bottom:3px">EXAMPLE PRODUCTS</p>
-              <p style="font-size:12px;color:var(--tx)">\${cat.products}</p>
-            </div>
-          </div>\`).join('')}
-      </div>\`;
-    })()}
+    ${renderProfileCategories(u,isOwn)}
 
     ${c?`<div class="card">
       <div class="ctitle">📋 Learning Contract</div>
