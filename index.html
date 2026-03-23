@@ -263,21 +263,115 @@ const EVIDENCE_TYPES=[
 ];
 
 const QUIZ=[
-  {q:"When you learn something new, you prefer to...",s:"Choose what feels most like you",opts:[{e:"📺",t:"Watch a video or listen to someone explain it"},{e:"📖",t:"Read about it and take notes"},{e:"💬",t:"Talk about it with someone"},{e:"🛠️",t:"Try it yourself straight away"}]},
-  {q:"Your dream English project would be...",s:"Pick the one that excites you most",opts:[{e:"🎬",t:"A short film or video diary"},{e:"📝",t:"A blog post or written story"},{e:"🎙️",t:"A podcast or audio recording"},{e:"🎨",t:"An infographic or presentation"}]},
-  {q:"You feel most confident when...",s:"Be honest — no wrong answers",opts:[{e:"✨",t:"You can be creative and make something original"},{e:"📋",t:"You have clear steps to follow"},{e:"🤝",t:"You're working and sharing with others"},{e:"🔍",t:"You can research and explore on your own"}]},
-  {q:"Outside school, you usually learn English by...",s:"What do you actually do?",opts:[{e:"🎮",t:"Playing games or watching videos/series"},{e:"📱",t:"Using apps or following content online"},{e:"🎵",t:"Listening to music or podcasts"},{e:"📚",t:"Reading books, articles or captions"}]},
-  {q:"When you get feedback, you prefer it from...",s:"How do you like to grow?",opts:[{e:"🪞",t:"Myself — I reflect on my own work first"},{e:"👥",t:"My classmates — peer opinions matter to me"},{e:"👩‍🏫",t:"My teacher — expert guidance is most useful"},{e:"🔀",t:"A mix of all three"}]}
+  {q:"How do you most enjoy using English outside of school?",s:"Pick the option that feels most like you",opts:[
+    {e:"📖",t:"Reading stories, articles, or captions — I like exploring words on my own",pid:'storyteller'},
+    {e:"🎙️",t:"Talking, singing along, or listening — I love how the language sounds",pid:'speaker'},
+    {e:"🔍",t:"Looking things up, watching documentaries, or learning new facts",pid:'researcher'},
+    {e:"🎨",t:"Making things — videos, edits, designs, or social media content",pid:'creator'},
+    {e:"🤝",t:"Chatting with friends, playing games online, or sharing things",pid:'connector'},
+    {e:"🌍",t:"Discovering new places, cultures, or topics I've never thought about before",pid:'explorer'}
+  ]},
+  {q:"If you could make any English project right now, what would it be?",s:"Go with your gut — there's no wrong answer",opts:[
+    {e:"📝",t:"A story, poem, or personal essay about something that matters to me",pid:'storyteller'},
+    {e:"🎬",t:"A video, speech, or podcast where I talk about something I love",pid:'speaker'},
+    {e:"📊",t:"A research project or deep-dive into a topic I'm curious about",pid:'researcher'},
+    {e:"🖼️",t:"An infographic, digital poster, or creative visual piece",pid:'creator'},
+    {e:"💬",t:"Something I make with a partner or group — teamwork makes it better",pid:'connector'},
+    {e:"🗺️",t:"A project about a country, culture, or topic I've never explored before",pid:'explorer'}
+  ]},
+  {q:"When you sit down to work on something in English, what helps you most?",s:"Think about what actually works for you",opts:[
+    {e:"✍️",t:"Having space to write freely — I think best when I can express myself on paper",pid:'storyteller'},
+    {e:"🎤",t:"Being able to say things out loud — speaking helps me figure out my ideas",pid:'speaker'},
+    {e:"📚",t:"Having good sources and information to work from — I like knowing the facts",pid:'researcher'},
+    {e:"💡",t:"Being free to design and create — I learn by making and doing",pid:'creator'},
+    {e:"👥",t:"Working with someone — bouncing ideas off others gives me energy",pid:'connector'},
+    {e:"🔭",t:"Having a question to explore — I work best when I'm genuinely curious",pid:'explorer'}
+  ]},
+  {q:"Which of these sounds most like you at school?",s:"Be honest — all answers are equally good",opts:[
+    {e:"📔",t:"I doodle, write notes in the margins, or come up with story ideas in class",pid:'storyteller'},
+    {e:"🙋",t:"I like to answer questions, share opinions, or explain things to others",pid:'speaker'},
+    {e:"🧐",t:"I ask a lot of questions and want to understand how things really work",pid:'researcher'},
+    {e:"🎭",t:"I prefer hands-on tasks — making, building, or designing something",pid:'creator'},
+    {e:"🤜",t:"I work better in groups and like hearing different points of view",pid:'connector'},
+    {e:"🌐",t:"I get excited when topics connect to real life or the world around me",pid:'explorer'}
+  ]}
 ];
 
 const PROFILES=[
-  {id:'storyteller',name:'The Storyteller',emoji:'📖',color:'#EEEDFE',desc:'You learn best by creating narratives and sharing your voice. Blogs, videos, and presentations are where you shine.',tags:['Creative','Expressive','Narrative']},
-  {id:'explorer',name:'The Explorer',emoji:'🔍',color:'#E1F5EE',desc:'You love diving deep into topics. Research projects and detailed reading fit you perfectly.',tags:['Curious','Independent','Analytical']},
-  {id:'connector',name:'The Connector',emoji:'🤝',color:'#FAEEDA',desc:'You thrive in social learning. Conversations, podcasts and collaborative projects are your strength.',tags:['Social','Collaborative','Communicative']},
-  {id:'creator',name:'The Creator',emoji:'🎨',color:'#FAECE7',desc:'You express learning through making things. Visual, digital and multimedia projects are where you shine.',tags:['Visual','Creative','Digital']}
+  {id:'storyteller',name:'The Storyteller',emoji:'📖',color:'#EEEDFE',textColor:'#3C3489',
+   tagline:'You have a voice — and the world wants to hear it.',
+   desc:"You're drawn to language that moves people. You notice the details others miss, you feel things deeply, and when you write or speak, something real comes through. English is your medium — and stories are how you make sense of the world.",
+   tags:['Expressive','Imaginative','Reflective'],
+   categories:[
+     {name:'Personal Narratives',desc:'Tell stories from your own life — moments that shaped you, lessons you learned, or memories worth keeping.',products:'Personal essay, diary entry, memory piece, letter to your future self',level:'Starter'},
+     {name:'Fiction & Creative Writing',desc:'Build worlds, create characters, and let your imagination lead. No rules — just story.',products:'Short story, flash fiction, character sketch, opening chapter',level:'Starter'},
+     {name:'Descriptive Writing',desc:'Paint pictures with words. Make the reader feel like they are there.',products:'Scene description, setting piece, sensory paragraph, travel writing',level:'Starter'},
+     {name:'Persuasive & Opinion Writing',desc:'Stand for something. Make your argument clear, strong, and hard to ignore.',products:'Opinion essay, letter to the editor, speech, review',level:'Intermediate'},
+     {name:'Poetry & Lyrical Writing',desc:'Bend the rules of language. Say the most with the fewest words.',products:'Free verse poem, spoken word piece, song lyrics, haiku collection',level:'Advanced'}
+   ]},
+  {id:'speaker',name:'The Speaker',emoji:'🎙️',color:'#E1F5EE',textColor:'#085041',
+   tagline:'Your voice is your superpower.',
+   desc:"You come alive when you speak. Whether it's telling a story, explaining an idea, or performing for an audience, you connect with people through your words and energy. English gives you a stage — and you know how to own it.",
+   tags:['Confident','Communicative','Performing'],
+   categories:[
+     {name:'Presentations & Speeches',desc:'Speak to inform, inspire, or persuade. Structure your ideas and deliver them with confidence.',products:'Class presentation, TED-style talk, informational speech, slideshow + narration',level:'Starter'},
+     {name:'Storytelling Aloud',desc:'Bring stories to life with your voice. Pacing, tone, and expression are your tools.',products:'Recorded story, dramatic reading, personal narrative video',level:'Starter'},
+     {name:'Podcasting',desc:'Host a conversation, share an opinion, or explore a topic — all through audio.',products:'Podcast episode, interview recording, radio segment',level:'Intermediate'},
+     {name:'Video Diaries & Vlogs',desc:'Talk to the camera like you talk to a friend. Document what you think, see, and experience.',products:'Vlog entry, day-in-my-life video, opinion video',level:'Starter'},
+     {name:'Debates & Discussions',desc:'Defend your position, listen to the other side, and think on your feet.',products:'Structured debate, Socratic seminar contribution, panel discussion',level:'Advanced'}
+   ]},
+  {id:'researcher',name:'The Researcher',emoji:'🔍',color:'#FAEEDA',textColor:'#633806',
+   tagline:'You ask the questions others forget to ask.',
+   desc:"You want to understand things fully — not just the surface, but the reasons behind them. You read carefully, think critically, and love discovering something you didn't know before. English is a key that opens up the whole world of knowledge.",
+   tags:['Curious','Analytical','Thorough'],
+   categories:[
+     {name:'Reading & Responding',desc:'Read actively — question the text, find the main idea, and respond with your own thoughts.',products:'Reading response, summary + reaction, annotated text, reading journal',level:'Starter'},
+     {name:'Research Projects',desc:'Choose a question, find reliable sources, take notes, and turn your research into something worth sharing.',products:'Research report, fact file, topic deep-dive, bibliography',level:'Intermediate'},
+     {name:'News & Media Literacy',desc:'Read the news, question what you see online, and learn to tell fact from opinion.',products:'News analysis, media comparison, fact-check piece, current events journal',level:'Intermediate'},
+     {name:'Book & Film Reviews',desc:'Evaluate what you read and watch. What worked? What didn\'t? What would you tell someone before they read it?',products:'Book review, film critique, recommendation piece, star rating + justification',level:'Intermediate'},
+     {name:'Vocabulary & Language Study',desc:'Go deep on words — where they come from, how they work, and how to use them like a pro.',products:'Word study project, vocabulary map, etymology exploration, personal dictionary',level:'Starter'}
+   ]},
+  {id:'creator',name:'The Creator',emoji:'🎨',color:'#FAECE7',textColor:'#712B13',
+   tagline:'You build things that didn\'t exist before.',
+   desc:"You see potential everywhere — in a blank page, an empty slide, a new tool you've just discovered. You learn by making, and what you make says more than any test ever could. English is your material, and creativity is your method.",
+   tags:['Visual','Inventive','Digital'],
+   categories:[
+     {name:'Infographics & Visual Posters',desc:'Turn information into something beautiful and easy to understand at a glance.',products:'Canva infographic, illustrated fact poster, data visualisation, visual timeline',level:'Starter'},
+     {name:'Digital Storytelling',desc:'Combine words, images, sound, and motion to tell a story in a completely new way.',products:'Short film, photo story, animated explainer, digital picture book',level:'Intermediate'},
+     {name:'Blog & Online Writing',desc:'Write for a real audience on a topic you actually care about.',products:'Blog post, online article, comment piece, website page',level:'Starter'},
+     {name:'Social Media Projects',desc:'Create content as if you were running a real account — plan, write, and design posts with purpose.',products:'Mock Instagram/X feed, content calendar, profile in a character\'s voice',level:'Starter'},
+     {name:'Multimedia & Design Projects',desc:'Bring together text, visuals, and audio into one polished piece.',products:'Digital magazine spread, e-book, interactive presentation, branded project',level:'Advanced'}
+   ]},
+  {id:'connector',name:'The Connector',emoji:'🤝',color:'#F4C0D1',textColor:'#72243E',
+   tagline:'You make everything better by involving others.',
+   desc:"You believe learning is more meaningful when it's shared. You notice people, listen well, and bring out the best in those around you. In English, you're at your strongest when you're collaborating, communicating, and building something together.",
+   tags:['Collaborative','Empathetic','Social'],
+   categories:[
+     {name:'Collaborative Writing',desc:'Write with a partner or group — share ideas, divide tasks, and create something none of you could make alone.',products:'Co-written story, group report, shared poem, team essay',level:'Starter'},
+     {name:'Interview Projects',desc:'Ask the right questions and really listen. Interviews capture voices and stories that would otherwise be lost.',products:'Recorded interview, written Q&A, profile piece, oral history',level:'Intermediate'},
+     {name:'Peer Teaching',desc:'Explain what you know so clearly that someone else can understand it too. Teaching is the best way to learn.',products:'Mini-lesson video, how-to guide, explainer poster, teaching script',level:'Intermediate'},
+     {name:'Community & People Stories',desc:'Tell the stories of the people around you — family, neighbours, classmates, communities.',products:'Profile writing, local history project, community newsletter, personal portrait',level:'Starter'},
+     {name:'Correspondence & Communication',desc:'Write to real people for real purposes — and mean every word.',products:'Pen pal letter, formal email, thank-you note, open letter',level:'Starter'}
+   ]},
+  {id:'explorer',name:'The Explorer',emoji:'🌍',color:'#C0DD97',textColor:'#27500A',
+   tagline:'The world is your classroom.',
+   desc:"You're drawn to what's out there — different places, ideas, cultures, and ways of seeing the world. You get excited by things you've never encountered before, and English is the language that lets you access all of it. Curiosity is your compass.",
+   tags:['Adventurous','Open-minded','Globally aware'],
+   categories:[
+     {name:'Cultural Exploration',desc:'Discover how people live, celebrate, communicate, and see the world differently.',products:'Culture comparison, traditions presentation, cultural profile, interview with someone from another background',level:'Starter'},
+     {name:'Travel & Places Writing',desc:'Explore the world through words — even if you never leave your room.',products:'Travel diary, destination guide, imaginary journey, place description',level:'Starter'},
+     {name:'Science, Nature & How Things Work',desc:'Use English to explore the natural world and the big ideas behind it.',products:'Explainer text, science summary, nature journal, process description',level:'Intermediate'},
+     {name:'Passion Projects',desc:'Pick something you genuinely love and go deep. Your enthusiasm will come through in everything you make.',products:'Personal documentary, obsession essay, expert guide, passion presentation',level:'Advanced'},
+     {name:'English in the Real World',desc:'Notice English all around you — on signs, packaging, apps, and everywhere in between.',products:'Real-world English collection, label analysis, translation comparison, everyday English journal',level:'Starter'}
+   ]}
 ];
 
-function getProfile(ans){const c=[0,0,0,0];ans.forEach(a=>c[a]++);return PROFILES[c.indexOf(Math.max(...c))]||PROFILES[0];}
+function getProfile(ans){
+  const scores={storyteller:0,speaker:0,researcher:0,creator:0,connector:0,explorer:0};
+  ans.forEach(a=>{if(a&&a.pid)scores[a.pid]=(scores[a.pid]||0)+1;});
+  const top=Object.entries(scores).sort((a,b)=>b[1]-a[1])[0][0];
+  return PROFILES.find(p=>p.id===top)||PROFILES[0];
+}
 const sc=s=>({Speaking:'#EEEDFE',Writing:'#E1F5EE',Reading:'#FAEEDA',Listening:'#FAECE7'}[s]||'#F1EFE8');
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
 window.toast=toast;
@@ -454,14 +548,19 @@ function renderQuiz(){
     <div class="pt">Discover Your Learning Style</div>
     <div class="qprog"><div class="qpf" style="width:${Math.round(qI/QUIZ.length*100)}%"></div></div>
     <div class="qq">${q.q}</div><div class="qs2">${q.s}</div>
-    <div class="qopts">${q.opts.map((o,i)=>`<button class="qo" data-i="${i}"><span style="font-size:20px;width:28px;flex-shrink:0;text-align:center">${o.e}</span><span>${o.t}</span></button>`).join('')}</div>
+    <div class="qopts">${q.opts.map((o,i)=>`<button class="qo" data-i="${i}" data-pid="${o.pid}"><span style="font-size:20px;width:28px;flex-shrink:0;text-align:center">${o.e}</span><span>${o.t}</span></button>`).join('')}</div>
     <div class="qnav">
       <button class="btn bts" ${qI===0?'disabled':''} onclick="qBack()">← Back</button>
       <button class="btn btp" id="qn" disabled onclick="qNext()">Next →</button>
     </div>`;
   mc.querySelectorAll('.qo').forEach(b=>{
-    if(qA[qI]===parseInt(b.dataset.i)){b.classList.add('sel');document.getElementById('qn').disabled=false;}
-    b.onclick=()=>{mc.querySelectorAll('.qo').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');qA[qI]=parseInt(b.dataset.i);document.getElementById('qn').disabled=false;};
+    if(qA[qI]&&qA[qI].pid===b.dataset.pid){b.classList.add('sel');document.getElementById('qn').disabled=false;}
+    b.onclick=()=>{
+      mc.querySelectorAll('.qo').forEach(x=>x.classList.remove('sel'));
+      b.classList.add('sel');
+      qA[qI]={pid:b.dataset.pid,i:parseInt(b.dataset.i)};
+      document.getElementById('qn').disabled=false;
+    };
   });
 }
 
@@ -470,15 +569,49 @@ window.qBack=()=>{if(qI>0){qI--;renderQuiz();}};
 
 function showQuizResult(mc){
   const p=getProfile(qA);
-  mc.innerHTML=`<div class="card"><div class="pres">
-    <div class="pbadge" style="background:${p.color}">${p.emoji}</div>
-    <h2>You are ${p.name}!</h2>
-    <p class="pdesc">${p.desc}</p>
-    <div class="ptags">${p.tags.map(t=>`<span class="tag" style="background:${p.color}">${t}</span>`).join('')}</div>
-    <button class="btn btp btf" onclick="go('contract')">Build My Learning Contract →</button>
-    <button class="btn bts btf mt10" onclick="go('home')">← Back to Home</button>
-  </div></div>`;
+  saveProfileId(p.id);
+  const levelColor={Starter:'#E1F5EE',Intermediate:'#EEEDFE',Advanced:'#FAEEDA'};
+  const levelText={Starter:'var(--td)',Intermediate:'var(--pd)',Advanced:'var(--a)'};
+  mc.innerHTML=`
+    <div class="card" style="border-top:4px solid ${p.color};text-align:center;padding:24px 16px">
+      <div style="width:80px;height:80px;border-radius:22px;background:${p.color};display:flex;align-items:center;justify-content:center;font-size:40px;margin:0 auto 14px">${p.emoji}</div>
+      <h2 style="font-size:22px;font-weight:800;margin-bottom:6px">${p.name}</h2>
+      <p style="font-size:13px;font-style:italic;color:${p.textColor};font-weight:600;margin-bottom:10px">"${p.tagline}"</p>
+      <p style="font-size:14px;color:var(--tm);line-height:1.6;margin-bottom:14px">${p.desc}</p>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:20px">
+        ${p.tags.map(t=>`<span class="tag" style="background:${p.color};color:${p.textColor}">${t}</span>`).join('')}
+      </div>
+    </div>
+    <div style="margin:16px 0 8px">
+      <p style="font-size:15px;font-weight:700;margin-bottom:4px">What can you do as ${p.name}?</p>
+      <p style="font-size:13px;color:var(--tm)">Tap any category to explore what you could make.</p>
+    </div>
+    ${p.categories.map((cat,i)=>`
+      <div class="card" style="border-left:4px solid ${p.color};cursor:pointer" onclick="toggleCat('cat-${i}')">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <p style="font-size:14px;font-weight:700">${cat.name}</p>
+            <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:${levelColor[cat.level]||'#F1EFE8'};color:${levelText[cat.level]||'var(--g)'}">${cat.level}</span>
+          </div>
+          <span style="font-size:18px;color:var(--tm)">›</span>
+        </div>
+        <div id="cat-${i}" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--gb)">
+          <p style="font-size:13px;color:var(--tm);margin-bottom:8px;line-height:1.5">${cat.desc}</p>
+          <p style="font-size:12px;font-weight:700;color:var(--th);margin-bottom:4px">EXAMPLE PRODUCTS</p>
+          <p style="font-size:13px;color:var(--tx)">${cat.products}</p>
+          <button class="btn btp mt10" style="font-size:12px;padding:7px 14px" onclick="event.stopPropagation();go('contract')">Choose this as my goal →</button>
+        </div>
+      </div>`).join('')}
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button class="btn btp btf" onclick="go('contract')">Build My Learning Contract →</button>
+      <button class="btn bts btf" onclick="retakeQuiz()">Retake quiz</button>
+    </div>`;
 }
+
+window.toggleCat=function(id){
+  const el=document.getElementById(id);if(!el)return;
+  el.style.display=el.style.display==='none'?'block':'none';
+};
 
 // ── CONTRACT ──
 async function renderContract(){
@@ -754,6 +887,11 @@ function renderProgress(){
     <div class="card">
       <div class="ctitle">📦 My Evidence</div>
       <div id="ev-list"><div class="loading">Loading...</div></div>
+    </div>
+    <div class="card">
+      <div class="ctitle">👥 Give Peer Feedback</div>
+      <p style="font-size:13px;color:var(--tm);margin-bottom:12px">Go to a classmate's profile to leave feedback on their individual works using the rubric.</p>
+      <button class="btn btp btf" onclick="go('class')">Browse Class Contracts →</button>
     </div>`;
   renderRubRows('self-rub-rows',rubricV,RUBRIC,'setR');
   loadMyEvidence();
@@ -796,15 +934,49 @@ function loadMyEvidence(){
   onValue(ref(db,`evidence/${CU.uid}`),snap=>{
     if(!snap.exists()){l.innerHTML='<p style="font-size:13px;color:var(--tm)">No evidence uploaded yet.</p>';return;}
     const items=[];snap.forEach(c=>items.push({id:c.key,...c.val()}));items.reverse();
-    l.innerHTML=items.map(it=>`
-      <div style="padding:10px;border-radius:var(--rs);border:1.5px solid var(--gb);margin-bottom:8px">
-        <div class="fb mb10">
+    l.innerHTML=items.map(it=>{
+      const peerCount=it.peerFeedback?Object.keys(it.peerFeedback).length:0;
+      return`<div style="padding:10px;border-radius:var(--rs);border:1.5px solid var(--gb);margin-bottom:8px">
+        <div class="fb">
           <span style="font-size:13px;font-weight:700">📎 ${it.title}</span>
-          ${it.link?`<a href="${it.link}" target="_blank" class="obtn">View ↗</a>`:''}
+          <div style="display:flex;gap:5px;align-items:center">
+            ${peerCount?`<span class="sb sa" style="font-size:10px">${peerCount} feedback</span>`:''}
+            ${it.link?`<a href="${it.link}" target="_blank" class="obtn">View ↗</a>`:''}
+            <button class="obtn" onclick="editEvidence('${it.id}','${(it.title||'').replace(/'/g,"\'")}','${it.link||''}')">✏️ Edit</button>
+            <button class="obtn" style="color:var(--c)" onclick="deleteEvidence('${it.id}')">🗑️</button>
+          </div>
         </div>
-      </div>`).join('');
-  },{onlyOnce:true});
+        <div id="edit-ev-${it.id}" style="display:none;margin-top:8px">
+          <input class="fi mb10" id="edit-title-${it.id}" value="${(it.title||'').replace(/"/g,'&quot;')}" placeholder="Title">
+          <input class="fi mb10" id="edit-link-${it.id}" value="${it.link||''}" placeholder="Link">
+          <div style="display:flex;gap:8px">
+            <button class="btn btp" style="font-size:12px;padding:6px 12px" onclick="saveEditEvidence('${it.id}')">Save</button>
+            <button class="btn bts" style="font-size:12px;padding:6px 12px" onclick="document.getElementById('edit-ev-${it.id}').style.display='none'">Cancel</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  });
 }
+
+window.editEvidence=function(id,title,link){
+  const d=document.getElementById('edit-ev-'+id);if(!d)return;
+  d.style.display=d.style.display==='none'?'block':'none';
+};
+
+window.saveEditEvidence=async function(id){
+  const title=document.getElementById('edit-title-'+id)?.value.trim();
+  const link=document.getElementById('edit-link-'+id)?.value.trim();
+  if(!title){toast('Title cannot be empty');return;}
+  await update(ref(db,`evidence/${CU.uid}/${id}`),{title,link:link||''});
+  toast('Evidence updated!');
+};
+
+window.deleteEvidence=async function(id){
+  if(!confirm('Delete this evidence? This cannot be undone.'))return;
+  await remove(ref(db,`evidence/${CU.uid}/${id}`));
+  toast('Evidence deleted.');
+};
 
 window.togglePeer=function(id){
   window._peerEv=id;
@@ -861,13 +1033,20 @@ window.openForum=function(groupId,groupName){
   onValue(ref(db,`forums/${groupId}`),snap=>{
     const msgs=document.getElementById('forum-msgs');if(!msgs)return;
     if(!snap.exists()){msgs.innerHTML='<div class="empty"><div class="ei">💬</div><p>No messages yet. Start the conversation!</p></div>';return;}
-    const items=[];snap.forEach(m=>items.push({id:m.key,...m.val()}));
+    const items=[];
+    snap.forEach(m=>{
+      const d=m.val();
+      // skip the 'info' metadata entry, only show real messages
+      if(d.text)items.push({id:m.key,...d});
+    });
+    if(!items.length){msgs.innerHTML='<div class="empty"><div class="ei">💬</div><p>No messages yet. Start the conversation!</p></div>';return;}
     msgs.innerHTML=items.map(m=>`
-      <div class="forum-msg">
-        <div class="forum-sender">${m.senderName||'Student'}</div>
+      <div class="forum-msg" style="background:${m.senderId===CU.uid?'var(--pl)':'#fff'}">
+        <div class="forum-sender" style="color:${m.senderId===CU.uid?'var(--pd)':'var(--p)'}">${m.senderId===CU.uid?'You':m.senderName||'Student'}</div>
         <div class="forum-text">${m.text||''}</div>
         <div class="forum-time">${new Date(m.createdAt).toLocaleString()}</div>
       </div>`).join('');
+    msgs.scrollTop=msgs.scrollHeight;
   });
 };
 
@@ -1139,10 +1318,13 @@ window.openNotifications=async function(){
           <span style="font-size:22px">${n.type==='peer_feedback'?'💬':n.type==='teacher_eval'?'👩‍🏫':'📢'}</span>
           <div style="flex:1">
             <p style="font-size:14px;font-weight:${n.read?'400':'700'}">${n.message||''}</p>
-            <p style="font-size:12px;color:var(--th);margin-top:2px">${new Date(n.createdAt).toLocaleString()}</p>
+            <p style="font-size:12px;color:var(--th);margin-top:2px">${new Date(n.createdAt).toLocaleDateString()} ${new Date(n.createdAt).toLocaleTimeString()}</p>
           </div>
         </div>
-        ${n.evId?`<button class="btn bts mt10" style="font-size:12px;padding:6px 12px" onclick="renderProfile('${CU.uid}',true)">View My Profile →</button>`:''}
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+          <button class="btn bts" style="font-size:12px;padding:6px 12px" onclick="go('profile')">View My Profile →</button>
+          ${n.type==='peer_feedback'||n.type==='teacher_eval'?`<button class="btn btp" style="font-size:12px;padding:6px 12px" onclick="goToReport()">🤖 Get AI Report →</button>`:''}
+        </div>
       </div>`).join(''):'<div class="empty"><div class="ei">🔔</div><p>No notifications yet. When classmates give you feedback, it will appear here.</p></div>'}
     <button class="btn bts btf mt10" onclick="go('profile')">← Back to Profile</button>`;
 };
@@ -1151,6 +1333,16 @@ window.openNotifications=async function(){
 async function sendNotif(toUid,type,message,evId=''){
   await push(ref(db,`notifications/${toUid}`),{type,message,evId,read:false,createdAt:Date.now()});
 }
+
+window.goToReport=async function(){
+  setNav('profile');
+  await renderProfile(CU.uid,true);
+  setTimeout(()=>{
+    const sec=document.getElementById('ai-report-section');
+    if(sec){sec.scrollIntoView({behavior:'smooth'});}
+    generateAIReport(CU.uid);
+  },600);
+};
 
 // ── PROFILE (FULL REWRITE) ──
 window.renderProfile=async function(uid,isOwn){
@@ -1182,11 +1374,42 @@ window.renderProfile=async function(uid,isOwn){
       <div class="prof-sub">${c?.skills?(c.skills.join(' · ')):'No contract yet'}</div>
       ${groupName?`<div style="margin-top:6px"><span class="tag" style="background:var(--pl)">👥 ${groupName}</span></div>`:''}
       <div style="display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap">
-        ${isOwn&&groupId?`<button class="btn btp" style="font-size:12px;padding:7px 13px" onclick="openForum('${groupId}','${groupName||'My Group'}')">💬 Open Group Forum</button>`:''}
-        ${isOwn?`<button class="btn bts" style="font-size:12px;padding:7px 13px" onclick="generateAIReport('${uid}')">🤖 Get AI Feedback Report</button>`:''}
+        ${isOwn&&groupId?`<button class="btn btp" style="font-size:12px;padding:7px 13px" onclick="openForum('${groupId}','${groupName||'My Group'}')">💬 Group Forum</button>`:''}
+        ${isOwn?`<button class="btn bts" style="font-size:12px;padding:7px 13px" onclick="generateAIReport('${uid}')">🤖 AI Feedback Report</button>`:''}
         ${!isOwn?`<button class="btn bts" style="font-size:12px;padding:7px 13px" onclick="go('class')">← Back</button>`:''}
       </div>
     </div>
+    ${(()=>{
+      const uProfile=PROFILES.find(p=>p.id===u.profileId);
+      if(!uProfile)return '';
+      const levelColor={Starter:'#E1F5EE',Intermediate:'#EEEDFE',Advanced:'#FAEEDA'};
+      const levelText={Starter:'var(--td)',Intermediate:'var(--pd)',Advanced:'var(--a)'};
+      return \`<div class="card" style="border-top:3px solid \${uProfile.color}">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <div style="width:44px;height:44px;border-radius:12px;background:\${uProfile.color};display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">\${uProfile.emoji}</div>
+          <div>
+            <p style="font-size:15px;font-weight:700">\${uProfile.name}</p>
+            <p style="font-size:12px;font-style:italic;color:\${uProfile.textColor}">\${uProfile.tagline}</p>
+          </div>
+        </div>
+        <p style="font-size:12px;font-weight:700;color:var(--th);margin-bottom:8px">WHAT \${isOwn?'YOU CAN':'THEY CAN'} EXPLORE</p>
+        \${uProfile.categories.map((cat,i)=>\`
+          <div style="padding:9px 11px;border-radius:var(--rs);border:1.5px solid \${uProfile.color};margin-bottom:7px;cursor:pointer" onclick="toggleCat('pcat-\${i}')">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <span style="font-size:13px;font-weight:700">\${cat.name}</span>
+              <div style="display:flex;align-items:center;gap:6px">
+                <span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;background:\${levelColor[cat.level]||'#F1EFE8'};color:\${levelText[cat.level]||'var(--g)'}">\${cat.level}</span>
+                <span style="color:var(--tm)">›</span>
+              </div>
+            </div>
+            <div id="pcat-\${i}" style="display:none;margin-top:8px">
+              <p style="font-size:12px;color:var(--tm);margin-bottom:6px;line-height:1.5">\${cat.desc}</p>
+              <p style="font-size:11px;font-weight:700;color:var(--th);margin-bottom:3px">EXAMPLE PRODUCTS</p>
+              <p style="font-size:12px;color:var(--tx)">\${cat.products}</p>
+            </div>
+          </div>\`).join('')}
+      </div>\`;
+    })()}
 
     ${c?`<div class="card">
       <div class="ctitle">📋 Learning Contract</div>
@@ -1212,6 +1435,15 @@ window.renderProfile=async function(uid,isOwn){
             </div>
           </div>
           <div id="ev-det-${ev.id}" style="display:none;margin-top:10px">
+            ${isOwn?`<div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+              <button class="obtn" onclick="editEvidence('${ev.id}','${(ev.title||'').replace(/'/g,&quot;\'&quot;)}','${ev.link||''}')">✏️ Edit</button>
+              <button class="obtn" style="color:var(--c)" onclick="deleteEvidence('${ev.id}')">🗑️ Delete</button>
+            </div>
+            <div id="edit-ev-${ev.id}" style="display:none;margin-bottom:10px">
+              <input class="fi mb10" id="edit-title-${ev.id}" value="${(ev.title||'').replace(/"/g,'&quot;')}" placeholder="Title">
+              <input class="fi mb10" id="edit-link-${ev.id}" value="${ev.link||''}" placeholder="Link">
+              <div style="display:flex;gap:8px"><button class="btn btp" style="font-size:12px;padding:6px 10px" onclick="saveEditEvidence('${ev.id}')">Save</button><button class="btn bts" style="font-size:12px;padding:6px 10px" onclick="document.getElementById('edit-ev-${ev.id}').style.display='none'">Cancel</button></div>
+            </div>`:''}
             ${isOwn&&peerCount?`<div style="margin-bottom:10px">
               <p style="font-size:12px;font-weight:700;color:var(--tm);margin-bottom:8px">Peer Feedback Received:</p>
               ${peerFeedbacks.map(pf=>`
