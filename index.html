@@ -1402,7 +1402,1618 @@ window.renderProfile=async function(uid,isOwn){
   const teachEvals=[];if(tSnap.exists())tSnap.forEach(t=>teachEvals.push(t.val()));
 
   // Group info
+  const groupId=u.groupId||null;<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>LearnPath</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --p:#7F77DD;--pl:#EEEDFE;--pd:#3C3489;
+  --t:#1D9E75;--tl:#E1F5EE;--td:#085041;
+  --a:#BA7517;--al:#FAEEDA;
+  --c:#D85A30;--cl:#FAECE7;
+  --g:#5F5E5A;--gl:#F1EFE8;--gb:#D3D1C7;
+  --tx:#2C2C2A;--tm:#5F5E5A;--th:#888780;
+  --bg:#F7F6F2;--r:12px;--rs:8px;--sh:0 2px 12px rgba(0,0,0,.08)
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh}
+#auth{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(135deg,var(--pl),var(--tl))}
+.auth-card{background:#fff;border-radius:24px;padding:44px 36px;max-width:420px;width:100%;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.12)}
+.alogo{width:60px;height:60px;background:var(--p);border-radius:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 18px}
+.alogo svg{width:32px;height:32px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.auth-card h1{font-size:26px;font-weight:700;margin-bottom:6px}
+.auth-card>p{color:var(--tm);font-size:14px;margin-bottom:26px;line-height:1.5}
+.gbtn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:13px 20px;border:2px solid var(--gb);border-radius:var(--r);background:#fff;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s}
+.gbtn:hover{border-color:var(--p);background:var(--pl)}
+.gbtn img{width:20px}
+.anote{margin-top:12px;font-size:12px;color:var(--th)}
+#role{min-height:100vh;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+.ri{max-width:460px;width:100%;text-align:center}
+.ri h2{font-size:22px;font-weight:700;margin-bottom:6px}
+.ri>p{color:var(--tm);margin-bottom:26px;font-size:14px}
+.rc{display:flex;flex-direction:column;gap:12px}
+.rcard{padding:18px;border-radius:var(--r);border:2px solid var(--gb);background:#fff;cursor:pointer;transition:all .2s;text-align:left;display:flex;align-items:center;gap:16px}
+.rcard:hover{border-color:var(--p);transform:translateY(-2px);box-shadow:var(--sh)}
+.ricon{width:50px;height:50px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0}
+.rcard h3{font-size:16px;font-weight:700;margin-bottom:2px}
+.rcard p{font-size:13px;color:var(--tm);margin:0}
+#app{display:none;min-height:100vh;flex-direction:column}
+.topbar{background:#fff;border-bottom:1px solid var(--gb);padding:0 16px;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.tbl{display:flex;align-items:center;gap:10px}
+.tlogo{width:32px;height:32px;background:var(--p);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.tlogo svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tname{font-size:16px;font-weight:700}
+.uinfo{display:flex;align-items:center;gap:8px}
+.uav{width:30px;height:30px;border-radius:50%;object-fit:cover}
+.uname{font-size:13px;font-weight:600}
+.sob{font-size:11px;color:var(--tm);cursor:pointer;border:1px solid var(--gb);padding:3px 8px;border-radius:6px;background:none}
+.sob:hover{color:var(--c);border-color:var(--c)}
+.mc{flex:1;overflow-y:auto;padding:16px;max-width:700px;margin:0 auto;width:100%;padding-bottom:74px}
+.bnav{background:#fff;border-top:1px solid var(--gb);display:flex;position:fixed;bottom:0;left:0;right:0;z-index:100}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px;cursor:pointer;gap:3px;border:none;background:none;color:var(--tm);font-size:10px;font-weight:500;transition:color .2s}
+.ni.active{color:var(--p)}
+.ni svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.card{background:#fff;border-radius:var(--r);padding:16px;margin-bottom:12px;box-shadow:var(--sh);border:1px solid var(--gb)}
+.ctitle{font-size:15px;font-weight:700;margin-bottom:10px}
+.pt{font-size:20px;font-weight:700;margin-bottom:3px}
+.ps{font-size:13px;color:var(--tm);margin-bottom:18px}
+.btn{padding:10px 20px;border-radius:var(--rs);font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .18s}
+.btp{background:var(--p);color:#fff}.btp:hover{background:var(--pd)}
+.bts{background:var(--gl);color:var(--tx)}.bts:hover{background:var(--gb)}
+.btg{background:var(--t);color:#fff}
+.btf{width:100%}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.fg{margin-bottom:10px}
+.fl{font-size:12px;font-weight:600;color:var(--tm);margin-bottom:5px;display:block}
+.fi,.fse,.fta{width:100%;padding:9px 12px;border:1.5px solid var(--gb);border-radius:var(--rs);font-size:14px;color:var(--tx);background:#fff;font-family:inherit;transition:border-color .2s}
+.fi:focus,.fse:focus,.fta:focus{outline:none;border-color:var(--p)}
+.fta{min-height:68px;resize:vertical}
+.tip{background:var(--al);border-left:3px solid var(--a);padding:8px 12px;border-radius:0 var(--rs) var(--rs) 0;font-size:12px;color:var(--tm);margin-top:6px}
+.cr{display:flex;flex-wrap:wrap;gap:7px}
+.chip{padding:7px 13px;border-radius:20px;border:2px solid var(--gb);font-size:13px;font-weight:600;cursor:pointer;background:#fff;transition:all .18s}
+.chip.sel{border-color:var(--t);background:var(--tl);color:var(--td)}
+.div{height:1px;background:var(--gb);margin:14px 0}
+.sb{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.sp{background:var(--al);color:var(--a)}.sa{background:var(--tl);color:var(--td)}.sd{background:var(--gl);color:var(--g)}
+.fb{display:flex;align-items:center;justify-content:space-between}
+.qprog{height:5px;background:var(--gb);border-radius:3px;margin-bottom:24px;overflow:hidden}
+.qpf{height:100%;background:var(--p);border-radius:3px;transition:width .4s}
+.qq{font-size:18px;font-weight:700;text-align:center;margin-bottom:6px;line-height:1.4}
+.qs2{font-size:13px;color:var(--tm);text-align:center;margin-bottom:22px}
+.qopts{display:flex;flex-direction:column;gap:9px}
+.qo{padding:13px 15px;border-radius:var(--r);border:2px solid var(--gb);background:#fff;cursor:pointer;text-align:left;font-size:14px;font-weight:500;transition:all .18s;display:flex;align-items:center;gap:11px}
+.qo:hover{border-color:var(--p);background:var(--pl)}
+.qo.sel{border-color:var(--p);background:var(--pl);color:var(--pd)}
+.qnav{display:flex;justify-content:space-between;margin-top:22px}
+.pres{text-align:center;padding:16px}
+.pbadge{width:76px;height:76px;border-radius:20px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:38px}
+.pres h2{font-size:21px;font-weight:800;margin-bottom:6px}
+.pdesc{font-size:14px;color:var(--tm);line-height:1.6;margin-bottom:14px}
+.ptags{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:14px}
+.tag{padding:4px 11px;border-radius:20px;font-size:12px;font-weight:600}
+.evg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.evc{padding:11px;border-radius:var(--rs);border:2px solid var(--gb);cursor:pointer;text-align:center;transition:all .18s;background:#fff}
+.evc.sel{border-color:var(--t);background:var(--tl)}
+.evi{font-size:20px;margin-bottom:4px}
+.evl{font-size:12px;font-weight:600}
+.fi2{background:#fff;border-radius:var(--r);padding:13px;margin-bottom:10px;border:1px solid var(--gb)}
+.fhdr{display:flex;align-items:center;gap:9px;margin-bottom:8px}
+.fav{width:36px;height:36px;border-radius:50%;background:var(--pl);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--p);flex-shrink:0}
+.fname{font-size:14px;font-weight:700}
+.fdet{font-size:12px;color:var(--tm)}
+.fgoal{font-size:14px;line-height:1.5;margin-bottom:8px}
+.ftags{display:flex;flex-wrap:wrap;gap:5px}
+.ftag{padding:2px 8px;border-radius:8px;font-size:11px;font-weight:600;background:var(--gl);color:var(--g)}
+.frow{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;padding-bottom:3px}
+.fch{padding:5px 12px;border-radius:20px;border:1.5px solid var(--gb);font-size:12px;font-weight:600;cursor:pointer;background:#fff;white-space:nowrap;transition:all .18s}
+.fch.act{background:var(--p);border-color:var(--p);color:#fff}
+.rc2{background:#fff;border-radius:var(--r);padding:13px;margin-bottom:10px;border:1px solid var(--gb)}
+.rtype{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:8px;font-size:11px;font-weight:700;background:var(--pl);color:var(--pd);margin-bottom:7px}
+.rtitle{font-size:15px;font-weight:700;margin-bottom:3px}
+.rwhy{font-size:13px;color:var(--tm);margin-bottom:8px;line-height:1.5}
+.rftr{display:flex;align-items:center;justify-content:space-between}
+.rauth{font-size:12px;color:var(--th)}
+.obtn{padding:4px 11px;border-radius:20px;border:1.5px solid var(--gb);font-size:12px;font-weight:600;cursor:pointer;background:none;color:var(--tm);text-decoration:none;transition:all .18s;display:inline-block}
+.obtn:hover{border-color:var(--t);color:var(--t)}
+.pbw{background:var(--gb);border-radius:6px;height:8px;margin:6px 0 12px;overflow:hidden}
+.pbf{height:100%;border-radius:6px;background:var(--t);transition:width .5s}
+.sti{display:flex;align-items:center;gap:11px;padding:10px 13px;border-radius:var(--rs);border:1.5px solid var(--gb);background:#fff;margin-bottom:8px}
+.stch{width:22px;height:22px;border-radius:50%;border:2px solid var(--gb);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .18s;font-size:12px;font-weight:700}
+.stch.done{background:var(--t);border-color:var(--t);color:#fff}
+.stt{font-size:13px;font-weight:500;flex:1}
+.stt.done{text-decoration:line-through;color:var(--tm)}
+.rubrow{margin-bottom:14px;padding:12px;border-radius:var(--rs);border:1.5px solid var(--gb);background:#fff}
+.rubcrit{font-size:13px;font-weight:700;margin-bottom:4px}
+.rubcdesc{font-size:12px;color:var(--tm);margin-bottom:8px}
+.rubscale{display:flex;gap:6px}
+.rubbtn{flex:1;padding:8px 0;border-radius:var(--rs);border:2px solid var(--gb);font-size:14px;font-weight:700;cursor:pointer;background:#fff;transition:all .18s;text-align:center}
+.rubbtn:hover{border-color:var(--p);background:var(--pl)}
+.rubbtn.sel{border-color:var(--p);background:var(--p);color:#fff}
+.rubanchor{display:flex;justify-content:space-between;font-size:10px;color:var(--th);margin-top:3px}
+.rublvl{font-size:11px;color:var(--tm);margin-top:6px;padding:7px 10px;background:var(--gl);border-radius:6px;line-height:1.5}
+.chat-wrap{display:flex;flex-direction:column;height:380px;border-radius:var(--r);border:1.5px solid var(--gb);overflow:hidden;background:#fff}
+.chat-msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+.msg{max-width:84%;padding:9px 12px;border-radius:14px;font-size:13px;line-height:1.5}
+.msg.ai{background:var(--pl);color:var(--pd);align-self:flex-start;border-bottom-left-radius:4px}
+.msg.user{background:var(--p);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.chat-in{display:flex;gap:8px;padding:9px;border-top:1px solid var(--gb)}
+.chat-in input{flex:1;padding:8px 11px;border:1.5px solid var(--gb);border-radius:var(--rs);font-size:13px;font-family:inherit}
+.chat-in input:focus{outline:none;border-color:var(--p)}
+.prof-header{text-align:center;padding:18px 14px;background:#fff;border-radius:var(--r);margin-bottom:12px;border:1px solid var(--gb)}
+.prof-av{width:70px;height:70px;border-radius:50%;object-fit:cover;margin:0 auto 10px;display:block;border:3px solid var(--p)}
+.prof-avp{width:70px;height:70px;border-radius:50%;background:var(--pl);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;color:var(--p);margin:0 auto 10px;border:3px solid var(--p)}
+.prof-name{font-size:18px;font-weight:700;margin-bottom:3px}
+.prof-sub{font-size:13px;color:var(--tm)}
+.srow{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:var(--rs);border:1.5px solid var(--gb);background:#fff;margin-bottom:8px;cursor:pointer;transition:all .18s}
+.srow:hover{border-color:var(--p)}
+.sn{font-size:14px;font-weight:700}.sm{font-size:12px;color:var(--tm)}
+.pm{height:4px;background:var(--gb);border-radius:3px;margin-top:4px;overflow:hidden;width:80px}
+.pmf{height:100%;background:var(--t);border-radius:3px}
+.forum-msg{padding:10px 12px;border-radius:var(--rs);border:1.5px solid var(--gb);margin-bottom:8px;background:#fff}
+.forum-sender{font-size:12px;font-weight:700;color:var(--p);margin-bottom:3px}
+.forum-text{font-size:13px;line-height:1.5}
+.forum-time{font-size:11px;color:var(--th);margin-top:3px}
+.tab-row{display:flex;gap:0;margin-bottom:14px;border-radius:var(--rs);overflow:hidden;border:1.5px solid var(--gb)}
+.tab-btn{flex:1;padding:9px 0;font-size:13px;font-weight:600;cursor:pointer;border:none;background:#fff;color:var(--tm);transition:all .18s;text-align:center}
+.tab-btn.act{background:var(--p);color:#fff}
+.empty{text-align:center;padding:32px 16px;color:var(--tm)}
+.ei{font-size:34px;margin-bottom:8px}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#2C2C2A;color:#fff;padding:10px 20px;border-radius:var(--rs);font-size:13px;font-weight:600;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;max-width:90vw}
+.toast.show{opacity:1}
+.loading{text-align:center;padding:36px;color:var(--tm);font-size:14px}
+.mb10{margin-bottom:10px}.mt10{margin-top:10px}.mt14{margin-top:14px}
+.home-hero{background:linear-gradient(135deg,var(--pl),var(--tl));border-radius:var(--r);padding:24px;margin-bottom:16px;text-align:center}
+.home-hero h2{font-size:20px;font-weight:700;margin-bottom:6px}
+.home-hero p{font-size:14px;color:var(--tm);margin-bottom:18px}
+.home-btns{display:flex;flex-direction:column;gap:10px}
+</style>
+</head>
+<body>
+
+<div id="auth">
+  <div class="auth-card">
+    <div class="alogo"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5M2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+    <h1>LearnPath</h1>
+    <p>Your heutagogy-powered English learning platform. Sign in with your school Google account.</p>
+    <button class="gbtn" id="gsign"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G"> Continue with Google</button>
+    <p class="anote">Use your school email address to sign in.</p>
+  </div>
+</div>
+
+<div id="role">
+  <div class="ri">
+    <h2>Welcome! Who are you?</h2>
+    <p>This helps us set up the right experience for you.</p>
+    <div class="rc">
+      <div class="rcard" id="rs"><div class="ricon" style="background:#EEEDFE">🎒</div><div><h3>I'm a Student</h3><p>Set goals, track progress, share work with my class.</p></div></div>
+      <div class="rcard" id="rt2"><div class="ricon" style="background:#E1F5EE">👩‍🏫</div><div><h3>I'm a Teacher</h3><p>Monitor contracts, give feedback, manage groups.</p></div></div>
+    </div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="topbar">
+    <div class="tbl">
+      <div class="tlogo"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5M2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+      <span class="tname">LearnPath</span>
+    </div>
+    <div class="uinfo">
+      <img id="uav" class="uav" src="" alt="">
+      <span id="uname" class="uname"></span>
+      <button id="notif-btn" onclick="openNotifications()" style="position:relative;background:none;border:none;cursor:pointer;padding:4px 6px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--tm)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span id="notif-count" style="display:none;position:absolute;top:0;right:0;background:var(--c);color:#fff;font-size:9px;font-weight:700;width:16px;height:16px;border-radius:50%;align-items:center;justify-content:center">0</span></button>
+      <button class="sob" id="sob">Sign out</button>
+    </div>
+  </div>
+  <div class="mc" id="mc"></div>
+  <div class="bnav" id="bnav"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import{getAuth,GoogleAuthProvider,signInWithPopup,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import{getDatabase,ref,set,get,push,onValue,update,remove}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+const fb=initializeApp({apiKey:"AIzaSyDFC_bMD8MFxRPyBGO7kqgn7YWLWyEFR4M",authDomain:"let-s-practice-2eda9.firebaseapp.com",projectId:"let-s-practice-2eda9",storageBucket:"let-s-practice-2eda9.firebasestorage.app",messagingSenderId:"329452880269",appId:"1:329452880269:web:f64e787d55ca3f56b67dc4",databaseURL:"https://let-s-practice-2eda9-default-rtdb.firebaseio.com"});
+const auth=getAuth(fb),db=getDatabase(fb),prov=new GoogleAuthProvider();
+
+// ── REPLACE THIS WITH YOUR NEW API KEY ──
+const ANTHROPIC_KEY = "YOUR_NEW_API_KEY_HERE";
+
+let CU=null,UP=null;
+let qA=[],qI=0,selSkills=[],selEvidence='',chatHistory=[];
+let rubricV=[0,0,0,0,0,0],peerV=[0,0,0,0,0,0];
+let sDone={},cSteps=[],myGroupId=null,myGroupName=null;
+
+const RUBRIC=[
+  {label:'Content & Purpose',q:'Did I stay on topic and make my point clear?',
+   lvls:['Topic or purpose was hard to understand. Not enough information.','Topic was partly clear, but needed more explanation and details.','Topic and purpose were mostly clear. Some details included.','Clearly explained topic and purpose with enough details and examples.']},
+  {label:'Organization',q:'Was my work easy to follow from beginning to end?',
+   lvls:['Difficult to follow — ideas were not clearly organized.','Some organization, but parts were confusing or disconnected.','Mostly organized. Audience could follow, even if a few parts felt off.','Well organized with a clear beginning, middle, and end.']},
+  {label:'Language Control',q:'Were my sentences correct and understandable?',
+   lvls:['Very limited English or many mistakes made message hard to understand.','Several mistakes sometimes made meaning unclear.','Understandable sentences with some mistakes, but meaning was clear.','Sentences mostly correct and easy to understand.']},
+  {label:'Vocabulary',q:'Did I use the right words for my topic?',
+   lvls:['Not enough vocabulary to express ideas clearly.','Limited word set, often repeated the same vocabulary.','Enough words for topic. Some effective vocabulary but needed variety.','Good range of words that fit the message well.']},
+  {label:'Communication Strategies',q:'Did I use helpful tools when I got stuck or wanted to be clearer?',
+   lvls:['Did not use support strategies, or support did not help.','Tried to use some support, but it did not always help.','Used some supports that helped, but could be more effective.','Used examples, visuals, notes, gestures, or rewording very effectively.']},
+  {label:'Audience & Presentation Style',q:'Did my style fit the audience and task?',
+   lvls:['Style did not fit the audience or task.','Style sometimes fit the audience and task, but parts were awkward.','Style mostly fit the audience and task with only small problems.','Language, tone, and style fit the audience and task very well.']}
+];
+
+const PEER_RUBRIC=[
+  {label:'Content & Purpose',q:"Was the classmate's main idea clear?",
+   lvls:['Topic or purpose was difficult to understand — not enough clear information.','Topic was somewhat clear, but classmate needed more details.','Topic and purpose were mostly clear. Some details were helpful.','Classmate clearly explained topic and purpose with enough details.']},
+  {label:'Organization',q:'Was the work easy to follow?',
+   lvls:['Hard to follow because ideas were not clearly organized.','Some organization, but several parts were confusing.','Mostly easy to follow, although a few parts felt out of order.','Easy to follow with a clear beginning, middle, and end.']},
+  {label:'Language Control',q:'Was the English understandable?',
+   lvls:['Very limited or too difficult to understand.','Several grammar mistakes sometimes made meaning unclear.','Mostly understandable with some grammar mistakes.','Sentences mostly correct and easy to understand.']},
+  {label:'Vocabulary',q:'Did the classmate use enough and suitable words?',
+   lvls:['Not enough vocabulary to explain the topic clearly.','Limited vocabulary, repeated words made message less clear.','Enough words for topic but some were repeated or too simple.','Good range of words that fit the topic well.']},
+  {label:'Communication Strategies',q:'Did the classmate use examples, visuals, notes, gestures, or rewording?',
+   lvls:['Did not use support strategies, or supports did not help.','Tried to use support strategies, but they were limited.','Used some support strategies and they mostly helped.','Used support strategies very well.']},
+  {label:'Audience & Presentation Style',q:'Did the presentation fit the audience and task?',
+   lvls:["Style did not fit the audience or task well.","Style partly fit the audience and task, but some parts felt awkward.","Style mostly fit the audience and task with minor problems.","Tone, style, and way of presenting fit the audience and task very well."]}
+];
+
+const EVIDENCE_TYPES=[
+  {cat:'🗣️ Speaking',items:['Video Speech','Podcast','Interview','Discussion','Storytelling','Oral Presentation']},
+  {cat:'✍️ Writing',items:['Blog Post','Paragraph / Essay','Creative Writing','Poster Text','Presentation Script']},
+  {cat:'🎨 Multimodal',items:['Canva Product','Slides','Video','Audio Recording','Digital Poster','Drama']},
+  {cat:'✨ Other',items:['Something Else']}
+];
+
+const QUIZ=[
+  {q:"How do you most enjoy using English outside of school?",s:"Pick the option that feels most like you",opts:[
+    {e:"📖",t:"Reading stories, articles, or captions — I like exploring words on my own",pid:'storyteller'},
+    {e:"🎙️",t:"Talking, singing along, or listening — I love how the language sounds",pid:'speaker'},
+    {e:"🔍",t:"Looking things up, watching documentaries, or learning new facts",pid:'researcher'},
+    {e:"🎨",t:"Making things — videos, edits, designs, or social media content",pid:'creator'},
+    {e:"🤝",t:"Chatting with friends, playing games online, or sharing things",pid:'connector'},
+    {e:"🌍",t:"Discovering new places, cultures, or topics I've never thought about before",pid:'explorer'}
+  ]},
+  {q:"If you could make any English project right now, what would it be?",s:"Go with your gut — there's no wrong answer",opts:[
+    {e:"📝",t:"A story, poem, or personal essay about something that matters to me",pid:'storyteller'},
+    {e:"🎬",t:"A video, speech, or podcast where I talk about something I love",pid:'speaker'},
+    {e:"📊",t:"A research project or deep-dive into a topic I'm curious about",pid:'researcher'},
+    {e:"🖼️",t:"An infographic, digital poster, or creative visual piece",pid:'creator'},
+    {e:"💬",t:"Something I make with a partner or group — teamwork makes it better",pid:'connector'},
+    {e:"🗺️",t:"A project about a country, culture, or topic I've never explored before",pid:'explorer'}
+  ]},
+  {q:"When you sit down to work on something in English, what helps you most?",s:"Think about what actually works for you",opts:[
+    {e:"✍️",t:"Having space to write freely — I think best when I can express myself on paper",pid:'storyteller'},
+    {e:"🎤",t:"Being able to say things out loud — speaking helps me figure out my ideas",pid:'speaker'},
+    {e:"📚",t:"Having good sources and information to work from — I like knowing the facts",pid:'researcher'},
+    {e:"💡",t:"Being free to design and create — I learn by making and doing",pid:'creator'},
+    {e:"👥",t:"Working with someone — bouncing ideas off others gives me energy",pid:'connector'},
+    {e:"🔭",t:"Having a question to explore — I work best when I'm genuinely curious",pid:'explorer'}
+  ]},
+  {q:"Which of these sounds most like you at school?",s:"Be honest — all answers are equally good",opts:[
+    {e:"📔",t:"I doodle, write notes in the margins, or come up with story ideas in class",pid:'storyteller'},
+    {e:"🙋",t:"I like to answer questions, share opinions, or explain things to others",pid:'speaker'},
+    {e:"🧐",t:"I ask a lot of questions and want to understand how things really work",pid:'researcher'},
+    {e:"🎭",t:"I prefer hands-on tasks — making, building, or designing something",pid:'creator'},
+    {e:"🤜",t:"I work better in groups and like hearing different points of view",pid:'connector'},
+    {e:"🌐",t:"I get excited when topics connect to real life or the world around me",pid:'explorer'}
+  ]}
+];
+
+const PROFILES=[
+  {id:'storyteller',name:'The Storyteller',emoji:'📖',color:'#EEEDFE',textColor:'#3C3489',
+   tagline:'You have a voice — and the world wants to hear it.',
+   desc:"You're drawn to language that moves people. You notice the details others miss, you feel things deeply, and when you write or speak, something real comes through. English is your medium — and stories are how you make sense of the world.",
+   tags:['Expressive','Imaginative','Reflective'],
+   categories:[
+     {name:'Personal Narratives',desc:'Tell stories from your own life — moments that shaped you, lessons you learned, or memories worth keeping.',products:'Personal essay, diary entry, memory piece, letter to your future self',level:'Starter'},
+     {name:'Fiction & Creative Writing',desc:'Build worlds, create characters, and let your imagination lead. No rules — just story.',products:'Short story, flash fiction, character sketch, opening chapter',level:'Starter'},
+     {name:'Descriptive Writing',desc:'Paint pictures with words. Make the reader feel like they are there.',products:'Scene description, setting piece, sensory paragraph, travel writing',level:'Starter'},
+     {name:'Persuasive & Opinion Writing',desc:'Stand for something. Make your argument clear, strong, and hard to ignore.',products:'Opinion essay, letter to the editor, speech, review',level:'Intermediate'},
+     {name:'Poetry & Lyrical Writing',desc:'Bend the rules of language. Say the most with the fewest words.',products:'Free verse poem, spoken word piece, song lyrics, haiku collection',level:'Advanced'}
+   ]},
+  {id:'speaker',name:'The Speaker',emoji:'🎙️',color:'#E1F5EE',textColor:'#085041',
+   tagline:'Your voice is your superpower.',
+   desc:"You come alive when you speak. Whether it's telling a story, explaining an idea, or performing for an audience, you connect with people through your words and energy. English gives you a stage — and you know how to own it.",
+   tags:['Confident','Communicative','Performing'],
+   categories:[
+     {name:'Presentations & Speeches',desc:'Speak to inform, inspire, or persuade. Structure your ideas and deliver them with confidence.',products:'Class presentation, TED-style talk, informational speech, slideshow + narration',level:'Starter'},
+     {name:'Storytelling Aloud',desc:'Bring stories to life with your voice. Pacing, tone, and expression are your tools.',products:'Recorded story, dramatic reading, personal narrative video',level:'Starter'},
+     {name:'Podcasting',desc:'Host a conversation, share an opinion, or explore a topic — all through audio.',products:'Podcast episode, interview recording, radio segment',level:'Intermediate'},
+     {name:'Video Diaries & Vlogs',desc:'Talk to the camera like you talk to a friend. Document what you think, see, and experience.',products:'Vlog entry, day-in-my-life video, opinion video',level:'Starter'},
+     {name:'Debates & Discussions',desc:'Defend your position, listen to the other side, and think on your feet.',products:'Structured debate, Socratic seminar contribution, panel discussion',level:'Advanced'}
+   ]},
+  {id:'researcher',name:'The Researcher',emoji:'🔍',color:'#FAEEDA',textColor:'#633806',
+   tagline:'You ask the questions others forget to ask.',
+   desc:"You want to understand things fully — not just the surface, but the reasons behind them. You read carefully, think critically, and love discovering something you didn't know before. English is a key that opens up the whole world of knowledge.",
+   tags:['Curious','Analytical','Thorough'],
+   categories:[
+     {name:'Reading & Responding',desc:'Read actively — question the text, find the main idea, and respond with your own thoughts.',products:'Reading response, summary + reaction, annotated text, reading journal',level:'Starter'},
+     {name:'Research Projects',desc:'Choose a question, find reliable sources, take notes, and turn your research into something worth sharing.',products:'Research report, fact file, topic deep-dive, bibliography',level:'Intermediate'},
+     {name:'News & Media Literacy',desc:'Read the news, question what you see online, and learn to tell fact from opinion.',products:'News analysis, media comparison, fact-check piece, current events journal',level:'Intermediate'},
+     {name:'Book & Film Reviews',desc:'Evaluate what you read and watch. What worked? What didn\'t? What would you tell someone before they read it?',products:'Book review, film critique, recommendation piece, star rating + justification',level:'Intermediate'},
+     {name:'Vocabulary & Language Study',desc:'Go deep on words — where they come from, how they work, and how to use them like a pro.',products:'Word study project, vocabulary map, etymology exploration, personal dictionary',level:'Starter'}
+   ]},
+  {id:'creator',name:'The Creator',emoji:'🎨',color:'#FAECE7',textColor:'#712B13',
+   tagline:'You build things that didn\'t exist before.',
+   desc:"You see potential everywhere — in a blank page, an empty slide, a new tool you've just discovered. You learn by making, and what you make says more than any test ever could. English is your material, and creativity is your method.",
+   tags:['Visual','Inventive','Digital'],
+   categories:[
+     {name:'Infographics & Visual Posters',desc:'Turn information into something beautiful and easy to understand at a glance.',products:'Canva infographic, illustrated fact poster, data visualisation, visual timeline',level:'Starter'},
+     {name:'Digital Storytelling',desc:'Combine words, images, sound, and motion to tell a story in a completely new way.',products:'Short film, photo story, animated explainer, digital picture book',level:'Intermediate'},
+     {name:'Blog & Online Writing',desc:'Write for a real audience on a topic you actually care about.',products:'Blog post, online article, comment piece, website page',level:'Starter'},
+     {name:'Social Media Projects',desc:'Create content as if you were running a real account — plan, write, and design posts with purpose.',products:'Mock Instagram/X feed, content calendar, profile in a character\'s voice',level:'Starter'},
+     {name:'Multimedia & Design Projects',desc:'Bring together text, visuals, and audio into one polished piece.',products:'Digital magazine spread, e-book, interactive presentation, branded project',level:'Advanced'}
+   ]},
+  {id:'connector',name:'The Connector',emoji:'🤝',color:'#F4C0D1',textColor:'#72243E',
+   tagline:'You make everything better by involving others.',
+   desc:"You believe learning is more meaningful when it's shared. You notice people, listen well, and bring out the best in those around you. In English, you're at your strongest when you're collaborating, communicating, and building something together.",
+   tags:['Collaborative','Empathetic','Social'],
+   categories:[
+     {name:'Collaborative Writing',desc:'Write with a partner or group — share ideas, divide tasks, and create something none of you could make alone.',products:'Co-written story, group report, shared poem, team essay',level:'Starter'},
+     {name:'Interview Projects',desc:'Ask the right questions and really listen. Interviews capture voices and stories that would otherwise be lost.',products:'Recorded interview, written Q&A, profile piece, oral history',level:'Intermediate'},
+     {name:'Peer Teaching',desc:'Explain what you know so clearly that someone else can understand it too. Teaching is the best way to learn.',products:'Mini-lesson video, how-to guide, explainer poster, teaching script',level:'Intermediate'},
+     {name:'Community & People Stories',desc:'Tell the stories of the people around you — family, neighbours, classmates, communities.',products:'Profile writing, local history project, community newsletter, personal portrait',level:'Starter'},
+     {name:'Correspondence & Communication',desc:'Write to real people for real purposes — and mean every word.',products:'Pen pal letter, formal email, thank-you note, open letter',level:'Starter'}
+   ]},
+  {id:'explorer',name:'The Explorer',emoji:'🌍',color:'#C0DD97',textColor:'#27500A',
+   tagline:'The world is your classroom.',
+   desc:"You're drawn to what's out there — different places, ideas, cultures, and ways of seeing the world. You get excited by things you've never encountered before, and English is the language that lets you access all of it. Curiosity is your compass.",
+   tags:['Adventurous','Open-minded','Globally aware'],
+   categories:[
+     {name:'Cultural Exploration',desc:'Discover how people live, celebrate, communicate, and see the world differently.',products:'Culture comparison, traditions presentation, cultural profile, interview with someone from another background',level:'Starter'},
+     {name:'Travel & Places Writing',desc:'Explore the world through words — even if you never leave your room.',products:'Travel diary, destination guide, imaginary journey, place description',level:'Starter'},
+     {name:'Science, Nature & How Things Work',desc:'Use English to explore the natural world and the big ideas behind it.',products:'Explainer text, science summary, nature journal, process description',level:'Intermediate'},
+     {name:'Passion Projects',desc:'Pick something you genuinely love and go deep. Your enthusiasm will come through in everything you make.',products:'Personal documentary, obsession essay, expert guide, passion presentation',level:'Advanced'},
+     {name:'English in the Real World',desc:'Notice English all around you — on signs, packaging, apps, and everywhere in between.',products:'Real-world English collection, label analysis, translation comparison, everyday English journal',level:'Starter'}
+   ]}
+];
+
+function getProfile(ans){
+  const scores={storyteller:0,speaker:0,researcher:0,creator:0,connector:0,explorer:0};
+  ans.forEach(a=>{if(a&&a.pid)scores[a.pid]=(scores[a.pid]||0)+1;});
+  const top=Object.entries(scores).sort((a,b)=>b[1]-a[1])[0][0];
+  return PROFILES.find(p=>p.id===top)||PROFILES[0];
+}
+const sc=s=>({Speaking:'#EEEDFE',Writing:'#E1F5EE',Reading:'#FAEEDA',Listening:'#FAECE7'}[s]||'#F1EFE8');
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
+window.toast=toast;
+
+// ── AUTH ──
+document.getElementById('gsign').onclick=async()=>{try{await signInWithPopup(auth,prov);}catch(e){toast('Error: '+e.message);}};
+document.getElementById('sob').onclick=async()=>{await signOut(auth);location.reload();};
+document.getElementById('rs').onclick=()=>setRole('student');
+document.getElementById('rt2').onclick=()=>setRole('teacher');
+
+onAuthStateChanged(auth,async user=>{
+  if(!user){show('auth');return;}
+  CU=user;hide('auth');
+  document.getElementById('uav').src=user.photoURL||'';
+  document.getElementById('uname').textContent=(user.displayName||'User').split(' ')[0];
+  const snap=await get(ref(db,`users/${user.uid}`));
+  if(!snap.exists()||!snap.val().role){show('role');}
+  else{UP=snap.val();myGroupId=UP.groupId||null;myGroupName=UP.groupName||null;launchApp(UP.role);}
+});
+
+async function setRole(role){
+  await set(ref(db,`users/${CU.uid}`),{role,name:CU.displayName,email:CU.email,photo:CU.photoURL||'',uid:CU.uid,createdAt:Date.now()});
+  UP={role,name:CU.displayName};hide('role');launchApp(role);
+}
+
+function show(id){document.getElementById(id).style.display='flex';}
+function hide(id){document.getElementById(id).style.display='none';}
+
+function launchApp(role){
+  document.getElementById('app').style.display='flex';
+  document.getElementById('app').style.flexDirection='column';
+  if(role==='teacher')renderTeacher();
+  else{renderStudent();setTimeout(loadNotifications,1000);}
+}
+
+// ── AI CHAT ──
+async function askAI(userMsg){
+  chatHistory.push({role:'user',content:userMsg});
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',max_tokens:600,
+        system:`You are a friendly English learning assistant for 7th grade students on the LearnPath heutagogy platform. Help students choose learning goals, suggest resources and strategies, and answer English learning questions. Be warm, encouraging, and age-appropriate. Keep responses concise and practical. Students choose their own goals and evidence types (videos, podcasts, blog posts, presentations, etc.).`,
+        messages:chatHistory
+      })
+    });
+    const data=await res.json();
+    const reply=data.content?.[0]?.text||"I'm here to help! Try asking about learning strategies or evidence types.";
+    chatHistory.push({role:'assistant',content:reply});
+    return reply;
+  }catch(e){return"Sorry, I'm having trouble connecting right now. Please try again in a moment!";}
+}
+
+window.sendChat=async function(){
+  const inp=document.getElementById('chat-in-input');
+  const msg=inp?.value.trim();if(!msg)return;
+  const msgs=document.getElementById('chat-msgs');if(!msgs)return;
+  inp.value='';
+  msgs.innerHTML+=`<div class="msg user">${msg}</div>`;
+  msgs.innerHTML+=`<div class="msg ai" id="ai-typing">Thinking...</div>`;
+  msgs.scrollTop=msgs.scrollHeight;
+  const reply=await askAI(msg);
+  const el=document.getElementById('ai-typing');
+  if(el)el.outerHTML=`<div class="msg ai">${reply}</div>`;
+  msgs.scrollTop=msgs.scrollHeight;
+};
+
+function chatHTML(){
+  return`<div class="chat-wrap">
+    <div class="chat-msgs" id="chat-msgs"><div class="msg ai">Hi! I'm your LearnPath assistant 🌟 I can help you choose your learning focus, suggest resources, or answer any English learning questions. What would you like to know?</div></div>
+    <div class="chat-in"><input id="chat-in-input" placeholder="Type your question..." onkeydown="if(event.key==='Enter')sendChat()"><button class="btn btp" onclick="sendChat()">Send</button></div>
+  </div>`;
+}
+
+// ── STUDENT APP ──
+const SNAV=[
+  {id:'home',l:'Home',i:'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>'},
+  {id:'contract',l:'Contract',i:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>'},
+  {id:'class',l:'Class',i:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/>'},
+  {id:'resources',l:'Resources',i:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>'},
+  {id:'progress',l:'Progress',i:'<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>'},
+  {id:'profile',l:'Profile',i:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'}
+];
+
+function renderStudent(){
+  document.getElementById('bnav').innerHTML=SNAV.map(n=>`<button class="ni" id="nav-${n.id}" onclick="go('${n.id}')"><svg viewBox="0 0 24 24">${n.i}</svg>${n.l}</button>`).join('');
+  checkContractAndLoad();
+}
+
+async function checkContractAndLoad(){
+  const snap=await get(ref(db,`contracts/${CU.uid}`));
+  const usnap=await get(ref(db,`users/${CU.uid}`));
+  if(usnap.exists()){const u=usnap.val();myGroupId=u.groupId||null;myGroupName=u.groupName||null;}
+  go('home');
+}
+
+function setNav(id){document.querySelectorAll('#bnav .ni').forEach(n=>n.classList.remove('active'));document.getElementById('nav-'+id)?.classList.add('active');}
+
+window.go=function(page){
+  setNav(page);
+  document.getElementById('mc').innerHTML='<div class="loading">Loading...</div>';
+  const pages={home:renderHome,contract:renderContract,class:renderClass,resources:renderResources,progress:renderProgress,profile:()=>renderProfile(CU.uid,true)};
+  (pages[page]||renderHome)();
+};
+
+// ── HOME ──
+async function renderHome(){
+  const mc=document.getElementById('mc');
+  const snap=await get(ref(db,`contracts/${CU.uid}`));
+  const hasApproved=snap.exists()&&snap.val().status==='approved';
+  if(hasApproved){
+    cSteps=snap.val().steps||[];
+    const c=snap.val();
+    const done=cSteps.filter((_,i)=>sDone[i]).length;
+    const pct=cSteps.length?Math.round(done/cSteps.length*100):0;
+    mc.innerHTML=`
+      <div class="home-hero">
+        <h2>Welcome back, ${(CU.displayName||'').split(' ')[0]}! 👋</h2>
+        <p>You're working on <strong>${c.evidence}</strong>. Keep going!</p>
+        <div style="background:rgba(255,255,255,.6);border-radius:8px;padding:10px;margin-bottom:16px">
+          <div class="fb" style="margin-bottom:4px"><span style="font-size:12px;font-weight:700">My progress</span><span style="font-size:12px;font-weight:700;color:var(--t)">${pct}%</span></div>
+          <div class="pbw" style="margin:0"><div class="pbf" style="width:${pct}%"></div></div>
+        </div>
+        <div class="home-btns">
+          <button class="btn btg btf" onclick="go('progress')">📋 See My To-Do List</button>
+          <button class="btn btp btf" onclick="go('class')">👥 See What My Class Is Doing</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ctitle">🔄 Retake Test & Set New Goals</div>
+        <p style="font-size:13px;color:var(--tm);margin-bottom:12px">Want to explore new learning directions? Retake the quiz and update your contract.</p>
+        <button class="btn bts btf" onclick="go('discover-retake')">Start Discovery Quiz →</button>
+      </div>
+      <div class="card">
+        <div class="ctitle">💬 Chat with AI Assistant</div>
+        ${chatHTML()}
+      </div>`;
+  } else {
+    mc.innerHTML=`
+      <div class="home-hero">
+        <h2>Welcome to LearnPath! 🌟</h2>
+        <p>Start by discovering your learning style, then create your personal learning contract.</p>
+        <div class="home-btns">
+          <button class="btn btp btf" onclick="go('discover-new')">🔍 Discover My Learning Style</button>
+          <button class="btn bts btf" onclick="go('contract')">📋 Go to Contract</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ctitle">💬 Chat with AI Assistant</div>
+        <p style="font-size:13px;color:var(--tm);margin-bottom:10px">Not sure where to start? Ask me anything!</p>
+        ${chatHTML()}
+      </div>`;
+  }
+  setNav('home');
+}
+
+// ── QUIZ ──
+window.go=function(page){
+  setNav(page.split('-')[0]==='home'?'home':page.split('-')[0]);
+  document.getElementById('mc').innerHTML='<div class="loading">Loading...</div>';
+  if(page==='discover-new'||page==='discover-retake'){qI=0;qA=[];renderQuiz();return;}
+  const pages={home:renderHome,contract:renderContract,class:renderClass,resources:renderResources,progress:renderProgress,profile:()=>renderProfile(CU.uid,true)};
+  (pages[page]||renderHome)();
+  setNav(page);
+};
+
+function renderQuiz(){
+  const mc=document.getElementById('mc');
+  if(qI>=QUIZ.length){showQuizResult(mc);return;}
+  const q=QUIZ[qI];
+  mc.innerHTML=`
+    <div class="pt">Discover Your Learning Style</div>
+    <div class="qprog"><div class="qpf" style="width:${Math.round(qI/QUIZ.length*100)}%"></div></div>
+    <div class="qq">${q.q}</div><div class="qs2">${q.s}</div>
+    <div class="qopts">${q.opts.map((o,i)=>`<button class="qo" data-i="${i}" data-pid="${o.pid}"><span style="font-size:20px;width:28px;flex-shrink:0;text-align:center">${o.e}</span><span>${o.t}</span></button>`).join('')}</div>
+    <div class="qnav">
+      <button class="btn bts" ${qI===0?'disabled':''} onclick="qBack()">← Back</button>
+      <button class="btn btp" id="qn" disabled onclick="qNext()">Next →</button>
+    </div>`;
+  mc.querySelectorAll('.qo').forEach(b=>{
+    if(qA[qI]&&qA[qI].pid===b.dataset.pid){b.classList.add('sel');document.getElementById('qn').disabled=false;}
+    b.onclick=()=>{
+      mc.querySelectorAll('.qo').forEach(x=>x.classList.remove('sel'));
+      b.classList.add('sel');
+      qA[qI]={pid:b.dataset.pid,i:parseInt(b.dataset.i)};
+      document.getElementById('qn').disabled=false;
+    };
+  });
+}
+
+window.qNext=()=>{if(qA[qI]!==undefined){qI++;renderQuiz();}};
+window.qBack=()=>{if(qI>0){qI--;renderQuiz();}};
+
+function showQuizResult(mc){
+  const p=getProfile(qA);
+  saveProfileId(p.id);
+  const levelColor={Starter:'#E1F5EE',Intermediate:'#EEEDFE',Advanced:'#FAEEDA'};
+  const levelText={Starter:'var(--td)',Intermediate:'var(--pd)',Advanced:'var(--a)'};
+  mc.innerHTML=`
+    <div class="card" style="border-top:4px solid ${p.color};text-align:center;padding:24px 16px">
+      <div style="width:80px;height:80px;border-radius:22px;background:${p.color};display:flex;align-items:center;justify-content:center;font-size:40px;margin:0 auto 14px">${p.emoji}</div>
+      <h2 style="font-size:22px;font-weight:800;margin-bottom:6px">${p.name}</h2>
+      <p style="font-size:13px;font-style:italic;color:${p.textColor};font-weight:600;margin-bottom:10px">"${p.tagline}"</p>
+      <p style="font-size:14px;color:var(--tm);line-height:1.6;margin-bottom:14px">${p.desc}</p>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:20px">
+        ${p.tags.map(t=>`<span class="tag" style="background:${p.color};color:${p.textColor}">${t}</span>`).join('')}
+      </div>
+    </div>
+    <div style="margin:16px 0 8px">
+      <p style="font-size:15px;font-weight:700;margin-bottom:4px">What can you do as ${p.name}?</p>
+      <p style="font-size:13px;color:var(--tm)">Tap any category to explore what you could make.</p>
+    </div>
+    ${p.categories.map((cat,i)=>`
+      <div class="card" style="border-left:4px solid ${p.color};cursor:pointer" onclick="toggleCat('cat-${i}')">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <p style="font-size:14px;font-weight:700">${cat.name}</p>
+            <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:${levelColor[cat.level]||'#F1EFE8'};color:${levelText[cat.level]||'var(--g)'}">${cat.level}</span>
+          </div>
+          <span style="font-size:18px;color:var(--tm)">›</span>
+        </div>
+        <div id="cat-${i}" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--gb)">
+          <p style="font-size:13px;color:var(--tm);margin-bottom:8px;line-height:1.5">${cat.desc}</p>
+          <p style="font-size:12px;font-weight:700;color:var(--th);margin-bottom:4px">EXAMPLE PRODUCTS</p>
+          <p style="font-size:13px;color:var(--tx)">${cat.products}</p>
+          <button class="btn btp mt10" style="font-size:12px;padding:7px 14px" onclick="event.stopPropagation();go('contract')">Choose this as my goal →</button>
+        </div>
+      </div>`).join('')}
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button class="btn btp btf" onclick="go('contract')">Build My Learning Contract →</button>
+      <button class="btn bts btf" onclick="retakeQuiz()">Retake quiz</button>
+    </div>`;
+}
+
+
+function renderProfileCategories(u, isOwn){
+  const uProfile = PROFILES.find(p => p.id === u.profileId);
+  if(!uProfile) return '';
+  const levelColor = {Starter:'#E1F5EE', Intermediate:'#EEEDFE', Advanced:'#FAEEDA'};
+  const levelText  = {Starter:'var(--td)', Intermediate:'var(--pd)', Advanced:'var(--a)'};
+  const catsHTML = uProfile.categories.map((cat,i) => {
+    const bg  = levelColor[cat.level]  || '#F1EFE8';
+    const col = levelText[cat.level]   || 'var(--g)';
+    return '<div style="padding:9px 11px;border-radius:var(--rs);border:1.5px solid ' + uProfile.color + ';margin-bottom:7px;cursor:pointer" onclick="toggleCat('pcat-' + i + '')">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between">'
+        + '<span style="font-size:13px;font-weight:700">' + cat.name + '</span>'
+        + '<div style="display:flex;align-items:center;gap:6px">'
+          + '<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;background:' + bg + ';color:' + col + '">' + cat.level + '</span>'
+          + '<span style="color:var(--tm)">›</span>'
+        + '</div>'
+      + '</div>'
+      + '<div id="pcat-' + i + '" style="display:none;margin-top:8px">'
+        + '<p style="font-size:12px;color:var(--tm);margin-bottom:6px;line-height:1.5">' + cat.desc + '</p>'
+        + '<p style="font-size:11px;font-weight:700;color:var(--th);margin-bottom:3px">EXAMPLE PRODUCTS</p>'
+        + '<p style="font-size:12px;color:var(--tx)">' + cat.products + '</p>'
+      + '</div>'
+    + '</div>';
+  }).join('');
+
+  return '<div class="card" style="border-top:3px solid ' + uProfile.color + '">'
+    + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">'
+      + '<div style="width:44px;height:44px;border-radius:12px;background:' + uProfile.color + ';display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">' + uProfile.emoji + '</div>'
+      + '<div>'
+        + '<p style="font-size:15px;font-weight:700">' + uProfile.name + '</p>'
+        + '<p style="font-size:12px;font-style:italic;color:' + uProfile.textColor + '">' + uProfile.tagline + '</p>'
+      + '</div>'
+    + '</div>'
+    + '<p style="font-size:12px;font-weight:700;color:var(--th);margin-bottom:8px">WHAT ' + (isOwn ? 'YOU CAN' : 'THEY CAN') + ' EXPLORE</p>'
+    + catsHTML
+  + '</div>';
+}
+
+window.toggleCat=function(id){
+  const el=document.getElementById(id);if(!el)return;
+  el.style.display=el.style.display==='none'?'block':'none';
+};
+
+// ── CONTRACT ──
+async function renderContract(){
+  const mc=document.getElementById('mc');
+  const snap=await get(ref(db,`contracts/${CU.uid}`));
+  if(snap.exists()){const c=snap.val();cSteps=c.steps||[];mc.innerHTML=approvedContractHTML(c);}
+  else mc.innerHTML=contractFormHTML();
+}
+
+function approvedContractHTML(c){
+  return`<div class="pt">My Learning Contract</div>
+  <div class="ps">${c.status==='approved'?'Your contract is approved and active.':'Waiting for teacher approval.'}</div>
+  <div class="card" style="border-color:${c.status==='approved'?'var(--t)':'var(--a)'};border-width:2px">
+    <div class="fb mb10"><span class="ctitle">Learning Contract</span><span class="sb ${c.status==='approved'?'sa':'sp'}">${c.status==='approved'?'✓ Approved':'⏳ Pending'}</span></div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">
+      ${(c.skills||[]).map(s=>`<span class="tag" style="background:${sc(s)}">${s}</span>`).join('')}
+      <span class="tag" style="background:var(--gl)">${c.evidence}${c.evidenceOther?' — '+c.evidenceOther:''}</span>
+      ${c.frequency?`<span class="tag" style="background:var(--gl)">${c.frequency}/week</span>`:''}
+    </div>
+    <p style="font-size:14px;margin-bottom:3px"><strong>Focus 1:</strong> ${c.focus1||''}</p>
+    <p style="font-size:14px;margin-bottom:3px"><strong>Focus 2:</strong> ${c.focus2||''}</p>
+    <p style="font-size:14px;margin-bottom:10px"><strong>Focus 3:</strong> ${c.focus3||''}</p>
+    ${(c.steps||[]).map((s,i)=>`<p style="font-size:13px;color:var(--tm);margin-bottom:3px">${i+1}. ${s}</p>`).join('')}
+    ${c.teacherComment?`<div class="tip mt10"><strong>Teacher's note:</strong> ${c.teacherComment}</div>`:''}
+    <button class="btn bts mt10" style="font-size:12px;padding:7px 13px" onclick="clearContract()">Request New Contract</button>
+  </div>`;
+}
+
+function contractFormHTML(){
+  const evHTML=EVIDENCE_TYPES.map(cat=>`
+    <div style="margin-bottom:12px">
+      <div class="fl" style="margin-bottom:7px">${cat.cat}</div>
+      <div class="evg">${cat.items.map(l=>`<div class="evc" data-v="${l}" onclick="selEv(this,'${l}')"><div class="evl">${l}</div></div>`).join('')}</div>
+    </div>`).join('');
+  return`<div class="pt">My Learning Contract</div>
+  <div class="ps">Define your goals, plan your journey, and choose how you'll be assessed.</div>
+  <div class="card">
+    <div style="margin-bottom:14px">
+      <h3 style="font-size:14px;font-weight:700;color:var(--pd);margin-bottom:10px">🎯 Section 1: My Learning Skills & Goals</h3>
+      <div class="fg"><label class="fl">I want to improve my English in... (select all that apply)</label>
+        <div class="cr" id="sk-chips">${['🗣️ Speaking','✍️ Writing','📖 Reading','🎧 Listening'].map(s=>`<div class="chip sk-chip" data-v="${s.split(' ')[1]}" onclick="toggleSkill(this)">${s}</div>`).join('')}</div>
+      </div>
+      <div class="fg"><label class="fl">Focus 1 — What specifically do I want to do?</label><input class="fi" id="f1" placeholder="e.g. Give a 2-minute presentation about my hobby"></div>
+      <div class="fg"><label class="fl">Focus 2</label><input class="fi" id="f2" placeholder="e.g. Write a blog post about something I love"></div>
+      <div class="fg"><label class="fl">Focus 3</label><input class="fi" id="f3" placeholder="e.g. Record a podcast episode"></div>
+      <div class="tip">💡 A good focus is specific. Instead of "improve speaking", try "give a 2-minute presentation about my hobby".</div>
+    </div>
+    <div class="div"></div>
+    <div style="margin-bottom:14px">
+      <h3 style="font-size:14px;font-weight:700;color:var(--pd);margin-bottom:10px">📅 Section 2: My Plan</h3>
+      <div class="fg"><label class="fl">I will work on this per week:</label>
+        <div class="cr" id="fr-chips">${['1×','2×','3×+'].map(f=>`<div class="chip fr-chip" data-v="${f}" onclick="selOne(this,'fr-chips','fr-chip')">${f}</div>`).join('')}</div>
+      </div>
+      <div class="fg"><label class="fl">Resources I plan to use:</label>
+        <div class="cr">${['📺 YouTube','🎙️ Podcast','📱 App','📚 Book','🌐 Website','🤖 AI tool'].map(r=>`<div class="chip rc-chip" onclick="this.classList.toggle('sel')">${r}</div>`).join('')}</div>
+      </div>
+      <div class="fg"><label class="fl">My learning steps:</label>
+        <input class="fi mb10" id="s1" placeholder="Step 1">
+        <input class="fi mb10" id="s2" placeholder="Step 2">
+        <input class="fi" id="s3" placeholder="Step 3">
+      </div>
+    </div>
+    <div class="div"></div>
+    <div style="margin-bottom:14px">
+      <h3 style="font-size:14px;font-weight:700;color:var(--pd);margin-bottom:10px">📦 Section 3: My Evidence Type</h3>
+      ${evHTML}
+      <div id="other-ev-wrap" style="display:none;margin-top:8px">
+        <label class="fl">Describe your evidence type:</label>
+        <input class="fi" id="other-ev" placeholder="e.g. A hand-drawn comic strip in English">
+      </div>
+    </div>
+    <div class="div"></div>
+    <div style="margin-bottom:14px">
+      <h3 style="font-size:14px;font-weight:700;color:var(--pd);margin-bottom:10px">📝 Notes for Your Teacher</h3>
+      <textarea class="fta" id="c-note" placeholder="Anything you'd like your teacher to know..."></textarea>
+    </div>
+    <button class="btn btp btf" onclick="submitContract()">Submit for Teacher Approval</button>
+  </div>`;
+}
+
+window.toggleSkill=function(el){el.classList.toggle('sel');};
+window.selOne=function(el,gid,cls){document.querySelectorAll(`#${gid} .${cls}`).forEach(c=>c.classList.remove('sel'));el.classList.add('sel');};
+window.selEv=function(el,v){
+  document.querySelectorAll('.evc').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');
+  const ow=document.getElementById('other-ev-wrap');
+  if(ow)ow.style.display=v==='Something Else'?'block':'none';
+};
+window.clearContract=async function(){if(!confirm('Remove your current contract?'))return;await remove(ref(db,`contracts/${CU.uid}`));renderContract();};
+
+window.submitContract=async function(){
+  const mc=document.getElementById('mc');
+  const skills=[...mc.querySelectorAll('.sk-chip.sel')].map(c=>c.dataset.v);
+  const f1=document.getElementById('f1')?.value.trim();
+  const ev=mc.querySelector('.evc.sel')?.dataset.v;
+  if(!skills.length||!f1||!ev){toast('Please select skills, fill in Focus 1, and choose evidence type');return;}
+  const evOther=ev==='Something Else'?document.getElementById('other-ev')?.value.trim():'';
+  const steps=['s1','s2','s3'].map(id=>document.getElementById(id)?.value.trim()).filter(Boolean);
+  await set(ref(db,`contracts/${CU.uid}`),{
+    skills,focus1:f1,focus2:document.getElementById('f2')?.value.trim()||'',focus3:document.getElementById('f3')?.value.trim()||'',
+    frequency:mc.querySelector('.fr-chip.sel')?.dataset.v||'',
+    resources:[...mc.querySelectorAll('.rc-chip.sel')].map(c=>c.textContent.trim()),
+    evidence:ev,evidenceOther:evOther,steps,note:document.getElementById('c-note')?.value||'',
+    status:'pending',studentName:CU.displayName,studentEmail:CU.email,
+    studentPhoto:CU.photoURL||'',studentId:CU.uid,createdAt:Date.now()
+  });
+  cSteps=steps;toast('Contract submitted! Waiting for teacher approval.');renderContract();
+};
+
+// ── CLASS ──
+function renderClass(){
+  const mc=document.getElementById('mc');
+  mc.innerHTML=`
+    <div class="pt">My Class</div>
+    <div class="ps">See classmates' contracts and explore your group.</div>
+    <div class="frow" id="ff">
+      <div class="fch act" onclick="filterFeed(this,'all')">All</div>
+      ${['Speaking','Writing','Reading','Listening'].map(s=>`<div class="fch" onclick="filterFeed(this,'${s}')">${s}</div>`).join('')}
+    </div>
+    <div id="feed-list"><div class="loading">Loading...</div></div>`;
+  onValue(ref(db,'contracts'),snap=>{
+    window._fd=[];
+    if(snap.exists())snap.forEach(c=>{const d=c.val();if(d.status==='approved')window._fd.push(d);});
+    const a=document.querySelector('#ff .fch.act');
+    renderFeedItems(window._fd,a?.textContent==='All'?'all':a?.textContent||'all');
+  });
+}
+
+function renderFeedItems(items,filter){
+  const l=document.getElementById('feed-list');if(!l)return;
+  const f=filter==='all'?items:items.filter(i=>(i.skills||[]).includes(filter));
+  if(!f.length){l.innerHTML='<div class="empty"><div class="ei">📋</div><p>No approved contracts yet.</p></div>';return;}
+  l.innerHTML=f.map(item=>`
+    <div class="fi2">
+      <div class="fhdr">
+        ${item.studentPhoto?`<img src="${item.studentPhoto}" class="uav" style="width:34px;height:34px">`:`<div class="fav">${(item.studentName||'?')[0]}</div>`}
+        <div style="flex:1"><div class="fname">${item.studentName||'Student'}</div><div class="fdet">${item.evidence||''}</div></div>
+        <button class="obtn" onclick="viewProfile('${item.studentId||''}')">Profile</button>
+      </div>
+      <div class="fgoal">${item.focus1||''}</div>
+      <div class="ftags">
+        ${(item.skills||[]).map(s=>`<span class="ftag" style="background:${sc(s)}">${s}</span>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+window.filterFeed=function(el,f){document.querySelectorAll('#ff .fch').forEach(c=>c.classList.remove('act'));el.classList.add('act');renderFeedItems(window._fd||[],f);};
+window.viewProfile=function(uid){renderProfile(uid,false);setNav('class');};
+
+// ── RESOURCES ──
+function renderResources(){
+  const mc=document.getElementById('mc');
+  mc.innerHTML=`
+    <div class="pt">Resource Pool</div>
+    <div class="ps">Share and discover learning resources.</div>
+    <div class="tab-row">
+      <button class="tab-btn act" id="res-tab-class" onclick="switchResTab('class')">🏫 Whole Class</button>
+      <button class="tab-btn" id="res-tab-group" onclick="switchResTab('group')">👥 My Group${myGroupName?' ('+myGroupName+')':''}</button>
+    </div>
+    <div class="frow" id="rf">
+      <div class="fch act" onclick="filterRes(this,'all')">All</div>
+      ${['Video','Website','App','Podcast','Book','Other'].map(t=>`<div class="fch" onclick="filterRes(this,'${t}')">${t}</div>`).join('')}
+    </div>
+    <button class="btn btp btf mb10" onclick="toggleAddRes()">+ Add a Resource</button>
+    <div id="add-res" style="display:none" class="card">
+      <div class="ctitle">Share a Resource</div>
+      <div class="fg"><label class="fl">Type</label><select class="fse" id="rt"><option>Video</option><option>Website</option><option>App</option><option>Podcast</option><option>Book</option><option>Other</option></select></div>
+      <div class="fg"><label class="fl">Share with</label>
+        <div class="cr" id="res-scope-chips">
+          <div class="chip sel" id="rsc-class" onclick="selOne(this,'res-scope-chips','chip')" data-v="class">🏫 Whole Class</div>
+          ${myGroupId?`<div class="chip" id="rsc-group" onclick="selOne(this,'res-scope-chips','chip')" data-v="group">👥 My Group</div>`:''}
+        </div>
+      </div>
+      <div class="fg"><label class="fl">Title</label><input class="fi" id="rtitle" placeholder="Resource name"></div>
+      <div class="fg"><label class="fl">Link (optional)</label><input class="fi" id="rlink" placeholder="https://..."></div>
+      <div class="fg"><label class="fl">Why did you choose this?</label><textarea class="fta" id="rwhy" placeholder="Explain why this helps your goal..."></textarea></div>
+      <div style="display:flex;gap:8px"><button class="btn btp" onclick="addRes()">Share</button><button class="btn bts" onclick="toggleAddRes()">Cancel</button></div>
+    </div>
+    <div id="res-list"><div class="loading">Loading...</div></div>`;
+  window._resTab='class';
+  loadResources('class');
+}
+
+window.switchResTab=function(tab){
+  window._resTab=tab;
+  document.getElementById('res-tab-class').classList.toggle('act',tab==='class');
+  document.getElementById('res-tab-group').classList.toggle('act',tab==='group');
+  loadResources(tab);
+};
+
+function loadResources(tab){
+  const path=tab==='group'&&myGroupId?`groupResources/${myGroupId}`:'resources';
+  onValue(ref(db,path),snap=>{
+    window._rd=[];
+    if(snap.exists())snap.forEach(c=>window._rd.push({id:c.key,...c.val()}));
+    window._rd.reverse();
+    const a=document.querySelector('#rf .fch.act');
+    renderResList(window._rd,a?.textContent==='All'?'all':a?.textContent||'all');
+  },{onlyOnce:true});
+}
+
+function renderResList(items,filter){
+  const l=document.getElementById('res-list');if(!l)return;
+  const f=filter==='all'?items:items.filter(i=>i.type===filter);
+  if(!f.length){l.innerHTML='<div class="empty"><div class="ei">📚</div><p>No resources yet. Be the first!</p></div>';return;}
+  l.innerHTML=f.map(item=>`
+    <div class="rc2">
+      <div class="rtype">📌 ${item.type||'Resource'}</div>
+      <div class="rtitle">${item.title||'Untitled'}</div>
+      <div class="rwhy">${item.why||''}</div>
+      <div class="rftr">
+        <span class="rauth">by ${item.addedBy||'Student'}</span>
+        <div style="display:flex;gap:6px">
+          ${item.link?`<a href="${item.link}" target="_blank" class="obtn">Open ↗</a>`:''}
+          <button class="obtn" onclick="saveRes('${item.id}')">💾 Save</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+window.filterRes=function(el,f){document.querySelectorAll('#rf .fch').forEach(c=>c.classList.remove('act'));el.classList.add('act');renderResList(window._rd||[],f);};
+window.toggleAddRes=function(){const f=document.getElementById('add-res');f.style.display=f.style.display==='none'?'block':'none';};
+
+window.addRes=async function(){
+  const title=document.getElementById('rtitle')?.value.trim();
+  const why=document.getElementById('rwhy')?.value.trim();
+  if(!title||!why){toast('Please add a title and reason');return;}
+  const scope=document.querySelector('#res-scope-chips .chip.sel')?.dataset.v||'class';
+  const path=scope==='group'&&myGroupId?`groupResources/${myGroupId}`:'resources';
+  await push(ref(db,path),{type:document.getElementById('rt').value,title,why,link:document.getElementById('rlink')?.value||'',addedBy:CU.displayName,addedById:CU.uid,scope,createdAt:Date.now()});
+  toast('Resource shared!');toggleAddRes();loadResources(window._resTab||'class');
+};
+
+window.saveRes=async function(id){
+  const path=(window._resTab==='group'&&myGroupId)?`groupResources/${myGroupId}/${id}`:`resources/${id}`;
+  const snap=await get(ref(db,path));
+  if(snap.exists()){const d=snap.val();await set(ref(db,`savedResources/${CU.uid}/${id}`),{title:d.title||'',type:d.type||'',why:d.why||'',link:d.link||'',savedAt:Date.now()});}
+  toast('Saved to your profile!');
+};
+
+// ── PROGRESS ──
+function renderProgress(){
+  const mc=document.getElementById('mc');
+  const done=cSteps.filter((_,i)=>sDone[i]).length;
+  const pct=cSteps.length?Math.round(done/cSteps.length*100):0;
+  mc.innerHTML=`
+    <div class="pt">My Progress</div>
+    <div class="ps">Track your steps, upload evidence, and reflect.</div>
+    <div class="card">
+      <div class="fb"><span class="ctitle">My Steps</span><span style="font-size:12px;color:var(--t);font-weight:700">${pct}% complete</span></div>
+      <div class="pbw"><div class="pbf" style="width:${pct}%"></div></div>
+      ${cSteps.length?cSteps.map((s,i)=>`
+        <div class="sti">
+          <div class="stch ${sDone[i]?'done':''}" onclick="toggleStep(${i})">${sDone[i]?'✓':''}</div>
+          <span class="stt ${sDone[i]?'done':''}">${s}</span>
+        </div>`).join(''):'<p style="font-size:13px;color:var(--tm)">Submit your contract first to see steps here.</p>'}
+    </div>
+    <div class="card">
+      <div class="ctitle">📎 Upload Evidence</div>
+      <div class="fg"><label class="fl">Title</label><input class="fi" id="ev-title" placeholder="e.g. My podcast episode about animals"></div>
+      <div class="fg"><label class="fl">Link to your work</label><input class="fi" id="ev-link" placeholder="Google Drive / YouTube / Canva link..."></div>
+      <button class="btn btp btf" onclick="uploadEv()">Upload & Self-Assess</button>
+    </div>
+    <div class="card" id="assess-card" style="display:none">
+      <div class="ctitle">🪞 Self-Assessment</div>
+      <p style="font-size:13px;color:var(--tm);margin-bottom:12px">Rate your work honestly on each criterion:</p>
+      <div id="self-rub-rows"></div>
+      <div class="div"></div>
+      <div class="fg"><label class="fl">One thing I did well was:</label><textarea class="fta" id="ref-well"></textarea></div>
+      <div class="fg"><label class="fl">One thing I want to improve next time is:</label><textarea class="fta" id="ref-imp"></textarea></div>
+      <div class="fg"><label class="fl">My next step is:</label><textarea class="fta" id="ref-next"></textarea></div>
+      <button class="btn btg btf" onclick="saveRef()">Save Self-Assessment ✓</button>
+    </div>
+    <div class="card">
+      <div class="ctitle">📦 My Evidence</div>
+      <div id="ev-list"><div class="loading">Loading...</div></div>
+    </div>
+    <div class="card">
+      <div class="ctitle">👥 Give Peer Feedback</div>
+      <p style="font-size:13px;color:var(--tm);margin-bottom:12px">Go to a classmate's profile to leave feedback on their individual works using the rubric.</p>
+      <button class="btn btp btf" onclick="go('class')">Browse Class Contracts →</button>
+    </div>`;
+  renderRubRows('self-rub-rows',rubricV,RUBRIC,'setR');
+  loadMyEvidence();
+}
+
+function renderRubRows(cid,vals,rub,setter){
+  const w=document.getElementById(cid);if(!w)return;
+  w.innerHTML=rub.map((r,i)=>`
+    <div class="rubrow">
+      <div class="rubcrit">${r.label}</div>
+      <div class="rubcdesc">${r.q}</div>
+      <div class="rubscale">${[1,2,3,4].map(n=>`<button class="rubbtn ${vals[i]===n?'sel':''}" onclick="${setter}(${i},${n})">${n}</button>`).join('')}</div>
+      <div class="rubanchor"><span>Beginning</span><span>Strong</span></div>
+      ${vals[i]>0?`<div class="rublvl">${r.lvls[vals[i]-1]}</div>`:''}
+    </div>`).join('');
+}
+
+window.setR=function(d,v){rubricV[d]=v;renderRubRows('self-rub-rows',rubricV,RUBRIC,'setR');};
+window.toggleStep=function(i){sDone[i]=!sDone[i];renderProgress();};
+
+window.uploadEv=async function(){
+  const title=document.getElementById('ev-title')?.value.trim();
+  const link=document.getElementById('ev-link')?.value.trim();
+  if(!title){toast('Please add a title');return;}
+  await push(ref(db,`evidence/${CU.uid}`),{title,link:link||'',studentName:CU.displayName,studentId:CU.uid,studentPhoto:CU.photoURL||'',createdAt:Date.now()});
+  document.getElementById('assess-card').style.display='block';
+  toast('Uploaded! Now complete your self-assessment.');
+};
+
+window.saveRef=async function(){
+  if(!rubricV.some(v=>v>0)){toast('Please rate at least one criterion');return;}
+  await push(ref(db,`reflections/${CU.uid}`),{rubric:rubricV,well:document.getElementById('ref-well')?.value||'',imp:document.getElementById('ref-imp')?.value||'',next:document.getElementById('ref-next')?.value||'',evTitle:document.getElementById('ev-title')?.value||'',createdAt:Date.now()});
+  rubricV=[0,0,0,0,0,0];
+  document.getElementById('assess-card').style.display='none';
+  toast('Self-assessment saved! 🎉');loadMyEvidence();
+};
+
+function loadMyEvidence(){
+  const l=document.getElementById('ev-list');if(!l)return;
+  onValue(ref(db,`evidence/${CU.uid}`),snap=>{
+    if(!snap.exists()){l.innerHTML='<p style="font-size:13px;color:var(--tm)">No evidence uploaded yet.</p>';return;}
+    const items=[];snap.forEach(c=>items.push({id:c.key,...c.val()}));items.reverse();
+    l.innerHTML=items.map(it=>{
+      const peerCount=it.peerFeedback?Object.keys(it.peerFeedback).length:0;
+      return`<div style="padding:10px;border-radius:var(--rs);border:1.5px solid var(--gb);margin-bottom:8px">
+        <div class="fb">
+          <span style="font-size:13px;font-weight:700">📎 ${it.title}</span>
+          <div style="display:flex;gap:5px;align-items:center">
+            ${peerCount?`<span class="sb sa" style="font-size:10px">${peerCount} feedback</span>`:''}
+            ${it.link?`<a href="${it.link}" target="_blank" class="obtn">View ↗</a>`:''}
+            <button class="obtn" onclick="editEvidence('${it.id}','${(it.title||'').replace(/'/g,"\'")}','${it.link||''}')">✏️ Edit</button>
+            <button class="obtn" style="color:var(--c)" onclick="deleteEvidence('${it.id}')">🗑️</button>
+          </div>
+        </div>
+        <div id="edit-ev-${it.id}" style="display:none;margin-top:8px">
+          <input class="fi mb10" id="edit-title-${it.id}" value="${(it.title||'').replace(/"/g,'&quot;')}" placeholder="Title">
+          <input class="fi mb10" id="edit-link-${it.id}" value="${it.link||''}" placeholder="Link">
+          <div style="display:flex;gap:8px">
+            <button class="btn btp" style="font-size:12px;padding:6px 12px" onclick="saveEditEvidence('${it.id}')">Save</button>
+            <button class="btn bts" style="font-size:12px;padding:6px 12px" onclick="document.getElementById('edit-ev-${it.id}').style.display='none'">Cancel</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  });
+}
+
+window.editEvidence=function(id,title,link){
+  const d=document.getElementById('edit-ev-'+id);if(!d)return;
+  d.style.display=d.style.display==='none'?'block':'none';
+};
+
+window.saveEditEvidence=async function(id){
+  const title=document.getElementById('edit-title-'+id)?.value.trim();
+  const link=document.getElementById('edit-link-'+id)?.value.trim();
+  if(!title){toast('Title cannot be empty');return;}
+  await update(ref(db,`evidence/${CU.uid}/${id}`),{title,link:link||''});
+  toast('Evidence updated!');
+};
+
+window.deleteEvidence=async function(id){
+  if(!confirm('Delete this evidence? This cannot be undone.'))return;
+  await remove(ref(db,`evidence/${CU.uid}/${id}`));
+  toast('Evidence deleted.');
+};
+
+window.togglePeer=function(id){
+  window._peerEv=id;
+  peerV=[0,0,0,0,0,0];
+  const d=document.getElementById(`peer-form-${id}`);if(!d)return;
+  if(d.style.display==='none'){
+    d.style.display='block';
+    d.innerHTML=`<p style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--tm)">Rate a classmate's work on this piece:</p>
+      <div id="peer-rub-${id}"></div>
+      <div class="fg mt10"><label class="fl">A strong point in this work was:</label><textarea class="fta" id="pf-s-${id}"></textarea></div>
+      <div class="fg"><label class="fl">One suggestion for improvement is:</label><textarea class="fta" id="pf-i-${id}"></textarea></div>
+      <div class="fg"><label class="fl">One thing I learned from this work is:</label><textarea class="fta" id="pf-l-${id}"></textarea></div>
+      <button class="btn btg" style="font-size:12px;padding:7px 13px" onclick="savePeer('${id}')">Submit Peer Feedback</button>`;
+    renderRubRows(`peer-rub-${id}`,peerV,PEER_RUBRIC,`setPR_${id}`);
+    window[`setPR_${id}`]=function(d2,v){peerV[d2]=v;renderRubRows(`peer-rub-${id}`,peerV,PEER_RUBRIC,`setPR_${id}`);};
+  } else d.style.display='none';
+};
+
+window.savePeer=async function(evId){
+  await push(ref(db,`evidence/${CU.uid}/${evId}/peerFeedback`),{rubric:peerV,strong:document.getElementById(`pf-s-${evId}`)?.value||'',imp:document.getElementById(`pf-i-${evId}`)?.value||'',learn:document.getElementById(`pf-l-${evId}`)?.value||'',from:CU.displayName,fromId:CU.uid,createdAt:Date.now()});
+  toast('Peer feedback submitted!');document.getElementById(`peer-form-${evId}`).style.display='none';
+};
+
+// ── PROFILE ──
+window.toggleVisFeedback=function(evId,targetUid){
+  window._visTgt={evId,targetUid};
+  peerV=[0,0,0,0,0,0];
+  const d=document.getElementById(`vis-rub-${evId}`);if(!d)return;
+  if(d.style.display==='none'){
+    d.style.display='block';
+    d.innerHTML=`<p style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--tm)">Peer rubric for this work:</p>
+      <div id="vr-rows-${evId}"></div>
+      <div class="fg mt10"><label class="fl">A strong point in this work was:</label><textarea class="fta" id="vf-s-${evId}"></textarea></div>
+      <div class="fg"><label class="fl">One suggestion for improvement is:</label><textarea class="fta" id="vf-i-${evId}"></textarea></div>
+      <div class="fg"><label class="fl">One thing I learned from this work is:</label><textarea class="fta" id="vf-l-${evId}"></textarea></div>
+      <button class="btn btp" style="font-size:12px;padding:7px 13px" onclick="submitVisFeedback('${evId}','${targetUid}')">Submit Feedback</button>`;
+    renderRubRows(`vr-rows-${evId}`,peerV,PEER_RUBRIC,`setVR_${evId}`);
+    window[`setVR_${evId}`]=function(d2,v){peerV[d2]=v;renderRubRows(`vr-rows-${evId}`,peerV,PEER_RUBRIC,`setVR_${evId}`);};
+  }else d.style.display='none';
+};
+
+
+// ── GROUP FORUM ──
+window.openForum=function(groupId,groupName){
+  const mc=document.getElementById('mc');
+  mc.innerHTML=`
+    <div class="pt">👥 ${groupName} — Forum</div>
+    <div class="ps">Chat with your group members.</div>
+    <div id="forum-msgs" style="min-height:200px;margin-bottom:12px"></div>
+    <div class="card">
+      <div class="fg"><label class="fl">New message</label><textarea class="fta" id="forum-input" placeholder="Write a message to your group..." style="min-height:56px"></textarea></div>
+      <button class="btn btp" onclick="sendForumMsg('${groupId}')">Send Message</button>
+    </div>`;
+  onValue(ref(db,`forums/${groupId}`),snap=>{
+    const msgs=document.getElementById('forum-msgs');if(!msgs)return;
+    if(!snap.exists()){msgs.innerHTML='<div class="empty"><div class="ei">💬</div><p>No messages yet. Start the conversation!</p></div>';return;}
+    const items=[];
+    snap.forEach(m=>{
+      const d=m.val();
+      // skip the 'info' metadata entry, only show real messages
+      if(d.text)items.push({id:m.key,...d});
+    });
+    if(!items.length){msgs.innerHTML='<div class="empty"><div class="ei">💬</div><p>No messages yet. Start the conversation!</p></div>';return;}
+    msgs.innerHTML=items.map(m=>`
+      <div class="forum-msg" style="background:${m.senderId===CU.uid?'var(--pl)':'#fff'}">
+        <div class="forum-sender" style="color:${m.senderId===CU.uid?'var(--pd)':'var(--p)'}">${m.senderId===CU.uid?'You':m.senderName||'Student'}</div>
+        <div class="forum-text">${m.text||''}</div>
+        <div class="forum-time">${new Date(m.createdAt).toLocaleString()}</div>
+      </div>`).join('');
+    msgs.scrollTop=msgs.scrollHeight;
+  });
+};
+
+window.sendForumMsg=async function(groupId){
+  const text=document.getElementById('forum-input')?.value.trim();
+  if(!text){toast('Please write a message');return;}
+  await push(ref(db,`forums/${groupId}`),{text,senderName:CU.displayName,senderId:CU.uid,createdAt:Date.now()});
+  document.getElementById('forum-input').value='';
+  toast('Message sent!');
+};
+
+// ── TEACHER APP ──
+const TNAV=[
+  {id:'overview',l:'Overview',i:'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>'},
+  {id:'groups',l:'Groups',i:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/>'},
+  {id:'evaluate',l:'Evaluate',i:'<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>'},
+  {id:'rubric',l:'Rubric',i:'<line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/>'}
+];
+
+function renderTeacher(){
+  document.getElementById('bnav').innerHTML=TNAV.map(n=>`<button class="ni ${n.id==='overview'?'active':''}" id="tnav-${n.id}" onclick="tgo('${n.id}')"><svg viewBox="0 0 24 24">${n.i}</svg>${n.l}</button>`).join('');
+  tgo('overview');
+}
+
+window.tgo=function(page){
+  document.querySelectorAll('#bnav .ni').forEach(n=>n.classList.remove('active'));
+  document.getElementById(`tnav-${page}`)?.classList.add('active');
+  ({overview:renderTOverview,groups:renderTGroups,evaluate:renderTEvaluate,rubric:renderTRubric}[page]||renderTOverview)();
+};
+
+function renderTOverview(){
+  const mc=document.getElementById('mc');
+  mc.innerHTML=`<div class="pt">Class Overview</div><div class="ps">Monitor student contracts and progress.</div>
+    <div class="card"><div class="ctitle">⏳ Pending Approvals</div><div id="pend-list"><div class="loading">Loading...</div></div></div>
+    <div class="card"><div class="ctitle">All Students</div><div id="stud-list"><div class="loading">Loading...</div></div></div>`;
+  onValue(ref(db,'contracts'),snap=>{
+    const all=[],pend=[];
+    if(snap.exists())snap.forEach(c=>{const d={id:c.key,...c.val()};all.push(d);if(d.status==='pending')pend.push(d);});
+    const pl=document.getElementById('pend-list');
+    const sl=document.getElementById('stud-list');
+    if(!pl||!sl)return;
+    pl.innerHTML=!pend.length?'<div class="empty"><div class="ei">✅</div><p>No pending approvals.</p></div>':pend.map(s=>`
+      <div class="fi2">
+        <div class="fhdr">
+          ${s.studentPhoto?`<img src="${s.studentPhoto}" class="uav" style="width:32px;height:32px">`:`<div class="fav">${(s.studentName||'?')[0]}</div>`}
+          <div style="flex:1"><div class="fname">${s.studentName}</div><div class="fdet">${(s.skills||[]).join(', ')} · ${s.evidence||''}</div></div>
+        </div>
+        <p style="font-size:13px;margin-bottom:3px"><strong>Focus 1:</strong> ${s.focus1||''}</p>
+        <p style="font-size:13px;margin-bottom:3px"><strong>Focus 2:</strong> ${s.focus2||''}</p>
+        <p style="font-size:13px;margin-bottom:8px"><strong>Steps:</strong> ${(s.steps||[]).join(' → ')}</p>
+        ${s.note?`<div class="tip mb10"><strong>Student's note:</strong> ${s.note}</div>`:''}
+        <div class="fg"><label class="fl">Comment for student (optional)</label><textarea class="fta" id="cm-${s.id}" style="min-height:50px"></textarea></div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn btg" style="font-size:12px;padding:7px 13px" onclick="approveC('${s.id}','${s.studentName}')">✓ Approve</button>
+          <button class="btn bts" style="font-size:12px;padding:7px 13px" onclick="sendCm('${s.id}')">Send Comment</button>
+        </div>
+      </div>`).join('');
+    sl.innerHTML=!all.length?'<div class="empty"><div class="ei">👥</div><p>No students yet.</p></div>':all.map(s=>`
+      <div class="srow" onclick="tgo('evaluate')">
+        ${s.studentPhoto?`<img src="${s.studentPhoto}" class="uav">`:`<div class="fav">${(s.studentName||'?')[0]}</div>`}
+        <div style="flex:1"><div class="sn">${s.studentName||'Student'}</div><div class="sm">${(s.skills||[]).join(', ')||''}</div><div class="pm"><div class="pmf" style="width:${s.status==='approved'?60:20}%"></div></div></div>
+        <span class="sb ${s.status==='approved'?'sa':'sp'}">${s.status==='approved'?'✓':'⏳'}</span>
+      </div>`).join('');
+  });
+}
+
+window.approveC=async function(id,name){await update(ref(db,`contracts/${id}`),{status:'approved'});toast(`${name}'s contract approved! ✓`);};
+window.sendCm=async function(id){const cm=document.getElementById(`cm-${id}`)?.value.trim();if(!cm){toast('Please write a comment');return;}await update(ref(db,`contracts/${id}`),{teacherComment:cm});toast('Comment sent!');};
+
+// TEACHER GROUPS
+function renderTGroups(){
+  const mc=document.getElementById('mc');
+  mc.innerHTML=`<div class="pt">Working Groups</div><div class="ps">Create groups and assign students. Each group gets an automatic forum.</div>
+    <div class="card">
+      <div class="ctitle">Create a New Group</div>
+      <div class="fg"><label class="fl">Group name</label><input class="fi" id="grp-name" placeholder="e.g. Team Speakers"></div>
+      <button class="btn btp" onclick="createGroup()">Create Group</button>
+    </div>
+    <div id="grp-list"><div class="loading">Loading groups...</div></div>
+    <div class="card mt10">
+      <div class="ctitle">Assign Students to Group</div>
+      <div class="fg"><label class="fl">Select group</label><select class="fse" id="asgn-sel"></select></div>
+      <div id="asgn-students"><div class="loading">Loading students...</div></div>
+      <button class="btn btp mt10" onclick="saveAssign()">Save Assignments</button>
+    </div>`;
+  loadGroups();loadStudentsForAssign();
+}
+
+async function loadGroups(){
+  const snap=await get(ref(db,'groups'));
+  const gl=document.getElementById('grp-list');if(!gl)return;
+  if(!snap.exists()){gl.innerHTML='<div class="empty"><div class="ei">👥</div><p>No groups yet.</p></div>';return;}
+  const groups=[];snap.forEach(g=>groups.push({id:g.key,...g.val()}));
+  const sel=document.getElementById('asgn-sel');
+  if(sel)sel.innerHTML=groups.map(g=>`<option value="${g.id}">${g.name}</option>`).join('');
+  gl.innerHTML=`<div class="ctitle mb10">Existing Groups</div>`+groups.map(g=>`
+    <div style="padding:12px;border-radius:var(--r);border:1.5px solid var(--gb);background:#fff;margin-bottom:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <span style="font-size:14px;font-weight:700">👥 ${g.name}</span>
+        <button class="obtn" onclick="openGroupForum('${g.id}','${g.name}')">💬 Forum</button>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">${Object.values(g.members||{}).map(m=>`<span style="padding:3px 9px;border-radius:20px;background:var(--gl);font-size:12px;font-weight:600">👤 ${m}</span>`).join('')||'<span style="font-size:12px;color:var(--th)">No members yet</span>'}</div>
+    </div>`).join('');
+}
+
+async function loadStudentsForAssign(){
+  const snap=await get(ref(db,'contracts'));
+  const asd=document.getElementById('asgn-students');if(!asd)return;
+  if(!snap.exists()){asd.innerHTML='<p style="font-size:13px;color:var(--tm)">No approved students yet.</p>';return;}
+  const students=[];snap.forEach(c=>{const d=c.val();if(d.status==='approved')students.push({id:c.key,name:d.studentName});});
+  if(!students.length){asd.innerHTML='<p style="font-size:13px;color:var(--tm)">No approved students yet.</p>';return;}
+  asd.innerHTML=students.map(s=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--gb)">
+      <div class="fav" style="width:28px;height:28px;font-size:11px">${s.name[0]}</div>
+      <span style="font-size:14px;flex:1">${s.name}</span>
+      <input type="checkbox" id="asgn-${s.id}" data-uid="${s.id}" data-name="${s.name}" style="width:18px;height:18px;cursor:pointer">
+    </div>`).join('');
+}
+
+window.createGroup=async function(){
+  const name=document.getElementById('grp-name')?.value.trim();
+  if(!name){toast('Please enter a group name');return;}
+  const newRef=await push(ref(db,'groups'),{name,members:{},createdAt:Date.now()});
+  // auto-create forum entry
+  await set(ref(db,`forums/${newRef.key}/info`),{groupName:name,createdAt:Date.now()});
+  document.getElementById('grp-name').value='';
+  toast('Group and forum created!');loadGroups();
+};
+
+window.saveAssign=async function(){
+  const sel=document.getElementById('asgn-sel')?.value;
+  const selName=document.getElementById('asgn-sel')?.options[document.getElementById('asgn-sel')?.selectedIndex]?.text;
+  if(!sel){toast('Please select a group');return;}
+  const checked=[...document.querySelectorAll('#asgn-students input:checked')];
+  if(!checked.length){toast('Please select at least one student');return;}
+  const members={};
+  for(const cb of checked){
+    const uid=cb.dataset.uid,name=cb.dataset.name;
+    members[uid]=name;
+    await update(ref(db,`users/${uid}`),{groupId:sel,groupName:selName});
+  }
+  await update(ref(db,`groups/${sel}`),{members});
+  toast('Students assigned!');loadGroups();
+};
+
+window.openGroupForum=function(groupId,groupName){openForum(groupId,groupName);setNav('');};
+
+// TEACHER EVALUATE
+function renderTEvaluate(){
+  const mc=document.getElementById('mc');
+  mc.innerHTML=`<div class="pt">Evaluate Students</div><div class="ps">View student evidence and provide teacher assessment using the rubric.</div>
+    <div id="eval-list"><div class="loading">Loading...</div></div>`;
+  onValue(ref(db,'contracts'),async snap=>{
+    const el=document.getElementById('eval-list');if(!el)return;
+    if(!snap.exists()){el.innerHTML='<div class="empty"><div class="ei">📋</div><p>No students yet.</p></div>';return;}
+    const students=[];snap.forEach(c=>{const d=c.val();if(d.status==='approved')students.push({id:c.key,...d});});
+    if(!students.length){el.innerHTML='<div class="empty"><div class="ei">📋</div><p>No approved contracts yet.</p></div>';return;}
+    el.innerHTML=students.map(s=>`
+      <div class="card">
+        <div class="fhdr mb10">
+          ${s.studentPhoto?`<img src="${s.studentPhoto}" class="uav">`:`<div class="fav">${(s.studentName||'?')[0]}</div>`}
+          <div style="flex:1"><div class="fname">${s.studentName}</div><div class="fdet">${(s.skills||[]).join(', ')} · ${s.evidence||''}</div></div>
+        </div>
+        <p style="font-size:13px;margin-bottom:2px"><strong>Focus 1:</strong> ${s.focus1||''}</p>
+        <p style="font-size:13px;margin-bottom:2px"><strong>Focus 2:</strong> ${s.focus2||''}</p>
+        <p style="font-size:13px;margin-bottom:10px"><strong>Focus 3:</strong> ${s.focus3||''}</p>
+        <div id="ev-work-${s.id}"><div class="loading">Loading evidence...</div></div>
+        <button class="btn bts" style="font-size:12px;padding:6px 12px;margin:10px 0 0" onclick="toggleTeachEval('${s.id}','${s.studentName}')">📝 Open Teacher Evaluation</button>
+        <div id="teach-eval-${s.id}" style="display:none;margin-top:12px">
+          <div class="ctitle" style="font-size:14px;margin-bottom:10px">Teacher Evaluation — ${s.studentName}</div>
+          <div id="teach-rub-${s.id}"></div>
+          <div class="fg mt10"><label class="fl">Overall comment</label><textarea class="fta" id="tcm-${s.id}" placeholder="Overall feedback for this student..."></textarea></div>
+          <button class="btn btg" style="font-size:12px;padding:7px 13px;margin-top:8px" onclick="saveTeachEval('${s.id}','${s.studentName}')">Save Evaluation</button>
+        </div>
+      </div>`).join('');
+    window._teachRV=window._teachRV||{};
+    for(const s of students){
+      const evSnap=await get(ref(db,`evidence/${s.id}`));
+      const el2=document.getElementById(`ev-work-${s.id}`);if(!el2)continue;
+      if(!evSnap.exists()){el2.innerHTML='<p style="font-size:12px;color:var(--th)">No evidence uploaded yet.</p>';continue;}
+      const evs=[];evSnap.forEach(e=>evs.push({id:e.key,...e.val()}));
+      el2.innerHTML=evs.map(ev=>`
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;padding:8px 10px;border-radius:var(--rs);background:var(--gl)">
+          <span style="font-size:13px;flex:1">📎 ${ev.title}</span>
+          ${ev.link?`<a href="${ev.link}" target="_blank" class="obtn">View ↗</a>`:''}
+          ${ev.peerFeedback?`<span class="sb sa">${Object.keys(ev.peerFeedback).length} peer</span>`:''}
+        </div>`).join('');
+    }
+  },{onlyOnce:true});
+}
+
+window.toggleTeachEval=function(id,name){
+  const f=document.getElementById(`teach-eval-${id}`);if(!f)return;
+  if(f.style.display==='none'){
+    f.style.display='block';
+    window._teachRV[id]=[0,0,0,0,0,0];
+    renderTeachRub(id);
+  }else f.style.display='none';
+};
+
+window._teachRV={};
+function renderTeachRub(id){
+  const w=document.getElementById(`teach-rub-${id}`);if(!w)return;
+  const vals=window._teachRV[id]||[0,0,0,0,0,0];
+  w.innerHTML=RUBRIC.map((r,i)=>`
+    <div class="rubrow">
+      <div class="rubcrit">${r.label}</div>
+      <div class="rubcdesc">${r.q}</div>
+      <div class="rubscale">${[1,2,3,4].map(n=>`<button class="rubbtn ${vals[i]===n?'sel':''}" onclick="setTR('${id}',${i},${n})">${n}</button>`).join('')}</div>
+      <div class="rubanchor"><span>Beginning</span><span>Strong</span></div>
+      ${vals[i]>0?`<div class="rublvl">${r.lvls[vals[i]-1]}</div>`:''}
+    </div>`).join('');
+}
+
+window.setTR=function(id,d,v){if(!window._teachRV[id])window._teachRV[id]=[0,0,0,0,0,0];window._teachRV[id][d]=v;renderTeachRub(id);};
+window.saveTeachEval=async function(sid,name){
+  await push(ref(db,`teacherEvals/${sid}`),{rubric:window._teachRV[sid]||[],comment:document.getElementById(`tcm-${sid}`)?.value||'',teacherName:CU.displayName,createdAt:Date.now()});
+  toast(`Evaluation saved for ${name}!`);document.getElementById(`teach-eval-${sid}`).style.display='none';
+};
+
+// TEACHER RUBRIC VIEW
+function renderTRubric(){
+  const mc=document.getElementById('mc');
+  mc.innerHTML=`<div class="pt">Assessment Rubric</div><div class="ps">The rubric used across all evaluations.</div>
+    <div class="card">${RUBRIC.map((r,i)=>`
+      <div style="padding:12px;border-radius:var(--rs);border:1.5px solid var(--gb);margin-bottom:10px">
+        <div style="font-size:14px;font-weight:700;margin-bottom:3px">${i+1}. ${r.label}</div>
+        <div style="font-size:12px;color:var(--tm);margin-bottom:8px">${r.q}</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px">
+          ${r.lvls.map((l,j)=>`<div style="padding:7px;border-radius:6px;background:var(--gl);font-size:11px;line-height:1.4"><strong>${j+1}:</strong> ${l}</div>`).join('')}
+        </div>
+      </div>`).join('')}
+    </div>`;
+}
+
+
+// ── NOTIFICATIONS ──
+async function loadNotifications(){
+  if(!CU)return;
+  onValue(ref(db,`notifications/${CU.uid}`),snap=>{
+    const btn=document.getElementById('notif-count');if(!btn)return;
+    if(!snap.exists()){btn.style.display='none';return;}
+    let unread=0;
+    snap.forEach(n=>{if(!n.val().read)unread++;});
+    if(unread>0){btn.style.display='flex';btn.textContent=unread>9?'9+':unread;}
+    else btn.style.display='none';
+  });
+}
+
+window.openNotifications=async function(){
+  const mc=document.getElementById('mc');
+  mc.innerHTML='<div class="loading">Loading notifications...</div>';
+  setNav('profile');
+  const snap=await get(ref(db,`notifications/${CU.uid}`));
+  const items=[];
+  if(snap.exists())snap.forEach(n=>items.push({id:n.key,...n.val()}));
+  items.reverse();
+  // Mark all as read
+  for(const item of items){
+    if(!item.read)await update(ref(db,`notifications/${CU.uid}/${item.id}`),{read:true});
+  }
+  document.getElementById('notif-count').style.display='none';
+  mc.innerHTML=`
+    <div class="pt">🔔 Notifications</div>
+    <div class="ps">Feedback and updates from your class.</div>
+    ${items.length?items.map(n=>`
+      <div class="card" style="border-left:3px solid ${n.read?'var(--gb)':'var(--p)'}">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:22px">${n.type==='peer_feedback'?'💬':n.type==='teacher_eval'?'👩‍🏫':'📢'}</span>
+          <div style="flex:1">
+            <p style="font-size:14px;font-weight:${n.read?'400':'700'}">${n.message||''}</p>
+            <p style="font-size:12px;color:var(--th);margin-top:2px">${new Date(n.createdAt).toLocaleDateString()} ${new Date(n.createdAt).toLocaleTimeString()}</p>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+          <button class="btn bts" style="font-size:12px;padding:6px 12px" onclick="go('profile')">View My Profile →</button>
+          ${n.type==='peer_feedback'||n.type==='teacher_eval'?`<button class="btn btp" style="font-size:12px;padding:6px 12px" onclick="goToReport()">🤖 Get AI Report →</button>`:''}
+        </div>
+      </div>`).join(''):'<div class="empty"><div class="ei">🔔</div><p>No notifications yet. When classmates give you feedback, it will appear here.</p></div>'}
+    <button class="btn bts btf mt10" onclick="go('profile')">← Back to Profile</button>`;
+};
+
+// Send notification helper
+async function sendNotif(toUid,type,message,evId=''){
+  await push(ref(db,`notifications/${toUid}`),{type,message,evId,read:false,createdAt:Date.now()});
+}
+
+window.goToReport=async function(){
+  setNav('profile');
+  await renderProfile(CU.uid,true);
+  setTimeout(()=>{
+    const sec=document.getElementById('ai-report-section');
+    if(sec){sec.scrollIntoView({behavior:'smooth'});}
+    generateAIReport(CU.uid);
+  },600);
+};
+
+// ── PROFILE (FULL REWRITE) ──
+window.renderProfile=async function(uid,isOwn){
+  const mc=document.getElementById('mc');
+  mc.innerHTML='<div class="loading">Loading profile...</div>';
+  const [uSnap,cSnap,rSnap,sSnap,eSnap,tSnap]=await Promise.all([
+    get(ref(db,`users/${uid}`)),
+    get(ref(db,`contracts/${uid}`)),
+    get(ref(db,`reflections/${uid}`)),
+    get(ref(db,`savedResources/${uid}`)),
+    get(ref(db,`evidence/${uid}`)),
+    get(ref(db,`teacherEvals/${uid}`))
+  ]);
+  const u=uSnap.val()||{name:'Student',photo:''};
+  const c=cSnap.val();
+  const refls=[];if(rSnap.exists())rSnap.forEach(r=>refls.push(r.val()));
+  const saved=[];if(sSnap.exists())sSnap.forEach(r=>saved.push({id:r.key,...r.val()}));
+  const evs=[];if(eSnap.exists())eSnap.forEach(e=>evs.push({id:e.key,...e.val()}));
+  const teachEvals=[];if(tSnap.exists())tSnap.forEach(t=>teachEvals.push(t.val()));
+
+  // Group info
   const groupId=u.groupId||null;
+  const groupName=u.groupName||null;
+
+  mc.innerHTML=`
+    <div class="prof-header">
+      ${u.photo?`<img src="${u.photo}" class="prof-av">`:`<div class="prof-avp">${(u.name||'?')[0]}</div>`}
+      <div class="prof-name">${u.name||'Student'}</div>
+      <div class="prof-sub">${c?.skills?(c.skills.join(' · ')):'No contract yet'}</div>
+      ${groupName?`<div style="margin-top:6px"><span class="tag" style="background:var(--pl)">👥 ${groupName}</span></div>`:''}
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap">
+        ${isOwn&&groupId?`<button class="btn btp" style="font-size:12px;padding:7px 13px" onclick="openForum('${groupId}','${groupName||'My Group'}')">💬 Group Forum</button>`:''}
+        ${isOwn?`<button class="btn bts" style="font-size:12px;padding:7px 13px" onclick="generateAIReport('${uid}')">🤖 AI Feedback Report</button>`:''}
+        ${!isOwn?`<button class="btn bts" style="font-size:12px;padding:7px 13px" onclick="go('class')">← Back</button>`:''}
+      </div>
+    </div>
+    ${renderProfileCategories(u,isOwn)}
+
+    ${c?`<div class="card">
+      <div class="ctitle">📋 Learning Contract</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">
+        ${(c.skills||[]).map(s=>`<span class="tag" style="background:${sc(s)}">${s}</span>`).join('')}
+        <span class="tag" style="background:var(--gl)">${c.evidence||''}</span>
+      </div>
+      <p style="font-size:13px;margin-bottom:2px"><strong>Focus 1:</strong> ${c.focus1||''}</p>
+      <p style="font-size:13px;margin-bottom:2px"><strong>Focus 2:</strong> ${c.focus2||''}</p>
+      <p style="font-size:13px"><strong>Focus 3:</strong> ${c.focus3||''}</p>
+    </div>`:''}
+
+    <div class="card">
+      <div class="ctitle">📦 Evidence Portfolio (${evs.length})</div>
+      ${evs.length?evs.map(ev=>{
+        const peerFeedbacks=ev.peerFeedback?Object.values(ev.peerFeedback):[];
+        const peerCount=peerFeedbacks.length;
+        return`<div style="padding:11px;border-radius:var(--rs);border:1.5px solid var(--gb);margin-bottom:8px">
+          <div class="fb">
+            <span style="font-size:13px;font-weight:700;cursor:pointer" onclick="toggleEvDetails('ev-det-${ev.id}')">📎 ${ev.title||'Untitled'} ${peerCount?`<span class="sb sa" style="font-size:10px;margin-left:4px">${peerCount} feedback</span>`:''}</span>
+            <div style="display:flex;gap:6px">
+              ${ev.link?`<a href="${ev.link}" target="_blank" class="obtn">View ↗</a>`:''}
+            </div>
+          </div>
+          <div id="ev-det-${ev.id}" style="display:none;margin-top:10px">
+            ${isOwn?`<div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+              <button class="obtn" onclick="editEvidence('${ev.id}','${(ev.title||'').replace(/'/g,&quot;\'&quot;)}','${ev.link||''}')">✏️ Edit</button>
+              <button class="obtn" style="color:var(--c)" onclick="deleteEvidence('${ev.id}')">🗑️ Delete</button>
+            </div>
+            <div id="edit-ev-${ev.id}" style="display:none;margin-bottom:10px">
+              <input class="fi mb10" id="edit-title-${ev.id}" value="${(ev.title||'').replace(/"/g,'&quot;')}" placeholder="Title">
+              <input class="fi mb10" id="edit-link-${ev.id}" value="${ev.link||''}" placeholder="Link">
+              <div style="display:flex;gap:8px"><button class="btn btp" style="font-size:12px;padding:6px 10px" onclick="saveEditEvidence('${ev.id}')">Save</button><button class="btn bts" style="font-size:12px;padding:6px 10px" onclick="document.getElementById('edit-ev-${ev.id}').style.display='none'">Cancel</button></div>
+            </div>`:''}
+            ${isOwn&&peerCount?`<div style="margin-bottom:10px">
+              <p style="font-size:12px;font-weight:700;color:var(--tm);margin-bottom:8px">Peer Feedback Received:</p>
+              ${peerFeedbacks.map(pf=>`
+                <div style="padding:9px;border-radius:var(--rs);background:var(--pl);margin-bottom:7px">
+                  <p style="font-size:12px;font-weight:700;color:var(--pd);margin-bottom:5px">From: ${pf.from||'Classmate'}</p>
+                  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:7px">
+                    ${RUBRIC.map((r,i)=>pf.rubric&&pf.rubric[i]>0?`<div style="padding:5px;border-radius:5px;background:#fff;font-size:11px"><strong>${r.label.split(' ')[0]}:</strong> ${pf.rubric[i]}/4</div>`:''  ).filter(Boolean).join('')}
+                  </div>
+                  ${pf.strong?`<p style="font-size:12px;margin-bottom:3px">💪 <strong>Strong point:</strong> ${pf.strong}</p>`:''}
+                  ${pf.imp?`<p style="font-size:12px;margin-bottom:3px">📈 <strong>Suggestion:</strong> ${pf.imp}</p>`:''}
+                  ${pf.learn?`<p style="font-size:12px">💡 <strong>What I learned:</strong> ${pf.learn}</p>`:''}
+                </div>`).join('')}
+            </div>`:''}
+            ${!isOwn&&uid!==CU.uid?`
+              <div id="vis-rub-${ev.id}" style="display:none"></div>
+              <button class="btn bts" style="font-size:11px;padding:5px 10px" onclick="toggleVisFeedback('${ev.id}','${uid}')">💬 Leave Feedback on This Work</button>
+            `:''}
+          </div>
+        </div>`;
+      }).join(''):'<p style="font-size:13px;color:var(--tm)">No evidence yet.</p>'}
+    </div>
+
+    ${isOwn&&teachEvals.length?`<div class="card">
+      <div class="ctitle">👩‍🏫 Teacher Evaluations</div>
+      ${teachEvals.map(te=>`
+        <div style="padding:10px;border-radius:var(--rs);border:1.5px solid var(--tl);background:var(--tl);margin-bottom:8px">
+          <p style="font-size:12px;font-weight:700;color:var(--td);margin-bottom:6px">From: ${te.teacherName||'Teacher'} · ${new Date(te.createdAt).toLocaleDateString()}</p>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:7px">
+            ${RUBRIC.map((r,i)=>te.rubric&&te.rubric[i]>0?`<div style="padding:5px;border-radius:5px;background:#fff;font-size:11px"><strong>${r.label.split(' ')[0]}:</strong> ${te.rubric[i]}/4</div>`:'').filter(Boolean).join('')}
+          </div>
+          ${te.comment?`<p style="font-size:13px;color:var(--td)">${te.comment}</p>`:''}
+        </div>`).join('')}
+    </div>`:''}
+
+    ${saved.length?`<div class="card">
+      <div class="ctitle">💾 Saved Resources</div>
+      ${saved.map(r=>`<div style="padding:8px;border-radius:var(--rs);border:1.5px solid var(--gb);margin-bottom:7px"><div class="fb"><span style="font-size:13px;font-weight:700">${r.title||''}</span>${r.link?`<a href="${r.link}" target="_blank" class="obtn">Open ↗</a>`:''}</div><p style="font-size:12px;color:var(--tm)">${r.type||''}</p></div>`).join('')}
+    </div>`:''}
+
+    ${refls.length?`<div class="card">
+      <div class="ctitle">📔 Recent Reflections</div>
+      ${refls.slice(-3).reverse().map(r=>`<div style="padding:9px;border-radius:var(--rs);border:1.5px solid var(--gb);margin-bottom:8px">
+        ${r.well?`<p style="font-size:13px;margin-bottom:3px">💪 <strong>Did well:</strong> ${r.well}</p>`:''}
+        ${r.imp?`<p style="font-size:13px;margin-bottom:3px">📈 <strong>Improve:</strong> ${r.imp}</p>`:''}
+        ${r.next?`<p style="font-size:13px">🎯 <strong>Next step:</strong> ${r.next}</p>`:''}
+      </div>`).join('')}
+    </div>`:''}
+
+    <div id="ai-report-section"></div>`;
+};
+
+window.toggleEvDetails=function(id){
+  const el=document.getElementById(id);if(!el)return;
+  el.style.display=el.style.display==='none'?'block':'none';
+};
+
+// ── AI FEEDBACK REPORT ──
+window.generateAIReport=async function(uid){
+  const sec=document.getElementById('ai-report-section');if(!sec)return;
+  sec.innerHTML=`<div class="card"><div class="ctitle">🤖 AI Feedback Report</div><div class="loading">Analysing your feedback and reflections...</div></div>`;
+  sec.scrollIntoView({behavior:'smooth'});
+
+  // Gather all data
+  const [eSnap,rSnap,tSnap]=await Promise.all([
+    get(ref(db,`evidence/${uid}`)),
+    get(ref(db,`reflections/${uid}`)),
+    get(ref(db,`teacherEvals/${uid}`))
+  ]);
+
+  const evs=[];if(eSnap.exists())eSnap.forEach(e=>evs.push({id:e.key,...e.val()}));
+  const refls=[];if(rSnap.exists())rSnap.forEach(r=>refls.push(r.val()));
+  const teachEvals=[];if(tSnap.exists())tSnap.forEach(t=>teachEvals.push(t.val()));
+
+  // Build context string
+  let context=`Student's learning evidence, peer feedback, teacher evaluations, and reflections:\n\n`;
+
+  evs.forEach(ev=>{
+    context+=`Evidence: "${ev.title}"\n`;
+    const peers=ev.peerFeedback?Object.values(ev.peerFeedback):[];
+    peers.forEach(pf=>{
+      context+=`  Peer feedback from ${pf.from}:\n`;
+      if(pf.strong)context+=`    Strong point: ${pf.strong}\n`;
+      if(pf.imp)context+=`    Suggestion: ${pf.imp}\n`;
+      if(pf.learn)context+=`    What peer learned: ${pf.learn}\n`;
+      if(pf.rubric){RUBRIC.forEach((r,i)=>{if(pf.rubric[i])context+=`    ${r.label}: ${pf.rubric[i]}/4\n`;});}
+    });
+  });
+
+  teachEvals.forEach(te=>{
+    context+=`Teacher evaluation:\n`;
+    if(te.comment)context+=`  Comment: ${te.comment}\n`;
+    if(te.rubric){RUBRIC.forEach((r,i)=>{if(te.rubric[i])context+=`  ${r.label}: ${te.rubric[i]}/4\n`;});}
+  });
+
+  refls.forEach(r=>{
+    context+=`Student reflection:\n`;
+    if(r.well)context+=`  Did well: ${r.well}\n`;
+    if(r.imp)context+=`  Wants to improve: ${r.imp}\n`;
+    if(r.next)context+=`  Next step: ${r.next}\n`;
+  });
+
+  if(evs.length===0&&refls.length===0&&teachEvals.length===0){
+    sec.innerHTML=`<div class="card"><div class="ctitle">🤖 AI Feedback Report</div><p style="font-size:14px;color:var(--tm)">Upload some evidence and complete your self-assessments first — then I can generate a personalised report!</p></div>`;
+    return;
+  }
+
+  const prompt=`You are a supportive English teacher assistant for a 7th grade student on a heutagogy learning platform. Based on the feedback data below, write a personalised learning report for the student. 
+
+Structure your report as:
+1. 🌟 What You're Doing Well (2-3 specific strengths based on the feedback)
+2. 📈 Areas to Focus On (2-3 specific improvement areas)  
+3. 🎯 Your Next Steps (3 concrete, actionable suggestions)
+4. 💬 A short encouraging message
+
+Be specific, warm, and encouraging. Reference actual feedback when possible. Write directly to the student using "you".
+
+${context}`;
+
+  const reply=await askAI(prompt);
+  sec.innerHTML=`<div class="card">
+    <div class="ctitle">🤖 Your Personal AI Feedback Report</div>
+    <div style="font-size:13px;line-height:1.7;color:var(--tx);white-space:pre-wrap">${reply}</div>
+    <button class="btn bts btf mt10" onclick="generateAIReport('${uid}')">🔄 Regenerate Report</button>
+  </div>`;
+};
+
+// ── UPDATE submitVisFeedback TO SEND NOTIFICATION ──
+window.submitVisFeedback=async function(evId,targetUid){
+  await push(ref(db,`evidence/${targetUid}/${evId}/peerFeedback`),{
+    rubric:peerV,
+    strong:document.getElementById(`vf-s-${evId}`)?.value||'',
+    imp:document.getElementById(`vf-i-${evId}`)?.value||'',
+    learn:document.getElementById(`vf-l-${evId}`)?.value||'',
+    from:CU.displayName,fromId:CU.uid,createdAt:Date.now()
+  });
+  // Send notification
+  await sendNotif(targetUid,'peer_feedback',`${CU.displayName} left feedback on your work!`,evId);
+  toast('Feedback submitted!');
+  const d=document.getElementById(`vis-rub-${evId}`);if(d)d.style.display='none';
+};
+
+// ── UPDATE saveTeachEval TO SEND NOTIFICATION ──
+const _origSaveTeachEval=window.saveTeachEval;
+window.saveTeachEval=async function(sid,name){
+  const vals=window._teachRV[sid]||[];
+  const comment=document.getElementById(`tcm-${sid}`)?.value||'';
+  await push(ref(db,`teacherEvals/${sid}`),{rubric:vals,comment,teacherName:CU.displayName,createdAt:Date.now()});
+  await sendNotif(sid,'teacher_eval',`Your teacher ${CU.displayName} evaluated your work!`);
+  toast(`Evaluation saved for ${name}!`);
+  const f=document.getElementById(`teach-eval-${sid}`);if(f)f.style.display='none';
+};
+
+// Auto-load notifications when student logs in
+
+</script>
+</body>
+</html>
+
   const groupName=u.groupName||null;
 
   mc.innerHTML=`
