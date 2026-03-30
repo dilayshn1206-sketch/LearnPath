@@ -13,173 +13,184 @@
   --c:#D85A30;--cl:#FAECE7;
   --gl:#F1EFE8;--gb:#D3D1C7;
   --tx:#2C2C2A;--tm:#5F5E5A;--th:#888780;
-  --bg:#F7F6F2;--r:12px;--rs:8px;--sh:0 2px 12px rgba(0,0,0,.08)
+  --bg:#F7F6F2;--r:12px;--rs:8px;--sh:0 1px 8px rgba(0,0,0,.07)
 }
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--tx);min-height:100vh}
+/* AUTH */
 #auth{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(135deg,var(--pl),var(--tl))}
 .auth-card{background:#fff;border-radius:24px;padding:44px 36px;max-width:420px;width:100%;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.12)}
-.alogo{width:60px;height:60px;background:var(--p);border-radius:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 18px}
-.alogo svg{width:32px;height:32px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.auth-card h1{font-size:26px;font-weight:700;margin-bottom:6px}
-.auth-card>p{color:var(--tm);font-size:14px;margin-bottom:26px;line-height:1.5}
-.gbtn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:13px 20px;border:2px solid var(--gb);border-radius:var(--r);background:#fff;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s}
+.alogo{width:56px;height:56px;background:var(--p);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+.alogo svg{width:30px;height:30px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.auth-card h1{font-size:24px;font-weight:700;margin-bottom:5px}
+.auth-card>p{color:var(--tm);font-size:14px;margin-bottom:24px;line-height:1.5}
+.gbtn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:12px 20px;border:1.5px solid var(--gb);border-radius:var(--r);background:#fff;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s}
 .gbtn:hover{border-color:var(--p);background:var(--pl)}
 .gbtn img{width:20px}
-.anote{margin-top:12px;font-size:12px;color:var(--th)}
+/* ROLE */
 #role{min-height:100vh;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px}
-.ri{max-width:460px;width:100%;text-align:center}
-.ri h2{font-size:22px;font-weight:700;margin-bottom:6px}
-.ri>p{color:var(--tm);margin-bottom:26px;font-size:14px}
-.rc{display:flex;flex-direction:column;gap:12px}
-.rcard{padding:18px;border-radius:var(--r);border:2px solid var(--gb);background:#fff;cursor:pointer;transition:all .2s;text-align:left;display:flex;align-items:center;gap:16px}
-.rcard:hover{border-color:var(--p);transform:translateY(-2px);box-shadow:var(--sh)}
-.ricon{width:50px;height:50px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0}
-.rcard h3{font-size:16px;font-weight:700;margin-bottom:2px}
-.rcard p{font-size:13px;color:var(--tm);margin:0}
+.ri{max-width:440px;width:100%;text-align:center}
+.ri h2{font-size:21px;font-weight:700;margin-bottom:5px}
+.ri>p{color:var(--tm);margin-bottom:24px;font-size:14px}
+.role-cards{display:flex;flex-direction:column;gap:11px}
+.role-card{padding:16px;border-radius:var(--r);border:1.5px solid var(--gb);background:#fff;cursor:pointer;transition:all .2s;text-align:left;display:flex;align-items:center;gap:14px}
+.role-card:hover{border-color:var(--p);transform:translateY(-2px);box-shadow:var(--sh)}
+.role-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.role-card h3{font-size:15px;font-weight:700;margin-bottom:2px}
+.role-card p{font-size:12px;color:var(--tm);margin:0}
+/* APP SHELL */
 #app{display:none;min-height:100vh;flex-direction:column}
-.topbar{background:#fff;border-bottom:1px solid var(--gb);padding:0 16px;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
-.tbl{display:flex;align-items:center;gap:10px}
-.tlogo{width:32px;height:32px;background:var(--p);border-radius:8px;display:flex;align-items:center;justify-content:center}
-.tlogo svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.tname{font-size:16px;font-weight:700}
-.uinfo{display:flex;align-items:center;gap:8px}
-.uav{width:30px;height:30px;border-radius:50%;object-fit:cover}
-.uname{font-size:13px;font-weight:600}
-.coins-badge{display:flex;align-items:center;gap:4px;background:var(--al);border-radius:20px;padding:3px 9px;font-size:12px;font-weight:700;color:var(--a);cursor:pointer}
-.sob{font-size:11px;color:var(--tm);cursor:pointer;border:1px solid var(--gb);padding:3px 8px;border-radius:6px;background:none}
-.nbtn{position:relative;background:none;border:none;cursor:pointer;padding:4px}
-.nbtn svg{width:20px;height:20px;stroke:var(--tm);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.ndot{display:none;position:absolute;top:0;right:0;background:var(--c);color:#fff;font-size:9px;font-weight:700;width:15px;height:15px;border-radius:50%;align-items:center;justify-content:center;line-height:15px;text-align:center}
-.mc{flex:1;overflow-y:auto;padding:16px;max-width:700px;margin:0 auto;width:100%;padding-bottom:74px}
+.topbar{background:#fff;border-bottom:1px solid var(--gb);padding:0 14px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.tbl{display:flex;align-items:center;gap:9px}
+.tlogo{width:30px;height:30px;background:var(--p);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.tlogo svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tname{font-size:15px;font-weight:700}
+.uinfo{display:flex;align-items:center;gap:7px}
+.uav{width:28px;height:28px;border-radius:50%;object-fit:cover;cursor:pointer;border:2px solid var(--gb)}
+.uname{font-size:12px;font-weight:600}
+.coin-pill{display:flex;align-items:center;gap:4px;background:var(--al);border-radius:20px;padding:3px 9px;font-size:12px;font-weight:700;color:var(--a);cursor:pointer;border:none}
+.nbtn{position:relative;background:none;border:none;cursor:pointer;padding:3px}
+.nbtn svg{width:19px;height:19px;stroke:var(--tm);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:block}
+.ndot{display:none;position:absolute;top:-1px;right:-1px;background:var(--c);color:#fff;font-size:8px;font-weight:700;width:14px;height:14px;border-radius:50%;align-items:center;justify-content:center;line-height:14px;text-align:center}
+.sob{font-size:11px;color:var(--tm);cursor:pointer;border:1px solid var(--gb);padding:3px 7px;border-radius:6px;background:none}
+.mc{flex:1;overflow-y:auto;padding:14px;max-width:640px;margin:0 auto;width:100%;padding-bottom:70px}
 .bnav{background:#fff;border-top:1px solid var(--gb);display:flex;position:fixed;bottom:0;left:0;right:0;z-index:100}
-.ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px;cursor:pointer;gap:3px;border:none;background:none;color:var(--tm);font-size:10px;font-weight:500;transition:color .2s}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:7px 3px;cursor:pointer;gap:2px;border:none;background:none;color:var(--tm);font-size:10px;font-weight:500;transition:color .15s}
 .ni.active{color:var(--p)}
-.ni svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.card{background:#fff;border-radius:var(--r);padding:16px;margin-bottom:12px;box-shadow:var(--sh);border:1px solid var(--gb)}
-.ctitle{font-size:15px;font-weight:700;margin-bottom:10px}
-.pt{font-size:20px;font-weight:700;margin-bottom:3px}
-.ps{font-size:13px;color:var(--tm);margin-bottom:18px}
-.btn{padding:10px 20px;border-radius:var(--rs);font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .18s;display:inline-block}
+.ni svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+/* CARDS & COMMON */
+.card{background:#fff;border-radius:var(--r);padding:14px;margin-bottom:10px;box-shadow:var(--sh);border:1px solid var(--gb)}
+.pt{font-size:19px;font-weight:700;margin-bottom:2px}
+.ps{font-size:13px;color:var(--tm);margin-bottom:14px}
+.btn{padding:9px 18px;border-radius:var(--rs);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .18s;display:inline-block}
 .btp{background:var(--p);color:#fff}
 .bts{background:var(--gl);color:var(--tx)}
 .btg{background:var(--t);color:#fff}
+.bto{background:none;border:1.5px solid var(--gb);color:var(--tm)}
 .btf{width:100%}
-.fg{margin-bottom:12px}
-.fl{font-size:12px;font-weight:600;color:var(--tm);margin-bottom:5px;display:block}
-.fi,.fse,.fta{width:100%;padding:10px 13px;border:1.5px solid var(--gb);border-radius:var(--rs);font-size:14px;color:var(--tx);background:#fff;font-family:inherit;transition:border-color .2s}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.fg{margin-bottom:11px}
+.fl{font-size:12px;font-weight:600;color:var(--tm);margin-bottom:4px;display:block}
+.fi,.fse,.fta{width:100%;padding:9px 11px;border:1.5px solid var(--gb);border-radius:var(--rs);font-size:13px;color:var(--tx);background:#fff;font-family:inherit;transition:border-color .2s}
 .fi:focus,.fse:focus,.fta:focus{outline:none;border-color:var(--p)}
-.fta{min-height:72px;resize:vertical}
-.tip{background:var(--al);border-left:3px solid var(--a);padding:8px 12px;border-radius:0 var(--rs) var(--rs) 0;font-size:12px;color:var(--tm);margin-top:6px;line-height:1.5}
-.cr{display:flex;flex-wrap:wrap;gap:7px}
-.chip{padding:8px 14px;border-radius:20px;border:2px solid var(--gb);font-size:13px;font-weight:600;cursor:pointer;background:#fff;transition:all .18s}
-.chip.sel{border-color:var(--t);background:var(--tl);color:var(--td)}
-.div{height:1px;background:var(--gb);margin:16px 0}
-.sb{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.fta{min-height:64px;resize:vertical}
+.tip{background:var(--al);border-left:3px solid var(--a);padding:8px 11px;border-radius:0 var(--rs) var(--rs) 0;font-size:12px;color:var(--a);margin-top:5px;line-height:1.5}
+.chip{padding:6px 12px;border-radius:20px;border:1.5px solid var(--gb);font-size:12px;font-weight:600;cursor:pointer;background:#fff;transition:all .15s;display:inline-block;margin:3px}
+.chip.sel{border-color:var(--p);background:var(--pl);color:var(--pd)}
+.divider{height:1px;background:var(--gb);margin:13px 0}
+.sb{display:inline-flex;align-items:center;gap:2px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
 .sp{background:var(--al);color:var(--a)}
 .sa{background:var(--tl);color:var(--td)}
+.sr{background:var(--cl);color:var(--c)}
 .fb{display:flex;align-items:center;justify-content:space-between}
+/* AGENDA BLOCKS */
+.agenda-wrap{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:12px}
+.agenda-block{background:#fff;border-radius:var(--r);padding:13px;border:1.5px solid var(--gb);cursor:pointer;transition:all .18s;min-height:90px;display:flex;flex-direction:column;justify-content:space-between}
+.agenda-block:hover{border-color:var(--p);transform:translateY(-2px);box-shadow:var(--sh)}
+.ab-icon{font-size:22px;margin-bottom:6px}
+.ab-title{font-size:12px;font-weight:700;line-height:1.3}
+.ab-sub{font-size:11px;color:var(--tm);margin-top:3px}
+/* POST CARDS (social feed) */
+.post{background:#fff;border-radius:var(--r);margin-bottom:10px;border:1px solid var(--gb);overflow:hidden}
+.post-hdr{display:flex;align-items:center;gap:9px;padding:11px 13px 0}
+.post-av{width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0;cursor:pointer}
+.post-avp{width:36px;height:36px;border-radius:50%;background:var(--pl);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--p);flex-shrink:0;cursor:pointer}
+.post-name{font-size:13px;font-weight:700;cursor:pointer}
+.post-meta{font-size:11px;color:var(--tm)}
+.post-body{padding:9px 13px}
+.post-text{font-size:13px;line-height:1.6;margin-bottom:7px}
+.post-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
+.post-tag{padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.post-draft{background:var(--al);color:var(--a);padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;display:inline-block;margin-bottom:8px}
+.post-actions{display:flex;border-top:1px solid var(--gb)}
+.post-act{flex:1;padding:9px 0;font-size:12px;font-weight:600;color:var(--tm);background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .15s}
+.post-act:hover{background:var(--gl);color:var(--p)}
+.comments-section{padding:0 13px 10px;border-top:1px solid var(--gb)}
+.comment{padding:9px 0;border-bottom:1px solid var(--gl)}
+.comment:last-child{border-bottom:none}
+.comment-name{font-size:12px;font-weight:700;color:var(--pd);margin-bottom:3px}
+.comment-text{font-size:12px;color:var(--tm);line-height:1.5}
 /* QUIZ */
-.qprog{height:6px;background:var(--gb);border-radius:3px;margin-bottom:20px;overflow:hidden}
-.qpf{height:100%;background:var(--p);border-radius:3px;transition:width .4s}
-.qq{font-size:18px;font-weight:700;text-align:center;margin-bottom:6px;line-height:1.4}
-.qs2{font-size:13px;color:var(--tm);text-align:center;margin-bottom:20px}
-.qopts{display:flex;flex-direction:column;gap:9px}
-.qo{padding:13px 15px;border-radius:var(--r);border:2px solid var(--gb);background:#fff;cursor:pointer;text-align:left;font-size:14px;font-weight:500;transition:all .18s;display:flex;align-items:center;gap:11px}
+.qprog{height:3px;background:var(--gb);border-radius:2px;margin-bottom:18px;overflow:hidden}
+.qpf{height:100%;background:var(--p);border-radius:2px;transition:width .4s}
+.ql{font-size:11px;color:var(--th);margin-bottom:3px}
+.qq{font-size:17px;font-weight:600;margin-bottom:4px;line-height:1.4}
+.qs2{font-size:13px;color:var(--tm);margin-bottom:14px}
+.qopts{display:flex;flex-direction:column;gap:7px}
+.qo{padding:11px 13px;border-radius:var(--r);border:1px solid var(--gb);background:#fff;cursor:pointer;text-align:left;font-size:13px;transition:all .15s;display:flex;align-items:flex-start;gap:10px}
 .qo:hover{border-color:var(--p);background:var(--pl)}
 .qo.sel{border-color:var(--p);background:var(--pl);color:var(--pd)}
-.qnav{display:flex;justify-content:space-between;margin-top:20px}
-/* PLAN WIZARD */
-.step-header{display:flex;align-items:center;gap:10px;margin-bottom:20px}
-.step-num{width:32px;height:32px;border-radius:50%;background:var(--p);color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.step-title{font-size:17px;font-weight:700}
-.step-sub{font-size:13px;color:var(--tm)}
-.skill-card{padding:16px;border-radius:var(--r);border:2px solid var(--gb);background:#fff;cursor:pointer;transition:all .18s;text-align:center;margin-bottom:10px}
-.skill-card:hover{border-color:var(--p);transform:translateY(-2px)}
-.skill-card.sel{border-color:var(--p);background:var(--pl)}
-.skill-card .sk-emoji{font-size:32px;margin-bottom:6px}
-.skill-card h3{font-size:15px;font-weight:700;margin-bottom:3px}
-.skill-card p{font-size:12px;color:var(--tm);margin:0}
-.prod-card{padding:12px;border-radius:var(--r);border:2px solid var(--gb);background:#fff;cursor:pointer;transition:all .18s;text-align:center}
-.prod-card:hover{border-color:var(--t);transform:translateY(-2px)}
-.prod-card.sel{border-color:var(--t);background:var(--tl)}
-.prod-card.featured{border-color:var(--p);background:var(--pl)}
-.prod-card .pe{font-size:24px;margin-bottom:4px}
-.prod-card .pl{font-size:12px;font-weight:700}
-.res-cat{margin-bottom:14px}
-.res-cat-title{font-size:12px;font-weight:700;color:var(--th);margin-bottom:7px;text-transform:uppercase;letter-spacing:.5px}
-.res-link{display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:var(--rs);border:1.5px solid var(--gb);background:#fff;margin-bottom:6px;cursor:pointer;transition:all .18s;text-decoration:none;color:var(--tx)}
-.res-link:hover{border-color:var(--p);background:var(--pl)}
-.res-link .rl-icon{font-size:18px;flex-shrink:0}
-.res-link .rl-name{font-size:13px;font-weight:600}
-.res-link .rl-desc{font-size:11px;color:var(--tm)}
-/* SOCIAL FEED */
-.post-card{background:#fff;border-radius:var(--r);margin-bottom:12px;border:1px solid var(--gb);overflow:hidden}
-.post-header{display:flex;align-items:center;gap:10px;padding:12px 14px 0}
-.post-av{width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0}
-.post-avp{width:38px;height:38px;border-radius:50%;background:var(--pl);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:var(--p);flex-shrink:0}
-.post-name{font-size:14px;font-weight:700}
-.post-meta{font-size:12px;color:var(--tm)}
-.post-body{padding:10px 14px}
-.post-text{font-size:14px;line-height:1.6;margin-bottom:8px}
-.post-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
-.post-tag{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
-.post-actions{display:flex;gap:0;border-top:1px solid var(--gb)}
-.post-act{flex:1;padding:10px 0;font-size:12px;font-weight:600;color:var(--tm);background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .18s}
-.post-act:hover{background:var(--gl);color:var(--p)}
-/* GROUP CARDS */
-.group-bubble{background:#fff;border-radius:var(--r);padding:14px;margin-bottom:10px;border:2px solid var(--gb);cursor:pointer;transition:all .18s}
-.group-bubble:hover{border-color:var(--p);transform:translateY(-2px);box-shadow:var(--sh)}
-.group-bubble h3{font-size:15px;font-weight:700;margin-bottom:8px}
-.group-members{display:flex;flex-wrap:wrap;gap:6px}
-.member-chip{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;background:var(--gl);font-size:12px;font-weight:600}
+.qo.skip-opt{border-style:dashed;color:var(--th)}
+.qo.skip-opt.sel{border-color:var(--c);background:var(--cl);color:var(--c);border-style:solid}
+.qchk{width:15px;height:15px;border-radius:3px;border:1.5px solid var(--gb);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center}
+.qo.sel .qchk{border-color:var(--p);background:var(--p);color:#fff;font-size:9px}
+.qnav{display:flex;justify-content:space-between;margin-top:16px}
+/* PRODUCT RESULT */
+.prod-top{border:1.5px solid var(--p);background:var(--pl);border-radius:var(--r);padding:13px;margin-bottom:8px}
+.prod-row{display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid var(--gb);border-radius:var(--rs);background:#fff;margin-bottom:6px;cursor:pointer;transition:all .15s}
+.prod-row:hover{border-color:var(--p)}
+.prod-row.chosen{border-color:var(--t);background:var(--tl)}
+/* CONTRACT */
+.week-block{border:1.5px solid var(--gb);border-radius:var(--r);margin-bottom:9px;overflow:hidden}
+.week-header{padding:11px 13px;background:var(--gl);display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+.week-title{font-size:13px;font-weight:700}
+.week-status{font-size:11px;color:var(--tm)}
+.week-body{padding:13px;border-top:1px solid var(--gb);background:#fff;display:none}
+.week-body.open{display:block}
 /* PROGRESS */
-.step-item{padding:12px 14px;border-radius:var(--rs);border:1.5px solid var(--gb);background:#fff;margin-bottom:8px;transition:all .18s}
+.step-item{padding:11px 13px;border-radius:var(--rs);border:1.5px solid var(--gb);background:#fff;margin-bottom:7px;cursor:pointer;transition:all .15s}
 .step-item.done{background:var(--tl);border-color:var(--t)}
-.step-check{width:24px;height:24px;border-radius:50%;border:2px solid var(--gb);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .18s;font-size:13px;font-weight:700}
-.step-check.done{background:var(--t);border-color:var(--t);color:#fff}
+.step-row{display:flex;align-items:center;gap:10px}
+.step-chk{width:22px;height:22px;border-radius:50%;border:2px solid var(--gb);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:700;transition:all .15s}
+.step-chk.done{background:var(--t);border-color:var(--t);color:#fff}
+.step-txt{font-size:13px;font-weight:500;flex:1}
+.step-txt.done{text-decoration:line-through;color:var(--tm)}
 /* RUBRIC */
-.rubrow{margin-bottom:12px;padding:12px;border-radius:var(--rs);border:1.5px solid var(--gb);background:#fff}
-.rubcrit{font-size:13px;font-weight:700;margin-bottom:3px}
-.rubcdesc{font-size:12px;color:var(--tm);margin-bottom:8px}
+.rubrow{margin-bottom:11px;padding:11px;border-radius:var(--rs);border:1.5px solid var(--gb);background:#fff}
+.rubcrit{font-size:12px;font-weight:700;margin-bottom:2px}
+.rubcdesc{font-size:11px;color:var(--tm);margin-bottom:7px}
 .rubscale{display:flex;gap:5px}
-.rubbtn{flex:1;padding:8px 0;border-radius:var(--rs);border:2px solid var(--gb);font-size:14px;font-weight:700;cursor:pointer;background:#fff;transition:all .18s;text-align:center}
+.rubbtn{flex:1;padding:7px 0;border-radius:var(--rs);border:1.5px solid var(--gb);font-size:13px;font-weight:700;cursor:pointer;background:#fff;transition:all .15s}
 .rubbtn:hover{border-color:var(--p);background:var(--pl)}
 .rubbtn.sel{border-color:var(--p);background:var(--p);color:#fff}
-.rubanchor{display:flex;justify-content:space-between;font-size:10px;color:var(--th);margin-top:3px}
-.rublvl{font-size:11px;color:var(--tm);margin-top:6px;padding:7px 10px;background:var(--gl);border-radius:6px;line-height:1.5}
+.rubanchor{display:flex;justify-content:space-between;font-size:10px;color:var(--th);margin-top:2px}
+.rublvl{font-size:11px;color:var(--tm);margin-top:5px;padding:6px 9px;background:var(--gl);border-radius:6px;line-height:1.5}
 /* CHAT */
-.chat-wrap{display:flex;flex-direction:column;height:340px;border-radius:var(--r);border:1.5px solid var(--gb);overflow:hidden;background:#fff}
-.chat-msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
-.msg{max-width:84%;padding:9px 12px;border-radius:14px;font-size:13px;line-height:1.5}
-.msg.ai{background:var(--pl);color:var(--pd);align-self:flex-start;border-bottom-left-radius:4px}
-.msg.user{background:var(--p);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
-.chat-in{display:flex;gap:8px;padding:9px;border-top:1px solid var(--gb)}
-.chat-in input{flex:1;padding:8px 11px;border:1.5px solid var(--gb);border-radius:var(--rs);font-size:13px;font-family:inherit}
+.chat-wrap{display:flex;flex-direction:column;height:320px;border-radius:var(--r);border:1.5px solid var(--gb);overflow:hidden;background:#fff}
+.chat-msgs{flex:1;overflow-y:auto;padding:11px;display:flex;flex-direction:column;gap:7px}
+.msg{max-width:85%;padding:8px 11px;border-radius:12px;font-size:13px;line-height:1.5}
+.msg.ai{background:var(--pl);color:var(--pd);align-self:flex-start;border-bottom-left-radius:3px}
+.msg.me{background:var(--p);color:#fff;align-self:flex-end;border-bottom-right-radius:3px}
+.chat-in{display:flex;gap:7px;padding:8px;border-top:1px solid var(--gb)}
+.chat-in input{flex:1;padding:8px 10px;border:1.5px solid var(--gb);border-radius:var(--rs);font-size:13px;font-family:inherit}
 .chat-in input:focus{outline:none;border-color:var(--p)}
 /* FORUM */
-.forum-bubble{padding:10px 13px;border-radius:14px;margin-bottom:8px;font-size:13px;line-height:1.5;max-width:85%}
-.forum-bubble.mine{background:var(--p);color:#fff;margin-left:auto;border-bottom-right-radius:4px}
-.forum-bubble.theirs{background:#fff;border:1.5px solid var(--gb);border-bottom-left-radius:4px}
-.forum-sender{font-size:11px;font-weight:700;margin-bottom:3px}
+.forum-bbl{padding:9px 11px;border-radius:12px;margin-bottom:7px;font-size:13px;line-height:1.5;max-width:85%}
+.forum-bbl.mine{background:var(--p);color:#fff;margin-left:auto;border-bottom-right-radius:3px}
+.forum-bbl.theirs{background:#fff;border:1.5px solid var(--gb);border-bottom-left-radius:3px}
+/* PROFILE */
+.prof-av-wrap{position:relative;width:70px;height:70px;margin:0 auto 10px;cursor:pointer}
+.prof-av-img{width:70px;height:70px;border-radius:50%;object-fit:cover;border:3px solid var(--p);display:block}
+.prof-av-plc{width:70px;height:70px;border-radius:50%;background:var(--pl);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;color:var(--p);border:3px solid var(--p)}
+.prof-av-edit{position:absolute;bottom:0;right:0;width:22px;height:22px;background:var(--p);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff}
 /* COINS */
-.coin-card{background:linear-gradient(135deg,#FFF3CD,#FFF8E7);border:2px solid var(--a);border-radius:var(--r);padding:16px;margin-bottom:12px}
-.coin-big{font-size:40px;text-align:center;margin-bottom:6px}
-.sticker-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
-.sticker{width:100%;aspect-ratio:1;border-radius:var(--rs);display:flex;align-items:center;justify-content:center;font-size:28px;border:2px solid var(--gb);background:#fff;cursor:pointer;transition:all .18s}
+.sticker-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:10px}
+.sticker{aspect-ratio:1;border-radius:var(--rs);display:flex;align-items:center;justify-content:center;font-size:24px;border:1.5px solid var(--gb);background:#fff}
 .sticker.earned{border-color:var(--a);background:var(--al)}
-.sticker.locked{opacity:.4;cursor:not-allowed}
+.sticker.locked{opacity:.35}
 /* MISC */
-.obtn{padding:4px 11px;border-radius:20px;border:1.5px solid var(--gb);font-size:12px;font-weight:600;cursor:pointer;background:none;color:var(--tm);text-decoration:none;transition:all .18s;display:inline-block}
+.pbw{background:var(--gb);border-radius:5px;height:7px;margin:5px 0 11px;overflow:hidden}
+.pbf{height:100%;border-radius:5px;background:var(--t);transition:width .5s}
+.obtn{padding:4px 10px;border-radius:20px;border:1.5px solid var(--gb);font-size:11px;font-weight:600;cursor:pointer;background:none;color:var(--tm);text-decoration:none;transition:all .15s;display:inline-block}
 .obtn:hover{border-color:var(--t);color:var(--t)}
-.pbw{background:var(--gb);border-radius:6px;height:8px;margin:6px 0 12px;overflow:hidden}
-.pbf{height:100%;border-radius:6px;background:var(--t);transition:width .5s}
-.tag{padding:4px 11px;border-radius:20px;font-size:12px;font-weight:600}
-.empty{text-align:center;padding:32px 16px;color:var(--tm)}
-.ei{font-size:34px;margin-bottom:8px}
-.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#2C2C2A;color:#fff;padding:10px 20px;border-radius:var(--rs);font-size:13px;font-weight:600;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;max-width:90vw}
+.empty{text-align:center;padding:28px 14px;color:var(--tm)}
+.ei{font-size:30px;margin-bottom:7px}
+.toast{position:fixed;bottom:76px;left:50%;transform:translateX(-50%);background:#2C2C2A;color:#fff;padding:9px 18px;border-radius:var(--rs);font-size:13px;font-weight:600;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;max-width:88vw;text-align:center}
 .toast.show{opacity:1}
-.loading{text-align:center;padding:36px;color:var(--tm);font-size:14px}
-.mb10{margin-bottom:10px}.mt10{margin-top:10px}
+.loading{text-align:center;padding:32px;color:var(--tm);font-size:13px}
+.mt8{margin-top:8px}.mb8{margin-bottom:8px}.mt12{margin-top:12px}
+.toggle-row{display:flex;border-radius:var(--rs);overflow:hidden;border:1.5px solid var(--gb);margin-bottom:12px}
+.toggle-btn{flex:1;padding:8px 0;font-size:12px;font-weight:600;cursor:pointer;border:none;background:#fff;color:var(--tm);transition:all .15s;text-align:center}
+.toggle-btn.act{background:var(--p);color:#fff}
 </style>
 </head>
 <body>
@@ -188,19 +199,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
   <div class="auth-card">
     <div class="alogo"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5M2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
     <h1>LearnPath</h1>
-    <p>Your personal English learning space. Sign in with your school Google account.</p>
+    <p>Your English learning space. Sign in with your school Google account.</p>
     <button class="gbtn" id="gsign"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G"> Continue with Google</button>
-    <p class="anote">Use your school email to sign in.</p>
   </div>
 </div>
 
 <div id="role">
   <div class="ri">
-    <h2>Hey there! Who are you?</h2>
+    <h2>Who are you?</h2>
     <p>Pick your role to get started.</p>
-    <div class="rc">
-      <div class="rcard" id="rs"><div class="ricon" style="background:#EEEDFE">&#127922;</div><div><h3>I am a Student</h3><p>Set my own goals, share my work, grow at my own pace.</p></div></div>
-      <div class="rcard" id="rt2"><div class="ricon" style="background:#E1F5EE">&#128105;&#8205;&#127979;</div><div><h3>I am a Teacher</h3><p>Guide my students, approve plans, give feedback.</p></div></div>
+    <div class="role-cards">
+      <div class="role-card" id="rs"><div class="role-icon" style="background:#EEEDFE">&#127922;</div><div><h3>I am a Student</h3><p>Set my goals, share work, grow at my own pace.</p></div></div>
+      <div class="role-card" id="rt2"><div class="role-icon" style="background:#E1F5EE">&#128105;&#8205;&#127979;</div><div><h3>I am a Teacher</h3><p>Guide students, approve plans, give feedback.</p></div></div>
     </div>
   </div>
 </div>
@@ -212,14 +222,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
       <span class="tname">LearnPath</span>
     </div>
     <div class="uinfo">
-      <div class="coins-badge" id="coins-badge" onclick="openCoins()" title="Your coins">&#127881; <span id="coins-count">0</span></div>
-      <img id="uav" class="uav" src="" alt="">
+      <button class="coin-pill" id="coin-pill" onclick="openCoins()">&#127881; <span id="coins-count">0</span></button>
+      <img id="uav" class="uav" src="" alt="" onclick="go('profile')">
       <span id="uname" class="uname"></span>
-      <button class="nbtn" id="nbtn" onclick="openNotifs()">
+      <button class="nbtn" onclick="openNotifs()">
         <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         <span id="ndot" class="ndot">0</span>
       </button>
-      <button class="sob" id="sob">Sign out</button>
+      <button class="sob" id="sob">Out</button>
     </div>
   </div>
   <div class="mc" id="mc"></div>
@@ -231,7 +241,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import{getAuth,GoogleAuthProvider,signInWithPopup,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import{getDatabase,ref,set,get,push,onValue,update,remove,increment}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import{getDatabase,ref,set,get,push,onValue,update,remove}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const fb=initializeApp({
   apiKey:"AIzaSyDFC_bMD8MFxRPyBGO7kqgn7YWLWyEFR4M",
@@ -244,223 +254,178 @@ const fb=initializeApp({
 });
 const auth=getAuth(fb),db=getDatabase(fb),prov=new GoogleAuthProvider();
 const AKEY="YOUR_NEW_API_KEY_HERE";
-const AI_SYSTEM="You are a warm, encouraging English learning assistant for 7th grade students on the LearnPath platform. Help students choose learning goals, suggest resources and strategies, and answer English learning questions. Be friendly, supportive, and age-appropriate. Keep responses concise and practical.";
 
 let CU=null,UP=null;
-let qA=[],qI=0,chatHist=[];
-let rubV=[0,0,0,0,0,0],peerV=[0,0,0,0,0,0];
-let sDone={},cSteps=[],myGid=null,myGname=null;
-let planState={step:1,skills:[],topic:"",product:"",resources:[],steps:["","",""]};
-let userCoins=0;
+let chatHist=[],rubV=[0,0,0,0,0,0],peerV=[0,0,0,0,0,0];
+let myGid=null,myGname=null,userCoins=0;
+let contractData=null;
 
-// ── DATA ──
-const RUBRIC=[
-  {label:"Content & Purpose",q:"Did I stay on topic and make my point clear?",lvls:["Topic or purpose was hard to understand.","Topic was partly clear but needed more explanation.","Topic and purpose were mostly clear.","Clearly explained topic and purpose with enough details."]},
-  {label:"Organization",q:"Was my work easy to follow from beginning to end?",lvls:["Difficult to follow — ideas were not clearly organized.","Some organization, but parts were confusing.","Mostly organized. Audience could follow it.","Well organized with a clear beginning, middle, and end."]},
-  {label:"Language Control",q:"Were my sentences correct and understandable?",lvls:["Very limited English or many mistakes.","Several mistakes sometimes made meaning unclear.","Understandable sentences with some mistakes.","Sentences mostly correct and easy to understand."]},
-  {label:"Vocabulary",q:"Did I use the right words for my topic?",lvls:["Not enough vocabulary to express ideas clearly.","Limited word set, often repeated the same vocabulary.","Enough words for topic but needed more variety.","Good range of words that fit the message well."]},
-  {label:"Communication Strategies",q:"Did I use helpful tools when I got stuck?",lvls:["Did not use support strategies.","Tried to use some support but it did not always help.","Used some supports that helped communication.","Used examples, visuals, notes, gestures very effectively."]},
-  {label:"Audience & Style",q:"Did my style fit the audience and task?",lvls:["Style did not fit the audience or task.","Style sometimes fit the audience and task.","Style mostly fit the audience and task.","Language, tone, and style fit the audience and task very well."]}
-];
-const PEER_Q=["Was the classmate's main idea clear?","Was the work easy to follow?","Was the English understandable?","Did the classmate use enough and suitable words?","Did the classmate use examples, visuals, notes, or gestures?","Did the presentation fit the audience and task?"];
-
-const SKILLS=[
-  {id:"speaking",label:"Speaking",emoji:"🎙️",color:"#E1F5EE",tc:"#085041",desc:"Talk, present, record, perform",subs:["Presentation","Podcast","Interview","Discussion","Storytelling","Video Diary"]},
-  {id:"writing",label:"Writing",emoji:"✍️",color:"#EEEDFE",tc:"#3C3489",desc:"Write, create, express, share",subs:["Blog Post","Story","Essay","Poem","Review","Letter"]},
-  {id:"reading",label:"Reading",emoji:"📖",color:"#FAEEDA",tc:"#633806",desc:"Read, explore, discover, analyse",subs:["Book Review","Article Summary","Research","Vocabulary Journal","News Analysis"]},
-  {id:"listening",label:"Listening",emoji:"🎧",color:"#FAECE7",tc:"#712B13",desc:"Listen, learn, respond, reflect",subs:["Podcast Response","Video Reflection","Song Analysis","Audio Notes"]}
-];
-
+// ── QUIZ DATA (embedded from provided quiz) ──
+const CATS={writing:"Writing",speaking:"Speaking",visual:"Visual & Design",video:"Video",creative:"Creative Writing",research:"Research",reallife:"Real-Life",collab:"Collaborative",digital:"Digital"};
 const PRODUCTS=[
-  {e:"🎬",l:"Short Video",p:["speaking"]},
-  {e:"🎙️",l:"Podcast",p:["speaking","listening"]},
-  {e:"📝",l:"Blog Post",p:["writing"]},
-  {e:"📊",l:"Presentation",p:["speaking","writing"]},
-  {e:"🎨",l:"Canva Poster",p:["writing","reading"]},
-  {e:"📖",l:"Story",p:["writing"]},
-  {e:"🗞️",l:"News Article",p:["writing","reading"]},
-  {e:"🎭",l:"Drama / Skit",p:["speaking"]},
-  {e:"🔊",l:"Audio Recording",p:["speaking","listening"]},
-  {e:"💬",l:"Discussion Video",p:["speaking","listening"]},
-  {e:"📋",l:"Research Report",p:["reading","writing"]},
-  {e:"🖼️",l:"Infographic",p:["writing","reading"]}
+  {id:"blog_post",e:"📝",name:"Blog Post",cats:["writing","digital"]},
+  {id:"short_story",e:"📖",name:"Short Story",cats:["creative","writing"]},
+  {id:"news_article",e:"🗞️",name:"News Article",cats:["writing","reallife"]},
+  {id:"book_review",e:"📚",name:"Book Review",cats:["writing","research"]},
+  {id:"movie_review",e:"🎬",name:"Movie Review",cats:["writing","reallife"]},
+  {id:"song_review",e:"🎵",name:"Song Review",cats:["writing","creative"]},
+  {id:"research_report",e:"📋",name:"Research Report",cats:["research","writing"]},
+  {id:"essay",e:"📑",name:"Essay",cats:["writing","research"]},
+  {id:"brochure",e:"🧾",name:"Brochure",cats:["visual","reallife"]},
+  {id:"magazine_article",e:"📰",name:"Magazine Article",cats:["writing","digital"]},
+  {id:"advertisement",e:"📢",name:"Advertisement",cats:["writing","reallife"]},
+  {id:"dialogue_script",e:"🗨️",name:"Dialogue Script",cats:["creative","speaking"]},
+  {id:"skit_script",e:"🎭",name:"Skit Script",cats:["creative","collab"]},
+  {id:"travel_guide",e:"🧭",name:"Travel Guide",cats:["writing","reallife"]},
+  {id:"howto",e:"🧑‍🏫",name:"How-to Guide",cats:["writing","reallife"]},
+  {id:"presentation",e:"📊",name:"Presentation",cats:["visual","speaking"]},
+  {id:"podcast",e:"🎙️",name:"Podcast",cats:["speaking","digital"]},
+  {id:"speech",e:"🗣️",name:"Speech",cats:["speaking","reallife"]},
+  {id:"oral_presentation",e:"🎤",name:"Oral Presentation",cats:["speaking","research"]},
+  {id:"interview",e:"🧑‍🤝‍🧑",name:"Interview",cats:["speaking","reallife"]},
+  {id:"news_broadcast",e:"📺",name:"News Broadcast",cats:["video","speaking"]},
+  {id:"debate",e:"🎯",name:"Debate",cats:["speaking","collab"]},
+  {id:"drama_skit",e:"🎭",name:"Drama / Skit",cats:["creative","collab"]},
+  {id:"short_video",e:"🎬",name:"Short Video",cats:["video","digital"]},
+  {id:"vlog",e:"📹",name:"Vlog",cats:["video","digital"]},
+  {id:"mini_doc",e:"🎞️",name:"Mini Documentary",cats:["video","research"]},
+  {id:"explainer_video",e:"🧠",name:"Explainer Video",cats:["video","research"]},
+  {id:"poem",e:"✨",name:"Poem",cats:["creative","writing"]},
+  {id:"song_lyrics",e:"🎵",name:"Song Lyrics",cats:["creative","writing"]},
+  {id:"comic_book",e:"📘",name:"Comic Book",cats:["creative","visual"]},
+  {id:"childrens_story",e:"🧸",name:"Children's Story",cats:["creative","writing"]},
+  {id:"group_presentation",e:"🧑‍🤝‍🧑",name:"Group Presentation",cats:["collab","speaking"]},
+  {id:"group_podcast",e:"🎤",name:"Group Podcast",cats:["collab","speaking"]},
+  {id:"class_magazine",e:"📰",name:"Class Magazine",cats:["collab","writing"]},
+  {id:"short_film_collab",e:"🎬",name:"Short Film",cats:["collab","video"]},
+  {id:"social_post",e:"📱",name:"Social Media Post",cats:["digital","writing"]},
+  {id:"infographic",e:"📊",name:"Infographic",cats:["visual","research"]},
+  {id:"illustrated_book",e:"🎨",name:"Illustrated Storybook",cats:["creative","visual"]}
 ];
-
-const RESOURCES=[
-  {cat:"📰 Real English Content",links:[
-    {icon:"🗞️",name:"BBC Learning English",desc:"Real news + exercises",url:"https://www.bbc.co.uk/learningenglish"},
-    {icon:"📺",name:"VOA Learning English",desc:"Slow news for learners",url:"https://learningenglish.voanews.com"},
-    {icon:"🗞️",name:"Newsela",desc:"Real news at your level",url:"https://newsela.com"},
-    {icon:"🎬",name:"TED-Ed",desc:"Short educational videos",url:"https://ed.ted.com"}
-  ]},
-  {cat:"📚 Study Materials",links:[
-    {icon:"📖",name:"British Council",desc:"Grammar, vocabulary, skills",url:"https://learnenglish.britishcouncil.org"},
-    {icon:"🎯",name:"Quizlet",desc:"Vocabulary flashcards",url:"https://quizlet.com"},
-    {icon:"✏️",name:"Grammarly",desc:"Check your writing",url:"https://www.grammarly.com"},
-    {icon:"📝",name:"ReadWorks",desc:"Reading practice texts",url:"https://www.readworks.org"}
-  ]},
-  {cat:"🤖 AI Tools for Learning",links:[
-    {icon:"🤖",name:"Claude AI",desc:"Ask anything, get explanations",url:"https://claude.ai"},
-    {icon:"💬",name:"ChatGPT",desc:"Writing help and ideas",url:"https://chatgpt.com"},
-    {icon:"🎤",name:"Elsa Speak",desc:"Speaking practice with AI",url:"https://elsaspeak.com"}
-  ]},
-  {cat:"🎮 Practice & Fun",links:[
-    {icon:"🎮",name:"Duolingo",desc:"Daily English exercises",url:"https://www.duolingo.com"},
-    {icon:"🎵",name:"LyricsTraining",desc:"Learn with songs",url:"https://lyricstraining.com"},
-    {icon:"🧩",name:"Vocabulary.com",desc:"Word games and quizzes",url:"https://www.vocabulary.com"}
-  ]}
-];
-
-const QUIZ=[
-  {q:"How do you most enjoy using English outside of school?",s:"You can pick more than one!",opts:[
-    {e:"📖",t:"Reading stories, articles, or captions",p:"reading"},
-    {e:"🎙️",t:"Talking, singing along, or listening",p:"speaking"},
-    {e:"🔍",t:"Looking things up and learning new facts",p:"reading"},
-    {e:"🎨",t:"Making things — videos, designs, content",p:"writing"},
-    {e:"🤝",t:"Chatting with friends or playing online",p:"speaking"},
-    {e:"🌍",t:"Discovering new places and cultures",p:"reading"}
-  ]},
-  {q:"If you could make any English project right now, what would it be?",s:"Pick all that excite you!",opts:[
-    {e:"📝",t:"A story or personal essay",p:"writing"},
-    {e:"🎬",t:"A video or speech about something I love",p:"speaking"},
-    {e:"📊",t:"A research project on a topic I like",p:"reading"},
-    {e:"🖼️",t:"An infographic or digital poster",p:"writing"},
-    {e:"💬",t:"Something made with a partner or group",p:"speaking"},
-    {e:"🗺️",t:"A project about a country or culture",p:"reading"}
-  ]},
-  {q:"When working on English, what helps you most?",s:"Choose everything that applies!",opts:[
-    {e:"✍️",t:"Writing freely — expressing myself on paper",p:"writing"},
-    {e:"🎤",t:"Speaking out loud — talking through ideas",p:"speaking"},
-    {e:"📚",t:"Having good sources and facts to work from",p:"reading"},
-    {e:"💡",t:"Being free to design and create",p:"writing"},
-    {e:"👥",t:"Working with someone and sharing ideas",p:"speaking"},
-    {e:"🔭",t:"Having a question to explore",p:"reading"}
-  ]},
-  {q:"Which sounds most like you at school?",s:"Select all that feel true!",opts:[
-    {e:"📔",t:"I write notes, doodle, or come up with story ideas",p:"writing"},
-    {e:"🙋",t:"I like answering questions and explaining things",p:"speaking"},
-    {e:"🧐",t:"I ask lots of questions and want to understand things",p:"reading"},
-    {e:"🎭",t:"I prefer hands-on tasks — making or building things",p:"writing"},
-    {e:"🤜",t:"I work better in groups and like different views",p:"speaking"},
-    {e:"🌐",t:"I get excited when topics connect to real life",p:"reading"}
-  ]}
-];
-
-const PROFILES={
-  writing:{id:"writing",name:"The Storyteller",emoji:"📖",color:"#EEEDFE",tc:"#3C3489",tagline:"You have a voice — the world wants to hear it.",desc:"You are drawn to language that moves people. You notice details, feel things deeply, and when you write, something real comes through.",tags:["Expressive","Imaginative","Reflective"]},
-  speaking:{id:"speaking",name:"The Speaker",emoji:"🎙️",color:"#E1F5EE",tc:"#085041",tagline:"Your voice is your superpower.",desc:"You come alive when you speak. Whether telling a story, explaining an idea, or performing, you connect with people through your words.",tags:["Confident","Communicative","Energetic"]},
-  reading:{id:"reading",name:"The Explorer",emoji:"🔍",color:"#FAEEDA",tc:"#633806",tagline:"You ask the questions others forget to ask.",desc:"You want to understand things fully. You read carefully, think critically, and love discovering something you did not know before.",tags:["Curious","Analytical","Thorough"]}
+const SKILL_TIPS={
+  writing:["Plan first — even 3 bullet points helps","Read your draft aloud to catch unclear sentences","One clear idea per paragraph"],
+  speaking:["Practice out loud before the real thing","Record yourself once and listen back","Slow down — most people rush when nervous"],
+  visual:["Sketch your layout on paper first","Stick to two colours and two fonts maximum","Every element needs a reason to be there"],
+  video:["Storyboard before filming","Good audio matters more than perfect video","Shorter and focused beats long and rambling"],
+  research:["Start with a question, not just a topic","Check two sources before trusting a fact","Note sources as you go, not at the end"],
+  creative:["Permission to write a messy first draft","Try starting in the middle of the action","Read your favourite authors and notice their choices"],
+  collab:["Agree on roles at the very start","Check in before the final deadline","Make sure every voice has been heard"],
+  digital:["Learn one tool well before trying many","Think about your real audience","Keep files organised from day one"],
+  reallife:["Think about who will actually use this","Use clear simple language over impressive words","Test it on someone outside class"]
 };
+const QUESTIONS=[
+  {id:"format",q:"What kind of product do you want to make?",s:"Pick everything that sounds good.",opts:[
+    {e:"✍️",t:"Something written — article, story, essay, script",cats:["writing","creative","research"]},
+    {e:"🗣️",t:"Something spoken — speech, podcast, presentation",cats:["speaking","reallife"]},
+    {e:"🎬",t:"Something filmed — video, vlog, documentary",cats:["video","digital"]},
+    {e:"🎨",t:"Something visual — poster, infographic, illustrated",cats:["visual","creative"]},
+    {e:"🤝",t:"Something made with others — a group project",cats:["collab"]},
+    {e:"🌐",t:"Something digital — social post, newsletter, online",cats:["digital","reallife"]}
+  ],skipLabel:"Help me find a product with AI"},
+  {id:"purpose",q:"What do you want your product to do?",s:"Choose all that fit.",opts:[
+    {e:"📖",t:"Tell a story or take someone somewhere imaginative",cats:["creative","writing"]},
+    {e:"📣",t:"Persuade or argue a point of view",cats:["writing","speaking","research"]},
+    {e:"💡",t:"Explain something or teach someone",cats:["reallife","speaking","video"]},
+    {e:"🔍",t:"Investigate a question with facts and evidence",cats:["research","writing"]},
+    {e:"😄",t:"Entertain — make people laugh or feel something",cats:["creative","video","speaking"]},
+    {e:"🌍",t:"Solve a real problem or serve a real need",cats:["reallife","collab","digital"]}
+  ],skipLabel:"Help me find a product with AI"},
+  {id:"process",q:"How do you like to work?",s:"Pick all that feel true.",opts:[
+    {e:"🧍",t:"On my own — I like making all the decisions",cats:["writing","creative","research"]},
+    {e:"👥",t:"With others — collaboration energises me",cats:["collab","speaking"]},
+    {e:"🖊️",t:"Pen and paper, keeping it simple",cats:["writing","creative"]},
+    {e:"🖥️",t:"Using digital tools — apps, editing software",cats:["digital","video"]},
+    {e:"🎤",t:"With a mic or camera — I don't mind being recorded",cats:["speaking","video"]},
+    {e:"🖼️",t:"Designing and arranging things visually",cats:["visual","digital"]}
+  ],skipLabel:"Help me find a product with AI"},
+  {id:"weakness",q:"Which feels most uncomfortable for you right now?",s:"Be honest — this shapes what you will practise.",opts:[
+    {e:"✍️",t:"Writing clearly and expressing ideas on paper",skill:"writing"},
+    {e:"🗣️",t:"Speaking in front of others or being recorded",skill:"speaking"},
+    {e:"🎨",t:"Designing or making things look good visually",skill:"visual"},
+    {e:"🎬",t:"Filming, editing or producing video content",skill:"video"},
+    {e:"🔍",t:"Finding, reading and using sources and evidence",skill:"research"},
+    {e:"💡",t:"Coming up with original or creative ideas",skill:"creative"},
+    {e:"🤝",t:"Working in a group and sharing the work",skill:"collab"}
+  ],skipLabel:"I don't feel uncomfortable in any of these areas"}
+];
 
-function getProfile(answers){
-  var sc={writing:0,speaking:0,reading:0};
-  answers.forEach(function(ans){if(ans)ans.forEach(function(a){if(a&&a.p&&sc[a.p]!==undefined)sc[a.p]++;});});
-  var top=Object.entries(sc).sort(function(a,b){return b[1]-a[1];})[0][0];
-  return PROFILES[top]||PROFILES.writing;
-}
+const RUBRIC=[
+  {label:"Content & Purpose",q:"Is the main idea clear?",lvls:["Hard to understand.","Partly clear, needs more explanation.","Mostly clear.","Clearly explained with details."]},
+  {label:"Organization",q:"Is the work easy to follow?",lvls:["Difficult to follow.","Some organization, parts confusing.","Mostly organized.","Well organized, clear structure."]},
+  {label:"Language Control",q:"Are sentences correct and understandable?",lvls:["Very limited or many mistakes.","Several mistakes, meaning unclear sometimes.","Understandable with some mistakes.","Mostly correct and clear."]},
+  {label:"Vocabulary",q:"Are the right words used for the topic?",lvls:["Not enough vocabulary.","Limited, often repeated words.","Enough but needs more variety.","Good range of suitable words."]},
+  {label:"Communication Strategies",q:"Are helpful strategies used?",lvls:["No strategies used.","Tried but not always helpful.","Some strategies helped.","Examples, visuals, gestures used very effectively."]},
+  {label:"Audience & Style",q:"Does the style fit the audience and task?",lvls:["Does not fit.","Sometimes fits.","Mostly fits.","Fits very well."]}
+];
+const PEER_Q=["Was the main idea clear?","Was the work easy to follow?","Was the English understandable?","Did the classmate use suitable words?","Did they use examples, visuals, or gestures?","Did the style fit the task?"];
 
-function skColor(s){
-  var m={Speaking:"#E1F5EE",Writing:"#EEEDFE",Reading:"#FAEEDA",Listening:"#FAECE7"};
-  return m[s]||"#F1EFE8";
-}
-
-function toast(msg){
-  var t=document.getElementById("toast");
-  t.textContent=msg;t.classList.add("show");
-  setTimeout(function(){t.classList.remove("show");},3000);
-}
+// ── HELPERS ──
+function toast(m){var t=document.getElementById("toast");t.innerHTML=m;t.classList.add("show");setTimeout(function(){t.classList.remove("show");},3000);}
 window.toast=toast;
-
-function h(str){return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function skc(s){var m={Speaking:"#E1F5EE",Writing:"#EEEDFE",Reading:"#FAEEDA",Listening:"#FAECE7",speaking:"#E1F5EE",writing:"#EEEDFE"};return m[s]||"#F1EFE8";}
+function timeAgo(ts){var d=Date.now()-ts;if(d<60000)return "just now";if(d<3600000)return Math.floor(d/60000)+"m ago";if(d<86400000)return Math.floor(d/3600000)+"h ago";return Math.floor(d/86400000)+"d ago";}
 
 // ── AUTH ──
-document.getElementById("gsign").onclick=function(){
-  signInWithPopup(auth,prov).catch(function(e){toast("Error: "+e.message);});
-};
+document.getElementById("gsign").onclick=function(){signInWithPopup(auth,prov).catch(function(e){toast("Error: "+e.message);});};
 document.getElementById("sob").onclick=function(){signOut(auth).then(function(){location.reload();});};
 document.getElementById("rs").onclick=function(){setRole("student");};
 document.getElementById("rt2").onclick=function(){setRole("teacher");};
 
 onAuthStateChanged(auth,async function(user){
-  if(!user){
-    document.getElementById("auth").style.display="flex";
-    document.getElementById("app").style.display="none";
-    document.getElementById("role").style.display="none";
-    return;
-  }
+  if(!user){document.getElementById("auth").style.display="flex";document.getElementById("app").style.display="none";document.getElementById("role").style.display="none";return;}
   CU=user;
   document.getElementById("auth").style.display="none";
   document.getElementById("uav").src=user.photoURL||"";
   document.getElementById("uname").textContent=(user.displayName||"").split(" ")[0];
   var snap=await get(ref(db,"users/"+user.uid));
-  if(!snap.exists()||!snap.val().role){
-    document.getElementById("role").style.display="flex";
-  } else {
-    UP=snap.val();myGid=UP.groupId||null;myGname=UP.groupName||null;
-    launchApp(UP.role);
-  }
+  if(!snap.exists()||!snap.val().role){document.getElementById("role").style.display="flex";}
+  else{UP=snap.val();myGid=UP.groupId||null;myGname=UP.groupName||null;launchApp(UP.role);}
 });
 
 async function setRole(role){
   await set(ref(db,"users/"+CU.uid),{role:role,name:CU.displayName,email:CU.email,photo:CU.photoURL||"",uid:CU.uid,createdAt:Date.now()});
-  UP={role:role,name:CU.displayName};
-  document.getElementById("role").style.display="none";
-  launchApp(role);
+  UP={role:role,name:CU.displayName};document.getElementById("role").style.display="none";launchApp(role);
 }
 
 function launchApp(role){
-  var app=document.getElementById("app");
-  app.style.display="flex";app.style.flexDirection="column";
+  var app=document.getElementById("app");app.style.display="flex";app.style.flexDirection="column";
   if(role==="teacher"){renderTeacher();}
-  else{renderStudent();setTimeout(loadNotifs,1200);setTimeout(loadCoins,1200);}
+  else{renderStudent();setTimeout(loadNotifs,1000);setTimeout(loadCoins,1000);}
 }
 
 // ── AI ──
-async function askAI(msg,system){
-  chatHist.push({role:"user",content:msg});
+async function askAI(msg,sys,hist){
+  var messages=hist?[...hist,{role:"user",content:msg}]:[{role:"user",content:msg}];
   try{
     var res=await fetch("https://api.anthropic.com/v1/messages",{
       method:"POST",
       headers:{"Content-Type":"application/json","x-api-key":AKEY,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
-      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:600,system:system||AI_SYSTEM,messages:chatHist})
+      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:500,system:sys||"You are a friendly English learning assistant for 7th grade students. Be warm, encouraging, concise.",messages:messages})
     });
     var data=await res.json();
-    var reply=(data.content&&data.content[0]&&data.content[0].text)||"I am here to help! Try asking about learning strategies.";
-    chatHist.push({role:"assistant",content:reply});
-    return reply;
-  }catch(e){return "Sorry, I am having trouble connecting right now. Please try again!";}
-}
-
-async function askAIOnce(msg,system){
-  try{
-    var res=await fetch("https://api.anthropic.com/v1/messages",{
-      method:"POST",
-      headers:{"Content-Type":"application/json","x-api-key":AKEY,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
-      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:600,system:system||AI_SYSTEM,messages:[{role:"user",content:msg}]})
-    });
-    var data=await res.json();
-    return (data.content&&data.content[0]&&data.content[0].text)||"";
-  }catch(e){return "";}
+    return (data.content&&data.content[0]&&data.content[0].text)||"I am here to help!";
+  }catch(e){return "Could not connect. Check your API key.";}
 }
 
 window.sendChat=async function(){
-  var inp=document.getElementById("chat-inp");
-  var msg=inp?inp.value.trim():"";if(!msg)return;
-  inp.value="";
+  var inp=document.getElementById("chat-inp");if(!inp)return;
+  var msg=inp.value.trim();if(!msg)return;inp.value="";
   var msgs=document.getElementById("chat-msgs");if(!msgs)return;
-  msgs.innerHTML+='<div class="msg user">'+h(msg)+'</div>';
-  msgs.innerHTML+='<div class="msg ai" id="ai-typing">Thinking...</div>';
+  msgs.innerHTML+='<div class="msg me">'+esc(msg)+'</div>';
+  msgs.innerHTML+='<div class="msg ai" id="ai-typing">...</div>';
   msgs.scrollTop=msgs.scrollHeight;
-  var reply=await askAI(msg);
-  var el=document.getElementById("ai-typing");
-  if(el)el.outerHTML='<div class="msg ai">'+reply+'</div>';
+  chatHist.push({role:"user",content:msg});
+  var reply=await askAI(msg,"You are a friendly English learning assistant for 7th grade students on LearnPath. Help with learning goals, product ideas, and English skills. Be warm, encouraging, and concise.",chatHist.slice(-8));
+  chatHist.push({role:"assistant",content:reply});
+  var el=document.getElementById("ai-typing");if(el)el.outerHTML='<div class="msg ai">'+reply+'</div>';
   msgs.scrollTop=msgs.scrollHeight;
 };
 
-function chatHTML(placeholder){
+function chatHTML(ph){
   return '<div class="chat-wrap">'
-    +'<div class="chat-msgs" id="chat-msgs"><div class="msg ai">Hi! I am your LearnPath assistant. Ask me anything about learning English, your goals, or how to get started!</div></div>'
-    +'<div class="chat-in"><input id="chat-inp" placeholder="'+(placeholder||"Ask me anything...")+'" onkeydown="if(event.key===\'Enter\')sendChat()"><button class="btn btp" onclick="sendChat()">Send</button></div>'
+    +'<div class="chat-msgs" id="chat-msgs"><div class="msg ai">Hi! I am your LearnPath assistant. Ask me anything about your English project, goals, or ideas!</div></div>'
+    +'<div class="chat-in"><input id="chat-inp" placeholder="'+(ph||"Ask anything...")+'" onkeydown="if(event.key===\'Enter\')sendChat()"><button class="btn btp" onclick="sendChat()">Send</button></div>'
     +'</div>';
 }
 
@@ -468,66 +433,49 @@ function chatHTML(placeholder){
 async function loadCoins(){
   if(!CU)return;
   var snap=await get(ref(db,"coins/"+CU.uid));
-  userCoins=snap.exists()?snap.val():0;
-  updateCoinsBadge();
+  userCoins=snap.exists()?parseInt(snap.val()):0;
+  document.getElementById("coins-count").textContent=userCoins;
 }
 
-function updateCoinsBadge(){
-  var el=document.getElementById("coins-count");
-  if(el)el.textContent=userCoins;
-}
-
-async function addCoin(reason){
+async function addCoin(){
   userCoins++;
   await set(ref(db,"coins/"+CU.uid),userCoins);
-  updateCoinsBadge();
-  toast("You earned a coin! Total: "+userCoins+" &#127881;");
-  if(userCoins%3===0)setTimeout(function(){toast("You have "+userCoins+" coins! Open the coins tab to spin for a sticker!");},2000);
+  document.getElementById("coins-count").textContent=userCoins;
+  toast("&#127881; +1 coin! You have "+userCoins+" now.");
 }
 
 window.openCoins=function(){
-  var mc=document.getElementById("mc");
-  setNav("profile");
-  var stickers=["🌟","🔥","💎","🚀","🎯","🏆","⚡","🎨","📚","🎵","🌈","💪"];
+  var mc=document.getElementById("mc");setNav("profile");
+  var stickers=["&#127775;","&#128293;","&#128142;","&#128640;","&#127919;","&#127942;","&#9889;","&#127912;","&#128218;","&#127926;","&#127756;","&#128170;","&#127968;","&#129351;","&#127873;"];
   var earned=Math.floor(userCoins/3);
-  var html='<div class="pt">My Coins &amp; Stickers</div>';
-  html+='<div class="ps">Earn coins by making comments on classmates\' work. Every 3 coins = a new sticker!</div>';
-  html+='<div class="coin-card">';
-  html+='<div class="coin-big">&#127881;</div>';
-  html+='<div style="text-align:center;font-size:32px;font-weight:800;color:var(--a)">'+userCoins+'</div>';
-  html+='<div style="text-align:center;font-size:14px;color:var(--tm);margin-top:4px">coins collected</div>';
-  if(userCoins>=3){
-    html+='<div style="background:var(--a);color:#fff;border-radius:var(--rs);padding:10px;text-align:center;margin-top:12px;cursor:pointer;font-weight:700" onclick="spinSticker()">Reveal a Sticker (costs 3 coins)!</div>';
-  } else {
-    html+='<div style="text-align:center;font-size:13px;color:var(--tm);margin-top:10px">Earn '+(3-userCoins)+" more coin"+(3-userCoins===1?"":"s")+" to reveal a sticker!</div>";
-  }
+  var html='<div class="pt">Coins &amp; Stickers</div>';
+  html+='<div class="ps">Comment on a classmate\'s work to earn coins. Every 3 coins unlocks a sticker!</div>';
+  html+='<div class="card" style="text-align:center;padding:20px">';
+  html+='<div style="font-size:42px;margin-bottom:6px">&#127881;</div>';
+  html+='<div style="font-size:36px;font-weight:800;color:var(--a)">'+userCoins+'</div>';
+  html+='<div style="font-size:13px;color:var(--tm);margin-bottom:14px">coins collected</div>';
+  if(userCoins>=3){html+='<button class="btn btf" style="background:var(--a);color:#fff" onclick="spendCoins()">Unlock a sticker (3 coins)</button>';}
+  else{html+='<div style="font-size:13px;color:var(--tm)">Earn '+(3-userCoins)+" more to unlock a sticker</div>";}
   html+='</div>';
-  html+='<div class="ctitle mt10">My Sticker Collection</div>';
+  html+='<div class="card"><div class="ctitle" style="margin-bottom:10px">My Sticker Collection</div>';
   html+='<div class="sticker-grid">';
-  stickers.forEach(function(s,i){
-    var isEarned=i<earned;
-    html+='<div class="sticker'+(isEarned?" earned":" locked")+'" title="'+(isEarned?"Earned!":"Locked")+'">'+s+'</div>';
-  });
-  html+='</div>';
+  stickers.forEach(function(s,i){html+='<div class="sticker'+(i<earned?" earned":" locked")+'">'+s+'</div>';});
+  html+='</div></div>';
   mc.innerHTML=html;
 };
 
-window.spinSticker=async function(){
-  if(userCoins<3){toast("You need at least 3 coins!");return;}
-  userCoins-=3;
-  await set(ref(db,"coins/"+CU.uid),userCoins);
-  updateCoinsBadge();
-  toast("You revealed a new sticker! Keep earning coins for more!");
-  openCoins();
+window.spendCoins=async function(){
+  if(userCoins<3){toast("Not enough coins!");return;}
+  userCoins-=3;await set(ref(db,"coins/"+CU.uid),userCoins);
+  document.getElementById("coins-count").textContent=userCoins;
+  toast("New sticker unlocked!");openCoins();
 };
 
-// ── STUDENT APP ──
+// ── STUDENT NAV ──
 var SNAV=[
   {id:"home",l:"Home",i:'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>'},
+  {id:"feed",l:"Feed",i:'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>'},
   {id:"plan",l:"My Plan",i:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>'},
-  {id:"class",l:"Class",i:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/>'},
-  {id:"resources",l:"Resources",i:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>'},
-  {id:"progress",l:"Progress",i:'<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>'},
   {id:"profile",l:"Profile",i:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'}
 ];
 
@@ -536,14 +484,14 @@ function renderStudent(){
     return '<button class="ni" id="nav-'+n.id+'" onclick="go(\''+n.id+'\')">'
       +'<svg viewBox="0 0 24 24">'+n.i+'</svg>'+n.l+'</button>';
   }).join("");
-  checkAndLoad();
+  loadContractAndStart();
 }
 
-async function checkAndLoad(){
-  var snap=await get(ref(db,"contracts/"+CU.uid));
+async function loadContractAndStart(){
   var usnap=await get(ref(db,"users/"+CU.uid));
   if(usnap.exists()){var u=usnap.val();myGid=u.groupId||null;myGname=u.groupName||null;}
-  if(snap.exists()&&snap.val().status==="approved")cSteps=snap.val().steps||[];
+  var snap=await get(ref(db,"contracts/"+CU.uid));
+  contractData=snap.exists()?snap.val():null;
   go("home");
 }
 
@@ -555,595 +503,282 @@ function setNav(id){
 window.go=function(page){
   setNav(page);
   document.getElementById("mc").innerHTML='<div class="loading">Loading...</div>';
-  var pages={home:renderHome,plan:renderPlan,class:renderClass,resources:renderResources,progress:renderProgress,profile:function(){renderProfile(CU.uid,true);}};
+  var pages={home:renderHome,feed:renderFeed,plan:renderPlan,profile:function(){renderProfile(CU.uid,true);}};
   if(pages[page])pages[page]();else renderHome();
 };
 
-// ── HOME ──
+// ── PAGE 1: HOME ──
 async function renderHome(){
   var mc=document.getElementById("mc");
   var snap=await get(ref(db,"contracts/"+CU.uid));
-  var approved=snap.exists()&&snap.val().status==="approved";
+  contractData=snap.exists()?snap.val():null;
+  var approved=contractData&&contractData.status==="approved";
   var firstName=(CU.displayName||"").split(" ")[0];
-  var html="";
-  if(approved){
-    var c=snap.val();cSteps=c.steps||[];
-    var done=cSteps.filter(function(_,i){return sDone[i];}).length;
-    var pct=cSteps.length?Math.round(done/cSteps.length*100):0;
-    html+='<div class="card" style="background:linear-gradient(135deg,var(--pl),var(--tl));border:none">';
-    html+='<div style="font-size:22px;font-weight:800;margin-bottom:4px">Hey, '+h(firstName)+'! &#128075;</div>';
-    html+='<div style="font-size:14px;color:var(--tm);margin-bottom:14px">You are working on <strong>'+h(c.evidence||"")+'</strong>. Keep going!</div>';
-    html+='<div style="background:rgba(255,255,255,.7);border-radius:10px;padding:12px;margin-bottom:14px">';
-    html+='<div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:13px;font-weight:700">My progress</span><span style="font-size:13px;font-weight:700;color:var(--t)">'+pct+'%</span></div>';
-    html+='<div class="pbw" style="margin:0"><div class="pbf" style="width:'+pct+'%"></div></div></div>';
-    html+='<div style="display:flex;gap:9px">';
-    html+='<button class="btn btg" style="flex:1" onclick="go(\'progress\')">My To-Do List</button>';
-    html+='<button class="btn btp" style="flex:1" onclick="go(\'class\')">My Class</button>';
-    html+='</div></div>';
-    html+='<div class="card">';
-    html+='<div class="ctitle">Want to change direction?</div>';
-    html+='<div style="font-size:13px;color:var(--tm);margin-bottom:12px">Retake the quiz and set a new plan whenever you are ready.</div>';
-    html+='<button class="btn bts btf" onclick="startQuiz()">Retake Discovery Quiz</button>';
-    html+='</div>';
-  } else {
-    html+='<div class="card" style="background:linear-gradient(135deg,var(--pl),var(--tl));border:none;text-align:center;padding:28px 20px">';
-    html+='<div style="font-size:40px;margin-bottom:10px">&#127775;</div>';
-    html+='<div style="font-size:22px;font-weight:800;margin-bottom:6px">Welcome to LearnPath, '+h(firstName)+'!</div>';
-    html+='<div style="font-size:14px;color:var(--tm);margin-bottom:20px">Start by discovering your learning style. It only takes 2 minutes!</div>';
-    html+='<button class="btn btp btf" onclick="startQuiz()" style="font-size:16px;padding:13px 20px">Discover My Learning Style &#127775;</button>';
-    html+='</div>';
+
+  var html='<div style="font-size:18px;font-weight:700;margin-bottom:14px">Hey, '+esc(firstName)+" &#128075;</div>";
+
+  // AGENDA BLOCK
+  html+='<div class="card" style="margin-bottom:10px">';
+  html+='<div style="font-size:13px;font-weight:700;color:var(--tm);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;font-size:11px">My Agenda</div>';
+  html+='<div class="agenda-wrap">';
+
+  // Block 1: Get ideas
+  html+='<div class="agenda-block" onclick="go(\'plan\')" style="border-color:var(--p)">';
+  html+='<div class="ab-icon">&#128161;</div>';
+  html+='<div><div class="ab-title">Get Ideas</div><div class="ab-sub">Find your project</div></div>';
+  html+='</div>';
+
+  // Block 2: Today's agenda
+  var todayLabel="No plan yet";
+  var todayWeek=null;
+  if(approved&&contractData.weeks){
+    var now=Date.now();
+    contractData.weeks.forEach(function(w,i){
+      if(w.startDate&&w.endDate&&now>=w.startDate&&now<=w.endDate)todayWeek=i;
+    });
+    if(todayWeek!==null){
+      todayLabel="Week "+(todayWeek+1)+": "+( contractData.weeks[todayWeek].goal||"in progress");
+    } else if(contractData.weeks[0]){
+      todayLabel=contractData.weeks[0].goal||"Start week 1";
+    }
   }
-  html+='<div class="card"><div class="ctitle">&#128172; Chat with your AI Assistant</div>'+chatHTML("Ask me anything about English learning...")+'</div>';
+  html+='<div class="agenda-block" onclick="go(\'plan\')" style="border-color:var(--t)">';
+  html+='<div class="ab-icon">&#128197;</div>';
+  html+='<div><div class="ab-title">Today</div><div class="ab-sub">'+esc(todayLabel)+'</div></div>';
+  html+='</div>';
+
+  // Block 3: Overall plan
+  var overallLabel=approved?"Active plan":"Set up plan";
+  html+='<div class="agenda-block" onclick="go(\'plan\')" style="border-color:var(--a)">';
+  html+='<div class="ab-icon">&#127919;</div>';
+  html+='<div><div class="ab-title">My Plan</div><div class="ab-sub">'+esc(overallLabel)+'</div></div>';
+  html+='</div>';
+
+  html+='</div>';// end agenda-wrap
+
+  if(approved){
+    var done=0,total=0;
+    if(contractData.weeks)contractData.weeks.forEach(function(w){if(w.tasks)w.tasks.forEach(function(t){total++;if(t.done)done++;});});
+    if(total>0){
+      var pct=Math.round(done/total*100);
+      html+='<div style="margin-top:8px">';
+      html+='<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--tm);margin-bottom:4px"><span>Overall progress</span><span style="color:var(--t);font-weight:700">'+pct+'%</span></div>';
+      html+='<div class="pbw" style="margin:0"><div class="pbf" style="width:'+pct+'%"></div></div></div>';
+    }
+    html+='<button class="btn bts btf" style="margin-top:10px;font-size:12px" onclick="go(\'feed\')">See what friends are doing &#8594;</button>';
+  }
+  html+='</div>'; // end card
+
+  // AI chat
+  html+='<div class="card"><div style="font-size:13px;font-weight:700;margin-bottom:8px">&#128172; Ask your assistant</div>'+chatHTML("Ask anything about your project...")+'</div>';
   mc.innerHTML=html;setNav("home");
 }
 
-// ── QUIZ ──
-window.startQuiz=function(){qI=0;qA=[];renderQuiz();setNav("home");};
-window.qNext=function(){if(qA[qI]&&qA[qI].length>0){qI++;renderQuiz();}else toast("Please pick at least one option!");};
-window.qBack=function(){if(qI>0){qI--;renderQuiz();}};
-
-function renderQuiz(){
+// ── PAGE 2: FEED ──
+function renderFeed(){
   var mc=document.getElementById("mc");
-  if(qI>=QUIZ.length){showQuizResult(mc);return;}
-  var q=QUIZ[qI];
-  var pct=Math.round(qI/QUIZ.length*100);
-  var html='<div class="pt">Discover Your Style</div>';
-  html+='<div class="qprog"><div class="qpf" style="width:'+pct+'%"></div></div>';
-  html+='<div class="qq">'+q.q+'</div>';
-  html+='<div class="qs2">'+q.s+'</div>';
-  html+='<div class="qopts" id="qopts">';
-  q.opts.forEach(function(o,i){
-    var isSel=qA[qI]&&qA[qI].some(function(a){return a.p===o.p&&a.i===i;});
-    html+='<button class="qo'+(isSel?" sel":"")+'" data-i="'+i+'" data-p="'+o.p+'">';
-    html+='<span style="font-size:20px;width:28px;flex-shrink:0;text-align:center">'+o.e+'</span>';
-    html+='<span>'+o.t+'</span></button>';
-  });
+  var html='<div class="pt">Feed</div>';
+
+  // Toggle: whole class / my group
+  html+='<div class="toggle-row">';
+  html+='<button class="toggle-btn act" id="feed-tab-class" onclick="switchFeedTab(\'class\')">Whole Class</button>';
+  html+='<button class="toggle-btn" id="feed-tab-group" onclick="switchFeedTab(\'group\')">My Group'+(myGname?" — "+myGname:"")+'</button>';
   html+='</div>';
-  html+='<div class="qnav">';
-  html+='<button class="btn bts" '+(qI===0?"disabled ":"")+' onclick="qBack()">Back</button>';
-  html+='<button class="btn btp" onclick="qNext()">Next</button>';
+
+  // Toggle: today agenda / overall plan
+  html+='<div class="toggle-row">';
+  html+='<button class="toggle-btn act" id="view-tab-posts" onclick="switchViewTab(\'posts\')">All Posts</button>';
+  html+='<button class="toggle-btn" id="view-tab-today" onclick="switchViewTab(\'today\')">Friends\' Today</button>';
+  html+='<button class="toggle-btn" id="view-tab-plan" onclick="switchViewTab(\'plan\')">Friends\' Plans</button>';
   html+='</div>';
+
+  html+='<button class="btn btp btf mb8" onclick="openNewPost()">+ Share Your Work</button>';
+  html+='<div id="feed-container"><div class="loading">Loading...</div></div>';
   mc.innerHTML=html;
-  if(!qA[qI])qA[qI]=[];
-  document.querySelectorAll(".qo").forEach(function(b){
-    b.onclick=function(){
-      var idx=parseInt(b.dataset.i);var p=b.dataset.p;
-      if(!qA[qI])qA[qI]=[];
-      var existing=qA[qI].findIndex(function(a){return a.i===idx;});
-      if(existing>=0){qA[qI].splice(existing,1);b.classList.remove("sel");}
-      else{qA[qI].push({p:p,i:idx});b.classList.add("sel");}
-    };
-  });
+  window._feedTab="class";window._viewTab="posts";
+  loadFeed();
 }
 
-function showQuizResult(mc){
-  var p=getProfile(qA);
-  if(CU)update(ref(db,"users/"+CU.uid),{profileId:p.id});
-  var html='<div class="card" style="border-top:4px solid '+p.color+';text-align:center;padding:24px 16px">';
-  html+='<div style="width:80px;height:80px;border-radius:22px;background:'+p.color+';display:flex;align-items:center;justify-content:center;font-size:40px;margin:0 auto 14px">'+p.emoji+'</div>';
-  html+='<div style="font-size:22px;font-weight:800;margin-bottom:6px">'+p.name+'</div>';
-  html+='<div style="font-size:13px;font-style:italic;color:'+p.tc+';font-weight:600;margin-bottom:10px">'+p.tagline+'</div>';
-  html+='<div style="font-size:14px;color:var(--tm);line-height:1.6;margin-bottom:16px">'+p.desc+'</div>';
-  html+='<div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:20px">';
-  p.tags.forEach(function(t){html+='<span class="tag" style="background:'+p.color+';color:'+p.tc+'">'+t+'</span>';});
-  html+='</div>';
-  html+='<button class="btn btp btf" style="font-size:16px;padding:14px 20px" onclick="go(\'plan\')">Build My Learning Plan &#128640;</button>';
-  html+='</div>';
-  mc.innerHTML=html;
-}
+window.switchFeedTab=function(tab){
+  window._feedTab=tab;
+  document.getElementById("feed-tab-class").classList.toggle("act",tab==="class");
+  document.getElementById("feed-tab-group").classList.toggle("act",tab==="group");
+  loadFeed();
+};
+window.switchViewTab=function(tab){
+  window._viewTab=tab;
+  document.getElementById("view-tab-posts").classList.toggle("act",tab==="posts");
+  document.getElementById("view-tab-today").classList.toggle("act",tab==="today");
+  document.getElementById("view-tab-plan").classList.toggle("act",tab==="plan");
+  loadFeed();
+};
 
-// ── PLAN (WIZARD) ──
-async function renderPlan(){
-  var snap=await get(ref(db,"contracts/"+CU.uid));
-  if(snap.exists()){var c=snap.val();cSteps=c.steps||[];renderPlanView(c);}
-  else{planState={step:1,skills:[],topic:"",product:"",resources:[],steps:["","",""]};renderPlanStep();}
-}
-
-function renderPlanView(c){
-  var mc=document.getElementById("mc");
-  var html='<div class="pt">My Learning Plan</div>';
-  html+='<div class="ps">'+(c.status==="approved"?"Your plan is active and approved!":"Your plan is waiting for approval.")+'</div>';
-  html+='<div class="card" style="border-color:'+(c.status==="approved"?"var(--t)":"var(--a)")+';border-width:2px">';
-  html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">';
-  html+='<span class="ctitle" style="margin:0">My Plan</span>';
-  html+='<span class="sb '+(c.status==="approved"?"sa":"sp")+'">'+(c.status==="approved"?"Active":"Pending")+'</span></div>';
-  html+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">';
-  (c.skills||[]).forEach(function(s){html+='<span class="tag" style="background:'+skColor(s)+'">'+s+'</span>';});
-  if(c.product)html+='<span class="tag" style="background:var(--gl)">'+h(c.product)+'</span>';
-  html+='</div>';
-  html+='<div style="font-size:14px;margin-bottom:4px"><strong>My topic:</strong> '+h(c.topic||"")+'</div>';
-  html+='<div style="font-size:14px;margin-bottom:4px"><strong>I want to get better at:</strong> '+h(c.focus1||"")+'</div>';
-  html+='<div style="font-size:14px;margin-bottom:4px"><strong>My goal:</strong> '+h(c.focus2||"")+'</div>';
-  html+='<div style="font-size:14px;margin-bottom:12px"><strong>I will know I succeeded when:</strong> '+h(c.focus3||"")+'</div>';
-  if((c.steps||[]).length){
-    html+='<div style="font-size:12px;font-weight:700;color:var(--th);margin-bottom:7px">MY STEPS</div>';
-    c.steps.forEach(function(s,i){html+='<div style="font-size:13px;color:var(--tm);margin-bottom:3px">'+h(String(i+1))+". "+h(s)+'</div>';});
-  }
-  if(c.teacherComment)html+='<div class="tip" style="margin-top:10px"><strong>Teacher comment:</strong> '+h(c.teacherComment)+'</div>';
-  html+='<button class="btn bts" style="margin-top:12px;font-size:12px;padding:7px 13px" onclick="clearPlan()">Start a new plan</button>';
-  html+='</div>';
-  mc.innerHTML=html;
-}
-
-function renderPlanStep(){
-  var mc=document.getElementById("mc");
-  var s=planState.step;
-  var html='<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">';
-  [1,2,3,4,5,6].forEach(function(i){
-    html+='<div style="flex:1;height:4px;border-radius:2px;background:'+(i<=s?"var(--p)":"var(--gb)")+'"></div>';
-  });
-  html+='</div>';
-  html+='<div style="font-size:12px;color:var(--th);margin-bottom:20px;text-align:right">Step '+s+' of 6</div>';
-
-  if(s===1){
-    html+='<div class="step-header"><div class="step-num">1</div><div><div class="step-title">What do you want to get better at?</div><div class="step-sub">Pick the skills you want to work on</div></div></div>';
-    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">';
-    SKILLS.forEach(function(sk){
-      var isSel=planState.skills.includes(sk.id);
-      html+='<div class="skill-card'+(isSel?" sel":"")+'" onclick="togglePlanSkill(\''+sk.id+'\')" style="border-color:'+(isSel?sk.color:"var(--gb)")+';background:'+(isSel?sk.color:"#fff")+'">';
-      html+='<div class="sk-emoji">'+sk.emoji+'</div>';
-      html+='<h3>'+sk.label+'</h3>';
-      html+='<p>'+sk.desc+'</p></div>';
+function loadFeed(){
+  var tab=window._feedTab||"class";
+  var view=window._viewTab||"posts";
+  if(view==="today"||view==="plan"){loadFriendViews(view,tab);return;}
+  onValue(ref(db,"posts"),function(snap){
+    var container=document.getElementById("feed-container");if(!container)return;
+    var posts=[];
+    if(snap.exists())snap.forEach(function(p){
+      var d=p.val();
+      if(tab==="group"&&myGid){if(d.groupId!==myGid)return;}
+      posts.push({id:p.key,...d});
     });
-    html+='</div>';
-    if(planState.skills.length>0){
-      html+='<div class="card" style="background:var(--pl);border-color:var(--p)">';
-      html+='<div style="font-size:13px;font-weight:700;color:var(--pd);margin-bottom:8px">Related to your profile, you could try...</div>';
-      var subs=[];
-      planState.skills.forEach(function(sid){var sk=SKILLS.find(function(x){return x.id===sid;});if(sk)subs=subs.concat(sk.subs);});
-      subs.slice(0,6).forEach(function(sub){html+='<span class="tag" style="background:#fff;color:var(--pd);margin:3px">'+sub+'</span>';});
-      html+='</div>';
-    }
-  }
-  else if(s===2){
-    html+='<div class="step-header"><div class="step-num">2</div><div><div class="step-title">What is your topic?</div><div class="step-sub">What do you actually care about? This is where it gets personal!</div></div></div>';
-    html+='<div class="card" style="background:var(--pl);border:none;margin-bottom:14px">';
-    html+='<div style="font-size:13px;color:var(--pd);line-height:1.6"><strong>Think about something you love outside school.</strong><br>It could be: football, music, a TV series, cooking, animals, a country, gaming, fashion, space... anything!</div>';
-    html+='</div>';
-    html+='<div class="fg"><label class="fl">My topic is...</label>';
-    html+='<input class="fi" id="plan-topic" placeholder="e.g. I love basketball / I am obsessed with Studio Ghibli films / I want to know about space..." value="'+h(planState.topic||"")+'">';
-    html+='</div>';
-    html+='<div class="tip">The more specific, the better! Instead of "music" try "the lyrics of my favourite K-pop songs".</div>';
-  }
-  else if(s===3){
-    html+='<div class="step-header"><div class="step-num">3</div><div><div class="step-title">What would you like to make?</div><div class="step-sub">Pick the type of project you will create</div></div></div>';
-    var featured=PRODUCTS.filter(function(p){return planState.skills.some(function(sid){return p.p.includes(sid);});});
-    var others=PRODUCTS.filter(function(p){return !planState.skills.some(function(sid){return p.p.includes(sid);});});
-    if(featured.length){
-      html+='<div style="font-size:12px;font-weight:700;color:var(--pd);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Recommended for you</div>';
-      html+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">';
-      featured.forEach(function(p){
-        var isSel=planState.product===p.l;
-        html+='<div class="prod-card featured'+(isSel?" sel":"")+'" onclick="planState.product=\''+p.l+'\';renderPlanStep()">';
-        html+='<div class="pe">'+p.e+'</div><div class="pl">'+p.l+'</div></div>';
-      });
-      html+='</div>';
-    }
-    if(others.length){
-      html+='<div style="font-size:12px;font-weight:700;color:var(--th);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Other options</div>';
-      html+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">';
-      others.forEach(function(p){
-        var isSel=planState.product===p.l;
-        html+='<div class="prod-card'+(isSel?" sel":"")+'" onclick="planState.product=\''+p.l+'\';renderPlanStep()">';
-        html+='<div class="pe">'+p.e+'</div><div class="pl">'+p.l+'</div></div>';
-      });
-      html+='</div>';
-    }
-  }
-  else if(s===4){
-    html+='<div class="step-header"><div class="step-num">4</div><div><div class="step-title">How will you learn?</div><div class="step-sub">Pick the tools and resources you plan to use</div></div></div>';
-    var allRes=["YouTube","BBC Learning English","VOA Learning English","Newsela","British Council","Quizlet","Podcast","Book","App","Claude AI","ChatGPT","Other websites"];
-    html+='<div class="cr" style="margin-bottom:14px">';
-    allRes.forEach(function(r){
-      var isSel=planState.resources.includes(r);
-      html+='<div class="chip'+(isSel?" sel":"")+'" onclick="togglePlanResource(\''+r+'\')">'+r+'</div>';
+    posts.reverse();
+    if(!posts.length){container.innerHTML='<div class="empty"><div class="ei">&#128247;</div><p>Nothing shared yet. Be the first!</p></div>';return;}
+    var html="";
+    posts.forEach(function(post){
+      html+=buildPostHTML(post);
     });
-    html+='</div>';
-    html+='<div class="tip">You can also use the <strong>Resources</strong> tab for direct links to safe and useful websites!</div>';
-  }
-  else if(s===5){
-    html+='<div class="step-header"><div class="step-num">5</div><div><div class="step-title">What are your three goals?</div><div class="step-sub">Be specific — the more real, the better</div></div></div>';
-    html+='<div class="fg"><label class="fl">I want to get better at...</label>';
-    html+='<input class="fi" id="plan-f1" placeholder="e.g. Using new vocabulary when I speak about my topic" value="'+h(planState.focus1||"")+'">';
-    html+='</div>';
-    html+='<div class="fg"><label class="fl">My goal for this project is...</label>';
-    html+='<input class="fi" id="plan-f2" placeholder="e.g. Create a 2-minute video about basketball tactics" value="'+h(planState.focus2||"")+'">';
-    html+='</div>';
-    html+='<div class="fg"><label class="fl">I will know I succeeded when...</label>';
-    html+='<input class="fi" id="plan-f3" placeholder="e.g. My classmates understand my video without subtitles" value="'+h(planState.focus3||"")+'">';
-    html+='</div>';
-    html+='<div style="margin-top:14px">';
-    html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">';
-    html+='<div style="font-size:13px;font-weight:700">My 3 Steps</div>';
-    html+='<button class="btn bts" style="font-size:12px;padding:5px 11px" onclick="generateSteps()">Generate with AI &#9889;</button>';
-    html+='</div>';
-    html+='<div id="steps-area">';
-    planState.steps.forEach(function(st,i){
-      html+='<input class="fi mb10" id="plan-step-'+i+'" placeholder="Step '+(i+1)+'..." value="'+h(st||"")+'">';
-    });
-    html+='</div></div>';
-  }
-  else if(s===6){
-    html+='<div class="step-header"><div class="step-num">6</div><div><div class="step-title">Here is your plan!</div><div class="step-sub">Everything looks good? Send it to your teacher!</div></div></div>';
-    var preview=buildPlanPreview();
-    html+=preview;
-    html+='<div class="fg mt10"><label class="fl">Anything you would like your teacher to know?</label>';
-    html+='<textarea class="fta" id="plan-note" placeholder="Optional: Any questions, context, or extra info for your teacher..."></textarea></div>';
-  }
-
-  html+='<div style="display:flex;gap:10px;margin-top:16px">';
-  if(s>1)html+='<button class="btn bts" style="flex:1" onclick="planBack()">Back</button>';
-  if(s<6)html+='<button class="btn btp" style="flex:1" onclick="planNext()">Next &#8250;</button>';
-  else html+='<button class="btn btg btf" onclick="submitPlan()">Send to Teacher &#128640;</button>';
-  html+='</div>';
-
-  mc.innerHTML=html;
+    container.innerHTML=html;
+  });
 }
 
-function buildPlanPreview(){
-  var html='<div class="card" style="background:var(--pl);border-color:var(--p)">';
-  html+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">';
-  planState.skills.forEach(function(sid){var sk=SKILLS.find(function(x){return x.id===sid;});if(sk)html+='<span class="tag" style="background:'+sk.color+';color:'+sk.tc+'">'+sk.emoji+' '+sk.label+'</span>';});
-  if(planState.product)html+='<span class="tag" style="background:#fff">'+h(planState.product)+'</span>';
+function buildPostHTML(post){
+  var comments=post.comments?Object.values(post.comments):[];
+  var html='<div class="post" id="post-'+post.id+'">';
+  html+='<div class="post-hdr">';
+  if(post.photo)html+='<img src="'+esc(post.photo)+'" class="post-av" onclick="viewProf(\''+esc(post.uid)+'\')">';
+  else html+='<div class="post-avp" onclick="viewProf(\''+esc(post.uid)+'\')">'+esc((post.name||"?")[0])+'</div>';
+  html+='<div style="flex:1"><div class="post-name" onclick="viewProf(\''+esc(post.uid)+'\')">'+esc(post.name||"Student")+'</div>';
+  html+='<div class="post-meta">'+esc(post.productType||"")+" &bull; "+timeAgo(post.createdAt||Date.now())+'</div></div>';
+  if(post.isDraft)html+='<span class="post-draft">Draft</span>';
   html+='</div>';
-  if(planState.topic)html+='<div style="font-size:14px;margin-bottom:4px"><strong>My topic:</strong> '+h(planState.topic)+'</div>';
-  if(planState.focus1)html+='<div style="font-size:14px;margin-bottom:4px"><strong>I want to get better at:</strong> '+h(planState.focus1)+'</div>';
-  if(planState.focus2)html+='<div style="font-size:14px;margin-bottom:4px"><strong>My goal:</strong> '+h(planState.focus2)+'</div>';
-  if(planState.focus3)html+='<div style="font-size:14px;margin-bottom:10px"><strong>I will know I succeeded when:</strong> '+h(planState.focus3)+'</div>';
-  var hasSteps=planState.steps.some(function(s){return s&&s.trim();});
-  if(hasSteps){
-    html+='<div style="font-size:12px;font-weight:700;color:var(--pd);margin-bottom:6px">MY 3 STEPS</div>';
-    planState.steps.forEach(function(s,i){if(s&&s.trim())html+='<div style="font-size:13px;color:var(--pd);margin-bottom:3px">'+(i+1)+". "+h(s)+'</div>';});
+  html+='<div class="post-body">';
+  if(post.title)html+='<div style="font-size:14px;font-weight:700;margin-bottom:5px">'+esc(post.title)+'</div>';
+  if(post.reflection)html+='<div class="post-text">'+esc(post.reflection)+'</div>';
+  if(post.link)html+='<a href="'+esc(post.link)+'" target="_blank" class="obtn mb8" style="display:inline-block">View work &#8599;</a>';
+  // self-assessment scores summary
+  if(post.rubric&&post.rubric.some(function(v){return v>0;})){
+    html+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:7px">';
+    RUBRIC.forEach(function(r,i){if(post.rubric[i]>0)html+='<span style="padding:2px 7px;border-radius:20px;font-size:10px;font-weight:700;background:var(--pl);color:var(--pd)">'+r.label.split(" ")[0]+": "+post.rubric[i]+"/4</span>";});
+    html+='</div>';
   }
+  html+='</div>';
+  // AI summary button
+  html+='<div style="padding:0 13px 8px">';
+  html+='<button class="obtn" onclick="postAISummary(\''+post.id+'\',\''+esc(post.id)+'\')" style="font-size:11px">&#10024; AI Summary</button>';
+  html+='<div id="aisumm-'+post.id+'" style="font-size:12px;color:var(--tm);margin-top:6px;display:none"></div>';
+  html+='</div>';
+  // Comments
+  if(comments.length){
+    html+='<div class="comments-section">';
+    comments.slice(-3).forEach(function(cm){
+      html+='<div class="comment"><div class="comment-name">'+esc(cm.from||"Student")+'</div>';
+      html+='<div class="comment-text">'+esc(cm.text||"")+'</div></div>';
+    });
+    if(comments.length>3)html+='<div style="font-size:11px;color:var(--th);padding:4px 0">'+( comments.length-3)+' more comments</div>';
+    html+='</div>';
+  }
+  html+='<div class="post-actions">';
+  if(post.uid!==CU.uid)html+='<button class="post-act" onclick="openComment(\''+post.id+'\')">&#128172; Comment +&#127881;</button>';
+  if(post.link)html+='<button class="post-act" onclick="window.open(\''+esc(post.link)+'\',\'_blank\')">&#128279; View</button>';
+  if(post.uid===CU.uid)html+='<button class="post-act" onclick="deletePost(\''+post.id+'\')">&#128465; Delete</button>';
+  html+='</div>';
+  // Inline comment form
+  html+='<div id="cmform-'+post.id+'" style="display:none;padding:10px 13px;border-top:1px solid var(--gb)">';
+  html+='<div style="font-size:12px;font-weight:600;margin-bottom:8px;color:var(--tm)">Leave a comment (uses rubric):</div>';
+  html+='<div id="cm-rub-'+post.id+'"></div>';
+  html+='<textarea class="fta mb8" id="cm-text-'+post.id+'" placeholder="Add your comment..." style="min-height:52px"></textarea>';
+  html+='<button class="btn btg" style="font-size:12px;padding:7px 14px" onclick="submitComment(\''+post.id+'\',\''+esc(post.uid)+'\')">Submit Comment</button>';
+  html+='</div>';
   html+='</div>';
   return html;
 }
 
-window.togglePlanSkill=function(id){
-  var idx=planState.skills.indexOf(id);
-  if(idx>=0)planState.skills.splice(idx,1);else planState.skills.push(id);
-  renderPlanStep();
-};
-
-window.togglePlanResource=function(r){
-  var idx=planState.resources.indexOf(r);
-  if(idx>=0)planState.resources.splice(idx,1);else planState.resources.push(r);
-  renderPlanStep();
-};
-
-window.planNext=function(){
-  var s=planState.step;
-  if(s===1&&planState.skills.length===0){toast("Pick at least one skill!");return;}
-  if(s===2){
-    var t=document.getElementById("plan-topic");
-    if(!t||!t.value.trim()){toast("Tell us your topic — this is the most important part!");return;}
-    planState.topic=t.value.trim();
-  }
-  if(s===3&&!planState.product){toast("Pick a product type!");return;}
-  if(s===5){
-    var f1=document.getElementById("plan-f1");
-    var f2=document.getElementById("plan-f2");
-    var f3=document.getElementById("plan-f3");
-    if(!f1||!f1.value.trim()||!f2||!f2.value.trim()||!f3||!f3.value.trim()){toast("Please fill in all three goals!");return;}
-    planState.focus1=f1.value.trim();planState.focus2=f2.value.trim();planState.focus3=f3.value.trim();
-    planState.steps=[0,1,2].map(function(i){var el=document.getElementById("plan-step-"+i);return el?el.value.trim():"";});
-  }
-  planState.step++;renderPlanStep();
-};
-
-window.planBack=function(){planState.step--;renderPlanStep();};
-
-window.generateSteps=async function(){
-  var f1=document.getElementById("plan-f1");
-  var f2=document.getElementById("plan-f2");
-  if(f1)planState.focus1=f1.value.trim();
-  if(f2)planState.focus2=f2.value.trim();
-  var sa=document.getElementById("steps-area");
-  if(sa)sa.innerHTML='<div class="loading">AI is generating your steps...</div>';
-  var prompt="A 7th grade student is learning English. Their topic: "+planState.topic+". Skills: "+planState.skills.join(", ")+". Product: "+planState.product+". Goal: "+planState.focus2+". Give them exactly 3 concrete, simple, actionable learning steps written in first person. Format: just Step 1: ... Step 2: ... Step 3: ... with no extra text.";
-  var reply=await askAIOnce(prompt);
-  var lines=reply.split("\n").filter(function(l){return l.trim();});
-  var steps=[];
-  lines.forEach(function(l){
-    var m=l.match(/Step\s*\d+[:.]\s*(.*)/i);
-    if(m&&m[1])steps.push(m[1].trim());
-  });
-  while(steps.length<3)steps.push("");
-  planState.steps=steps.slice(0,3);
-  if(sa){
-    var h2="";
-    planState.steps.forEach(function(st,i){
-      h2+='<input class="fi mb10" id="plan-step-'+i+'" placeholder="Step '+(i+1)+'..." value="'+h(st)+'">';
-    });
-    sa.innerHTML=h2;
-  }
-};
-
-window.clearPlan=async function(){if(!confirm("Remove your current plan?"))return;await remove(ref(db,"contracts/"+CU.uid));cSteps=[];planState={step:1,skills:[],topic:"",product:"",resources:[],steps:["","",""]};renderPlanStep();};
-
-window.submitPlan=async function(){
-  var note=(document.getElementById("plan-note")||{}).value||"";
-  var steps=planState.steps.filter(function(s){return s&&s.trim();});
-  if(planState.skills.length===0||!planState.topic||!planState.product){toast("Please complete all steps!");return;}
-  await set(ref(db,"contracts/"+CU.uid),{
-    skills:planState.skills.map(function(id){return id.charAt(0).toUpperCase()+id.slice(1);}),
-    topic:planState.topic,product:planState.product,
-    evidence:planState.product,
-    focus1:planState.focus1||"",focus2:planState.focus2||"",focus3:planState.focus3||"",
-    resources:planState.resources,steps:steps,note:note,
-    status:"pending",studentName:CU.displayName,studentEmail:CU.email,
-    studentPhoto:CU.photoURL||"",studentId:CU.uid,createdAt:Date.now()
-  });
-  cSteps=steps;
-  toast("Plan submitted! Your teacher will review it soon.");
-  renderPlan();
-};
-
-// ── CLASS ──
-async function renderClass(){
-  var mc=document.getElementById("mc");
-  var usnap=await get(ref(db,"users/"+CU.uid));
-  if(usnap.exists()){var u=usnap.val();myGid=u.groupId||null;myGname=u.groupName||null;}
-  var html='<div class="pt">My Class</div>';
-  html+='<div class="ps">See what everyone is working on.</div>';
-
-  // My group bubble first
-  if(myGid){
-    html+='<div class="group-bubble" style="border-color:var(--p);background:var(--pl)" onclick="openGroupPage(\''+myGid+'\',\''+h(myGname||"My Group")+'\')">';
-    html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">';
-    html+='<h3 style="color:var(--pd)">&#128101; '+h(myGname||"My Group")+'</h3>';
-    html+='<span style="font-size:12px;color:var(--p);font-weight:700">Your group &#8250;</span></div>';
-    html+='<div id="mygroup-members"><div class="loading">...</div></div>';
-    html+='</div>';
-  }
-
-  // All groups
-  html+='<div id="groups-container"><div class="loading">Loading groups...</div></div>';
-  html+='<div class="div"></div>';
-  html+='<div class="ctitle">Everyone\'s Work</div>';
-  html+='<div id="class-feed"><div class="loading">Loading...</div></div>';
-  mc.innerHTML=html;
-
-  // Load groups
-  var gsnap=await get(ref(db,"groups"));
-  var gc=document.getElementById("groups-container");
-  if(gc){
-    if(!gsnap.exists()){gc.innerHTML="";}
-    else{
-      var groupsHTML="";
-      gsnap.forEach(function(g){
-        var gd={id:g.key,...g.val()};
-        if(gd.id===myGid)return;
-        var mems=Object.values(gd.members||{});
-        groupsHTML+='<div class="group-bubble" onclick="openGroupPage(\''+gd.id+'\',\''+h(gd.name||"Group")+'\')">';
-        groupsHTML+='<h3>'+h(gd.name||"Group")+'</h3>';
-        groupsHTML+='<div class="group-members">';
-        mems.slice(0,5).forEach(function(m){groupsHTML+='<div class="member-chip">&#128100; '+h(m)+'</div>';});
-        if(mems.length>5)groupsHTML+='<div class="member-chip">+'+( mems.length-5)+' more</div>';
-        groupsHTML+='</div></div>';
-      });
-      gc.innerHTML=groupsHTML;
-    }
-  }
-
-  // Load my group members
-  if(myGid){
-    var mgsnap=await get(ref(db,"groups/"+myGid));
-    var mgel=document.getElementById("mygroup-members");
-    if(mgel&&mgsnap.exists()){
-      var mems=Object.values(mgsnap.val().members||{});
-      var mghtml='<div class="group-members">';
-      mems.forEach(function(m){mghtml+='<div class="member-chip">&#128100; '+h(m)+'</div>';});
-      mghtml+='</div>';
-      mgel.innerHTML=mghtml;
-    }
-  }
-
-  // Load class feed as posts
-  onValue(ref(db,"contracts"),function(snap){
-    var feed=document.getElementById("class-feed");if(!feed)return;
-    var items=[];
-    if(snap.exists())snap.forEach(function(c){var d=c.val();if(d.status==="approved")items.push(d);});
-    if(!items.length){feed.innerHTML='<div class="empty"><div class="ei">&#128161;</div><p>No approved plans yet.</p></div>';return;}
-    var fhtml="";
-    items.forEach(function(item){
-      fhtml+='<div class="post-card">';
-      fhtml+='<div class="post-header">';
-      if(item.studentPhoto)fhtml+='<img src="'+h(item.studentPhoto)+'" class="post-av">';
-      else fhtml+='<div class="post-avp">'+h((item.studentName||"?")[0])+'</div>';
-      fhtml+='<div><div class="post-name">'+h(item.studentName||"Student")+'</div>';
-      fhtml+='<div class="post-meta">Working on: '+h(item.product||item.evidence||"")+'</div></div>';
-      fhtml+='<button class="obtn" style="margin-left:auto" onclick="viewProf(\''+h(item.studentId||"")+'\')" >Profile</button>';
-      fhtml+='</div>';
-      fhtml+='<div class="post-body">';
-      fhtml+='<div class="post-text">&#127919; '+h(item.focus2||item.focus1||"Working on something great!")+'</div>';
-      fhtml+='<div class="post-tags">';
-      (item.skills||[]).forEach(function(s){fhtml+='<span class="post-tag" style="background:'+skColor(s)+'">'+ h(s)+'</span>';});
-      fhtml+='</div></div>';
-      fhtml+='<div class="post-actions">';
-      fhtml+='<button class="post-act" onclick="viewProf(\''+h(item.studentId||"")+'\')">&#128172; Make a Comment</button>';
-      fhtml+='</div></div>';
-    });
-    feed.innerHTML=fhtml;
-  });
-}
-
-window.viewProf=function(uid){renderProfile(uid,false);setNav("class");};
-
-window.openGroupPage=function(groupId,groupName){
-  var mc=document.getElementById("mc");
-  var html='<div class="pt">&#128101; '+h(groupName)+'</div>';
-  html+='<div class="ps">Your group space — share, chat, and learn together.</div>';
-  html+='<div style="display:flex;gap:8px;margin-bottom:14px">';
-  html+='<button class="btn btp" style="flex:1" onclick="openForum(\''+groupId+'\',\''+h(groupName)+'\')">&#128172; Group Chat</button>';
-  html+='<button class="btn bts" style="flex:1" onclick="go(\'class\')">Back</button>';
-  html+='</div>';
-  html+='<div class="card"><div class="ctitle">Group Members</div><div id="gm-list"><div class="loading">Loading...</div></div></div>';
-  html+='<div class="ctitle">What your group is making</div><div id="gw-feed"><div class="loading">Loading...</div></div>';
-  mc.innerHTML=html;
-  get(ref(db,"groups/"+groupId)).then(function(snap){
-    var el=document.getElementById("gm-list");if(!el)return;
-    if(!snap.exists()){el.innerHTML='<p style="font-size:13px;color:var(--tm)">No members yet.</p>';return;}
-    var mems=Object.entries(snap.val().members||{});
-    var mh='<div class="group-members">';
-    mems.forEach(function(m){mh+='<div class="member-chip" style="cursor:pointer" onclick="viewProf(\''+m[0]+'\')">&#128100; '+h(m[1])+'</div>';});
-    mh+='</div>';
-    el.innerHTML=mh;
-  });
+function loadFriendViews(view,tab){
+  var container=document.getElementById("feed-container");if(!container)return;
   get(ref(db,"contracts")).then(function(snap){
-    var el=document.getElementById("gw-feed");if(!el)return;
-    if(!snap.exists()){el.innerHTML='<div class="empty"><div class="ei">&#128161;</div><p>Nothing yet.</p></div>';return;}
-    get(ref(db,"groups/"+groupId)).then(function(gsnap){
-      var memberIds=Object.keys(gsnap.exists()?gsnap.val().members||{}:{});
-      var items=[];snap.forEach(function(c){var d=c.val();if(d.status==="approved"&&memberIds.includes(d.studentId))items.push(d);});
-      if(!items.length){el.innerHTML='<div class="empty"><div class="ei">&#128161;</div><p>No approved plans yet.</p></div>';return;}
-      var fh="";
-      items.forEach(function(item){
-        fh+='<div class="post-card">';
-        fh+='<div class="post-header">';
-        if(item.studentPhoto)fh+='<img src="'+h(item.studentPhoto)+'" class="post-av">';
-        else fh+='<div class="post-avp">'+h((item.studentName||"?")[0])+'</div>';
-        fh+='<div><div class="post-name">'+h(item.studentName||"Student")+'</div>';
-        fh+='<div class="post-meta">'+h(item.product||item.evidence||"")+'</div></div>';
-        fh+='<button class="obtn" style="margin-left:auto" onclick="viewProf(\''+h(item.studentId||"")+'\')">Profile</button>';
-        fh+='</div>';
-        fh+='<div class="post-body"><div class="post-text">'+h(item.focus2||item.focus1||"")+'</div></div>';
-        fh+='<div class="post-actions"><button class="post-act" onclick="viewProf(\''+h(item.studentId||"")+'\')">&#128172; Make a Comment</button></div>';
-        fh+='</div>';
-      });
-      el.innerHTML=fh;
+    if(!snap.exists()){container.innerHTML='<div class="empty"><div class="ei">&#128203;</div><p>No plans yet.</p></div>';return;}
+    var html="";
+    snap.forEach(function(c){
+      var d=c.val();if(d.status!=="approved")return;
+      if(tab==="group"&&myGid){var gid=null;get(ref(db,"users/"+c.key)).then(function(u){if(u.exists()&&u.val().groupId!==myGid)return;});}
+      html+='<div class="post" style="margin-bottom:10px">';
+      html+='<div class="post-hdr">';
+      if(d.studentPhoto)html+='<img src="'+esc(d.studentPhoto)+'" class="post-av" onclick="viewProf(\''+esc(d.studentId||"")+'\')">';
+      else html+='<div class="post-avp" onclick="viewProf(\''+esc(d.studentId||"")+'\')">'+esc((d.studentName||"?")[0])+'</div>';
+      html+='<div><div class="post-name">'+esc(d.studentName||"Student")+'</div><div class="post-meta">'+esc(d.productType||d.product||"")+'</div></div></div>';
+      html+='<div class="post-body">';
+      if(view==="today"&&d.weeks){
+        var now=Date.now();var tw=null;
+        d.weeks.forEach(function(w,i){if(w.startDate&&w.endDate&&now>=w.startDate&&now<=w.endDate)tw=i;});
+        if(tw!==null){html+='<div style="font-size:13px"><strong>Today (Week '+(tw+1)+'):</strong> '+esc(d.weeks[tw].goal||"")+'</div>';}
+      } else {
+        if(d.weeks)d.weeks.forEach(function(w,i){html+='<div style="font-size:12px;margin-bottom:3px;color:var(--tm)"><strong>Week '+(i+1)+':</strong> '+esc(w.goal||"")+'</div>';});
+      }
+      html+='</div></div>';
     });
-  });
-};
-
-// ── RESOURCES ──
-function renderResources(){
-  var mc=document.getElementById("mc");
-  var html='<div class="pt">Resources</div>';
-  html+='<div class="ps">Useful links, tools, and materials — all in one place.</div>';
-  RESOURCES.forEach(function(cat){
-    html+='<div class="res-cat"><div class="res-cat-title">'+cat.cat+'</div>';
-    cat.links.forEach(function(lnk){
-      html+='<a href="'+lnk.url+'" target="_blank" class="res-link">';
-      html+='<span class="rl-icon">'+lnk.icon+'</span>';
-      html+='<div><div class="rl-name">'+lnk.name+'</div><div class="rl-desc">'+lnk.desc+'</div></div>';
-      html+='</a>';
-    });
-    html+='</div>';
-  });
-  html+='<div class="div"></div>';
-  html+='<div class="ctitle">Share a Resource with Your Class</div>';
-  html+='<div class="card">';
-  html+='<div class="fg"><label class="fl">What is it called?</label><input class="fi" id="rtitle" placeholder="e.g. A great YouTube channel about grammar"></div>';
-  html+='<div class="fg"><label class="fl">Link</label><input class="fi" id="rlink" placeholder="https://..."></div>';
-  html+='<div class="fg"><label class="fl">Why is it useful?</label><textarea class="fta" id="rwhy" placeholder="Tell your classmates why you recommend this..."></textarea></div>';
-  html+='<button class="btn btp btf" onclick="addRes()">Share with Class</button>';
-  html+='</div>';
-  html+='<div class="ctitle" style="margin-top:8px">Shared by Your Class</div>';
-  html+='<div id="res-list"><div class="loading">Loading...</div></div>';
-  mc.innerHTML=html;
-  onValue(ref(db,"resources"),function(snap){
-    var l=document.getElementById("res-list");if(!l)return;
-    if(!snap.exists()){l.innerHTML='<div class="empty"><div class="ei">&#128279;</div><p>Nothing shared yet!</p></div>';return;}
-    var items=[];snap.forEach(function(c){items.push({id:c.key,...c.val()});});items.reverse();
-    var rh="";
-    items.forEach(function(item){
-      rh+='<a href="'+h(item.link||"#")+'" target="_blank" class="res-link" style="margin-bottom:6px">';
-      rh+='<span class="rl-icon">&#128279;</span>';
-      rh+='<div style="flex:1"><div class="rl-name">'+h(item.title||"Resource")+'</div>';
-      rh+='<div class="rl-desc">'+h(item.why||"")+'</div>';
-      rh+='<div style="font-size:11px;color:var(--th);margin-top:2px">Shared by '+h(item.addedBy||"Student")+'</div></div>';
-      rh+='</a>';
-    });
-    l.innerHTML=rh;
+    container.innerHTML=html||'<div class="empty"><div class="ei">&#128203;</div><p>Nothing to show.</p></div>';
   });
 }
 
-window.addRes=async function(){
-  var title=((document.getElementById("rtitle")||{}).value||"").trim();
-  var link=((document.getElementById("rlink")||{}).value||"").trim();
-  var why=((document.getElementById("rwhy")||{}).value||"").trim();
-  if(!title||!why){toast("Please add a title and a reason!");return;}
-  await push(ref(db,"resources"),{title:title,link:link,why:why,addedBy:CU.displayName,addedById:CU.uid,createdAt:Date.now()});
-  toast("Resource shared!");
-  document.getElementById("rtitle").value="";
-  document.getElementById("rlink").value="";
-  document.getElementById("rwhy").value="";
+window.postAISummary=async function(postId,id){
+  var el=document.getElementById("aisumm-"+id);if(!el)return;
+  el.style.display="block";el.textContent="Generating summary...";
+  var snap=await get(ref(db,"posts/"+postId));
+  if(!snap.exists()){el.textContent="Post not found.";return;}
+  var post=snap.val();
+  var comments=post.comments?Object.values(post.comments):[];
+  var ctx="Post by "+post.name+": "+post.title+"\nReflection: "+post.reflection+"\n";
+  if(post.rubric)RUBRIC.forEach(function(r,i){if(post.rubric[i])ctx+=r.label+": "+post.rubric[i]+"/4\n";});
+  comments.forEach(function(cm){ctx+="Comment from "+cm.from+": "+cm.text+"\n";if(cm.rubric)RUBRIC.forEach(function(r,i){if(cm.rubric&&cm.rubric[i])ctx+=r.label+": "+cm.rubric[i]+"/4\n";});});
+  var reply=await askAI("Summarize this student's work and feedback in 2-3 sentences. Be encouraging and specific.\n\n"+ctx,"You are a supportive English teacher assistant. Write short, warm, specific summaries for 7th grade students.");
+  el.innerHTML='<div style="background:var(--pl);border-radius:var(--rs);padding:8px 10px;color:var(--pd)">'+esc(reply)+'</div>';
 };
 
-// ── PROGRESS ──
-function renderProgress(){
+window.openNewPost=function(){
   var mc=document.getElementById("mc");
-  var done=cSteps.filter(function(_,i){return sDone[i];}).length;
-  var pct=cSteps.length?Math.round(done/cSteps.length*100):0;
-  var html='<div class="pt">My Progress</div>';
-  html+='<div class="ps">Track your steps and share your work.</div>';
-  html+='<div class="card">';
-  html+='<div style="display:flex;justify-content:space-between;margin-bottom:5px"><span class="ctitle" style="margin:0">My Steps</span><span style="font-size:13px;font-weight:700;color:var(--t)">'+pct+'% done</span></div>';
-  html+='<div class="pbw"><div class="pbf" style="width:'+pct+'%"></div></div>';
-  if(cSteps.length){
-    cSteps.forEach(function(s,i){
-      html+='<div class="step-item'+(sDone[i]?" done":"")+'" onclick="toggleStep('+i+')">';
-      html+='<div style="display:flex;align-items:center;gap:11px">';
-      html+='<div class="step-check'+(sDone[i]?" done":"")+'">'+( sDone[i]?"&#10003;":"")+'</div>';
-      html+='<div style="flex:1">';
-      html+='<div style="font-size:13px;font-weight:600;'+(sDone[i]?"text-decoration:line-through;color:var(--tm)":"")+'">'+(i+1)+'. '+h(s)+'</div>';
-      html+='</div></div></div>';
-    });
-  } else {
-    html+='<div class="empty"><div class="ei">&#128203;</div><p>Submit your plan first to see your steps here!</p></div>';
-  }
-  html+='</div>';
-  html+='<div class="card"><div class="ctitle">Share Your Work</div>';
-  html+='<div style="font-size:13px;color:var(--tm);margin-bottom:12px">Upload a link to your work — Google Drive, YouTube, Canva, or any other platform.</div>';
-  html+='<div style="background:var(--pl);border-radius:var(--rs);padding:10px;font-size:12px;color:var(--pd);margin-bottom:12px;line-height:1.6">';
-  html+='<strong>How to share a link:</strong><br>';
-  html+='&#8226; <strong>Google Drive:</strong> Open your file &#8594; Share &#8594; Copy link<br>';
-  html+='&#8226; <strong>YouTube:</strong> Open your video &#8594; Share &#8594; Copy link<br>';
-  html+='&#8226; <strong>Canva:</strong> Share &#8594; Copy link<br>';
-  html+='&#8226; <strong>Any website:</strong> Copy the URL from your browser address bar</div>';
-  html+='<div class="fg"><label class="fl">What is this piece of work?</label><input class="fi" id="ev-title" placeholder="e.g. My podcast episode about basketball"></div>';
-  html+='<div class="fg"><label class="fl">Paste your link here</label><input class="fi" id="ev-link" placeholder="https://..."></div>';
-  html+='<button class="btn btp btf" onclick="uploadWork()">Share My Work</button></div>';
-  html+='<div class="card" id="assess-card" style="display:none">';
-  html+='<div class="ctitle">Rate Your Own Work</div>';
-  html+='<div style="font-size:13px;color:var(--tm);margin-bottom:12px">Be honest — this is just for you and your teacher!</div>';
-  html+='<div id="self-rub-rows"></div>';
-  html+='<div class="div"></div>';
-  html+='<div class="fg"><label class="fl">One thing I did well was...</label><textarea class="fta" id="ref-well"></textarea></div>';
-  html+='<div class="fg"><label class="fl">One thing I want to improve next time...</label><textarea class="fta" id="ref-imp"></textarea></div>';
-  html+='<div class="fg"><label class="fl">My next step is...</label><textarea class="fta" id="ref-next"></textarea></div>';
-  html+='<button class="btn btg btf" onclick="saveRef()">Save My Notes</button></div>';
-  html+='<div class="card"><div class="ctitle">See What Others Have Made</div>';
-  html+='<div style="font-size:13px;color:var(--tm);margin-bottom:10px">Visit a classmate\'s profile to comment on their work. You earn <strong>1 coin</strong> for every comment!</div>';
-  html+='<button class="btn btp btf" onclick="go(\'class\')">Browse Class Work &#127775;</button></div>';
-  html+='<div class="card"><div class="ctitle">My Work</div><div id="ev-list"><div class="loading">Loading...</div></div></div>';
-  mc.innerHTML=html;
-  renderRubRows("self-rub-rows",rubV,false);
-  loadMyWork();
-}
+  var wArr=[];if(contractData&&contractData.weeks)wArr=contractData.weeks;
+  var weekOpts=wArr.map(function(w,i){return '<option value="'+i+'">Week '+(i+1)+": "+(w.goal||"")+'</option>';}).join("");
 
-function renderRubRows(cid,vals,isPeer){
+  var html='<div class="pt">Share Your Work</div>';
+  html+='<div class="ps">You need to fill in the self-reflection before sharing.</div>';
+  html+='<div class="card">';
+  html+='<div class="fg"><label class="fl">Title of this piece of work</label><input class="fi" id="np-title" placeholder="e.g. My blog post about climate change"></div>';
+  html+='<div class="fg"><label class="fl">Link to your work</label><input class="fi" id="np-link" placeholder="Google Drive / YouTube / Canva..."></div>';
+  html+='<div style="font-size:11px;color:var(--tm);margin-bottom:10px;background:var(--pl);padding:8px;border-radius:var(--rs)">How to copy a link: Google Drive → Share → Copy link &bull; YouTube → Share &bull; Canva → Share → Copy link</div>';
+  html+='<div class="fg"><label class="fl">Product type</label><input class="fi" id="np-type" placeholder="e.g. Blog post, Podcast, Video..."></div>';
+  if(weekOpts)html+='<div class="fg"><label class="fl">This belongs to</label><select class="fse" id="np-week">'+weekOpts+'</select></div>';
+  html+='<div class="fg"><input type="checkbox" id="np-draft"> <label for="np-draft" style="font-size:13px;cursor:pointer"> Share as draft (for feedback before final version)</label></div>';
+  html+='<div class="divider"></div>';
+  html+='<div style="font-size:13px;font-weight:700;margin-bottom:10px">Self-Reflection</div>';
+  html+='<div class="fg"><label class="fl">Describe your work and what you learned</label><textarea class="fta" id="np-reflection" placeholder="What did you make? What went well? What was challenging? What would you improve?"></textarea></div>';
+  html+='<div id="np-rub-rows"></div>';
+  html+='<div class="fg" style="margin-top:10px"><label class="fl">One thing I did well...</label><textarea class="fta" id="np-well" style="min-height:50px"></textarea></div>';
+  html+='<div class="fg"><label class="fl">One thing I want to improve...</label><textarea class="fta" id="np-improve" style="min-height:50px"></textarea></div>';
+  html+='<div style="display:flex;gap:9px;margin-top:10px">';
+  html+='<button class="btn btp" style="flex:1" onclick="submitPost()">Share &#128640;</button>';
+  html+='<button class="btn bts" style="flex:1" onclick="go(\'feed\')">Cancel</button>';
+  html+='</div></div>';
+  mc.innerHTML=html;
+  var rubRows=document.getElementById("np-rub-rows");
+  if(rubRows)renderRubRows("np-rub-rows",[0,0,0,0,0,0],false,"setNPR");
+  window._npRub=[0,0,0,0,0,0];
+  window.setNPR=function(d,v){window._npRub[d]=v;renderRubRows("np-rub-rows",window._npRub,false,"setNPR");};
+};
+
+window.submitPost=async function(){
+  var title=((document.getElementById("np-title")||{}).value||"").trim();
+  var ref2=(document.getElementById("np-reflection")||{}).value||"";
+  if(!title||!ref2.trim()){toast("Please add a title and fill in your reflection!");return;}
+  var weekIdx=document.getElementById("np-week")?parseInt(document.getElementById("np-week").value):0;
+  await push(ref(db,"posts"),{
+    uid:CU.uid,name:CU.displayName,photo:CU.photoURL||"",
+    title:title,link:((document.getElementById("np-link")||{}).value||"").trim(),
+    productType:((document.getElementById("np-type")||{}).value||"").trim(),
+    reflection:ref2.trim(),rubric:window._npRub||[],
+    well:((document.getElementById("np-well")||{}).value||"").trim(),
+    improve:((document.getElementById("np-improve")||{}).value||"").trim(),
+    isDraft:document.getElementById("np-draft")?.checked||false,
+    weekIndex:weekIdx,groupId:myGid||"",
+    createdAt:Date.now()
+  });
+  toast("Shared!");go("feed");
+};
+
+function renderRubRows(cid,vals,isPeer,setter){
   var w=document.getElementById(cid);if(!w)return;
   var html="";
   RUBRIC.forEach(function(r,i){
@@ -1151,7 +786,6 @@ function renderRubRows(cid,vals,isPeer){
     html+='<div class="rubcdesc">'+(isPeer?PEER_Q[i]:r.q)+'</div>';
     html+='<div class="rubscale">';
     [1,2,3,4].forEach(function(n){
-      var setter=isPeer?"setPR":"setR";
       html+='<button class="rubbtn'+(vals[i]===n?" sel":"")+'" onclick="'+setter+'('+i+','+n+')">'+n+'</button>';
     });
     html+='</div><div class="rubanchor"><span>Developing</span><span>Strong</span></div>';
@@ -1161,234 +795,495 @@ function renderRubRows(cid,vals,isPeer){
   w.innerHTML=html;
 }
 
-window.setR=function(d,v){rubV[d]=v;renderRubRows("self-rub-rows",rubV,false);};
-window.setPR=function(d,v){peerV[d]=v;var cid=window._peerCid;if(cid)renderRubRows(cid,peerV,true);};
-window.toggleStep=function(i){sDone[i]=!sDone[i];renderProgress();};
-
-window.uploadWork=async function(){
-  var title=((document.getElementById("ev-title")||{}).value||"").trim();
-  var link=((document.getElementById("ev-link")||{}).value||"").trim();
-  if(!title){toast("What is this piece of work? Give it a title!");return;}
-  await push(ref(db,"evidence/"+CU.uid),{title:title,link:link,studentName:CU.displayName,studentId:CU.uid,studentPhoto:CU.photoURL||"",createdAt:Date.now()});
-  document.getElementById("assess-card").style.display="block";
-  document.getElementById("assess-card").scrollIntoView({behavior:"smooth"});
-  toast("Work shared! Now rate it.");
+window.openComment=function(postId){
+  var form=document.getElementById("cmform-"+postId);if(!form)return;
+  if(form.style.display!=="none"){form.style.display="none";return;}
+  form.style.display="block";
+  var rubId="cm-rub-"+postId;
+  window._cmRub=window._cmRub||{};
+  window._cmRub[postId]=[0,0,0,0,0,0];
+  renderRubRows(rubId,window._cmRub[postId],true,"setCMR_"+postId);
+  window["setCMR_"+postId]=function(d,v){window._cmRub[postId][d]=v;renderRubRows(rubId,window._cmRub[postId],true,"setCMR_"+postId);};
 };
 
-window.saveRef=async function(){
-  if(!rubV.some(function(v){return v>0;})){toast("Please rate at least one area!");return;}
-  await push(ref(db,"reflections/"+CU.uid),{rubric:rubV,well:((document.getElementById("ref-well")||{}).value||""),imp:((document.getElementById("ref-imp")||{}).value||""),next:((document.getElementById("ref-next")||{}).value||""),evTitle:((document.getElementById("ev-title")||{}).value||""),createdAt:Date.now()});
-  rubV=[0,0,0,0,0,0];
-  document.getElementById("assess-card").style.display="none";
-  toast("Notes saved!");loadMyWork();
+window.submitComment=async function(postId,targetUid){
+  var text=((document.getElementById("cm-text-"+postId)||{}).value||"").trim();
+  if(!text){toast("Write something!");return;}
+  await push(ref(db,"posts/"+postId+"/comments"),{
+    from:CU.displayName,fromId:CU.uid,text:text,
+    rubric:window._cmRub?window._cmRub[postId]||[]:[],createdAt:Date.now()
+  });
+  if(targetUid&&targetUid!==CU.uid){
+    await push(ref(db,"notifications/"+targetUid),{type:"comment",message:CU.displayName+" commented on your work!",read:false,createdAt:Date.now()});
+    await addCoin();
+  }
+  toast("Comment submitted! +1 coin");
+  var form=document.getElementById("cmform-"+postId);if(form)form.style.display="none";
+  loadFeed();
 };
 
-function loadMyWork(){
-  var l=document.getElementById("ev-list");if(!l)return;
-  onValue(ref(db,"evidence/"+CU.uid),function(snap){
-    if(!snap.exists()){l.innerHTML='<div class="empty"><div class="ei">&#128247;</div><p>Nothing shared yet. Upload your first piece of work!</p></div>';return;}
-    var items=[];snap.forEach(function(c){items.push({id:c.key,...c.val()});});items.reverse();
-    var wh="";
-    items.forEach(function(it){
-      var peerCount=it.peerFeedback?Object.keys(it.peerFeedback).length:0;
-      wh+='<div class="post-card">';
-      wh+='<div class="post-body" style="padding-top:12px">';
-      wh+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">';
-      wh+='<span style="font-size:14px;font-weight:700">'+h(it.title)+'</span>';
-      wh+='<div style="display:flex;gap:5px">';
-      if(peerCount)wh+='<span class="sb sa" style="font-size:10px">'+peerCount+' comments</span>';
-      if(it.link)wh+='<a href="'+h(it.link)+'" target="_blank" class="obtn">View</a>';
-      wh+='<button class="obtn" onclick="editWork(\''+it.id+'\')">Edit</button>';
-      wh+='<button class="obtn" style="color:var(--c)" onclick="deleteWork(\''+it.id+'\')">Delete</button>';
-      wh+='</div></div>';
-      wh+='<div id="edit-'+it.id+'" style="display:none;margin-top:8px">';
-      wh+='<input class="fi mb10" id="etitle-'+it.id+'" placeholder="Title">';
-      wh+='<input class="fi mb10" id="elink-'+it.id+'" placeholder="Link">';
-      wh+='<div style="display:flex;gap:8px"><button class="btn btp" style="font-size:12px;padding:6px 10px" onclick="saveWork(\''+it.id+'\')">Save</button><button class="btn bts" style="font-size:12px;padding:6px 10px" onclick="document.getElementById(\'edit-'+it.id+'\').style.display=\'none\'">Cancel</button></div></div>';
-      wh+='</div></div>';
-    });
-    l.innerHTML=wh;
-    items.forEach(function(it){
-      var et=document.getElementById("etitle-"+it.id);var el2=document.getElementById("elink-"+it.id);
-      if(et)et.value=it.title||"";if(el2)el2.value=it.link||"";
-    });
+window.deletePost=async function(postId){
+  if(!confirm("Delete this post?"))return;
+  await remove(ref(db,"posts/"+postId));toast("Deleted.");loadFeed();
+};
+window.viewProf=function(uid){renderProfile(uid,false);setNav("profile");};
+
+// ── PAGE 3: PLAN ──
+async function renderPlan(){
+  var mc=document.getElementById("mc");
+  var snap=await get(ref(db,"contracts/"+CU.uid));
+  contractData=snap.exists()?snap.val():null;
+
+  var html='<div class="pt">My Plan</div>';
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px">';
+
+  // Box 1: What are we learning
+  html+='<div class="agenda-block" style="grid-column:1/-1;min-height:70px;cursor:default;border-color:var(--p)" onclick="openUnitInfo()">';
+  html+='<div class="ab-icon">&#127979;</div>';
+  html+='<div><div class="ab-title">What are we learning?</div>';
+  html+='<div class="ab-sub" id="unit-info-sub">Tap to see the unit</div></div></div>';
+
+  // Box 2: Get project ideas
+  html+='<div class="agenda-block" onclick="go(\'quiz\')" style="border-color:var(--td)">';
+  html+='<div class="ab-icon">&#128161;</div>';
+  html+='<div><div class="ab-title">Get Project Ideas</div><div class="ab-sub">Take the quiz</div></div></div>';
+
+  // Box 3: My learning contract
+  var contractLabel="Not set up yet";var contractStyle="border-color:var(--gb)";
+  if(contractData){
+    if(contractData.status==="approved"){contractLabel="Active";contractStyle="border-color:var(--t)";}
+    else if(contractData.status==="pending"){contractLabel="Pending approval";contractStyle="border-color:var(--a)";}
+    else{contractLabel="Draft";contractStyle="border-color:var(--gb)";}
+  }
+  html+='<div class="agenda-block" onclick="openContract()" style="'+contractStyle+'">';
+  html+='<div class="ab-icon">&#128203;</div>';
+  html+='<div><div class="ab-title">My Learning Contract</div><div class="ab-sub">'+contractLabel+'</div></div></div>';
+  html+='</div>';
+
+  // Contract detail (if exists)
+  if(contractData){html+=renderContractDetail(contractData);}
+  mc.innerHTML=html;
+
+  // Load unit info
+  get(ref(db,"unitInfo")).then(function(snap){
+    var el=document.getElementById("unit-info-sub");
+    if(el&&snap.exists()&&snap.val().title)el.textContent=snap.val().title;
   });
 }
 
-window.editWork=function(id){var d=document.getElementById("edit-"+id);if(d)d.style.display=d.style.display==="none"?"block":"none";};
-window.saveWork=async function(id){
-  var t=((document.getElementById("etitle-"+id)||{}).value||"").trim();
-  var l=((document.getElementById("elink-"+id)||{}).value||"").trim();
-  if(!t){toast("Title cannot be empty!");return;}
-  await update(ref(db,"evidence/"+CU.uid+"/"+id),{title:t,link:l});
-  toast("Updated!");
-};
-window.deleteWork=async function(id){
-  if(!confirm("Delete this piece of work?"))return;
-  await remove(ref(db,"evidence/"+CU.uid+"/"+id));toast("Deleted.");
+window.openUnitInfo=async function(){
+  var snap=await get(ref(db,"unitInfo"));
+  var info=snap.exists()?snap.val():{title:"Unit info coming soon",description:"Your teacher will add this."};
+  var mc=document.getElementById("mc");
+  var html='<button class="btn bts mb8" onclick="go(\'plan\')">&#8592; Back to Plan</button>';
+  html+='<div class="card"><div style="font-size:18px;font-weight:700;margin-bottom:6px">&#127979; '+esc(info.title||"Our Unit")+'</div>';
+  if(info.description)html+='<div style="font-size:13px;line-height:1.7;color:var(--tm)">'+esc(info.description)+'</div>';
+  if(info.theme)html+='<div style="margin-top:10px"><span class="sb sa">Theme: '+esc(info.theme)+'</span></div>';
+  html+='</div>';
+  mc.innerHTML=html;
 };
 
-// ── PROFILE ──
+function renderContractDetail(c){
+  var html='<div class="card"><div class="fb mb8"><span style="font-size:14px;font-weight:700">My Learning Contract</span>';
+  if(c.status==="approved")html+='<span class="sb sa">Active</span>';
+  else if(c.status==="pending")html+='<span class="sb sp">Pending</span>';
+  else html+='<span class="sb" style="background:var(--gl);color:var(--tm)">Draft</span>';
+  html+='</div>';
+  if(c.productType)html+='<div style="font-size:13px;margin-bottom:6px"><strong>Product:</strong> '+esc(c.productType)+'</div>';
+  if(c.weakness&&c.weaknessTips){
+    html+='<div class="tip mb8"><strong>Focus skill:</strong> '+esc(c.weakness)+'</div>';
+  }
+  if(c.teacherComment)html+='<div style="background:var(--tl);border-radius:var(--rs);padding:8px 10px;font-size:12px;color:var(--td);margin-bottom:8px"><strong>Teacher:</strong> '+esc(c.teacherComment)+'</div>';
+  html+='<div class="divider"></div>';
+  // Weeks
+  var weeks=c.weeks||[{goal:"",resources:"",tasks:[]},{goal:"",resources:"",tasks:[]},{goal:"",resources:"",tasks:[]},{goal:"Present & reflect",resources:"",tasks:[]}];
+  var weekLabels=["Week 1 — Decide & Find Resources","Week 2 — Work towards goal","Week 3 — Refine & get feedback","Week 4 — Present & Final Review"];
+  weeks.forEach(function(w,i){
+    html+='<div class="week-block">';
+    var done=w.tasks?(w.tasks.filter(function(t){return t.done;}).length):0;
+    var total=w.tasks?w.tasks.length:0;
+    html+='<div class="week-header" onclick="toggleWeek('+i+')">';
+    html+='<span class="week-title">'+weekLabels[i]+'</span>';
+    html+='<span class="week-status">'+(total>0?done+"/"+total+" done":(w.goal?"&#10003;":"not set"))+'</span>';
+    html+='</div>';
+    html+='<div class="week-body" id="week-body-'+i+'">';
+    html+='<div class="fg"><label class="fl">My goal this week</label>';
+    html+='<input class="fi" id="w-goal-'+i+'" value="'+esc(w.goal||"")+'" placeholder="e.g. Find 3 sources and make a plan" onchange="saveWeekGoal('+i+')"></div>';
+    html+='<div class="fg"><label class="fl">Resources I am using</label>';
+    html+='<textarea class="fta" id="w-res-'+i+'" style="min-height:50px" placeholder="List the tools, websites, or materials you are using..." onchange="saveWeekRes('+i+')">'+esc(w.resources||"")+'</textarea></div>';
+    // Tasks
+    html+='<div style="font-size:12px;font-weight:700;color:var(--tm);margin-bottom:6px">This week\'s tasks</div>';
+    if(w.tasks&&w.tasks.length){
+      w.tasks.forEach(function(t,ti){
+        html+='<div class="step-item'+(t.done?" done":"")+'" onclick="toggleTask('+i+','+ti+')">';
+        html+='<div class="step-row"><div class="step-chk'+(t.done?" done":"")+'">'+( t.done?"&#10003;":"")+'</div>';
+        html+='<span class="step-txt'+(t.done?" done":"")+'">'+esc(t.text||"")+'</span></div></div>';
+      });
+    }
+    html+='<div style="display:flex;gap:7px;margin-top:7px">';
+    html+='<input class="fi" id="new-task-'+i+'" placeholder="Add a task..." style="flex:1">';
+    html+='<button class="btn btp" style="font-size:12px;padding:7px 12px" onclick="addTask('+i+')">Add</button>';
+    html+='</div></div></div>';
+  });
+
+  if(c.status!=="approved"){
+    html+='<button class="btn bts btf" style="margin-top:10px;font-size:12px" onclick="clearContract()">Clear contract</button>';
+  }
+  html+='</div>';
+  return html;
+}
+
+window.toggleWeek=function(i){
+  var el=document.getElementById("week-body-"+i);
+  if(el)el.classList.toggle("open");
+};
+
+window.saveWeekGoal=async function(i){
+  var val=((document.getElementById("w-goal-"+i)||{}).value||"").trim();
+  if(!contractData||!contractData.weeks)return;
+  contractData.weeks[i].goal=val;
+  await update(ref(db,"contracts/"+CU.uid),{weeks:contractData.weeks});
+};
+window.saveWeekRes=async function(i){
+  var val=((document.getElementById("w-res-"+i)||{}).value||"").trim();
+  if(!contractData||!contractData.weeks)return;
+  contractData.weeks[i].resources=val;
+  await update(ref(db,"contracts/"+CU.uid),{weeks:contractData.weeks});
+};
+window.addTask=async function(i){
+  var inp=document.getElementById("new-task-"+i);
+  var text=(inp?inp.value:"").trim();if(!text){toast("Write a task first!");return;}
+  if(!contractData||!contractData.weeks)return;
+  if(!contractData.weeks[i].tasks)contractData.weeks[i].tasks=[];
+  contractData.weeks[i].tasks.push({text:text,done:false});
+  await update(ref(db,"contracts/"+CU.uid),{weeks:contractData.weeks});
+  if(inp)inp.value="";
+  renderPlan();
+};
+window.toggleTask=async function(wi,ti){
+  if(!contractData||!contractData.weeks||!contractData.weeks[wi].tasks)return;
+  contractData.weeks[wi].tasks[ti].done=!contractData.weeks[wi].tasks[ti].done;
+  await update(ref(db,"contracts/"+CU.uid),{weeks:contractData.weeks});
+  renderPlan();
+};
+window.openContract=function(){renderPlan();document.getElementById("week-body-0")?.classList.add("open");};
+window.clearContract=async function(){if(!confirm("Clear your contract?"))return;await remove(ref(db,"contracts/"+CU.uid));contractData=null;renderPlan();};
+
+// ── QUIZ ──
+window.go=function(page){
+  setNav(page==="quiz"?"plan":page);
+  document.getElementById("mc").innerHTML='<div class="loading">Loading...</div>';
+  var pages={home:renderHome,feed:renderFeed,plan:renderPlan,quiz:startQuiz,profile:function(){renderProfile(CU.uid,true);}};
+  if(pages[page])pages[page]();else renderHome();
+};
+
+var qState={i:0,answers:[],catScores:{},weakSkills:[]};
+
+function startQuiz(){
+  qState={i:0,answers:[],catScores:{},weakSkills:[]};
+  renderQuiz();
+}
+
+function renderQuiz(){
+  var mc=document.getElementById("mc");
+  if(qState.i>=QUESTIONS.length){showQuizResult(mc);return;}
+  var q=QUESTIONS[qState.i];
+  var sel=qState.answers[qState.i]||[];
+  var pct=Math.round(qState.i/QUESTIONS.length*100);
+  var html='<button class="btn bts mb8" onclick="go(\'plan\')">&#8592; Back to Plan</button>';
+  html+='<div class="qprog"><div class="qpf" style="width:'+pct+'%"></div></div>';
+  html+='<div class="ql">Question '+(qState.i+1)+" of "+QUESTIONS.length+'</div>';
+  html+='<div class="qq">'+q.q+'</div><div class="qs2">'+q.s+'</div>';
+  html+='<div class="qopts">';
+  q.opts.forEach(function(o,i){
+    var on=sel.includes(i)&&!sel.includes("skip");
+    html+='<div class="qo'+(on?" sel":"")+'" onclick="qTog('+i+')">';
+    html+='<span style="font-size:16px;width:24px;flex-shrink:0">'+o.e+'</span>';
+    html+='<span style="flex:1">'+o.t+'</span>';
+    html+='<span class="qchk">'+(on?"&#10003;":"")+'</span></div>';
+  });
+  if(q.skipLabel){
+    var skipped=sel.includes("skip");
+    html+='<div class="qo skip-opt'+(skipped?" sel":"")+'" onclick="qSkip()" style="margin-top:4px">';
+    html+='<span style="font-size:14px;width:24px;flex-shrink:0">—</span>';
+    html+='<span style="flex:1;font-size:12px">'+q.skipLabel+'</span>';
+    html+='<span class="qchk">'+(skipped?"&#10003;":"")+'</span></div>';
+  }
+  html+='</div>';
+  html+='<div class="qnav">';
+  html+='<button class="btn bts" '+(qState.i===0?"disabled":"")+' onclick="qBack()">Back</button>';
+  html+='<button class="btn btp" '+(sel.length===0?"disabled":"")+' onclick="qNext()">'+(qState.i===QUESTIONS.length-1?"See results &#8594;":"Continue &#8594;")+'</button>';
+  html+='</div>';
+  mc.innerHTML=html;
+}
+
+window.qTog=function(i){
+  if(!qState.answers[qState.i])qState.answers[qState.i]=[];
+  var idx=qState.answers[qState.i].indexOf(i);
+  var skipIdx=qState.answers[qState.i].indexOf("skip");
+  if(skipIdx!==-1)qState.answers[qState.i].splice(skipIdx,1);
+  idx===-1?qState.answers[qState.i].push(i):qState.answers[qState.i].splice(idx,1);
+  renderQuiz();
+};
+window.qSkip=function(){
+  qState.answers[qState.i]=["skip"];renderQuiz();
+};
+window.qBack=function(){if(qState.i>0){qState.i--;renderQuiz();}};
+window.qNext=function(){
+  var q=QUESTIONS[qState.i];var sel=qState.answers[qState.i]||[];
+  if(!sel.includes("skip")){
+    if(q.id!=="weakness"){sel.forEach(function(i){if(q.opts[i]&&q.opts[i].cats)q.opts[i].cats.forEach(function(c){qState.catScores[c]=(qState.catScores[c]||0)+1;});});}
+    else{sel.forEach(function(i){if(q.opts[i]&&q.opts[i].skill)qState.weakSkills.push(q.opts[i].skill);});}
+  }
+  qState.i++;renderQuiz();
+};
+
+function showQuizResult(mc){
+  var scored=PRODUCTS.map(function(p){
+    var s=p.cats.reduce(function(acc,c){return acc+(qState.catScores[c]||0);},0);
+    return Object.assign({},p,{score:s});
+  }).sort(function(a,b){return b.score-a.score;});
+  var top3=scored.slice(0,3);
+  var rest=scored.slice(3);
+  var weakSkill=qState.weakSkills.length>0?qState.weakSkills[0]:null;
+
+  var html='<button class="btn bts mb8" onclick="go(\'plan\')">&#8592; Back</button>';
+  html+='<div class="pt">Your Results</div>';
+  html+='<div class="ps">Products that suit you — and what to work on</div>';
+  html+='<div class="card" style="border-color:var(--p);border-width:1.5px">';
+  html+='<div style="font-size:12px;font-weight:700;color:var(--pd);margin-bottom:10px">Top 3 recommendations</div>';
+  top3.forEach(function(p,i){
+    html+='<div class="prod-row'+(i===0?" chosen":"")+' prod-result-row" data-product="'+esc(p.name)+'" onclick="selectProduct(\''+esc(p.id)+'\',\''+esc(p.name)+'\')">';
+    html+='<span style="font-size:20px">'+p.e+'</span>';
+    html+='<div style="flex:1"><div style="font-size:13px;font-weight:600">'+p.name+'</div>';
+    html+='<div style="font-size:11px;color:var(--tm)">'+p.cats.slice(0,2).map(function(c){return CATS[c]||c;}).join(" · ")+'</div></div>';
+    if(i===0)html+='<span style="font-size:11px;color:var(--pd);font-weight:700">Best match</span>';
+    html+='</div>';
+  });
+  html+='</div>';
+
+  if(weakSkill){
+    var tips=SKILL_TIPS[weakSkill]||[];
+    html+='<div class="card" style="border-left:3px solid var(--c)">';
+    html+='<div style="font-size:13px;font-weight:700;margin-bottom:7px">Practise: <span style="color:var(--c)">'+CATS[weakSkill]||weakSkill+'</span></div>';
+    tips.forEach(function(t){html+='<div style="font-size:12px;color:var(--tm);margin-bottom:4px">&#8594; '+t+'</div>';});
+    html+='</div>';
+  }
+
+  // All other options collapsed
+  html+='<div class="card"><div style="font-size:12px;font-weight:700;color:var(--th);margin-bottom:8px">All other options</div>';
+  var byCat={};rest.forEach(function(p){var c=p.cats[0];if(!byCat[c])byCat[c]=[];byCat[c].push(p);});
+  Object.entries(byCat).forEach(function(entry){
+    html+='<div style="margin-bottom:8px"><div style="font-size:11px;font-weight:700;color:var(--th);margin-bottom:5px;text-transform:uppercase">'+( CATS[entry[0]]||entry[0])+'</div>';
+    html+='<div style="display:flex;flex-wrap:wrap;gap:5px">';
+    entry[1].forEach(function(p){html+='<div style="padding:4px 10px;border:1px solid var(--gb);border-radius:20px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px" onclick="selectProduct(\''+esc(p.id)+'\',\''+esc(p.name)+'\')"><span>'+p.e+'</span><span>'+p.name+'</span></div>';});
+    html+='</div></div>';
+  });
+  html+='</div>';
+
+  html+='<div id="selected-product-notice" style="display:none" class="card" style="border-color:var(--t);border-width:1.5px">';
+  html+='<div style="font-size:13px;font-weight:700;margin-bottom:6px;color:var(--td)">Selected: <span id="selected-product-name"></span></div>';
+  html+='<button class="btn btg btf" onclick="goToContract()">Build My Learning Contract &#8594;</button></div>';
+  mc.innerHTML=html;
+
+  // pre-select top
+  if(top3.length)selectProduct(top3[0].id,top3[0].name,true);
+}
+
+window._selectedProduct=null;
+window.selectProduct=function(id,name,silent){
+  window._selectedProduct={id:id,name:name,weakness:qState.weakSkills[0]||null,tips:qState.weakSkills[0]?SKILL_TIPS[qState.weakSkills[0]]:[]};
+  document.querySelectorAll(".prod-result-row").forEach(function(r){r.classList.remove("chosen");});
+  var rows=document.querySelectorAll(".prod-result-row");
+  rows.forEach(function(r){if(r.dataset.product===name)r.classList.add("chosen");});
+  var notice=document.getElementById("selected-product-notice");
+  var nameEl=document.getElementById("selected-product-name");
+  if(notice)notice.style.display="block";
+  if(nameEl)nameEl.textContent=name;
+};
+
+window.goToContract=async function(){
+  if(!window._selectedProduct){toast("Select a product first!");return;}
+  var p=window._selectedProduct;
+  // Save contract with product and 4 empty weeks
+  var weeks=[
+    {goal:"",resources:"",tasks:[],label:"Decide & find resources"},
+    {goal:"",resources:"",tasks:[],label:"Work towards my goal"},
+    {goal:"",resources:"",tasks:[],label:"Refine & get feedback"},
+    {goal:"",resources:"",tasks:[],label:"Present & final review"}
+  ];
+  await set(ref(db,"contracts/"+CU.uid),{
+    productId:p.id,productType:p.name,
+    weakness:p.weakness||"",weaknessTips:p.tips||[],
+    weeks:weeks,status:"draft",
+    studentName:CU.displayName,studentEmail:CU.email,
+    studentPhoto:CU.photoURL||"",studentId:CU.uid,createdAt:Date.now()
+  });
+  contractData=await(await get(ref(db,"contracts/"+CU.uid))).val();
+  toast("Contract created! Fill in your weekly goals.");
+  go("plan");
+  setTimeout(function(){document.getElementById("week-body-0")?.classList.add("open");},300);
+};
+
+// ── PAGE 4: PROFILE ──
 window.renderProfile=async function(uid,isOwn){
   var mc=document.getElementById("mc");
-  mc.innerHTML='<div class="loading">Loading profile...</div>';
+  mc.innerHTML='<div class="loading">Loading...</div>';
   var results=await Promise.all([
-    get(ref(db,"users/"+uid)),get(ref(db,"contracts/"+uid)),
-    get(ref(db,"reflections/"+uid)),get(ref(db,"savedResources/"+uid)),
-    get(ref(db,"evidence/"+uid)),get(ref(db,"teacherEvals/"+uid))
+    get(ref(db,"users/"+uid)),
+    get(ref(db,"contracts/"+uid)),
+    get(ref(db,"posts"))
   ]);
   var u=results[0].val()||{name:"Student",photo:""};
   var c=results[1].val();
-  var refls=[];if(results[2].exists())results[2].forEach(function(r){refls.push(r.val());});
-  var evs=[];if(results[4].exists())results[4].forEach(function(e){evs.push({id:e.key,...e.val()});});
-  var tevals=[];if(results[5].exists())results[5].forEach(function(t){tevals.push(t.val());});
-  var prof=PROFILES[u.profileId]||null;
-  var gid=u.groupId||null;var gname=u.groupName||null;
+  var allPosts=[];if(results[2].exists())results[2].forEach(function(p){var d=p.val();if(d.uid===uid)allPosts.push({id:p.key,...d});});
+  allPosts.reverse();
 
-  var html='<div class="card" style="text-align:center;padding:20px">';
-  if(u.photo)html+='<img src="'+h(u.photo)+'" style="width:70px;height:70px;border-radius:50%;object-fit:cover;margin:0 auto 10px;display:block;border:3px solid var(--p)">';
-  else html+='<div style="width:70px;height:70px;border-radius:50%;background:var(--pl);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:var(--p);margin:0 auto 10px;border:3px solid var(--p)">'+h((u.name||"?")[0])+'</div>';
-  html+='<div style="font-size:18px;font-weight:700;margin-bottom:3px">'+h(u.name||"Student")+'</div>';
-  if(prof)html+='<div style="font-size:13px;color:var(--tm);margin-bottom:6px">'+prof.emoji+' '+prof.name+'</div>';
-  if(gname)html+='<div style="margin-bottom:10px"><span class="tag" style="background:var(--pl)">&#128101; '+h(gname)+'</span></div>';
-  html+='<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">';
-  if(isOwn&&gid)html+='<button class="btn btp" style="font-size:12px;padding:7px 13px" onclick="openForum(\''+gid+'\',\''+h(gname||"My Group")+'\')">&#128172; Group Chat</button>';
-  if(isOwn)html+='<button class="btn bts" style="font-size:12px;padding:7px 13px" onclick="genSummary(\''+uid+'\')">&#10024; My Summary</button>';
-  if(!isOwn)html+='<button class="btn bts" style="font-size:12px;padding:7px 13px" onclick="go(\'class\')">&#8592; Back</button>';
+  var html="";
+  if(!isOwn)html+='<button class="btn bts mb8" onclick="go(\'feed\')">&#8592; Back</button>';
+
+  // Profile header
+  html+='<div class="card" style="text-align:center;padding:20px">';
+  if(isOwn){
+    html+='<div class="prof-av-wrap" onclick="changeAvatar()">';
+    if(u.photo)html+='<img src="'+esc(u.photo)+'" class="prof-av-img">';
+    else html+='<div class="prof-av-plc">'+esc((u.name||"?")[0])+'</div>';
+    if(!u.avatarChanged)html+='<div class="prof-av-edit">&#9998;</div>';
+    html+='</div>';
+  } else {
+    if(u.photo)html+='<img src="'+esc(u.photo)+'" style="width:70px;height:70px;border-radius:50%;object-fit:cover;margin:0 auto 10px;display:block;border:3px solid var(--p)">';
+    else html+='<div style="width:70px;height:70px;border-radius:50%;background:var(--pl);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;color:var(--p);margin:0 auto 10px;border:3px solid var(--p)">'+esc((u.name||"?")[0])+'</div>';
+  }
+  html+='<div style="font-size:17px;font-weight:700;margin-bottom:4px">'+esc(u.name||"Student")+'</div>';
+  var gname=u.groupName||null;var gid=u.groupId||null;
+  if(gname)html+='<span class="sb sa">&#128101; '+esc(gname)+'</span>';
+  html+='<div style="display:flex;gap:8px;justify-content:center;margin-top:10px;flex-wrap:wrap">';
+  if(isOwn&&gid)html+='<button class="btn btp" style="font-size:12px;padding:7px 12px" onclick="openForum(\''+gid+'\',\''+esc(gname||"My Group")+'\')">&#128172; Group Chat</button>';
+  if(isOwn)html+='<button class="btn bts" style="font-size:12px;padding:7px 12px" onclick="genSummary(\''+uid+'\')">&#10024; My Summary</button>';
   html+='</div></div>';
 
+  // Contract (same as plan page, editable)
   if(c){
-    html+='<div class="card"><div class="ctitle">&#128203; My Plan</div>';
-    html+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">';
-    (c.skills||[]).forEach(function(s){html+='<span class="tag" style="background:'+skColor(s)+'">'+h(s)+'</span>';});
-    if(c.product)html+='<span class="tag" style="background:var(--gl)">'+h(c.product)+'</span>';
+    html+='<div class="card"><div class="fb mb8"><span style="font-size:14px;font-weight:700">My Learning Contract</span>';
+    if(c.status==="approved")html+='<span class="sb sa">Active</span>';
+    else if(c.status==="pending")html+='<span class="sb sp">Pending</span>';
+    else html+='<span class="sb" style="background:var(--gl);color:var(--tm)">Draft</span>';
     html+='</div>';
-    if(c.topic)html+='<div style="font-size:14px;margin-bottom:3px"><strong>Topic:</strong> '+h(c.topic)+'</div>';
-    if(c.focus2)html+='<div style="font-size:14px">&#127919; '+h(c.focus2)+'</div>';
+    if(c.productType)html+='<div style="font-size:13px;margin-bottom:5px"><strong>Product:</strong> '+esc(c.productType)+'</div>';
+    var weeks=c.weeks||[];
+    weeks.forEach(function(w,i){
+      if(w.goal)html+='<div style="font-size:12px;color:var(--tm);margin-bottom:3px"><strong>Week '+(i+1)+':</strong> '+esc(w.goal)+'</div>';
+    });
+    if(isOwn)html+='<button class="btn bts" style="font-size:12px;padding:6px 11px;margin-top:8px" onclick="go(\'plan\')">Edit plan &#8594;</button>';
+    if(c.teacherComment)html+='<div class="tip mt8"><strong>Teacher:</strong> '+esc(c.teacherComment)+'</div>';
     html+='</div>';
   }
 
-  html+='<div class="card"><div class="ctitle">&#127911; My Work ('+evs.length+')</div>';
-  if(evs.length){
-    evs.forEach(function(ev){
-      var pf=ev.peerFeedback?Object.values(ev.peerFeedback):[];
-      html+='<div class="post-card" style="margin-bottom:8px">';
-      html+='<div class="post-body" style="padding-top:12px">';
-      html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;cursor:pointer" onclick="toggleCat(\'evdet-'+ev.id+'\')">';
-      html+='<span style="font-size:14px;font-weight:700">'+h(ev.title||"Untitled")+'</span>';
-      html+='<div style="display:flex;gap:5px;align-items:center">';
-      if(pf.length)html+='<span class="sb sa" style="font-size:10px">'+pf.length+' comments</span>';
-      if(ev.link)html+='<a href="'+h(ev.link)+'" target="_blank" class="obtn">View</a>';
+  // Portfolio
+  html+='<div class="card"><div class="fb mb8"><span style="font-size:14px;font-weight:700">&#127911; My Portfolio ('+allPosts.length+')</span>';
+  if(isOwn)html+='<button class="btn btp" style="font-size:12px;padding:6px 11px" onclick="go(\'feed\');openNewPost()">+ Share Work</button>';
+  html+='</div>';
+  if(allPosts.length){
+    allPosts.forEach(function(post){
+      var comments=post.comments?Object.values(post.comments):[];
+      html+='<div class="post" style="margin-bottom:8px">';
+      html+='<div class="post-body" style="padding-top:10px">';
+      html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;cursor:pointer" onclick="toggleCat(\'pdet-'+post.id+'\')">';
+      html+='<span style="font-size:13px;font-weight:700">'+esc(post.title||"Untitled")+'</span>';
+      html+='<div style="display:flex;align-items:center;gap:5px">';
+      if(post.isDraft)html+='<span class="post-draft" style="font-size:10px">Draft</span>';
+      if(comments.length)html+='<span class="sb sa" style="font-size:10px">'+comments.length+' comments</span>';
+      if(post.link)html+='<a href="'+esc(post.link)+'" target="_blank" class="obtn">View</a>';
       html+='<span style="color:var(--tm)">&#8250;</span></div></div>';
-      html+='<div id="evdet-'+ev.id+'" style="display:none;margin-top:8px">';
-      if(isOwn&&pf.length){
-        pf.forEach(function(pfd){
-          html+='<div style="padding:9px;border-radius:var(--rs);background:var(--pl);margin-bottom:7px">';
-          html+='<div style="font-size:12px;font-weight:700;color:var(--pd);margin-bottom:5px">&#128172; '+h(pfd.from||"Classmate")+'</div>';
-          if(pfd.strong)html+='<div style="font-size:12px;margin-bottom:2px"><strong>Great point:</strong> '+h(pfd.strong)+'</div>';
-          if(pfd.imp)html+='<div style="font-size:12px;margin-bottom:2px"><strong>Suggestion:</strong> '+h(pfd.imp)+'</div>';
-          if(pfd.learn)html+='<div style="font-size:12px"><strong>What I learned:</strong> '+h(pfd.learn)+'</div>';
-          html+='</div>';
+      html+='<div id="pdet-'+post.id+'" style="display:none;margin-top:8px">';
+      if(post.reflection)html+='<div style="font-size:12px;color:var(--tm);margin-bottom:7px">'+esc(post.reflection)+'</div>';
+      if(isOwn&&comments.length){
+        html+='<div style="font-size:12px;font-weight:700;color:var(--tm);margin-bottom:6px">Comments received:</div>';
+        comments.forEach(function(cm){
+          html+='<div class="comment"><div class="comment-name">'+esc(cm.from||"")+'</div><div class="comment-text">'+esc(cm.text||"")+'</div></div>';
         });
       }
       if(!isOwn&&uid!==CU.uid){
-        html+='<div id="pfform-'+ev.id+'" style="display:none"></div>';
-        html+='<button class="btn bts btf" style="font-size:12px;padding:7px 13px;margin-top:6px" onclick="openComment(\''+ev.id+'\',\''+uid+'\')">&#128172; Make a Comment</button>';
+        html+='<div id="pfform-'+post.id+'" style="display:none"></div>';
+        html+='<button class="btn bts btf" style="font-size:12px;padding:7px 12px;margin-top:6px" onclick="openProfileComment(\''+post.id+'\',\''+uid+'\')">&#128172; Comment +&#127881;</button>';
       }
       html+='</div></div></div>';
     });
-  } else {html+='<div class="empty"><div class="ei">&#128247;</div><p>Nothing shared yet.</p></div>';}
+  } else {
+    html+='<div class="empty"><div class="ei">&#128247;</div><p>'+(isOwn?"Share your first piece of work!":"Nothing shared yet.")+'</p></div>';
+  }
   html+='</div>';
-
-  if(tevals.length){
-    html+='<div class="card"><div class="ctitle">&#128105;&#8205;&#127979; Teacher Comments</div>';
-    tevals.forEach(function(te){
-      html+='<div style="padding:10px;border-radius:var(--rs);background:var(--tl);margin-bottom:8px">';
-      html+='<div style="font-size:12px;font-weight:700;color:var(--td);margin-bottom:6px">'+h(te.teacherName||"Teacher")+'</div>';
-      if(te.comment)html+='<div style="font-size:13px;color:var(--td)">'+h(te.comment)+'</div>';
-      html+='</div>';
-    });
-    html+='</div>';
-  }
-
-  if(refls.length){
-    html+='<div class="card"><div class="ctitle">&#128203; My Notes</div>';
-    refls.slice(-2).reverse().forEach(function(r){
-      html+='<div style="padding:9px;border-radius:var(--rs);border:1.5px solid var(--gb);margin-bottom:8px">';
-      if(r.well)html+='<div style="font-size:13px;margin-bottom:3px">&#128170; <strong>Did well:</strong> '+h(r.well)+'</div>';
-      if(r.next)html+='<div style="font-size:13px">&#127919; <strong>Next step:</strong> '+h(r.next)+'</div>';
-      html+='</div>';
-    });
-    html+='</div>';
-  }
-
   html+='<div id="summary-sec"></div>';
   mc.innerHTML=html;
 };
 
 window.toggleCat=function(id){var el=document.getElementById(id);if(el)el.style.display=el.style.display==="none"?"block":"none";};
 
-window.openComment=function(evId,targetUid){
-  window._peerCid="prows-"+evId;
-  peerV=[0,0,0,0,0,0];
-  var d=document.getElementById("pfform-"+evId);if(!d)return;
-  if(d.innerHTML&&d.style.display!=="none"){d.style.display="none";return;}
-  d.style.display="block";
-  var html='<div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--tm)">Rate this work:</div>';
-  html+='<div id="prows-'+evId+'"></div>';
-  html+='<div class="fg" style="margin-top:10px"><label class="fl">What is great about this work?</label><textarea class="fta" id="pfs-'+evId+'"></textarea></div>';
-  html+='<div class="fg"><label class="fl">One suggestion for improvement:</label><textarea class="fta" id="pfi-'+evId+'"></textarea></div>';
-  html+='<div class="fg"><label class="fl">What did you learn from this work?</label><textarea class="fta" id="pfl-'+evId+'"></textarea></div>';
-  html+='<button class="btn btp btf" onclick="submitComment(\''+evId+'\',\''+targetUid+'\')">Submit Comment +1 coin &#127881;</button>';
-  d.innerHTML=html;
-  renderRubRows("prows-"+evId,peerV,true);
+window.changeAvatar=async function(){
+  var usnap=await get(ref(db,"users/"+CU.uid));
+  if(usnap.exists()&&usnap.val().avatarChanged){toast("Avatar can only be changed once and has already been set.");return;}
+  var url=prompt("Paste a direct image URL for your new avatar:");
+  if(!url||!url.startsWith("http")){toast("Please enter a valid image URL.");return;}
+  await update(ref(db,"users/"+CU.uid),{photo:url,avatarChanged:true});
+  document.getElementById("uav").src=url;
+  toast("Avatar updated!");
+  renderProfile(CU.uid,true);
 };
 
-window.submitComment=async function(evId,targetUid){
-  var strong=((document.getElementById("pfs-"+evId)||{}).value||"").trim();
-  var imp=((document.getElementById("pfi-"+evId)||{}).value||"").trim();
-  var learn=((document.getElementById("pfl-"+evId)||{}).value||"").trim();
-  await push(ref(db,"evidence/"+targetUid+"/"+evId+"/peerFeedback"),{rubric:peerV,strong:strong,imp:imp,learn:learn,from:CU.displayName,fromId:CU.uid,createdAt:Date.now()});
-  await push(ref(db,"notifications/"+targetUid),{type:"comment",message:CU.displayName+" commented on your work!",evId:evId,read:false,createdAt:Date.now()});
-  await addCoin("comment on classmate work");
-  toast("Comment submitted! +1 coin!");
-  var d=document.getElementById("pfform-"+evId);if(d)d.style.display="none";
+window.openProfileComment=function(postId,targetUid){
+  window._cmRub=window._cmRub||{};
+  window._cmRub[postId]=[0,0,0,0,0,0];
+  var d=document.getElementById("pfform-"+postId);if(!d)return;
+  if(d.innerHTML&&d.style.display!=="none"){d.style.display="none";return;}
+  d.style.display="block";
+  var html='<div id="pf-rub-'+postId+'"></div>';
+  html+='<textarea class="fta mb8 mt8" id="pf-text-'+postId+'" placeholder="Your comment..." style="min-height:50px"></textarea>';
+  html+='<button class="btn btg" style="font-size:12px;padding:7px 13px" onclick="submitProfileComment(\''+postId+'\',\''+targetUid+'\')">Submit +&#127881;</button>';
+  d.innerHTML=html;
+  renderRubRows("pf-rub-"+postId,window._cmRub[postId],true,"setPFR_"+postId);
+  window["setPFR_"+postId]=function(di,v){window._cmRub[postId][di]=v;renderRubRows("pf-rub-"+postId,window._cmRub[postId],true,"setPFR_"+postId);};
+};
+
+window.submitProfileComment=async function(postId,targetUid){
+  var text=((document.getElementById("pf-text-"+postId)||{}).value||"").trim();
+  if(!text){toast("Write a comment!");return;}
+  await push(ref(db,"posts/"+postId+"/comments"),{from:CU.displayName,fromId:CU.uid,text:text,rubric:window._cmRub?window._cmRub[postId]||[]:[],createdAt:Date.now()});
+  await push(ref(db,"notifications/"+targetUid),{type:"comment",message:CU.displayName+" commented on your work!",read:false,createdAt:Date.now()});
+  await addCoin();
+  toast("Comment submitted! +1 coin");
+  document.getElementById("pfform-"+postId).style.display="none";
 };
 
 // ── FORUM ──
 window.openForum=function(groupId,groupName){
   var mc=document.getElementById("mc");
-  var html='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">';
-  html+='<button class="btn bts" style="font-size:12px;padding:6px 12px" onclick="go(\'class\')">&#8592;</button>';
-  html+='<div><div class="pt" style="margin:0">&#128172; '+h(groupName)+'</div></div></div>';
-  html+='<div id="forum-msgs" style="min-height:200px;margin-bottom:12px"></div>';
-  html+='<div class="card" style="position:sticky;bottom:80px">';
-  html+='<textarea class="fta" id="forum-input" placeholder="Write a message..." style="min-height:52px;margin-bottom:8px"></textarea>';
+  var html='<div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">';
+  html+='<button class="btn bts" style="font-size:12px;padding:6px 10px" onclick="go(\'profile\')">&#8592;</button>';
+  html+='<div style="font-size:17px;font-weight:700">&#128172; '+esc(groupName)+'</div></div>';
+  html+='<div id="forum-msgs" style="min-height:180px;margin-bottom:10px"></div>';
+  html+='<div class="card"><textarea class="fta" id="forum-inp" placeholder="Write a message..." style="min-height:50px;margin-bottom:7px"></textarea>';
   html+='<button class="btn btp btf" onclick="sendForum(\''+groupId+'\')">Send</button></div>';
   mc.innerHTML=html;
   onValue(ref(db,"forums/"+groupId),function(snap){
     var msgs=document.getElementById("forum-msgs");if(!msgs)return;
-    var items=[];
-    if(snap.exists())snap.forEach(function(m){var d=m.val();if(d.text)items.push({id:m.key,...d});});
+    var items=[];if(snap.exists())snap.forEach(function(m){var d=m.val();if(d.text)items.push({id:m.key,...d});});
     if(!items.length){msgs.innerHTML='<div class="empty"><div class="ei">&#128172;</div><p>No messages yet — say hello!</p></div>';return;}
     var mh="";
     items.forEach(function(m){
       var isMe=m.senderId===CU.uid;
-      mh+='<div style="margin-bottom:10px;'+(isMe?"text-align:right":"text-align:left")+'">';
-      if(!isMe)mh+='<div style="font-size:11px;font-weight:700;color:var(--p);margin-bottom:3px">'+h(m.senderName||"Student")+'</div>';
-      mh+='<div class="forum-bubble '+(isMe?"mine":"theirs")+'">'+h(m.text)+'</div>';
-      mh+='<div style="font-size:10px;color:var(--th);margin-top:2px">'+new Date(m.createdAt).toLocaleTimeString()+'</div>';
-      mh+='</div>';
+      mh+='<div style="margin-bottom:9px;'+(isMe?"text-align:right":"text-align:left")+'">';
+      if(!isMe)mh+='<div style="font-size:11px;font-weight:700;color:var(--p);margin-bottom:2px">'+esc(m.senderName||"")+'</div>';
+      mh+='<div class="forum-bbl '+(isMe?"mine":"theirs")+'">'+esc(m.text)+'</div>';
+      mh+='<div style="font-size:10px;color:var(--th);margin-top:2px">'+timeAgo(m.createdAt||Date.now())+'</div></div>';
     });
     msgs.innerHTML=mh;msgs.scrollTop=msgs.scrollHeight;
   });
 };
-
-window.sendForum=async function(groupId){
-  var text=((document.getElementById("forum-input")||{}).value||"").trim();
-  if(!text){toast("Write something first!");return;}
-  await push(ref(db,"forums/"+groupId),{text:text,senderName:CU.displayName,senderId:CU.uid,createdAt:Date.now()});
-  document.getElementById("forum-input").value="";
+window.sendForum=async function(gid){
+  var text=((document.getElementById("forum-inp")||{}).value||"").trim();
+  if(!text){toast("Write something!");return;}
+  await push(ref(db,"forums/"+gid),{text:text,senderName:CU.displayName,senderId:CU.uid,createdAt:Date.now()});
+  document.getElementById("forum-inp").value="";
 };
 
 // ── NOTIFICATIONS ──
@@ -1396,85 +1291,50 @@ async function loadNotifs(){
   if(!CU)return;
   onValue(ref(db,"notifications/"+CU.uid),function(snap){
     var dot=document.getElementById("ndot");if(!dot)return;
-    if(!snap.exists()){dot.style.display="none";return;}
-    var unread=0;snap.forEach(function(n){if(!n.val().read)unread++;});
+    var unread=0;if(snap.exists())snap.forEach(function(n){if(!n.val().read)unread++;});
     if(unread>0){dot.style.display="flex";dot.textContent=unread>9?"9+":String(unread);}
     else dot.style.display="none";
   });
 }
-
 window.openNotifs=async function(){
-  var mc=document.getElementById("mc");
+  var mc=document.getElementById("mc");setNav("profile");
   mc.innerHTML='<div class="loading">Loading...</div>';
-  setNav("profile");
   var snap=await get(ref(db,"notifications/"+CU.uid));
-  var items=[];
-  if(snap.exists())snap.forEach(function(n){items.push({id:n.key,...n.val()});});
+  var items=[];if(snap.exists())snap.forEach(function(n){items.push({id:n.key,...n.val()});});
   items.reverse();
-  for(var i=0;i<items.length;i++){
-    if(!items[i].read)await update(ref(db,"notifications/"+CU.uid+"/"+items[i].id),{read:true});
-  }
+  for(var i=0;i<items.length;i++){if(!items[i].read)await update(ref(db,"notifications/"+CU.uid+"/"+items[i].id),{read:true});}
   var dot=document.getElementById("ndot");if(dot)dot.style.display="none";
   var html='<div class="pt">Notifications</div><div class="ps">Your latest activity.</div>';
-  if(!items.length){html+='<div class="empty"><div class="ei">&#128276;</div><p>Nothing yet! When someone comments on your work, you will see it here.</p></div>';}
-  else{
-    items.forEach(function(n){
-      html+='<div class="card" style="border-left:3px solid '+(n.read?"var(--gb)":"var(--p)")+'">';
-      html+='<div style="display:flex;align-items:center;gap:10px">';
-      html+='<span style="font-size:22px">'+(n.type==="comment"?"&#128172;":n.type==="teacher_eval"?"&#128105;&#8205;&#127979;":"&#128226;")+'</span>';
-      html+='<div style="flex:1"><div style="font-size:14px;font-weight:'+(n.read?"400":"700")+'">'+h(n.message||"")+'</div>';
-      html+='<div style="font-size:12px;color:var(--th);margin-top:2px">'+new Date(n.createdAt).toLocaleString()+'</div></div></div>';
-      html+='<div style="display:flex;gap:8px;margin-top:8px">';
-      html+='<button class="btn bts" style="font-size:12px;padding:6px 12px" onclick="go(\'profile\')">View My Profile</button>';
-      if(n.type==="comment"||n.type==="teacher_eval")html+='<button class="btn btp" style="font-size:12px;padding:6px 12px" onclick="goToSummary()">See My Summary</button>';
-      html+='</div></div>';
-    });
-  }
-  html+='<button class="btn bts btf" style="margin-top:10px" onclick="go(\'profile\')">Back to Profile</button>';
+  if(!items.length)html+='<div class="empty"><div class="ei">&#128276;</div><p>Nothing yet!</p></div>';
+  else items.forEach(function(n){
+    html+='<div class="card" style="border-left:3px solid '+(n.read?"var(--gb)":"var(--p)")+'">';
+    html+='<div style="font-size:14px;font-weight:'+(n.read?"400":"700")+'">'+esc(n.message||"")+'</div>';
+    html+='<div style="font-size:11px;color:var(--th);margin-top:3px">'+timeAgo(n.createdAt||Date.now())+'</div></div>';
+  });
+  html+='<button class="btn bts btf mt8" onclick="go(\'profile\')">Back to Profile</button>';
   mc.innerHTML=html;
 };
 
-window.goToSummary=async function(){
-  setNav("profile");
-  await window.renderProfile(CU.uid,true);
-  setTimeout(function(){var s=document.getElementById("summary-sec");if(s){s.scrollIntoView({behavior:"smooth"});}genSummary(CU.uid);},600);
-};
-
-// ── SUMMARY (AI REPORT) ──
+// ── AI SUMMARY ──
 window.genSummary=async function(uid){
   var sec=document.getElementById("summary-sec");if(!sec)return;
-  sec.innerHTML='<div class="card"><div class="ctitle">&#10024; My Summary</div><div class="loading">Putting your summary together...</div></div>';
+  sec.innerHTML='<div class="card"><div style="font-size:13px;font-weight:700;margin-bottom:6px">&#10024; My Summary</div><div class="loading">Generating...</div></div>';
   sec.scrollIntoView({behavior:"smooth"});
-  var results=await Promise.all([get(ref(db,"evidence/"+uid)),get(ref(db,"reflections/"+uid)),get(ref(db,"teacherEvals/"+uid))]);
-  var evs=[];if(results[0].exists())results[0].forEach(function(e){evs.push({id:e.key,...e.val()});});
-  var refls=[];if(results[1].exists())results[1].forEach(function(r){refls.push(r.val());});
-  var tevals=[];if(results[2].exists())results[2].forEach(function(t){tevals.push(t.val());});
-  if(!evs.length&&!refls.length&&!tevals.length){
-    sec.innerHTML='<div class="card"><div class="ctitle">&#10024; My Summary</div><p style="font-size:14px;color:var(--tm)">Share some work and write some self-notes first — then I can create your summary!</p></div>';
-    return;
-  }
-  var ctx="";
-  evs.forEach(function(ev){
-    ctx+="Work: "+ev.title+"\n";
-    var pf=ev.peerFeedback?Object.values(ev.peerFeedback):[];
-    pf.forEach(function(p){
-      if(p.strong)ctx+="  Comment - great point: "+p.strong+"\n";
-      if(p.imp)ctx+="  Comment - suggestion: "+p.imp+"\n";
-    });
+  var results=await Promise.all([get(ref(db,"posts")),get(ref(db,"contracts/"+uid))]);
+  var posts=[];results[0].forEach(function(p){var d=p.val();if(d.uid===uid)posts.push(d);});
+  var c=results[1].val();
+  var ctx="Student: "+CU.displayName+"\n";
+  if(c){ctx+="Product: "+c.productType+"\n";if(c.weeks)c.weeks.forEach(function(w,i){if(w.goal)ctx+="Week "+(i+1)+" goal: "+w.goal+"\n";});}
+  posts.forEach(function(p){
+    ctx+="Work shared: "+p.title+"\nReflection: "+p.reflection+"\n";
+    var cms=p.comments?Object.values(p.comments):[];
+    cms.forEach(function(cm){ctx+="Comment from "+cm.from+": "+cm.text+"\n";});
   });
-  tevals.forEach(function(te){if(te.comment)ctx+="Teacher comment: "+te.comment+"\n";});
-  refls.forEach(function(r){
-    if(r.well)ctx+="Student reflection - did well: "+r.well+"\n";
-    if(r.imp)ctx+="Student reflection - wants to improve: "+r.imp+"\n";
-    if(r.next)ctx+="Student next step: "+r.next+"\n";
-  });
-  var prompt="You are a warm, supportive English teacher for a 7th grade student on the LearnPath platform. Based on the data below, write a short personalised learning summary.\n\nFormat:\n1. What You Are Doing Well (2-3 specific strengths)\n2. Something to Work On (1-2 focused suggestions)\n3. Your Next Step (1 clear action)\n4. One encouraging sentence\n\nWrite directly to the student using 'you'. Keep it short, warm, and specific.\n\n"+ctx;
-  var reply=await askAIOnce(prompt);
-  if(!reply){sec.innerHTML='<div class="card"><div class="ctitle">&#10024; My Summary</div><p style="font-size:14px;color:var(--tm)">Could not connect to AI. Please check your API key.</p></div>';return;}
-  sec.innerHTML='<div class="card"><div class="ctitle">&#10024; My Summary</div>'
-    +'<div style="font-size:14px;line-height:1.8;color:var(--tx);white-space:pre-wrap">'+reply+'</div>'
-    +'<button class="btn bts btf" style="margin-top:10px" onclick="genSummary(\''+uid+'\')">Refresh</button>'
-    +'</div>';
+  var reply=await askAI("Write a short personalised summary (3-4 sentences) of this student's learning journey. Highlight strengths, one area to improve, and an encouraging next step. Write to the student directly.\n\n"+ctx,"You are a warm supportive English teacher for 7th graders.");
+  sec.innerHTML='<div class="card" style="border-color:var(--p);border-width:1.5px">';
+  sec.innerHTML+='<div style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--pd)">&#10024; My Summary</div>';
+  sec.innerHTML+='<div style="font-size:13px;line-height:1.7;color:var(--tx)">'+esc(reply)+'</div>';
+  sec.innerHTML+='<button class="btn bts btf mt8" onclick="genSummary(\''+uid+'\')">Refresh</button></div>';
 };
 
 // ── TEACHER APP ──
@@ -1482,7 +1342,7 @@ var TNAV=[
   {id:"overview",l:"Overview",i:'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>'},
   {id:"groups",l:"Groups",i:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>'},
   {id:"evaluate",l:"Evaluate",i:'<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>'},
-  {id:"rubric",l:"Rubric",i:'<line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>'}
+  {id:"unit",l:"Unit",i:'<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>'}
 ];
 
 function renderTeacher(){
@@ -1492,75 +1352,65 @@ function renderTeacher(){
   }).join("");
   tgo("overview");
 }
-
 window.tgo=function(page){
   document.querySelectorAll("#bnav .ni").forEach(function(n){n.classList.remove("active");});
   var el=document.getElementById("tnav-"+page);if(el)el.classList.add("active");
-  ({overview:renderTOverview,groups:renderTGroups,evaluate:renderTEvaluate,rubric:renderTRubric}[page]||renderTOverview)();
+  ({overview:renderTOverview,groups:renderTGroups,evaluate:renderTEvaluate,unit:renderTUnit}[page]||renderTOverview)();
 };
 
 function renderTOverview(){
   var mc=document.getElementById("mc");
-  mc.innerHTML='<div class="pt">Class Overview</div><div class="ps">Approve plans and monitor your students.</div>'
+  mc.innerHTML='<div class="pt">Class Overview</div><div class="ps">Approve plans and monitor students.</div>'
     +'<div class="card"><div class="ctitle">Waiting for Approval</div><div id="pend-list"><div class="loading">Loading...</div></div></div>'
     +'<div class="card"><div class="ctitle">All Students</div><div id="stud-list"><div class="loading">Loading...</div></div></div>';
   onValue(ref(db,"contracts"),function(snap){
     var all=[],pend=[];
-    if(snap.exists())snap.forEach(function(c){var d={id:c.key,...c.val()};all.push(d);if(d.status==="pending")pend.push(d);});
-    var pl=document.getElementById("pend-list");
-    var sl=document.getElementById("stud-list");
-    if(!pl||!sl)return;
-    if(!pend.length)pl.innerHTML='<div class="empty"><div class="ei">&#9989;</div><p>All plans approved!</p></div>';
+    if(snap.exists())snap.forEach(function(c){var d={id:c.key,...c.val()};all.push(d);if(d.status==="pending"||d.status==="draft")pend.push(d);});
+    var pl=document.getElementById("pend-list");var sl=document.getElementById("stud-list");if(!pl||!sl)return;
+    if(!pend.length)pl.innerHTML='<div class="empty"><div class="ei">&#9989;</div><p>All clear!</p></div>';
     else{
-      var h2="";
+      var h="";
       pend.forEach(function(s){
-        h2+='<div class="post-card" style="margin-bottom:8px">';
-        h2+='<div class="post-header">';
-        if(s.studentPhoto)h2+='<img src="'+h(s.studentPhoto)+'" class="post-av">';
-        else h2+='<div class="post-avp">'+h((s.studentName||"?")[0])+'</div>';
-        h2+='<div><div class="post-name">'+h(s.studentName||"")+'</div>';
-        h2+='<div class="post-meta">'+h((s.skills||[]).join(", "))+' &#8226; '+h(s.product||s.evidence||"")+'</div></div></div>';
-        h2+='<div class="post-body">';
-        if(s.topic)h2+='<div style="font-size:13px;margin-bottom:3px"><strong>Topic:</strong> '+h(s.topic)+'</div>';
-        h2+='<div style="font-size:13px;margin-bottom:3px"><strong>Goal:</strong> '+h(s.focus2||s.focus1||"")+'</div>';
-        if(s.steps&&s.steps.length)h2+='<div style="font-size:13px;margin-bottom:8px"><strong>Steps:</strong> '+s.steps.map(function(st){return h(st);}).join(" &#8594; ")+'</div>';
-        if(s.note)h2+='<div class="tip" style="margin-bottom:10px">'+h(s.note)+'</div>';
-        h2+='<div class="fg"><textarea class="fta" id="cm-'+s.id+'" style="min-height:50px" placeholder="Add a comment for this student..."></textarea></div>';
-        h2+='<div style="display:flex;gap:8px">';
-        h2+='<button class="btn btg" style="font-size:12px;padding:7px 13px" onclick="approveP(\''+s.id+'\',\''+h(s.studentName||"")+'\')">Approve Plan</button>';
-        h2+='<button class="btn bts" style="font-size:12px;padding:7px 13px" onclick="sendCm(\''+s.id+'\')">Send Comment</button>';
-        h2+='</div></div></div>';
+        h+='<div class="post" style="margin-bottom:8px"><div class="post-hdr">';
+        if(s.studentPhoto)h+='<img src="'+esc(s.studentPhoto)+'" class="post-av">';
+        else h+='<div class="post-avp">'+esc((s.studentName||"?")[0])+'</div>';
+        h+='<div><div class="post-name">'+esc(s.studentName||"")+'</div>';
+        h+='<div class="post-meta">'+esc(s.productType||"")+'</div></div></div>';
+        h+='<div class="post-body">';
+        if(s.weeks)s.weeks.forEach(function(w,i){if(w.goal)h+='<div style="font-size:12px;color:var(--tm);margin-bottom:2px"><strong>W'+(i+1)+':</strong> '+esc(w.goal)+'</div>';});
+        h+='<div class="fg" style="margin-top:8px"><textarea class="fta" id="cm-'+s.id+'" style="min-height:46px" placeholder="Comment for student..."></textarea></div>';
+        h+='<div style="display:flex;gap:7px">';
+        h+='<button class="btn btg" style="font-size:12px;padding:7px 12px" onclick="approveP(\''+s.id+'\',\''+esc(s.studentName||"")+'\')">Approve</button>';
+        h+='<button class="btn bts" style="font-size:12px;padding:7px 12px" onclick="sendCm(\''+s.id+'\')">Comment</button>';
+        h+='</div></div></div>';
       });
-      pl.innerHTML=h2;
+      pl.innerHTML=h;
     }
     if(!all.length)sl.innerHTML='<div class="empty"><div class="ei">&#128100;</div><p>No students yet.</p></div>';
     else{
       var sh="";
       all.forEach(function(s){
         sh+='<div class="srow" onclick="tgo(\'evaluate\')">';
-        if(s.studentPhoto)sh+='<img src="'+h(s.studentPhoto)+'" class="uav">';
-        else sh+='<div class="fav" style="width:36px;height:36px;border-radius:50%;background:var(--pl);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--p);">'+h((s.studentName||"?")[0])+'</div>';
-        sh+='<div style="flex:1"><div class="sn">'+h(s.studentName||"Student")+'</div>';
-        sh+='<div class="sm">'+h((s.skills||[]).join(", "))+'</div>';
-        sh+='<div class="pm"><div class="pmf" style="width:'+(s.status==="approved"?60:20)+'%"></div></div></div>';
-        sh+='<span class="sb '+(s.status==="approved"?"sa":"sp")+'">'+(s.status==="approved"?"Active":"Pending")+'</span></div>';
+        if(s.studentPhoto)sh+='<img src="'+esc(s.studentPhoto)+'" class="uav">';
+        else sh+='<div style="width:28px;height:28px;border-radius:50%;background:var(--pl);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--p);flex-shrink:0">'+esc((s.studentName||"?")[0])+'</div>';
+        sh+='<div style="flex:1"><div style="font-size:13px;font-weight:700">'+esc(s.studentName||"Student")+'</div>';
+        sh+='<div style="font-size:11px;color:var(--tm)">'+esc(s.productType||"")+'</div></div>';
+        sh+='<span class="sb '+(s.status==="approved"?"sa":s.status==="pending"?"sp":"sd")+'">'+(s.status==="approved"?"Active":s.status==="pending"?"Pending":"Draft")+'</span>';
+        sh+='</div>';
       });
       sl.innerHTML=sh;
     }
   });
 }
-
 window.approveP=async function(id,name){
-  await update(ref(db,"contracts/"+id),{status:"approved"});
   var cm=((document.getElementById("cm-"+id)||{}).value||"").trim();
-  if(cm)await update(ref(db,"contracts/"+id),{teacherComment:cm});
+  await update(ref(db,"contracts/"+id),{status:"approved",teacherComment:cm||""});
   toast(name+"'s plan approved!");
 };
 window.sendCm=async function(id){
   var cm=((document.getElementById("cm-"+id)||{}).value||"").trim();
   if(!cm){toast("Write a comment first!");return;}
-  await update(ref(db,"contracts/"+id),{teacherComment:cm});
-  toast("Comment sent!");
+  await update(ref(db,"contracts/"+id),{teacherComment:cm});toast("Comment sent!");
 };
 
 function renderTGroups(){
@@ -1568,12 +1418,12 @@ function renderTGroups(){
   mc.innerHTML='<div class="pt">Groups</div><div class="ps">Create groups and assign students.</div>'
     +'<div class="card"><div class="ctitle">Create a Group</div>'
     +'<div class="fg"><label class="fl">Group name</label><input class="fi" id="grp-name" placeholder="e.g. Team Speakers"></div>'
-    +'<button class="btn btp" onclick="createGroup()">Create Group</button></div>'
+    +'<button class="btn btp" onclick="createGroup()">Create</button></div>'
     +'<div id="grp-list"><div class="loading">Loading...</div></div>'
-    +'<div class="card"><div class="ctitle">Assign Students</div>'
-    +'<div class="fg"><label class="fl">Select group</label><select class="fse" id="asgn-sel"></select></div>'
+    +'<div class="card mt8"><div class="ctitle">Assign Students</div>'
+    +'<div class="fg"><label class="fl">Group</label><select class="fse" id="asgn-sel"></select></div>'
     +'<div id="asgn-students"><div class="loading">Loading...</div></div>'
-    +'<button class="btn btp" style="margin-top:10px" onclick="saveAssign()">Save</button></div>';
+    +'<button class="btn btp mt8" onclick="saveAssign()">Save</button></div>';
   loadGroups();loadStudentsForAssign();
 }
 
@@ -1583,16 +1433,14 @@ async function loadGroups(){
   if(!snap.exists()){gl.innerHTML='<div class="empty"><div class="ei">&#128101;</div><p>No groups yet.</p></div>';return;}
   var groups=[];snap.forEach(function(g){groups.push({id:g.key,...g.val()});});
   var sel=document.getElementById("asgn-sel");
-  if(sel)sel.innerHTML=groups.map(function(g){return '<option value="'+g.id+'">'+h(g.name||"Group")+'</option>';}).join("");
-  var gh='<div class="ctitle" style="margin-bottom:10px">Your Groups</div>';
+  if(sel)sel.innerHTML=groups.map(function(g){return '<option value="'+g.id+'">'+esc(g.name||"Group")+'</option>';}).join("");
+  var gh='<div class="ctitle mb8">Existing Groups</div>';
   groups.forEach(function(g){
-    gh+='<div class="group-bubble">';
-    gh+='<div style="display:flex;justify-content:space-between;margin-bottom:8px">';
-    gh+='<h3>'+h(g.name||"Group")+'</h3>';
-    gh+='<button class="obtn" onclick="openForum(\''+g.id+'\',\''+h(g.name||"Group")+'\')">&#128172; Chat</button>';
-    gh+='</div>';
-    gh+='<div class="group-members">';
-    Object.values(g.members||{}).forEach(function(m){gh+='<div class="member-chip">&#128100; '+h(m)+'</div>';});
+    gh+='<div class="card" style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;margin-bottom:7px">';
+    gh+='<span style="font-size:14px;font-weight:700">'+esc(g.name||"")+'</span>';
+    gh+='<button class="obtn" onclick="openForum(\''+g.id+'\',\''+esc(g.name||"Group")+'\')">&#128172; Chat</button></div>';
+    gh+='<div style="display:flex;flex-wrap:wrap;gap:5px">';
+    Object.values(g.members||{}).forEach(function(m){gh+='<span style="padding:3px 8px;border-radius:20px;background:var(--gl);font-size:12px">'+esc(m)+'</span>';});
     if(!Object.keys(g.members||{}).length)gh+='<span style="font-size:12px;color:var(--th)">No members yet</span>';
     gh+='</div></div>';
   });
@@ -1602,15 +1450,13 @@ async function loadGroups(){
 async function loadStudentsForAssign(){
   var snap=await get(ref(db,"contracts"));
   var asd=document.getElementById("asgn-students");if(!asd)return;
-  if(!snap.exists()){asd.innerHTML='<p style="font-size:13px;color:var(--tm)">No approved students yet.</p>';return;}
-  var students=[];
-  snap.forEach(function(c){var d=c.val();if(d.status==="approved")students.push({id:c.key,name:d.studentName});});
-  if(!students.length){asd.innerHTML='<p style="font-size:13px;color:var(--tm)">No approved students yet.</p>';return;}
+  if(!snap.exists()){asd.innerHTML='<p style="font-size:13px;color:var(--tm)">No students yet.</p>';return;}
+  var students=[];snap.forEach(function(c){var d=c.val();students.push({id:c.key,name:d.studentName||"Student"});});
   var sh="";
   students.forEach(function(s){
-    sh+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--gb)">';
-    sh+='<span style="font-size:14px;flex:1">'+h(s.name)+'</span>';
-    sh+='<input type="checkbox" id="asgn-'+s.id+'" data-uid="'+s.id+'" data-name="'+h(s.name)+'" style="width:18px;height:18px;cursor:pointer">';
+    sh+='<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--gb)">';
+    sh+='<span style="font-size:13px;flex:1">'+esc(s.name)+'</span>';
+    sh+='<input type="checkbox" id="asgn-'+s.id+'" data-uid="'+s.id+'" data-name="'+esc(s.name)+'" style="width:16px;height:16px;cursor:pointer">';
     sh+='</div>';
   });
   asd.innerHTML=sh;
@@ -1618,140 +1464,103 @@ async function loadStudentsForAssign(){
 
 window.createGroup=async function(){
   var name=((document.getElementById("grp-name")||{}).value||"").trim();
-  if(!name){toast("Enter a group name!");return;}
+  if(!name){toast("Enter a name!");return;}
   var nr=await push(ref(db,"groups"),{name:name,members:{},createdAt:Date.now()});
   await set(ref(db,"forums/"+nr.key+"/info"),{groupName:name,createdAt:Date.now()});
-  document.getElementById("grp-name").value="";
-  toast("Group created!");loadGroups();
+  document.getElementById("grp-name").value="";toast("Group created!");loadGroups();
 };
 
 window.saveAssign=async function(){
-  var selEl=document.getElementById("asgn-sel");
-  var selId=selEl?selEl.value:"";
+  var selEl=document.getElementById("asgn-sel");var selId=selEl?selEl.value:"";
   var selName=selEl&&selEl.options[selEl.selectedIndex]?selEl.options[selEl.selectedIndex].text:"";
   if(!selId){toast("Select a group!");return;}
   var checked=Array.from(document.querySelectorAll("#asgn-students input:checked"));
-  if(!checked.length){toast("Select at least one student!");return;}
+  if(!checked.length){toast("Select students!");return;}
   var members={};
   for(var i=0;i<checked.length;i++){
     var cb=checked[i];members[cb.dataset.uid]=cb.dataset.name;
     await update(ref(db,"users/"+cb.dataset.uid),{groupId:selId,groupName:selName});
   }
   await update(ref(db,"groups/"+selId),{members:members});
-  toast("Students assigned!");loadGroups();
+  toast("Assigned!");loadGroups();
 };
 
 function renderTEvaluate(){
   var mc=document.getElementById("mc");
-  mc.innerHTML='<div class="pt">Evaluate Students</div><div class="ps">View student work and add your comments.</div><div id="eval-list"><div class="loading">Loading...</div></div>';
-  onValue(ref(db,"contracts"),async function(snap){
-    var el=document.getElementById("eval-list");if(!el)return;
-    if(!snap.exists()){el.innerHTML='<div class="empty"><div class="ei">&#128203;</div><p>No students yet.</p></div>';return;}
-    var students=[];
-    snap.forEach(function(c){var d=c.val();if(d.status==="approved")students.push({id:c.key,...d});});
-    if(!students.length){el.innerHTML='<div class="empty"><div class="ei">&#128203;</div><p>No approved plans yet.</p></div>';return;}
-    var evh="";
-    students.forEach(function(s){
-      evh+='<div class="card">';
-      evh+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">';
-      if(s.studentPhoto)evh+='<img src="'+h(s.studentPhoto)+'" class="uav" style="width:38px;height:38px">';
-      else evh+='<div style="width:38px;height:38px;border-radius:50%;background:var(--pl);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:var(--p)">'+h((s.studentName||"?")[0])+'</div>';
-      evh+='<div style="flex:1"><div style="font-size:15px;font-weight:700">'+h(s.studentName||"Student")+'</div>';
-      evh+='<div style="font-size:12px;color:var(--tm)">'+h((s.skills||[]).join(", "))+' &#8226; '+h(s.product||s.evidence||"")+'</div></div></div>';
-      if(s.topic)evh+='<div style="font-size:13px;margin-bottom:3px"><strong>Topic:</strong> '+h(s.topic)+'</div>';
-      if(s.focus2)evh+='<div style="font-size:13px;margin-bottom:8px">&#127919; '+h(s.focus2)+'</div>';
-      evh+='<div id="ev-work-'+s.id+'"><div class="loading">Loading work...</div></div>';
-      evh+='<button class="btn bts" style="font-size:12px;padding:6px 12px;margin:10px 0" onclick="toggleTEval(\''+s.id+'\',\''+h(s.studentName||"")+'\')">Add Evaluation</button>';
-      evh+='<div id="teval-'+s.id+'" style="display:none;margin-top:10px">';
-      evh+='<div style="font-size:14px;font-weight:700;margin-bottom:10px">Evaluation for '+h(s.studentName||"")+'</div>';
-      evh+='<div id="trub-'+s.id+'"></div>';
-      evh+='<div class="fg" style="margin-top:10px"><label class="fl">Your comment for this student</label><textarea class="fta" id="tcm-'+s.id+'" placeholder="Write your overall feedback..."></textarea></div>';
-      evh+='<button class="btn btg" style="font-size:12px;padding:7px 13px;margin-top:8px" onclick="saveTEval(\''+s.id+'\',\''+h(s.studentName||"")+'\')">Save Comment</button>';
-      evh+='</div></div>';
+  mc.innerHTML='<div class="pt">Student Work</div><div class="ps">View posts and leave evaluations.</div><div id="eval-feed"><div class="loading">Loading...</div></div>';
+  onValue(ref(db,"posts"),function(snap){
+    var ef=document.getElementById("eval-feed");if(!ef)return;
+    if(!snap.exists()){ef.innerHTML='<div class="empty"><div class="ei">&#128247;</div><p>No posts yet.</p></div>';return;}
+    var posts=[];snap.forEach(function(p){posts.push({id:p.key,...p.val()});});posts.reverse();
+    var html="";
+    posts.forEach(function(post){
+      var comments=post.comments?Object.values(post.comments):[];
+      html+='<div class="post" style="margin-bottom:10px"><div class="post-hdr">';
+      if(post.photo)html+='<img src="'+esc(post.photo)+'" class="post-av">';
+      else html+='<div class="post-avp">'+esc((post.name||"?")[0])+'</div>';
+      html+='<div><div class="post-name">'+esc(post.name||"Student")+'</div>';
+      html+='<div class="post-meta">'+esc(post.productType||"")+" &bull; "+timeAgo(post.createdAt||Date.now())+'</div></div></div>';
+      html+='<div class="post-body">';
+      if(post.title)html+='<div style="font-size:14px;font-weight:700;margin-bottom:4px">'+esc(post.title)+'</div>';
+      if(post.reflection)html+='<div class="post-text">'+esc(post.reflection)+'</div>';
+      if(post.link)html+='<a href="'+esc(post.link)+'" target="_blank" class="obtn mb8" style="display:inline-block">View work &#8599;</a>';
+      if(comments.length){
+        html+='<div style="font-size:12px;font-weight:700;color:var(--tm);margin-top:6px;margin-bottom:5px">'+comments.length+' comment(s)</div>';
+      }
+      html+='</div>';
+      html+='<div class="post-actions">';
+      html+='<button class="post-act" onclick="openTeacherComment(\''+post.id+'\',\''+esc(post.uid)+'\')">&#128105;&#8205;&#127979; Add Evaluation</button>';
+      html+='</div>';
+      html+='<div id="tcform-'+post.id+'" style="display:none;padding:10px 13px;border-top:1px solid var(--gb)">';
+      html+='<div id="tc-rub-'+post.id+'"></div>';
+      html+='<textarea class="fta mt8 mb8" id="tc-text-'+post.id+'" placeholder="Your feedback for this student..."></textarea>';
+      html+='<button class="btn btg" style="font-size:12px;padding:7px 13px" onclick="submitTeacherComment(\''+post.id+'\',\''+esc(post.uid)+'\')">Save Evaluation</button>';
+      html+='</div></div>';
     });
-    el.innerHTML=evh;
-    window._trv=window._trv||{};
-    for(var i=0;i<students.length;i++){
-      var s=students[i];
-      var evSnap=await get(ref(db,"evidence/"+s.id));
-      var ew=document.getElementById("ev-work-"+s.id);if(!ew)continue;
-      if(!evSnap.exists()){ew.innerHTML='<p style="font-size:12px;color:var(--th)">No work shared yet.</p>';continue;}
-      var evItems=[];evSnap.forEach(function(e){evItems.push({id:e.key,...e.val()});});
-      var ewh="";
-      evItems.forEach(function(ev){
-        ewh+='<div class="res-link" style="margin-bottom:6px">';
-        ewh+='<span class="rl-icon">&#128247;</span>';
-        ewh+='<div style="flex:1"><div class="rl-name">'+h(ev.title||"Work")+'</div>';
-        var pfCount=ev.peerFeedback?Object.keys(ev.peerFeedback).length:0;
-        if(pfCount)ewh+='<div class="rl-desc">'+pfCount+' peer comments</div>';
-        ewh+='</div>';
-        if(ev.link)ewh+='<a href="'+h(ev.link)+'" target="_blank" class="obtn">View</a>';
-        ewh+='</div>';
-      });
-      ew.innerHTML=ewh;
-    }
-  },{onlyOnce:true});
-}
-
-window.toggleTEval=function(id,name){
-  var f=document.getElementById("teval-"+id);if(!f)return;
-  if(f.style.display==="none"){
-    f.style.display="block";
-    if(!window._trv)window._trv={};
-    window._trv[id]=[0,0,0,0,0,0];
-    renderTRubRows(id);
-  } else f.style.display="none";
-};
-
-function renderTRubRows(id){
-  var w=document.getElementById("trub-"+id);if(!w)return;
-  var vals=(window._trv&&window._trv[id])||[0,0,0,0,0,0];
-  var th="";
-  RUBRIC.forEach(function(r,i){
-    th+='<div class="rubrow"><div class="rubcrit">'+r.label+'</div>';
-    th+='<div class="rubcdesc">'+r.q+'</div>';
-    th+='<div class="rubscale">';
-    [1,2,3,4].forEach(function(n){
-      th+='<button class="rubbtn'+(vals[i]===n?" sel":"")+'" onclick="setTRV(\''+id+'\','+i+','+n+')">'+n+'</button>';
-    });
-    th+='</div><div class="rubanchor"><span>Developing</span><span>Strong</span></div>';
-    if(vals[i]>0)th+='<div class="rublvl">'+r.lvls[vals[i]-1]+'</div>';
-    th+='</div>';
+    ef.innerHTML=html;
+    window._tcRub=window._tcRub||{};
   });
-  w.innerHTML=th;
 }
 
-window.setTRV=function(id,d,v){
-  if(!window._trv)window._trv={};
-  if(!window._trv[id])window._trv[id]=[0,0,0,0,0,0];
-  window._trv[id][d]=v;renderTRubRows(id);
+window.openTeacherComment=function(postId,targetUid){
+  var form=document.getElementById("tcform-"+postId);if(!form)return;
+  if(form.style.display!=="none"){form.style.display="none";return;}
+  form.style.display="block";
+  if(!window._tcRub)window._tcRub={};
+  window._tcRub[postId]=[0,0,0,0,0,0];
+  renderRubRows("tc-rub-"+postId,window._tcRub[postId],true,"setTCR_"+postId);
+  window["setTCR_"+postId]=function(d,v){window._tcRub[postId][d]=v;renderRubRows("tc-rub-"+postId,window._tcRub[postId],true,"setTCR_"+postId);};
 };
 
-window.saveTEval=async function(sid,name){
-  var vals=(window._trv&&window._trv[sid])||[];
-  var comment=((document.getElementById("tcm-"+sid)||{}).value||"").trim();
-  await push(ref(db,"teacherEvals/"+sid),{rubric:vals,comment:comment,teacherName:CU.displayName,createdAt:Date.now()});
-  await push(ref(db,"notifications/"+sid),{type:"teacher_eval",message:"Your teacher left you a comment!",read:false,createdAt:Date.now()});
-  toast("Comment saved for "+name+"!");
-  var f=document.getElementById("teval-"+sid);if(f)f.style.display="none";
+window.submitTeacherComment=async function(postId,targetUid){
+  var text=((document.getElementById("tc-text-"+postId)||{}).value||"").trim();
+  if(!text){toast("Write your feedback!");return;}
+  await push(ref(db,"posts/"+postId+"/comments"),{from:CU.displayName+" (Teacher)",fromId:CU.uid,text:text,rubric:window._tcRub?window._tcRub[postId]||[]:[],isTeacher:true,createdAt:Date.now()});
+  if(targetUid){await push(ref(db,"notifications/"+targetUid),{type:"teacher",message:"Your teacher left feedback on your work!",read:false,createdAt:Date.now()});}
+  toast("Evaluation saved!");var f=document.getElementById("tcform-"+postId);if(f)f.style.display="none";
 };
 
-function renderTRubric(){
+function renderTUnit(){
   var mc=document.getElementById("mc");
-  var rh='<div class="pt">Assessment Rubric</div><div class="ps">The criteria used across all evaluations.</div><div class="card">';
-  RUBRIC.forEach(function(r,i){
-    rh+='<div style="padding:12px;border-radius:var(--rs);border:1.5px solid var(--gb);margin-bottom:10px">';
-    rh+='<div style="font-size:14px;font-weight:700;margin-bottom:3px">'+(i+1)+". "+r.label+'</div>';
-    rh+='<div style="font-size:12px;color:var(--tm);margin-bottom:8px">'+r.q+'</div>';
-    rh+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px">';
-    r.lvls.forEach(function(l,j){
-      rh+='<div style="padding:7px;border-radius:6px;background:var(--gl);font-size:11px;line-height:1.4"><strong>'+(j+1)+':</strong> '+l+'</div>';
-    });
-    rh+='</div></div>';
+  mc.innerHTML='<div class="pt">Unit Info</div><div class="ps">This is what students see on their plan page.</div><div class="loading">Loading...</div>';
+  get(ref(db,"unitInfo")).then(function(snap){
+    var info=snap.exists()?snap.val():{title:"",description:"",theme:""};
+    var html='<div class="card">';
+    html+='<div class="fg"><label class="fl">Unit Title</label><input class="fi" id="unit-title" value="'+esc(info.title||"")+'" placeholder="e.g. Our Community"></div>';
+    html+='<div class="fg"><label class="fl">Theme</label><input class="fi" id="unit-theme" value="'+esc(info.theme||"")+'" placeholder="e.g. Identity & Belonging"></div>';
+    html+='<div class="fg"><label class="fl">Description (shown to students)</label><textarea class="fta" id="unit-desc" style="min-height:100px" placeholder="What will students explore in this unit? What are the key ideas?">'+esc(info.description||"")+'</textarea></div>';
+    html+='<button class="btn btp btf" onclick="saveUnit()">Save Unit Info</button></div>';
+    mc.innerHTML='<div class="pt">Unit Info</div><div class="ps">This is what students see on their plan page.</div>'+html;
   });
-  rh+='</div>';
-  mc.innerHTML=rh;
 }
+
+window.saveUnit=async function(){
+  var title=((document.getElementById("unit-title")||{}).value||"").trim();
+  var theme=((document.getElementById("unit-theme")||{}).value||"").trim();
+  var desc=((document.getElementById("unit-desc")||{}).value||"").trim();
+  await set(ref(db,"unitInfo"),{title:title,theme:theme,description:desc,updatedAt:Date.now()});
+  toast("Unit info saved! Students can now see it.");
+};
 </script>
 </body>
 </html>
