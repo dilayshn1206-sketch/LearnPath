@@ -512,60 +512,76 @@ async function renderHome(){
   var mc=document.getElementById("mc");
   var snap=await get(ref(db,"contracts/"+CU.uid));
   contractData=snap.exists()?snap.val():null;
-  var approved=contractData&&contractData.status==="approved";
+  var approved=contractData&&(contractData.status==="approved"||contractData.status==="completed");
   var firstName=(CU.displayName||"").split(" ")[0];
 
   var html='<div style="font-size:18px;font-weight:700;margin-bottom:14px">Hey, '+esc(firstName)+" &#128075;</div>";
 
   // AGENDA BLOCK
   html+='<div class="card" style="margin-bottom:10px">';
-  html+='<div style="font-size:13px;font-weight:700;color:var(--tm);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;font-size:11px">My Agenda</div>';
+  html+='<div style="font-size:11px;font-weight:700;color:var(--tm);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px">My Agenda</div>';
   html+='<div class="agenda-wrap">';
 
-  // Block 1: Get ideas
+  // Block 1: Get Ideas
   html+='<div class="agenda-block" onclick="go(\'plan\')" style="border-color:var(--p)">';
   html+='<div class="ab-icon">&#128161;</div>';
   html+='<div><div class="ab-title">Get Ideas</div><div class="ab-sub">Find your project</div></div>';
   html+='</div>';
 
-  // Block 2: Today's agenda
+  // Block 2: Today — shows active week goal
   var todayLabel="No plan yet";
-  var todayWeek=null;
-  if(approved&&contractData.weeks){
-    var now=Date.now();
-    contractData.weeks.forEach(function(w,i){
-      if(w.startDate&&w.endDate&&now>=w.startDate&&now<=w.endDate)todayWeek=i;
-    });
-    if(todayWeek!==null){
-      todayLabel="Week "+(todayWeek+1)+": "+( contractData.weeks[todayWeek].goal||"in progress");
-    } else if(contractData.weeks[0]){
-      todayLabel=contractData.weeks[0].goal||"Start week 1";
+  var todayWeekIdx=null;
+  if(contractData&&contractData.weeks){
+    // find active (unclosed) week
+    for(var i=0;i<contractData.weeks.length;i++){
+      if(!contractData.weeks[i].closed){todayWeekIdx=i;break;}
+    }
+    if(todayWeekIdx!==null){
+      var tw=contractData.weeks[todayWeekIdx];
+      todayLabel="Week "+(todayWeekIdx+1)+(tw.goal?": "+tw.goal:"");
+    } else {
+      todayLabel="All weeks complete!";
     }
   }
   html+='<div class="agenda-block" onclick="go(\'plan\')" style="border-color:var(--t)">';
   html+='<div class="ab-icon">&#128197;</div>';
-  html+='<div><div class="ab-title">Today</div><div class="ab-sub">'+esc(todayLabel)+'</div></div>';
+  html+='<div><div class="ab-title">Today</div><div class="ab-sub" style="line-height:1.4">'+esc(todayLabel)+'</div></div>';
   html+='</div>';
 
-  // Block 3: Overall plan
-  var overallLabel=approved?"Active plan":"Set up plan";
-  html+='<div class="agenda-block" onclick="go(\'plan\')" style="border-color:var(--a)">';
-  html+='<div class="ab-icon">&#127919;</div>';
-  html+='<div><div class="ab-title">My Plan</div><div class="ab-sub">'+esc(overallLabel)+'</div></div>';
+  // Block 3: What friends are working on
+  html+='<div class="agenda-block" onclick="go(\'feed\')" style="border-color:var(--a)">';
+  html+='<div class="ab-icon">&#128101;</div>';
+  html+='<div><div class="ab-title">Friends</div><div class="ab-sub">See what they\'re making</div></div>';
   html+='</div>';
 
   html+='</div>';// end agenda-wrap
 
-  if(approved){
+  // Progress bar if contract active
+  if(approved&&contractData.weeks){
     var done=0,total=0;
-    if(contractData.weeks)contractData.weeks.forEach(function(w){if(w.tasks)w.tasks.forEach(function(t){total++;if(t.done)done++;});});
+    contractData.weeks.forEach(function(w){if(w.tasks)w.tasks.forEach(function(t){total++;if(t.done)done++;});});
     if(total>0){
       var pct=Math.round(done/total*100);
-      html+='<div style="margin-top:8px">';
+      html+='<div style="margin-top:10px">';
       html+='<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--tm);margin-bottom:4px"><span>Overall progress</span><span style="color:var(--t);font-weight:700">'+pct+'%</span></div>';
       html+='<div class="pbw" style="margin:0"><div class="pbf" style="width:'+pct+'%"></div></div></div>';
     }
-    html+='<button class="btn bts btf" style="margin-top:10px;font-size:12px" onclick="go(\'feed\')">See what friends are doing &#8594;</button>';
+    // Show current week tasks as checklist
+    if(todayWeekIdx!==null){
+      var tw2=contractData.weeks[todayWeekIdx];
+      var tasks=tw2.tasks||[];
+      if(tasks.length){
+        html+='<div style="margin-top:10px">';
+        html+='<div style="font-size:12px;font-weight:700;color:var(--tm);margin-bottom:6px">This week\'s tasks:</div>';
+        tasks.slice(0,4).forEach(function(t){
+          html+='<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--gl)">';
+          html+='<div style="width:18px;height:18px;border-radius:50%;border:1.5px solid '+( t.done?"var(--t)":"var(--gb)")+';background:'+( t.done?"var(--t)":"#fff")+';display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0">'+( t.done?"&#10003;":"")+"</div>";
+          html+='<span style="font-size:12px;color:var(--tx);'+(t.done?"text-decoration:line-through;color:var(--tm)":"")+'">'+esc(t.text)+'</span></div>';
+        });
+        if(tasks.length>4)html+='<div style="font-size:11px;color:var(--th);margin-top:4px">+'+( tasks.length-4)+' more — see My Plan</div>';
+        html+='</div>';
+      }
+    }
   }
   html+='</div>'; // end card
 
@@ -990,6 +1006,9 @@ function renderWeeklyPlan(c){
           html+='<div style="background:var(--al);border-radius:var(--rs);padding:7px 10px;font-size:12px;color:var(--a);margin-bottom:10px">&#127919; Focus skill: <strong>'+esc(w.focusSkill)+'</strong></div>';
         }
 
+        // Work section header
+        html+='<div style="font-size:11px;font-weight:700;color:var(--tm);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px">This week's work</div>';
+
         // Goal
         html+='<div class="fg"><label class="fl">My goal this week</label>';
         html+='<input class="fi" id="w-goal-'+i+'" value="'+esc(w.goal||"")+'" placeholder="e.g. Find 3 sources and write a rough outline" onblur="saveWeekGoal('+i+')"></div>';
@@ -1017,11 +1036,17 @@ function renderWeeklyPlan(c){
         html+='<button class="btn btp" style="font-size:12px;padding:7px 12px" onclick="addTask('+i+')">Add</button>';
         html+='</div>';
 
-        // Close week button
+        // Close week section — visually separated card
         html+='<div class="divider"></div>';
-        html+='<button class="btn btf" style="background:var(--p);color:#fff;font-size:13px;padding:11px" onclick="openCloseWeek('+i+')">';
+        html+='<div style="border-radius:var(--r);background:var(--pd);padding:14px 16px;margin-top:4px">';
+        html+='<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.65);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Done for this week?</div>';
+        html+='<div style="font-size:13px;color:rgba(255,255,255,.8);margin-bottom:12px;line-height:1.5">';
+        html+=i<3?"Make sure you have shared your work on the Feed first, then close the week.":"Great work! Make sure your final piece is on the Feed, then complete your plan.";
+        html+='</div>';
+        html+='<button class="btn btf" style="background:#fff;color:var(--pd);font-size:13px;font-weight:700;padding:11px" onclick="openCloseWeek('+i+')">';
         html+=i<3?"&#128274; Close this week &amp; plan next week &#8594;":"&#127942; Complete my plan";
         html+='</button>';
+        html+='</div>';
       }
       html+='</div>';
     }
