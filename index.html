@@ -838,7 +838,7 @@ async function renderPlan(){
   html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px">';
 
   // Box 1: What are we learning
-  html+='<div class="agenda-block" style="grid-column:1/-1;min-height:70px;cursor:default;border-color:var(--p)" onclick="openUnitInfo()">';
+  html+='<div class="agenda-block" style="grid-column:1/-1;min-height:70px;border-color:var(--p)" onclick="openUnitInfo()">';
   html+='<div class="ab-icon">&#127979;</div>';
   html+='<div><div class="ab-title">What are we learning?</div>';
   html+='<div class="ab-sub" id="unit-info-sub">Tap to see the unit</div></div></div>';
@@ -848,7 +848,7 @@ async function renderPlan(){
   html+='<div class="ab-icon">&#128161;</div>';
   html+='<div><div class="ab-title">Get Project Ideas</div><div class="ab-sub">Take the quiz</div></div></div>';
 
-  // Box 3: My learning contract
+  // Box 3: My contract status
   var contractLabel="Not set up yet";var contractStyle="border-color:var(--gb)";
   if(contractData){
     if(contractData.status==="approved"){contractLabel="Active";contractStyle="border-color:var(--t)";}
@@ -860,11 +860,10 @@ async function renderPlan(){
   html+='<div><div class="ab-title">My Learning Contract</div><div class="ab-sub">'+contractLabel+'</div></div></div>';
   html+='</div>';
 
-  // Contract detail (if exists)
-  if(contractData){html+=renderContractDetail(contractData);}
+  // Contract weekly view
+  if(contractData){html+=renderWeeklyPlan(contractData);}
   mc.innerHTML=html;
 
-  // Load unit info
   get(ref(db,"unitInfo")).then(function(snap){
     var el=document.getElementById("unit-info-sub");
     if(el&&snap.exists()&&snap.val().title)el.textContent=snap.val().title;
@@ -883,59 +882,169 @@ window.openUnitInfo=async function(){
   mc.innerHTML=html;
 };
 
-function renderContractDetail(c){
-  var html='<div class="card"><div class="fb mb8"><span style="font-size:14px;font-weight:700">My Learning Contract</span>';
+// ── WEEKLY PLAN (new logic) ──
+function getActiveWeek(weeks){
+  var now=Date.now();
+  // If any week has startDate/endDate set by teacher, use that
+  for(var i=0;i<weeks.length;i++){
+    if(weeks[i].startDate&&weeks[i].endDate&&now>=weeks[i].startDate&&now<=weeks[i].endDate)return i;
+  }
+  // Otherwise: first unclosed week
+  for(var i=0;i<weeks.length;i++){
+    if(!weeks[i].closed)return i;
+  }
+  return weeks.length-1;
+}
+
+function renderWeeklyPlan(c){
+  var weeks=c.weeks||[
+    {goal:"",focusSkill:"",resources:"",tasks:[],closed:false,nextPlan:"",closingNote:"",planOk:null},
+    {goal:"",focusSkill:"",resources:"",tasks:[],closed:false,nextPlan:"",closingNote:"",planOk:null},
+    {goal:"",focusSkill:"",resources:"",tasks:[],closed:false,nextPlan:"",closingNote:"",planOk:null},
+    {goal:"",focusSkill:"",resources:"",tasks:[],closed:false,nextPlan:"",closingNote:"",planOk:null}
+  ];
+  var activeWeek=getActiveWeek(weeks);
+  var weekLabels=["Week 1 — Choose & Find Resources","Week 2 — Create & Share","Week 3 — Revise & Refine","Week 4 — Present & Reflect"];
+  var FOCUS_SKILLS=["Speaking clearly","Organizing ideas","Using new vocabulary","Writing accurately","Being creative","Explaining clearly","Listening actively","Working with sources"];
+
+  var html='<div class="card"><div class="fb mb8">';
+  html+='<span style="font-size:14px;font-weight:700">My Learning Contract</span>';
   if(c.status==="approved")html+='<span class="sb sa">Active</span>';
-  else if(c.status==="pending")html+='<span class="sb sp">Pending</span>';
+  else if(c.status==="pending")html+='<span class="sb sp">Pending teacher approval</span>';
   else html+='<span class="sb" style="background:var(--gl);color:var(--tm)">Draft</span>';
   html+='</div>';
-  if(c.productType)html+='<div style="font-size:13px;margin-bottom:6px"><strong>Product:</strong> '+esc(c.productType)+'</div>';
-  if(c.weakness&&c.weaknessTips){
-    html+='<div class="tip mb8"><strong>Focus skill:</strong> '+esc(c.weakness)+'</div>';
+
+  if(c.productType){
+    html+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">';
+    html+='<span style="padding:3px 10px;border-radius:20px;background:var(--pl);color:var(--pd);font-size:12px;font-weight:700">'+esc(c.productType)+'</span>';
+    if(c.weakness)html+='<span style="padding:3px 10px;border-radius:20px;background:var(--al);color:var(--a);font-size:12px;font-weight:700">Focus: '+esc(c.weakness)+'</span>';
+    html+='</div>';
   }
   if(c.teacherComment)html+='<div style="background:var(--tl);border-radius:var(--rs);padding:8px 10px;font-size:12px;color:var(--td);margin-bottom:8px"><strong>Teacher:</strong> '+esc(c.teacherComment)+'</div>';
+
   html+='<div class="divider"></div>';
-  // Weeks
-  var weeks=c.weeks||[{goal:"",resources:"",tasks:[]},{goal:"",resources:"",tasks:[]},{goal:"",resources:"",tasks:[]},{goal:"Present & reflect",resources:"",tasks:[]}];
-  var weekLabels=["Week 1 — Decide & Find Resources","Week 2 — Work towards goal","Week 3 — Refine & get feedback","Week 4 — Present & Final Review"];
+
   weeks.forEach(function(w,i){
-    html+='<div class="week-block">';
+    var isActive=i===activeWeek;
+    var isClosed=w.closed;
+    var isFuture=i>activeWeek&&!isClosed;
     var done=w.tasks?(w.tasks.filter(function(t){return t.done;}).length):0;
     var total=w.tasks?w.tasks.length:0;
-    html+='<div class="week-header" onclick="toggleWeek('+i+')">';
-    html+='<span class="week-title">'+weekLabels[i]+'</span>';
-    html+='<span class="week-status">'+(total>0?done+"/"+total+" done":(w.goal?"&#10003;":"not set"))+'</span>';
+    var pct=total>0?Math.round(done/total*100):0;
+
+    // Week header styles
+    var headerBg=isClosed?"var(--tl)":isActive?"var(--pl)":"var(--gl)";
+    var headerBorder=isClosed?"var(--t)":isActive?"var(--p)":"var(--gb)";
+    var statusIcon=isClosed?"&#9989;":isActive?"&#128197;":"&#128274;";
+    var statusText=isClosed?"Completed":isActive?"This week":"Upcoming";
+
+    html+='<div style="border:1.5px solid '+headerBorder+';border-radius:var(--r);margin-bottom:9px;overflow:hidden">';
+
+    // Header — always clickable for closed/active, locked for future
+    html+='<div style="padding:11px 13px;background:'+headerBg+';display:flex;align-items:center;justify-content:space-between;'+(isFuture?"":"cursor:pointer;")+'" '+(isFuture?"":"onclick=\"toggleWeek("+i+")\"")+'">';
+    html+='<div><div style="font-size:13px;font-weight:700">'+statusIcon+' '+weekLabels[i]+'</div>';
+    if(w.goal&&!isFuture)html+='<div style="font-size:11px;color:var(--tm);margin-top:2px">'+esc(w.goal)+'</div>';
+    if(isFuture)html+='<div style="font-size:11px;color:var(--th);margin-top:2px">Complete the current week first</div>';
     html+='</div>';
-    html+='<div class="week-body" id="week-body-'+i+'">';
-    html+='<div class="fg"><label class="fl">My goal this week</label>';
-    html+='<input class="fi" id="w-goal-'+i+'" value="'+esc(w.goal||"")+'" placeholder="e.g. Find 3 sources and make a plan" onchange="saveWeekGoal('+i+')"></div>';
-    html+='<div class="fg"><label class="fl">Resources I am using</label>';
-    html+='<textarea class="fta" id="w-res-'+i+'" style="min-height:50px" placeholder="List the tools, websites, or materials you are using..." onchange="saveWeekRes('+i+')">'+esc(w.resources||"")+'</textarea></div>';
-    // Tasks
-    html+='<div style="font-size:12px;font-weight:700;color:var(--tm);margin-bottom:6px">This week\'s tasks</div>';
-    if(w.tasks&&w.tasks.length){
-      w.tasks.forEach(function(t,ti){
-        html+='<div class="step-item'+(t.done?" done":"")+'" onclick="toggleTask('+i+','+ti+')">';
-        html+='<div class="step-row"><div class="step-chk'+(t.done?" done":"")+'">'+( t.done?"&#10003;":"")+'</div>';
-        html+='<span class="step-txt'+(t.done?" done":"")+'">'+esc(t.text||"")+'</span></div></div>';
-      });
+    if(isClosed&&total>0)html+='<span class="sb sa">'+pct+'% done</span>';
+    else if(isActive&&total>0)html+='<span style="font-size:11px;color:var(--p);font-weight:700">'+done+"/"+total+' tasks</span>';
+    html+='</div>';
+
+    // Body — only for active and closed weeks
+    if(!isFuture){
+      html+='<div id="week-body-'+i+'" style="padding:13px;border-top:1px solid '+headerBorder+';background:#fff;display:'+(isActive?"block":"none")+'">';
+
+      if(isClosed){
+        // Closed week: read-only summary
+        if(w.closingNote)html+='<div style="font-size:13px;margin-bottom:8px"><strong>What I did:</strong> '+esc(w.closingNote)+'</div>';
+        if(w.planOk!==null){
+          var okLabel=w.planOk==="yes"?"Yes, went as planned":w.planOk==="partly"?"Partly":"Not really";
+          html+='<div style="font-size:13px;margin-bottom:8px"><strong>Went to plan?</strong> '+okLabel+'</div>';
+        }
+        if(w.nextPlan)html+='<div style="font-size:13px;margin-bottom:8px"><strong>What I planned for next week:</strong> '+esc(w.nextPlan)+'</div>';
+        if(w.focusSkill)html+='<div style="font-size:13px;color:var(--td)"><strong>Focus skill:</strong> '+esc(w.focusSkill)+'</div>';
+      } else {
+        // Active week
+        // If there's a carry-over from last week's plan
+        if(i>0&&weeks[i-1]&&weeks[i-1].nextPlan){
+          html+='<div style="background:var(--pl);border-radius:var(--rs);padding:9px 11px;margin-bottom:12px">';
+          html+='<div style="font-size:11px;font-weight:700;color:var(--pd);margin-bottom:3px">&#128204; From last week, you planned:</div>';
+          html+='<div style="font-size:13px;color:var(--pd)">'+esc(weeks[i-1].nextPlan)+'</div>';
+          html+='<div style="font-size:11px;color:var(--tm);margin-top:5px">Does this still hold? Update your goal below if things have changed.</div>';
+          html+='</div>';
+        }
+
+        // Week 1 only: focus skill picker
+        if(i===0){
+          html+='<div class="fg">';
+          html+='<label class="fl">To make a great '+esc(c.productType||"product")+', what do you most need to work on?</label>';
+          html+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px" id="focus-skill-chips">';
+          FOCUS_SKILLS.forEach(function(sk){
+            var isSel=w.focusSkill===sk;
+            html+='<div class="chip'+(isSel?" sel":"")+'" onclick="setFocusSkill('+i+',\''+esc(sk)+'\')" style="font-size:12px">'+sk+'</div>';
+          });
+          html+='</div>';
+          if(w.focusSkill)html+='<div style="font-size:12px;color:var(--td);margin-top:5px">&#9989; Selected: <strong>'+esc(w.focusSkill)+'</strong></div>';
+          html+='</div>';
+        } else if(w.focusSkill){
+          html+='<div style="background:var(--al);border-radius:var(--rs);padding:7px 10px;font-size:12px;color:var(--a);margin-bottom:10px">&#127919; Focus skill: <strong>'+esc(w.focusSkill)+'</strong></div>';
+        }
+
+        // Goal
+        html+='<div class="fg"><label class="fl">My goal this week</label>';
+        html+='<input class="fi" id="w-goal-'+i+'" value="'+esc(w.goal||"")+'" placeholder="e.g. Find 3 sources and write a rough outline" onblur="saveWeekGoal('+i+')"></div>';
+
+        // Resources
+        html+='<div class="fg"><label class="fl">Resources I am using</label>';
+        html+='<textarea class="fta" id="w-res-'+i+'" style="min-height:48px" placeholder="Which websites, tools or materials will you use?" onblur="saveWeekRes('+i+')">'+esc(w.resources||"")+'</textarea></div>';
+
+        // Progress bar
+        if(total>0){
+          html+='<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--tm);margin-bottom:3px"><span>Tasks</span><span>'+done+"/"+total+'</span></div>';
+          html+='<div class="pbw" style="margin-bottom:10px"><div class="pbf" style="width:'+pct+'%"></div></div>';
+        }
+
+        // Tasks
+        if(w.tasks&&w.tasks.length){
+          w.tasks.forEach(function(t,ti){
+            html+='<div class="step-item'+(t.done?" done":"")+'" onclick="toggleTask('+i+','+ti+')">';
+            html+='<div class="step-row"><div class="step-chk'+(t.done?" done":"")+'">'+( t.done?"&#10003;":"")+'</div>';
+            html+='<span class="step-txt'+(t.done?" done":"")+'">'+esc(t.text||"")+'</span></div></div>';
+          });
+        }
+        html+='<div style="display:flex;gap:7px;margin-top:7px">';
+        html+='<input class="fi" id="new-task-'+i+'" placeholder="Add a task..." style="flex:1" onkeydown="if(event.key===\'Enter\')addTask('+i+')">';
+        html+='<button class="btn btp" style="font-size:12px;padding:7px 12px" onclick="addTask('+i+')">Add</button>';
+        html+='</div>';
+
+        // Close week button
+        html+='<div class="divider"></div>';
+        html+='<button class="btn btf" style="background:var(--p);color:#fff;font-size:13px;padding:11px" onclick="openCloseWeek('+i+')">';
+        html+=i<3?"&#128274; Close this week &amp; plan next week &#8594;":"&#127942; Complete my plan";
+        html+='</button>';
+      }
+      html+='</div>';
     }
-    html+='<div style="display:flex;gap:7px;margin-top:7px">';
-    html+='<input class="fi" id="new-task-'+i+'" placeholder="Add a task..." style="flex:1">';
-    html+='<button class="btn btp" style="font-size:12px;padding:7px 12px" onclick="addTask('+i+')">Add</button>';
-    html+='</div></div></div>';
+    html+='</div>';
   });
 
   if(c.status!=="approved"){
-    html+='<button class="btn bts btf" style="margin-top:10px;font-size:12px" onclick="clearContract()">Clear contract</button>';
+    html+='<button class="btn bts btf" style="margin-top:4px;font-size:12px" onclick="clearContract()">Clear contract</button>';
   }
   html+='</div>';
   return html;
 }
 
+window.setFocusSkill=async function(weekIdx,skill){
+  if(!contractData||!contractData.weeks)return;
+  contractData.weeks[weekIdx].focusSkill=skill;
+  await update(ref(db,"contracts/"+CU.uid),{weeks:contractData.weeks});
+  renderPlan();
+};
+
 window.toggleWeek=function(i){
   var el=document.getElementById("week-body-"+i);
-  if(el)el.classList.toggle("open");
+  if(el)el.style.display=el.style.display==="none"?"block":"none";
 };
 
 window.saveWeekGoal=async function(i){
@@ -966,8 +1075,80 @@ window.toggleTask=async function(wi,ti){
   await update(ref(db,"contracts/"+CU.uid),{weeks:contractData.weeks});
   renderPlan();
 };
-window.openContract=function(){renderPlan();document.getElementById("week-body-0")?.classList.add("open");};
+window.openContract=function(){renderPlan();};
 window.clearContract=async function(){if(!confirm("Clear your contract?"))return;await remove(ref(db,"contracts/"+CU.uid));contractData=null;renderPlan();};
+
+// ── CLOSE WEEK MODAL ──
+window.openCloseWeek=function(weekIdx){
+  var mc=document.getElementById("mc");
+  var isLast=weekIdx===3;
+  var weekLabels=["Week 1","Week 2","Week 3","Week 4"];
+  var html='<button class="btn bts mb8" onclick="renderPlan()">&#8592; Back</button>';
+  html+='<div class="card" style="border-color:var(--p);border-width:2px">';
+  html+='<div style="font-size:16px;font-weight:700;margin-bottom:4px">&#128274; Close '+weekLabels[weekIdx]+'</div>';
+  html+='<div style="font-size:13px;color:var(--tm);margin-bottom:16px">Before you finish, take 2 minutes to reflect.</div>';
+
+  html+='<div class="fg"><label class="fl">What did you do this week? <span style="color:var(--c)">*</span></label>';
+  html+='<textarea class="fta" id="cw-note" placeholder="Describe what you worked on and what you made or started..." style="min-height:72px"></textarea></div>';
+
+  html+='<div class="fg"><label class="fl">Did the week go as planned? <span style="color:var(--c)">*</span></label>';
+  html+='<div style="display:flex;gap:8px;margin-top:4px" id="plan-ok-chips">';
+  html+='<div class="chip" onclick="selectPlanOk(\'yes\')" id="pok-yes">&#9989; Yes</div>';
+  html+='<div class="chip" onclick="selectPlanOk(\'partly\')" id="pok-partly">&#128336; Partly</div>';
+  html+='<div class="chip" onclick="selectPlanOk(\'no\')" id="pok-no">&#10060; Not really</div>';
+  html+='</div></div>';
+
+  if(!isLast){
+    html+='<div class="fg"><label class="fl">What is your plan for next week? <span style="color:var(--c)">*</span></label>';
+    html+='<textarea class="fta" id="cw-next" placeholder="What do you want to focus on next week? What steps will you take?..." style="min-height:64px"></textarea>';
+    html+='<div style="font-size:11px;color:var(--tm);margin-top:4px">This will appear as a reminder when you open next week.</div></div>';
+  }
+
+  html+='<button class="btn btg btf" style="margin-top:8px" onclick="submitCloseWeek('+weekIdx+')">'+( isLast?"&#127942; Complete my plan &amp; submit":"Save &amp; unlock next week &#8594;")+'</button>';
+  html+='</div>';
+  mc.innerHTML=html;
+  window._planOkChoice=null;
+};
+
+window.selectPlanOk=function(val){
+  window._planOkChoice=val;
+  ["yes","partly","no"].forEach(function(v){
+    var el=document.getElementById("pok-"+v);
+    if(el)el.classList.toggle("sel",v===val);
+  });
+};
+
+window.submitCloseWeek=async function(weekIdx){
+  var note=((document.getElementById("cw-note")||{}).value||"").trim();
+  var nextPlan=((document.getElementById("cw-next")||{}).value||"").trim();
+  if(!note){toast("Tell us what you did this week!");return;}
+  if(!window._planOkChoice){toast("Did the week go as planned?");return;}
+  if(weekIdx<3&&!nextPlan){toast("What is your plan for next week?");return;}
+
+  if(!contractData||!contractData.weeks)return;
+  contractData.weeks[weekIdx].closed=true;
+  contractData.weeks[weekIdx].closingNote=note;
+  contractData.weeks[weekIdx].planOk=window._planOkChoice;
+  contractData.weeks[weekIdx].nextPlan=nextPlan||"";
+  contractData.weeks[weekIdx].closedAt=Date.now();
+
+  // Carry next plan note into next week
+  if(weekIdx<3){
+    contractData.weeks[weekIdx+1].nextPlan=nextPlan;
+  }
+
+  // If last week, mark contract as completed
+  if(weekIdx===3){
+    await update(ref(db,"contracts/"+CU.uid),{weeks:contractData.weeks,status:"completed"});
+    toast("Your plan is complete! Amazing work!");
+  } else {
+    await update(ref(db,"contracts/"+CU.uid),{weeks:contractData.weeks});
+    toast("Week closed! Next week is now unlocked.");
+  }
+  window._planOkChoice=null;
+  renderPlan();
+};
+
 
 // ── QUIZ ──
 window.go=function(page){
