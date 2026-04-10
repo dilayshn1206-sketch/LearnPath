@@ -572,7 +572,7 @@ async function renderHome(){
       var tasks=tw2.tasks||[];
       if(tasks.length){
         html+='<div style="margin-top:10px">';
-        html+='<div style="font-size:12px;font-weight:700;color:var(--tm);margin-bottom:6px">This week\'s tasks:</div>';
+        html+='<div style="font-size:12px;font-weight:700;color:var(--tm);margin-bottom:6px">This week&#39;s tasks:</div>';
         tasks.slice(0,4).forEach(function(t){
           html+='<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--gl)">';
           html+='<div style="width:18px;height:18px;border-radius:50%;border:1.5px solid '+( t.done?"var(--t)":"var(--gb)")+';background:'+( t.done?"var(--t)":"#fff")+';display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0">'+( t.done?"&#10003;":"")+"</div>";
@@ -1007,7 +1007,7 @@ function renderWeeklyPlan(c){
         }
 
         // Work section header
-        html+='<div style="font-size:11px;font-weight:700;color:var(--tm);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px">This week's work</div>';
+        html+='<div style="font-size:11px;font-weight:700;color:var(--tm);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px">This week&#39;s work</div>';
 
         // Goal
         html+='<div class="fg"><label class="fl">My goal this week</label>';
