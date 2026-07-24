@@ -16,7 +16,6 @@
   --bg:#F7F6F2;--r:12px;--rs:8px;--sh:0 1px 8px rgba(0,0,0,.07)
 }
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--tx);min-height:100vh}
-/* AUTH */
 #auth{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(135deg,var(--pl),var(--tl))}
 .auth-card{background:#fff;border-radius:24px;padding:44px 36px;max-width:420px;width:100%;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.12)}
 .alogo{width:56px;height:56px;background:var(--p);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
@@ -26,7 +25,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .gbtn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:12px 20px;border:1.5px solid var(--gb);border-radius:var(--r);background:#fff;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s}
 .gbtn:hover{border-color:var(--p);background:var(--pl)}
 .gbtn img{width:20px}
-/* ROLE */
 #role{min-height:100vh;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px}
 .ri{max-width:440px;width:100%;text-align:center}
 .ri h2{font-size:21px;font-weight:700;margin-bottom:5px}
@@ -37,7 +35,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .role-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
 .role-card h3{font-size:15px;font-weight:700;margin-bottom:2px}
 .role-card p{font-size:12px;color:var(--tm);margin:0}
-/* APP SHELL */
 #app{display:none;min-height:100vh;flex-direction:column}
 .topbar{background:#fff;border-bottom:1px solid var(--gb);padding:0 14px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
 .tbl{display:flex;align-items:center;gap:9px}
@@ -57,7 +54,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:7px 3px;cursor:pointer;gap:2px;border:none;background:none;color:var(--tm);font-size:10px;font-weight:500;transition:color .15s}
 .ni.active{color:var(--p)}
 .ni svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-/* CARDS & COMMON */
 .card{background:#fff;border-radius:var(--r);padding:14px;margin-bottom:10px;box-shadow:var(--sh);border:1px solid var(--gb)}
 .pt{font-size:19px;font-weight:700;margin-bottom:2px}
 .ps{font-size:13px;color:var(--tm);margin-bottom:14px}
@@ -82,14 +78,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .sa{background:var(--tl);color:var(--td)}
 .sr{background:var(--cl);color:var(--c)}
 .fb{display:flex;align-items:center;justify-content:space-between}
-/* AGENDA BLOCKS */
 .agenda-wrap{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:12px}
 .agenda-block{background:#fff;border-radius:var(--r);padding:13px;border:1.5px solid var(--gb);cursor:pointer;transition:all .18s;min-height:90px;display:flex;flex-direction:column;justify-content:space-between}
 .agenda-block:hover{border-color:var(--p);transform:translateY(-2px);box-shadow:var(--sh)}
 .ab-icon{font-size:22px;margin-bottom:6px}
 .ab-title{font-size:12px;font-weight:700;line-height:1.3}
 .ab-sub{font-size:11px;color:var(--tm);margin-top:3px}
-/* POST CARDS (social feed) */
 .post{background:#fff;border-radius:var(--r);margin-bottom:10px;border:1px solid var(--gb);overflow:hidden}
 .post-hdr{display:flex;align-items:center;gap:9px;padding:11px 13px 0}
 .post-av{width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0;cursor:pointer}
@@ -109,7 +103,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .comment:last-child{border-bottom:none}
 .comment-name{font-size:12px;font-weight:700;color:var(--pd);margin-bottom:3px}
 .comment-text{font-size:12px;color:var(--tm);line-height:1.5}
-/* QUIZ */
 .qprog{height:3px;background:var(--gb);border-radius:2px;margin-bottom:18px;overflow:hidden}
 .qpf{height:100%;background:var(--p);border-radius:2px;transition:width .4s}
 .ql{font-size:11px;color:var(--th);margin-bottom:3px}
@@ -124,19 +117,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .qchk{width:15px;height:15px;border-radius:3px;border:1.5px solid var(--gb);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center}
 .qo.sel .qchk{border-color:var(--p);background:var(--p);color:#fff;font-size:9px}
 .qnav{display:flex;justify-content:space-between;margin-top:16px}
-/* PRODUCT RESULT */
 .prod-top{border:1.5px solid var(--p);background:var(--pl);border-radius:var(--r);padding:13px;margin-bottom:8px}
 .prod-row{display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid var(--gb);border-radius:var(--rs);background:#fff;margin-bottom:6px;cursor:pointer;transition:all .15s}
 .prod-row:hover{border-color:var(--p)}
 .prod-row.chosen{border-color:var(--t);background:var(--tl)}
-/* CONTRACT */
 .week-block{border:1.5px solid var(--gb);border-radius:var(--r);margin-bottom:9px;overflow:hidden}
 .week-header{padding:11px 13px;background:var(--gl);display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
 .week-title{font-size:13px;font-weight:700}
 .week-status{font-size:11px;color:var(--tm)}
 .week-body{padding:13px;border-top:1px solid var(--gb);background:#fff;display:none}
 .week-body.open{display:block}
-/* PROGRESS */
 .step-item{padding:11px 13px;border-radius:var(--rs);border:1.5px solid var(--gb);background:#fff;margin-bottom:7px;cursor:pointer;transition:all .15s}
 .step-item.done{background:var(--tl);border-color:var(--t)}
 .step-row{display:flex;align-items:center;gap:10px}
@@ -144,7 +134,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .step-chk.done{background:var(--t);border-color:var(--t);color:#fff}
 .step-txt{font-size:13px;font-weight:500;flex:1}
 .step-txt.done{text-decoration:line-through;color:var(--tm)}
-/* RUBRIC */
 .rubrow{margin-bottom:11px;padding:11px;border-radius:var(--rs);border:1.5px solid var(--gb);background:#fff}
 .rubcrit{font-size:12px;font-weight:700;margin-bottom:2px}
 .rubcdesc{font-size:11px;color:var(--tm);margin-bottom:7px}
@@ -154,7 +143,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .rubbtn.sel{border-color:var(--p);background:var(--p);color:#fff}
 .rubanchor{display:flex;justify-content:space-between;font-size:10px;color:var(--th);margin-top:2px}
 .rublvl{font-size:11px;color:var(--tm);margin-top:5px;padding:6px 9px;background:var(--gl);border-radius:6px;line-height:1.5}
-/* CHAT */
 .chat-wrap{display:flex;flex-direction:column;height:320px;border-radius:var(--r);border:1.5px solid var(--gb);overflow:hidden;background:#fff}
 .chat-msgs{flex:1;overflow-y:auto;padding:11px;display:flex;flex-direction:column;gap:7px}
 .msg{max-width:85%;padding:8px 11px;border-radius:12px;font-size:13px;line-height:1.5}
@@ -163,21 +151,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .chat-in{display:flex;gap:7px;padding:8px;border-top:1px solid var(--gb)}
 .chat-in input{flex:1;padding:8px 10px;border:1.5px solid var(--gb);border-radius:var(--rs);font-size:13px;font-family:inherit}
 .chat-in input:focus{outline:none;border-color:var(--p)}
-/* FORUM */
 .forum-bbl{padding:9px 11px;border-radius:12px;margin-bottom:7px;font-size:13px;line-height:1.5;max-width:85%}
 .forum-bbl.mine{background:var(--p);color:#fff;margin-left:auto;border-bottom-right-radius:3px}
 .forum-bbl.theirs{background:#fff;border:1.5px solid var(--gb);border-bottom-left-radius:3px}
-/* PROFILE */
 .prof-av-wrap{position:relative;width:70px;height:70px;margin:0 auto 10px;cursor:pointer}
 .prof-av-img{width:70px;height:70px;border-radius:50%;object-fit:cover;border:3px solid var(--p);display:block}
 .prof-av-plc{width:70px;height:70px;border-radius:50%;background:var(--pl);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;color:var(--p);border:3px solid var(--p)}
 .prof-av-edit{position:absolute;bottom:0;right:0;width:22px;height:22px;background:var(--p);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff}
-/* COINS */
 .sticker-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:10px}
 .sticker{aspect-ratio:1;border-radius:var(--rs);display:flex;align-items:center;justify-content:center;font-size:24px;border:1.5px solid var(--gb);background:#fff}
 .sticker.earned{border-color:var(--a);background:var(--al)}
 .sticker.locked{opacity:.35}
-/* MISC */
 .pbw{background:var(--gb);border-radius:5px;height:7px;margin:5px 0 11px;overflow:hidden}
 .pbf{height:100%;border-radius:5px;background:var(--t);transition:width .5s}
 .obtn{padding:4px 10px;border-radius:20px;border:1.5px solid var(--gb);font-size:11px;font-weight:600;cursor:pointer;background:none;color:var(--tm);text-decoration:none;transition:all .15s;display:inline-block}
@@ -260,93 +244,62 @@ let chatHist=[],rubV=[0,0,0,0,0,0],peerV=[0,0,0,0,0,0];
 let myGid=null,myGname=null,userCoins=0;
 let contractData=null;
 
-// ── QUIZ DATA (embedded from provided quiz) ──
-const CATS={writing:"Writing",speaking:"Speaking",visual:"Visual & Design",video:"Video",creative:"Creative Writing",research:"Research",reallife:"Real-Life",collab:"Collaborative",digital:"Digital"};
+// ── QUIZ DATA (simplified for 6th graders: 3 single-select questions, direct lookup) ──
+const FORMATS={
+  writing:{label:"Written",e:"✍️"},
+  speaking:{label:"Spoken",e:"🗣️"},
+  visual:{label:"Visual",e:"🎨"},
+  video:{label:"Video",e:"🎬"}
+};
 const PRODUCTS=[
-  {id:"blog_post",e:"📝",name:"Blog Post",cats:["writing","digital"]},
-  {id:"short_story",e:"📖",name:"Short Story",cats:["creative","writing"]},
-  {id:"news_article",e:"🗞️",name:"News Article",cats:["writing","reallife"]},
-  {id:"book_review",e:"📚",name:"Book Review",cats:["writing","research"]},
-  {id:"movie_review",e:"🎬",name:"Movie Review",cats:["writing","reallife"]},
-  {id:"song_review",e:"🎵",name:"Song Review",cats:["writing","creative"]},
-  {id:"research_report",e:"📋",name:"Research Report",cats:["research","writing"]},
-  {id:"essay",e:"📑",name:"Essay",cats:["writing","research"]},
-  {id:"brochure",e:"🧾",name:"Brochure",cats:["visual","reallife"]},
-  {id:"magazine_article",e:"📰",name:"Magazine Article",cats:["writing","digital"]},
-  {id:"advertisement",e:"📢",name:"Advertisement",cats:["writing","reallife"]},
-  {id:"dialogue_script",e:"🗨️",name:"Dialogue Script",cats:["creative","speaking"]},
-  {id:"skit_script",e:"🎭",name:"Skit Script",cats:["creative","collab"]},
-  {id:"travel_guide",e:"🧭",name:"Travel Guide",cats:["writing","reallife"]},
-  {id:"howto",e:"🧑‍🏫",name:"How-to Guide",cats:["writing","reallife"]},
-  {id:"presentation",e:"📊",name:"Presentation",cats:["visual","speaking"]},
-  {id:"podcast",e:"🎙️",name:"Podcast",cats:["speaking","digital"]},
-  {id:"speech",e:"🗣️",name:"Speech",cats:["speaking","reallife"]},
-  {id:"oral_presentation",e:"🎤",name:"Oral Presentation",cats:["speaking","research"]},
-  {id:"interview",e:"🧑‍🤝‍🧑",name:"Interview",cats:["speaking","reallife"]},
-  {id:"news_broadcast",e:"📺",name:"News Broadcast",cats:["video","speaking"]},
-  {id:"debate",e:"🎯",name:"Debate",cats:["speaking","collab"]},
-  {id:"drama_skit",e:"🎭",name:"Drama / Skit",cats:["creative","collab"]},
-  {id:"short_video",e:"🎬",name:"Short Video",cats:["video","digital"]},
-  {id:"vlog",e:"📹",name:"Vlog",cats:["video","digital"]},
-  {id:"mini_doc",e:"🎞️",name:"Mini Documentary",cats:["video","research"]},
-  {id:"explainer_video",e:"🧠",name:"Explainer Video",cats:["video","research"]},
-  {id:"poem",e:"✨",name:"Poem",cats:["creative","writing"]},
-  {id:"song_lyrics",e:"🎵",name:"Song Lyrics",cats:["creative","writing"]},
-  {id:"comic_book",e:"📘",name:"Comic Book",cats:["creative","visual"]},
-  {id:"childrens_story",e:"🧸",name:"Children's Story",cats:["creative","writing"]},
-  {id:"group_presentation",e:"🧑‍🤝‍🧑",name:"Group Presentation",cats:["collab","speaking"]},
-  {id:"group_podcast",e:"🎤",name:"Group Podcast",cats:["collab","speaking"]},
-  {id:"class_magazine",e:"📰",name:"Class Magazine",cats:["collab","writing"]},
-  {id:"short_film_collab",e:"🎬",name:"Short Film",cats:["collab","video"]},
-  {id:"social_post",e:"📱",name:"Social Media Post",cats:["digital","writing"]},
-  {id:"infographic",e:"📊",name:"Infographic",cats:["visual","research"]},
-  {id:"illustrated_book",e:"🎨",name:"Illustrated Storybook",cats:["creative","visual"]}
+  {id:"short_story",e:"📖",name:"Short Story",format:"writing"},
+  {id:"blog_post",e:"📝",name:"Blog Post",format:"writing"},
+  {id:"howto",e:"🧑‍🏫",name:"How-to Guide",format:"writing"},
+  {id:"class_magazine",e:"📰",name:"Class Magazine",format:"writing"},
+  {id:"speech",e:"🗣️",name:"Speech",format:"speaking"},
+  {id:"podcast",e:"🎙️",name:"Podcast",format:"speaking"},
+  {id:"interview",e:"🧑‍🤝‍🧑",name:"Interview",format:"speaking"},
+  {id:"infographic",e:"📊",name:"Poster / Infographic",format:"visual"},
+  {id:"comic_book",e:"📘",name:"Comic Strip",format:"visual"},
+  {id:"short_video",e:"🎬",name:"Short Video",format:"video"},
+  {id:"news_broadcast",e:"📺",name:"News Report",format:"video"},
+  {id:"group_video",e:"🎥",name:"Group Video Project",format:"video"}
 ];
+function productById(id){return PRODUCTS.find(function(p){return p.id===id;});}
+// direct lookup: format + workstyle -> recommended product id (no scoring needed, fully transparent)
+const RECOMMEND={
+  writing:{alone:"short_story",group:"class_magazine"},
+  speaking:{alone:"speech",group:"interview"},
+  visual:{alone:"infographic",group:"comic_book"},
+  video:{alone:"short_video",group:"group_video"}
+};
 const SKILL_TIPS={
   writing:["Plan first — even 3 bullet points helps","Read your draft aloud to catch unclear sentences","One clear idea per paragraph"],
   speaking:["Practice out loud before the real thing","Record yourself once and listen back","Slow down — most people rush when nervous"],
   visual:["Sketch your layout on paper first","Stick to two colours and two fonts maximum","Every element needs a reason to be there"],
   video:["Storyboard before filming","Good audio matters more than perfect video","Shorter and focused beats long and rambling"],
-  research:["Start with a question, not just a topic","Check two sources before trusting a fact","Note sources as you go, not at the end"],
-  creative:["Permission to write a messy first draft","Try starting in the middle of the action","Read your favourite authors and notice their choices"],
   collab:["Agree on roles at the very start","Check in before the final deadline","Make sure every voice has been heard"],
-  digital:["Learn one tool well before trying many","Think about your real audience","Keep files organised from day one"],
-  reallife:["Think about who will actually use this","Use clear simple language over impressive words","Test it on someone outside class"]
+  ideas:["Permission to write a messy first draft","Try starting in the middle of the action","Look at examples you like and notice what works"]
 };
 const QUESTIONS=[
-  {id:"format",q:"What kind of product do you want to make?",s:"Pick everything that sounds good.",opts:[
-    {e:"✍️",t:"Something written — article, story, essay, script",cats:["writing","creative","research"]},
-    {e:"🗣️",t:"Something spoken — speech, podcast, presentation",cats:["speaking","reallife"]},
-    {e:"🎬",t:"Something filmed — video, vlog, documentary",cats:["video","digital"]},
-    {e:"🎨",t:"Something visual — poster, infographic, illustrated",cats:["visual","creative"]},
-    {e:"🤝",t:"Something made with others — a group project",cats:["collab"]},
-    {e:"🌐",t:"Something digital — social post, newsletter, online",cats:["digital","reallife"]}
-  ],skipLabel:"Help me find a product with AI"},
-  {id:"purpose",q:"What do you want your product to do?",s:"Choose all that fit.",opts:[
-    {e:"📖",t:"Tell a story or take someone somewhere imaginative",cats:["creative","writing"]},
-    {e:"📣",t:"Persuade or argue a point of view",cats:["writing","speaking","research"]},
-    {e:"💡",t:"Explain something or teach someone",cats:["reallife","speaking","video"]},
-    {e:"🔍",t:"Investigate a question with facts and evidence",cats:["research","writing"]},
-    {e:"😄",t:"Entertain — make people laugh or feel something",cats:["creative","video","speaking"]},
-    {e:"🌍",t:"Solve a real problem or serve a real need",cats:["reallife","collab","digital"]}
-  ],skipLabel:"Help me find a product with AI"},
-  {id:"process",q:"How do you like to work?",s:"Pick all that feel true.",opts:[
-    {e:"🧍",t:"On my own — I like making all the decisions",cats:["writing","creative","research"]},
-    {e:"👥",t:"With others — collaboration energises me",cats:["collab","speaking"]},
-    {e:"🖊️",t:"Pen and paper, keeping it simple",cats:["writing","creative"]},
-    {e:"🖥️",t:"Using digital tools — apps, editing software",cats:["digital","video"]},
-    {e:"🎤",t:"With a mic or camera — I don't mind being recorded",cats:["speaking","video"]},
-    {e:"🖼️",t:"Designing and arranging things visually",cats:["visual","digital"]}
-  ],skipLabel:"Help me find a product with AI"},
-  {id:"weakness",q:"Which feels most uncomfortable for you right now?",s:"Be honest — this shapes what you will practise.",opts:[
-    {e:"✍️",t:"Writing clearly and expressing ideas on paper",skill:"writing"},
-    {e:"🗣️",t:"Speaking in front of others or being recorded",skill:"speaking"},
-    {e:"🎨",t:"Designing or making things look good visually",skill:"visual"},
-    {e:"🎬",t:"Filming, editing or producing video content",skill:"video"},
-    {e:"🔍",t:"Finding, reading and using sources and evidence",skill:"research"},
-    {e:"💡",t:"Coming up with original or creative ideas",skill:"creative"},
-    {e:"🤝",t:"Working in a group and sharing the work",skill:"collab"}
-  ],skipLabel:"I don't feel uncomfortable in any of these areas"}
+  {id:"format",q:"How do you want to make your project?",s:"Pick the one that sounds best.",opts:[
+    {e:"✍️",t:"Written — a story, article, or guide",value:"writing"},
+    {e:"🗣️",t:"Spoken — a podcast, speech, or interview",value:"speaking"},
+    {e:"🎨",t:"Visual — a poster, comic, or infographic",value:"visual"},
+    {e:"🎬",t:"Video — a short film or news report",value:"video"}
+  ]},
+  {id:"workstyle",q:"Do you want to work alone or with others?",s:"This changes which idea we suggest.",opts:[
+    {e:"🧍",t:"By myself",value:"alone"},
+    {e:"👥",t:"With a partner or group",value:"group"}
+  ]},
+  {id:"weakness",q:"What feels hardest for you right now?",s:"Be honest — we'll give you a few tips for this.",opts:[
+    {e:"✍️",t:"Writing clearly",value:"writing"},
+    {e:"🗣️",t:"Speaking in front of others",value:"speaking"},
+    {e:"🎨",t:"Designing or making things look good",value:"visual"},
+    {e:"🎬",t:"Filming or editing video",value:"video"},
+    {e:"🤝",t:"Working in a group",value:"collab"},
+    {e:"💡",t:"Coming up with ideas",value:"ideas"}
+  ]}
 ];
 
 const RUBRIC=[
@@ -517,22 +470,18 @@ async function renderHome(){
 
   var html='<div style="font-size:18px;font-weight:700;margin-bottom:14px">Hey, '+esc(firstName)+" &#128075;</div>";
 
-  // AGENDA BLOCK
   html+='<div class="card" style="margin-bottom:10px">';
   html+='<div style="font-size:11px;font-weight:700;color:var(--tm);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px">My Agenda</div>';
   html+='<div class="agenda-wrap">';
 
-  // Block 1: Get Ideas
   html+='<div class="agenda-block" onclick="go(\'plan\')" style="border-color:var(--p)">';
   html+='<div class="ab-icon">&#128161;</div>';
   html+='<div><div class="ab-title">Get Ideas</div><div class="ab-sub">Find your project</div></div>';
   html+='</div>';
 
-  // Block 2: Today — shows active week goal
   var todayLabel="No plan yet";
   var todayWeekIdx=null;
   if(contractData&&contractData.weeks){
-    // find active (unclosed) week
     for(var i=0;i<contractData.weeks.length;i++){
       if(!contractData.weeks[i].closed){todayWeekIdx=i;break;}
     }
@@ -548,15 +497,13 @@ async function renderHome(){
   html+='<div><div class="ab-title">Today</div><div class="ab-sub" style="line-height:1.4">'+esc(todayLabel)+'</div></div>';
   html+='</div>';
 
-  // Block 3: What friends are working on
   html+='<div class="agenda-block" onclick="go(\'feed\')" style="border-color:var(--a)">';
   html+='<div class="ab-icon">&#128101;</div>';
   html+='<div><div class="ab-title">Friends</div><div class="ab-sub">See what they\'re making</div></div>';
   html+='</div>';
 
-  html+='</div>';// end agenda-wrap
+  html+='</div>';
 
-  // Progress bar if contract active
   if(approved&&contractData.weeks){
     var done=0,total=0;
     contractData.weeks.forEach(function(w){if(w.tasks)w.tasks.forEach(function(t){total++;if(t.done)done++;});});
@@ -566,7 +513,6 @@ async function renderHome(){
       html+='<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--tm);margin-bottom:4px"><span>Overall progress</span><span style="color:var(--t);font-weight:700">'+pct+'%</span></div>';
       html+='<div class="pbw" style="margin:0"><div class="pbf" style="width:'+pct+'%"></div></div></div>';
     }
-    // Show current week tasks as checklist
     if(todayWeekIdx!==null){
       var tw2=contractData.weeks[todayWeekIdx];
       var tasks=tw2.tasks||[];
@@ -583,9 +529,8 @@ async function renderHome(){
       }
     }
   }
-  html+='</div>'; // end card
+  html+='</div>';
 
-  // AI chat
   html+='<div class="card"><div style="font-size:13px;font-weight:700;margin-bottom:8px">&#128172; Ask your assistant</div>'+chatHTML("Ask anything about your project...")+'</div>';
   mc.innerHTML=html;setNav("home");
 }
@@ -595,13 +540,11 @@ function renderFeed(){
   var mc=document.getElementById("mc");
   var html='<div class="pt">Feed</div>';
 
-  // Toggle: whole class / my group
   html+='<div class="toggle-row">';
   html+='<button class="toggle-btn act" id="feed-tab-class" onclick="switchFeedTab(\'class\')">Whole Class</button>';
   html+='<button class="toggle-btn" id="feed-tab-group" onclick="switchFeedTab(\'group\')">My Group'+(myGname?" — "+myGname:"")+'</button>';
   html+='</div>';
 
-  // Toggle: today agenda / overall plan
   html+='<div class="toggle-row">';
   html+='<button class="toggle-btn act" id="view-tab-posts" onclick="switchViewTab(\'posts\')">All Posts</button>';
   html+='<button class="toggle-btn" id="view-tab-today" onclick="switchViewTab(\'today\')">Friends\' Today</button>';
@@ -665,19 +608,16 @@ function buildPostHTML(post){
   if(post.title)html+='<div style="font-size:14px;font-weight:700;margin-bottom:5px">'+esc(post.title)+'</div>';
   if(post.reflection)html+='<div class="post-text">'+esc(post.reflection)+'</div>';
   if(post.link)html+='<a href="'+esc(post.link)+'" target="_blank" class="obtn mb8" style="display:inline-block">View work &#8599;</a>';
-  // self-assessment scores summary
   if(post.rubric&&post.rubric.some(function(v){return v>0;})){
     html+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:7px">';
     RUBRIC.forEach(function(r,i){if(post.rubric[i]>0)html+='<span style="padding:2px 7px;border-radius:20px;font-size:10px;font-weight:700;background:var(--pl);color:var(--pd)">'+r.label.split(" ")[0]+": "+post.rubric[i]+"/4</span>";});
     html+='</div>';
   }
   html+='</div>';
-  // AI summary button
   html+='<div style="padding:0 13px 8px">';
   html+='<button class="obtn" onclick="postAISummary(\''+post.id+'\',\''+esc(post.id)+'\')" style="font-size:11px">&#10024; AI Summary</button>';
   html+='<div id="aisumm-'+post.id+'" style="font-size:12px;color:var(--tm);margin-top:6px;display:none"></div>';
   html+='</div>';
-  // Comments
   if(comments.length){
     html+='<div class="comments-section">';
     comments.slice(-3).forEach(function(cm){
@@ -692,7 +632,6 @@ function buildPostHTML(post){
   if(post.link)html+='<button class="post-act" onclick="window.open(\''+esc(post.link)+'\',\'_blank\')">&#128279; View</button>';
   if(post.uid===CU.uid)html+='<button class="post-act" onclick="deletePost(\''+post.id+'\')">&#128465; Delete</button>';
   html+='</div>';
-  // Inline comment form
   html+='<div id="cmform-'+post.id+'" style="display:none;padding:10px 13px;border-top:1px solid var(--gb)">';
   html+='<div style="font-size:12px;font-weight:600;margin-bottom:8px;color:var(--tm)">Leave a comment (uses rubric):</div>';
   html+='<div id="cm-rub-'+post.id+'"></div>';
@@ -853,18 +792,15 @@ async function renderPlan(){
   var html='<div class="pt">My Plan</div>';
   html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px">';
 
-  // Box 1: What are we learning
   html+='<div class="agenda-block" style="grid-column:1/-1;min-height:70px;border-color:var(--p)" onclick="openUnitInfo()">';
   html+='<div class="ab-icon">&#127979;</div>';
   html+='<div><div class="ab-title">What are we learning?</div>';
   html+='<div class="ab-sub" id="unit-info-sub">Tap to see the unit</div></div></div>';
 
-  // Box 2: Get project ideas
   html+='<div class="agenda-block" onclick="go(\'quiz\')" style="border-color:var(--td)">';
   html+='<div class="ab-icon">&#128161;</div>';
   html+='<div><div class="ab-title">Get Project Ideas</div><div class="ab-sub">Take the quiz</div></div></div>';
 
-  // Box 3: My contract status
   var contractLabel="Not set up yet";var contractStyle="border-color:var(--gb)";
   if(contractData){
     if(contractData.status==="approved"){contractLabel="Active";contractStyle="border-color:var(--t)";}
@@ -876,7 +812,6 @@ async function renderPlan(){
   html+='<div><div class="ab-title">My Learning Contract</div><div class="ab-sub">'+contractLabel+'</div></div></div>';
   html+='</div>';
 
-  // Contract weekly view
   if(contractData){html+=renderWeeklyPlan(contractData);}
   mc.innerHTML=html;
 
@@ -901,11 +836,9 @@ window.openUnitInfo=async function(){
 // ── WEEKLY PLAN (new logic) ──
 function getActiveWeek(weeks){
   var now=Date.now();
-  // If any week has startDate/endDate set by teacher, use that
   for(var i=0;i<weeks.length;i++){
     if(weeks[i].startDate&&weeks[i].endDate&&now>=weeks[i].startDate&&now<=weeks[i].endDate)return i;
   }
-  // Otherwise: first unclosed week
   for(var i=0;i<weeks.length;i++){
     if(!weeks[i].closed)return i;
   }
@@ -948,7 +881,6 @@ function renderWeeklyPlan(c){
     var total=w.tasks?w.tasks.length:0;
     var pct=total>0?Math.round(done/total*100):0;
 
-    // Week header styles
     var headerBg=isClosed?"var(--tl)":isActive?"var(--pl)":"var(--gl)";
     var headerBorder=isClosed?"var(--t)":isActive?"var(--p)":"var(--gb)";
     var statusIcon=isClosed?"&#9989;":isActive?"&#128197;":"&#128274;";
@@ -956,7 +888,6 @@ function renderWeeklyPlan(c){
 
     html+='<div style="border:1.5px solid '+headerBorder+';border-radius:var(--r);margin-bottom:9px;overflow:hidden">';
 
-    // Header — always clickable for closed/active, locked for future
     html+='<div style="padding:11px 13px;background:'+headerBg+';display:flex;align-items:center;justify-content:space-between;'+(isFuture?"":"cursor:pointer;")+'" '+(isFuture?"":"onclick=\"toggleWeek("+i+")\"")+'">';
     html+='<div><div style="font-size:13px;font-weight:700">'+statusIcon+' '+weekLabels[i]+'</div>';
     if(w.goal&&!isFuture)html+='<div style="font-size:11px;color:var(--tm);margin-top:2px">'+esc(w.goal)+'</div>';
@@ -966,12 +897,10 @@ function renderWeeklyPlan(c){
     else if(isActive&&total>0)html+='<span style="font-size:11px;color:var(--p);font-weight:700">'+done+"/"+total+' tasks</span>';
     html+='</div>';
 
-    // Body — only for active and closed weeks
     if(!isFuture){
       html+='<div id="week-body-'+i+'" style="padding:13px;border-top:1px solid '+headerBorder+';background:#fff;display:'+(isActive?"block":"none")+'">';
 
       if(isClosed){
-        // Closed week: read-only summary
         if(w.closingNote)html+='<div style="font-size:13px;margin-bottom:8px"><strong>What I did:</strong> '+esc(w.closingNote)+'</div>';
         if(w.planOk!==null){
           var okLabel=w.planOk==="yes"?"Yes, went as planned":w.planOk==="partly"?"Partly":"Not really";
@@ -980,8 +909,6 @@ function renderWeeklyPlan(c){
         if(w.nextPlan)html+='<div style="font-size:13px;margin-bottom:8px"><strong>What I planned for next week:</strong> '+esc(w.nextPlan)+'</div>';
         if(w.focusSkill)html+='<div style="font-size:13px;color:var(--td)"><strong>Focus skill:</strong> '+esc(w.focusSkill)+'</div>';
       } else {
-        // Active week
-        // If there's a carry-over from last week's plan
         if(i>0&&weeks[i-1]&&weeks[i-1].nextPlan){
           html+='<div style="background:var(--pl);border-radius:var(--rs);padding:9px 11px;margin-bottom:12px">';
           html+='<div style="font-size:11px;font-weight:700;color:var(--pd);margin-bottom:3px">&#128204; From last week, you planned:</div>';
@@ -990,7 +917,6 @@ function renderWeeklyPlan(c){
           html+='</div>';
         }
 
-        // Week 1 only: focus skill picker
         if(i===0){
           html+='<div class="fg">';
           html+='<label class="fl">To make a great '+esc(c.productType||"product")+', what do you most need to work on?</label>';
@@ -1006,24 +932,19 @@ function renderWeeklyPlan(c){
           html+='<div style="background:var(--al);border-radius:var(--rs);padding:7px 10px;font-size:12px;color:var(--a);margin-bottom:10px">&#127919; Focus skill: <strong>'+esc(w.focusSkill)+'</strong></div>';
         }
 
-        // Work section header
         html+='<div style="font-size:11px;font-weight:700;color:var(--tm);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px">This week&#39;s work</div>';
 
-        // Goal
         html+='<div class="fg"><label class="fl">My goal this week</label>';
         html+='<input class="fi" id="w-goal-'+i+'" value="'+esc(w.goal||"")+'" placeholder="e.g. Find 3 sources and write a rough outline" onblur="saveWeekGoal('+i+')"></div>';
 
-        // Resources
         html+='<div class="fg"><label class="fl">Resources I am using</label>';
         html+='<textarea class="fta" id="w-res-'+i+'" style="min-height:48px" placeholder="Which websites, tools or materials will you use?" onblur="saveWeekRes('+i+')">'+esc(w.resources||"")+'</textarea></div>';
 
-        // Progress bar
         if(total>0){
           html+='<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--tm);margin-bottom:3px"><span>Tasks</span><span>'+done+"/"+total+'</span></div>';
           html+='<div class="pbw" style="margin-bottom:10px"><div class="pbf" style="width:'+pct+'%"></div></div>';
         }
 
-        // Tasks
         if(w.tasks&&w.tasks.length){
           w.tasks.forEach(function(t,ti){
             html+='<div class="step-item'+(t.done?" done":"")+'" onclick="toggleTask('+i+','+ti+')">';
@@ -1036,7 +957,6 @@ function renderWeeklyPlan(c){
         html+='<button class="btn btp" style="font-size:12px;padding:7px 12px" onclick="addTask('+i+')">Add</button>';
         html+='</div>';
 
-        // Close week section — visually separated card
         html+='<div class="divider"></div>';
         html+='<div style="border-radius:var(--r);background:var(--pd);padding:14px 16px;margin-top:4px">';
         html+='<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.65);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Done for this week?</div>';
@@ -1157,12 +1077,10 @@ window.submitCloseWeek=async function(weekIdx){
   contractData.weeks[weekIdx].nextPlan=nextPlan||"";
   contractData.weeks[weekIdx].closedAt=Date.now();
 
-  // Carry next plan note into next week
   if(weekIdx<3){
     contractData.weeks[weekIdx+1].nextPlan=nextPlan;
   }
 
-  // If last week, mark contract as completed
   if(weekIdx===3){
     await update(ref(db,"contracts/"+CU.uid),{weeks:contractData.weeks,status:"completed"});
     toast("Your plan is complete! Amazing work!");
@@ -1183,10 +1101,10 @@ window.go=function(page){
   if(pages[page])pages[page]();else renderHome();
 };
 
-var qState={i:0,answers:[],catScores:{},weakSkills:[]};
+var qState={i:0,answers:{}};
 
 function startQuiz(){
-  qState={i:0,answers:[],catScores:{},weakSkills:[]};
+  qState={i:0,answers:{}};
   renderQuiz();
 }
 
@@ -1194,124 +1112,84 @@ function renderQuiz(){
   var mc=document.getElementById("mc");
   if(qState.i>=QUESTIONS.length){showQuizResult(mc);return;}
   var q=QUESTIONS[qState.i];
-  var sel=qState.answers[qState.i]||[];
+  var sel=qState.answers[q.id];
   var pct=Math.round(qState.i/QUESTIONS.length*100);
   var html='<button class="btn bts mb8" onclick="go(\'plan\')">&#8592; Back to Plan</button>';
   html+='<div class="qprog"><div class="qpf" style="width:'+pct+'%"></div></div>';
   html+='<div class="ql">Question '+(qState.i+1)+" of "+QUESTIONS.length+'</div>';
   html+='<div class="qq">'+q.q+'</div><div class="qs2">'+q.s+'</div>';
   html+='<div class="qopts">';
-  q.opts.forEach(function(o,i){
-    var on=sel.includes(i)&&!sel.includes("skip");
-    html+='<div class="qo'+(on?" sel":"")+'" onclick="qTog('+i+')">';
+  q.opts.forEach(function(o){
+    var on=sel===o.value;
+    html+='<div class="qo'+(on?" sel":"")+'" onclick="qPick(\''+o.value+'\')">';
     html+='<span style="font-size:16px;width:24px;flex-shrink:0">'+o.e+'</span>';
     html+='<span style="flex:1">'+o.t+'</span>';
     html+='<span class="qchk">'+(on?"&#10003;":"")+'</span></div>';
   });
-  if(q.skipLabel){
-    var skipped=sel.includes("skip");
-    html+='<div class="qo skip-opt'+(skipped?" sel":"")+'" onclick="qSkip()" style="margin-top:4px">';
-    html+='<span style="font-size:14px;width:24px;flex-shrink:0">—</span>';
-    html+='<span style="flex:1;font-size:12px">'+q.skipLabel+'</span>';
-    html+='<span class="qchk">'+(skipped?"&#10003;":"")+'</span></div>';
-  }
   html+='</div>';
   html+='<div class="qnav">';
   html+='<button class="btn bts" '+(qState.i===0?"disabled":"")+' onclick="qBack()">Back</button>';
-  html+='<button class="btn btp" '+(sel.length===0?"disabled":"")+' onclick="qNext()">'+(qState.i===QUESTIONS.length-1?"See results &#8594;":"Continue &#8594;")+'</button>';
+  html+='<button class="btn btp" '+(sel===undefined?"disabled":"")+' onclick="qNext()">'+(qState.i===QUESTIONS.length-1?"See my idea &#8594;":"Continue &#8594;")+'</button>';
   html+='</div>';
   mc.innerHTML=html;
 }
 
-window.qTog=function(i){
-  if(!qState.answers[qState.i])qState.answers[qState.i]=[];
-  var idx=qState.answers[qState.i].indexOf(i);
-  var skipIdx=qState.answers[qState.i].indexOf("skip");
-  if(skipIdx!==-1)qState.answers[qState.i].splice(skipIdx,1);
-  idx===-1?qState.answers[qState.i].push(i):qState.answers[qState.i].splice(idx,1);
+window.qPick=function(value){
+  var q=QUESTIONS[qState.i];
+  qState.answers[q.id]=value;
   renderQuiz();
 };
-window.qSkip=function(){
-  qState.answers[qState.i]=["skip"];renderQuiz();
-};
 window.qBack=function(){if(qState.i>0){qState.i--;renderQuiz();}};
-window.qNext=function(){
-  var q=QUESTIONS[qState.i];var sel=qState.answers[qState.i]||[];
-  if(!sel.includes("skip")){
-    if(q.id!=="weakness"){sel.forEach(function(i){if(q.opts[i]&&q.opts[i].cats)q.opts[i].cats.forEach(function(c){qState.catScores[c]=(qState.catScores[c]||0)+1;});});}
-    else{sel.forEach(function(i){if(q.opts[i]&&q.opts[i].skill)qState.weakSkills.push(q.opts[i].skill);});}
-  }
-  qState.i++;renderQuiz();
-};
+window.qNext=function(){qState.i++;renderQuiz();};
 
 function showQuizResult(mc){
-  var scored=PRODUCTS.map(function(p){
-    var s=p.cats.reduce(function(acc,c){return acc+(qState.catScores[c]||0);},0);
-    return Object.assign({},p,{score:s});
-  }).sort(function(a,b){return b.score-a.score;});
-  var top3=scored.slice(0,3);
-  var rest=scored.slice(3);
-  var weakSkill=qState.weakSkills.length>0?qState.weakSkills[0]:null;
+  var format=qState.answers.format;
+  var workstyle=qState.answers.workstyle;
+  var weakness=qState.answers.weakness;
+  var recId=RECOMMEND[format][workstyle];
+  var rec=productById(recId);
+  var alternates=PRODUCTS.filter(function(p){return p.format===format&&p.id!==recId;});
+  var whyText="You said you want to make something "+FORMATS[format].label.toLowerCase()+(workstyle==="group"?" and work with a partner or group.":" and work by yourself.");
 
   var html='<button class="btn bts mb8" onclick="go(\'plan\')">&#8592; Back</button>';
-  html+='<div class="pt">Your Results</div>';
-  html+='<div class="ps">Products that suit you — and what to work on</div>';
-  html+='<div class="card" style="border-color:var(--p);border-width:1.5px">';
-  html+='<div style="font-size:12px;font-weight:700;color:var(--pd);margin-bottom:10px">Top 3 recommendations</div>';
-  top3.forEach(function(p,i){
-    html+='<div class="prod-row'+(i===0?" chosen":"")+' prod-result-row" data-product="'+esc(p.name)+'" onclick="selectProduct(\''+esc(p.id)+'\',\''+esc(p.name)+'\')">';
-    html+='<span style="font-size:20px">'+p.e+'</span>';
-    html+='<div style="flex:1"><div style="font-size:13px;font-weight:600">'+p.name+'</div>';
-    html+='<div style="font-size:11px;color:var(--tm)">'+p.cats.slice(0,2).map(function(c){return CATS[c]||c;}).join(" · ")+'</div></div>';
-    if(i===0)html+='<span style="font-size:11px;color:var(--pd);font-weight:700">Best match</span>';
-    html+='</div>';
-  });
+  html+='<div class="pt">Your Idea</div>';
+  html+='<div class="ps">Based on your answers</div>';
+
+  html+='<div class="card" style="border-color:var(--p);border-width:1.5px;text-align:center;padding:20px">';
+  html+='<div style="font-size:34px;margin-bottom:6px">'+rec.e+'</div>';
+  html+='<div style="font-size:17px;font-weight:700;margin-bottom:6px">'+rec.name+'</div>';
+  html+='<div style="font-size:12px;color:var(--tm);margin-bottom:14px">'+whyText+'</div>';
+  html+='<button class="btn btg btf" onclick="chooseProduct(\''+rec.id+'\',\''+esc(rec.name)+'\')">Choose this &amp; Build My Plan &#8594;</button>';
   html+='</div>';
 
-  if(weakSkill){
-    var tips=SKILL_TIPS[weakSkill]||[];
+  if(alternates.length){
+    html+='<div class="card"><div style="font-size:12px;font-weight:700;color:var(--th);margin-bottom:8px">Other ideas in this style</div>';
+    html+='<div style="display:flex;flex-wrap:wrap;gap:6px">';
+    alternates.forEach(function(p){
+      html+='<div style="padding:6px 12px;border:1px solid var(--gb);border-radius:20px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px" onclick="chooseProduct(\''+esc(p.id)+'\',\''+esc(p.name)+'\')"><span>'+p.e+'</span><span>'+p.name+'</span></div>';
+    });
+    html+='</div></div>';
+  }
+
+  if(weakness){
+    var tips=SKILL_TIPS[weakness]||[];
     html+='<div class="card" style="border-left:3px solid var(--c)">';
-    html+='<div style="font-size:13px;font-weight:700;margin-bottom:7px">Practise: <span style="color:var(--c)">'+CATS[weakSkill]||weakSkill+'</span></div>';
+    html+='<div style="font-size:13px;font-weight:700;margin-bottom:7px">A few tips for you</div>';
     tips.forEach(function(t){html+='<div style="font-size:12px;color:var(--tm);margin-bottom:4px">&#8594; '+t+'</div>';});
     html+='</div>';
   }
-
-  // All other options collapsed
-  html+='<div class="card"><div style="font-size:12px;font-weight:700;color:var(--th);margin-bottom:8px">All other options</div>';
-  var byCat={};rest.forEach(function(p){var c=p.cats[0];if(!byCat[c])byCat[c]=[];byCat[c].push(p);});
-  Object.entries(byCat).forEach(function(entry){
-    html+='<div style="margin-bottom:8px"><div style="font-size:11px;font-weight:700;color:var(--th);margin-bottom:5px;text-transform:uppercase">'+( CATS[entry[0]]||entry[0])+'</div>';
-    html+='<div style="display:flex;flex-wrap:wrap;gap:5px">';
-    entry[1].forEach(function(p){html+='<div style="padding:4px 10px;border:1px solid var(--gb);border-radius:20px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px" onclick="selectProduct(\''+esc(p.id)+'\',\''+esc(p.name)+'\')"><span>'+p.e+'</span><span>'+p.name+'</span></div>';});
-    html+='</div></div>';
-  });
-  html+='</div>';
-
-  html+='<div id="selected-product-notice" style="display:none" class="card" style="border-color:var(--t);border-width:1.5px">';
-  html+='<div style="font-size:13px;font-weight:700;margin-bottom:6px;color:var(--td)">Selected: <span id="selected-product-name"></span></div>';
-  html+='<button class="btn btg btf" onclick="goToContract()">Build My Learning Contract &#8594;</button></div>';
   mc.innerHTML=html;
-
-  // pre-select top
-  if(top3.length)selectProduct(top3[0].id,top3[0].name,true);
 }
 
-window._selectedProduct=null;
-window.selectProduct=function(id,name,silent){
-  window._selectedProduct={id:id,name:name,weakness:qState.weakSkills[0]||null,tips:qState.weakSkills[0]?SKILL_TIPS[qState.weakSkills[0]]:[]};
-  document.querySelectorAll(".prod-result-row").forEach(function(r){r.classList.remove("chosen");});
-  var rows=document.querySelectorAll(".prod-result-row");
-  rows.forEach(function(r){if(r.dataset.product===name)r.classList.add("chosen");});
-  var notice=document.getElementById("selected-product-notice");
-  var nameEl=document.getElementById("selected-product-name");
-  if(notice)notice.style.display="block";
-  if(nameEl)nameEl.textContent=name;
+window.chooseProduct=function(id,name){
+  var weakness=qState.answers.weakness;
+  window._selectedProduct={id:id,name:name,weakness:weakness||null,tips:weakness?(SKILL_TIPS[weakness]||[]):[]};
+  goToContract();
 };
 
 window.goToContract=async function(){
   if(!window._selectedProduct){toast("Select a product first!");return;}
   var p=window._selectedProduct;
-  // Save contract with product and 4 empty weeks
   var weeks=[
     {goal:"",resources:"",tasks:[],label:"Decide & find resources"},
     {goal:"",resources:"",tasks:[],label:"Work towards my goal"},
@@ -1348,7 +1226,6 @@ window.renderProfile=async function(uid,isOwn){
   var html="";
   if(!isOwn)html+='<button class="btn bts mb8" onclick="go(\'feed\')">&#8592; Back</button>';
 
-  // Profile header
   html+='<div class="card" style="text-align:center;padding:20px">';
   if(isOwn){
     html+='<div class="prof-av-wrap" onclick="changeAvatar()">';
@@ -1368,7 +1245,6 @@ window.renderProfile=async function(uid,isOwn){
   if(isOwn)html+='<button class="btn bts" style="font-size:12px;padding:7px 12px" onclick="genSummary(\''+uid+'\')">&#10024; My Summary</button>';
   html+='</div></div>';
 
-  // Contract (same as plan page, editable)
   if(c){
     html+='<div class="card"><div class="fb mb8"><span style="font-size:14px;font-weight:700">My Learning Contract</span>';
     if(c.status==="approved")html+='<span class="sb sa">Active</span>';
@@ -1385,7 +1261,6 @@ window.renderProfile=async function(uid,isOwn){
     html+='</div>';
   }
 
-  // Portfolio
   html+='<div class="card"><div class="fb mb8"><span style="font-size:14px;font-weight:700">&#127911; My Portfolio ('+allPosts.length+')</span>';
   if(isOwn)html+='<button class="btn btp" style="font-size:12px;padding:6px 11px" onclick="go(\'feed\');openNewPost()">+ Share Work</button>';
   html+='</div>';
