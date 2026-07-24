@@ -175,6 +175,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .toggle-row{display:flex;border-radius:var(--rs);overflow:hidden;border:1.5px solid var(--gb);margin-bottom:12px}
 .toggle-btn{flex:1;padding:8px 0;font-size:12px;font-weight:600;cursor:pointer;border:none;background:#fff;color:var(--tm);transition:all .15s;text-align:center}
 .toggle-btn.act{background:var(--p);color:#fff}
+.step-card{background:#fff;border-radius:var(--r);border:1.5px solid var(--gb);padding:15px;margin-bottom:11px;cursor:pointer;transition:all .18s;display:flex;gap:12px;align-items:flex-start}
+.step-card:hover{border-color:var(--p);box-shadow:var(--sh)}
+.step-card.locked{opacity:.55;cursor:not-allowed}
+.step-card.locked:hover{border-color:var(--gb);box-shadow:none}
+.step-num{width:30px;height:30px;border-radius:50%;background:var(--p);color:#fff;font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.step-card.locked .step-num{background:var(--gb);color:var(--tm)}
+.step-title{font-size:14px;font-weight:700;margin-bottom:2px}
+.step-sub{font-size:12px;color:var(--tm);line-height:1.4}
+.lockbar{position:sticky;top:0;background:var(--pd);color:#fff;padding:10px 13px;border-radius:var(--r);margin-bottom:14px;text-align:center;z-index:5}
+.lockbar .lt{font-size:11px;opacity:.75;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
+.lockbar .lb{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+.lockbar.urgent{background:var(--c)}
+.word-chip{display:inline-block;padding:4px 11px;border-radius:20px;background:var(--pl);color:var(--pd);font-size:12px;font-weight:600;margin:3px}
+.sugg-task{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border:1.5px dashed var(--p);border-radius:20px;font-size:12px;color:var(--pd);cursor:pointer;margin:3px;background:var(--pl)}
+.sugg-res{display:inline-block;padding:4px 10px;border-radius:20px;background:var(--al);color:var(--a);font-size:11px;font-weight:600;margin:3px}
 </style>
 </head>
 <body>
@@ -244,63 +259,79 @@ let chatHist=[],rubV=[0,0,0,0,0,0],peerV=[0,0,0,0,0,0];
 let myGid=null,myGname=null,userCoins=0;
 let contractData=null;
 
-// ── QUIZ DATA (simplified for 6th graders: 3 single-select questions, direct lookup) ──
-const FORMATS={
-  writing:{label:"Written",e:"✍️"},
-  speaking:{label:"Spoken",e:"🗣️"},
-  visual:{label:"Visual",e:"🎨"},
-  video:{label:"Video",e:"🎬"}
+// ── QUIZ DATA (v3: platforms multi-select, grouped product picker, weakness) ──
+const CAT_LABELS={written:"Written",spoken:"Spoken",visual:"Visual"};
+const CAT_EMOJI={written:"✍️",spoken:"🗣️",visual:"🎨"};
+const PRODUCTS_BY_CAT={
+  written:[
+    {id:"short_story",e:"📖",name:"Short Story"},
+    {id:"blog_post",e:"📝",name:"Blog Post"},
+    {id:"howto",e:"🧑‍🏫",name:"How-to Guide"},
+    {id:"class_magazine",e:"📰",name:"Class Magazine Article"},
+    {id:"review",e:"⭐",name:"Book / Movie Review"},
+    {id:"interview_writeup",e:"🗒️",name:"Interview Write-up"}
+  ],
+  spoken:[
+    {id:"speech",e:"🗣️",name:"Speech"},
+    {id:"podcast",e:"🎙️",name:"Podcast"},
+    {id:"interview_audio",e:"🧑‍🤝‍🧑",name:"Recorded Interview"},
+    {id:"radio_ad",e:"📻",name:"Radio Ad"},
+    {id:"debate",e:"🎯",name:"Debate"},
+    {id:"oral_presentation",e:"🎤",name:"Oral Presentation"}
+  ],
+  visual:[
+    {id:"infographic",e:"📊",name:"Poster / Infographic"},
+    {id:"comic_book",e:"📘",name:"Comic Strip"},
+    {id:"illustrated_book",e:"🎨",name:"Illustrated Storybook"},
+    {id:"slides",e:"🖥️",name:"Presentation Slides"},
+    {id:"short_video",e:"🎬",name:"Short Video"},
+    {id:"photo_story",e:"📷",name:"Photo Story"}
+  ]
 };
-const PRODUCTS=[
-  {id:"short_story",e:"📖",name:"Short Story",format:"writing"},
-  {id:"blog_post",e:"📝",name:"Blog Post",format:"writing"},
-  {id:"howto",e:"🧑‍🏫",name:"How-to Guide",format:"writing"},
-  {id:"class_magazine",e:"📰",name:"Class Magazine",format:"writing"},
-  {id:"speech",e:"🗣️",name:"Speech",format:"speaking"},
-  {id:"podcast",e:"🎙️",name:"Podcast",format:"speaking"},
-  {id:"interview",e:"🧑‍🤝‍🧑",name:"Interview",format:"speaking"},
-  {id:"infographic",e:"📊",name:"Poster / Infographic",format:"visual"},
-  {id:"comic_book",e:"📘",name:"Comic Strip",format:"visual"},
-  {id:"short_video",e:"🎬",name:"Short Video",format:"video"},
-  {id:"news_broadcast",e:"📺",name:"News Report",format:"video"},
-  {id:"group_video",e:"🎥",name:"Group Video Project",format:"video"}
-];
-function productById(id){return PRODUCTS.find(function(p){return p.id===id;});}
-// direct lookup: format + workstyle -> recommended product id (no scoring needed, fully transparent)
-const RECOMMEND={
-  writing:{alone:"short_story",group:"class_magazine"},
-  speaking:{alone:"speech",group:"interview"},
-  visual:{alone:"infographic",group:"comic_book"},
-  video:{alone:"short_video",group:"group_video"}
-};
+function allProducts(){return [].concat(PRODUCTS_BY_CAT.written,PRODUCTS_BY_CAT.spoken,PRODUCTS_BY_CAT.visual);}
+function productById(id){return allProducts().find(function(p){return p.id===id;});}
+function catOfProduct(id){for(var c in PRODUCTS_BY_CAT){if(PRODUCTS_BY_CAT[c].some(function(p){return p.id===id;}))return c;}return "written";}
+
+const PLATFORMS=["Canva","Google Docs / Slides","Phone camera / YouTube","Pen & paper","PowerPoint","Audio recording app"];
+
 const SKILL_TIPS={
   writing:["Plan first — even 3 bullet points helps","Read your draft aloud to catch unclear sentences","One clear idea per paragraph"],
   speaking:["Practice out loud before the real thing","Record yourself once and listen back","Slow down — most people rush when nervous"],
   visual:["Sketch your layout on paper first","Stick to two colours and two fonts maximum","Every element needs a reason to be there"],
-  video:["Storyboard before filming","Good audio matters more than perfect video","Shorter and focused beats long and rambling"],
   collab:["Agree on roles at the very start","Check in before the final deadline","Make sure every voice has been heard"],
   ideas:["Permission to write a messy first draft","Try starting in the middle of the action","Look at examples you like and notice what works"]
 };
-const QUESTIONS=[
-  {id:"format",q:"How do you want to make your project?",s:"Pick the one that sounds best.",opts:[
-    {e:"✍️",t:"Written — a story, article, or guide",value:"writing"},
-    {e:"🗣️",t:"Spoken — a podcast, speech, or interview",value:"speaking"},
-    {e:"🎨",t:"Visual — a poster, comic, or infographic",value:"visual"},
-    {e:"🎬",t:"Video — a short film or news report",value:"video"}
-  ]},
-  {id:"workstyle",q:"Do you want to work alone or with others?",s:"This changes which idea we suggest.",opts:[
-    {e:"🧍",t:"By myself",value:"alone"},
-    {e:"👥",t:"With a partner or group",value:"group"}
-  ]},
-  {id:"weakness",q:"What feels hardest for you right now?",s:"Be honest — we'll give you a few tips for this.",opts:[
-    {e:"✍️",t:"Writing clearly",value:"writing"},
-    {e:"🗣️",t:"Speaking in front of others",value:"speaking"},
-    {e:"🎨",t:"Designing or making things look good",value:"visual"},
-    {e:"🎬",t:"Filming or editing video",value:"video"},
-    {e:"🤝",t:"Working in a group",value:"collab"},
-    {e:"💡",t:"Coming up with ideas",value:"ideas"}
-  ]}
+
+const WEAKNESS_OPTS=[
+  {e:"✍️",t:"Writing clearly",value:"writing"},
+  {e:"🗣️",t:"Speaking in front of others",value:"speaking"},
+  {e:"🎨",t:"Designing or making things look good",value:"visual"},
+  {e:"🤝",t:"Working in a group",value:"collab"},
+  {e:"💡",t:"Coming up with ideas",value:"ideas"}
 ];
+
+// ── CONTRACT TASK TEMPLATES (per category, per week) — {p} is replaced with the product name ──
+const WEEK_TITLES=["Decide & Find Ideas","Create Your First Draft","Get Feedback & Improve","Finish & Present"];
+const TASK_TEMPLATES={
+  written:[
+    ["Write down 3 ideas for your {p}, then circle your favourite","Find 2 real examples of a {p} for inspiration","List 3-4 English words or phrases you'll need"],
+    ["Write a rough first draft of your {p}","Read your draft aloud once and fix anything confusing"],
+    ["Share your draft on the Feed and ask for one comment","Fix at least 2 things based on the feedback you got","Check your spelling and punctuation"],
+    ["Finish your final {p} and share it on the Feed","Write 2-3 sentences about what you learned making it"]
+  ],
+  spoken:[
+    ["Write down 3 ideas for your {p}, then circle your favourite","Listen to one real example of a {p} for inspiration","Write down key vocabulary you'll need"],
+    ["Write a script or notes for your {p}","Practice saying it out loud at least twice"],
+    ["Record a practice version and listen back","Ask someone for one piece of feedback","Fix your pacing or pronunciation based on that feedback"],
+    ["Record or perform your final {p}","Share it on the Feed","Write 2-3 sentences about what you learned making it"]
+  ],
+  visual:[
+    ["Sketch 2 rough layout ideas on paper","Find 2 real examples of a {p} for inspiration","List the key words or labels you'll need"],
+    ["Create a first draft of your {p}","Check that everything is easy to read and understand"],
+    ["Share your draft on the Feed and ask for one comment","Fix at least 2 things based on the feedback you got"],
+    ["Finish your final {p} and share it on the Feed","Write 2-3 sentences about what you learned making it"]
+  ]
+};
 
 const RUBRIC=[
   {label:"Content & Purpose",q:"Is the main idea clear?",lvls:["Hard to understand.","Partly clear, needs more explanation.","Mostly clear.","Clearly explained with details."]},
@@ -428,7 +459,6 @@ window.spendCoins=async function(){
 var SNAV=[
   {id:"home",l:"Home",i:'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>'},
   {id:"feed",l:"Feed",i:'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>'},
-  {id:"plan",l:"My Plan",i:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>'},
   {id:"profile",l:"Profile",i:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'}
 ];
 
@@ -446,6 +476,10 @@ async function loadContractAndStart(){
   var snap=await get(ref(db,"contracts/"+CU.uid));
   contractData=snap.exists()?snap.val():null;
   go("home");
+  onValue(ref(db,"liveSession"),function(s){
+    window._liveSession=s.exists()?s.val():{active:false};
+    applySessionLock();
+  });
 }
 
 function setNav(id){
@@ -453,85 +487,87 @@ function setNav(id){
   var el=document.getElementById("nav-"+id);if(el)el.classList.add("active");
 }
 
+// ── TEACHER-LED LOCK MODE ──
+function isLockedStep(step){var ls=window._liveSession;return !!(ls&&ls.active&&ls.step===step);}
+function lockBarHTML(){
+  var ls=window._liveSession;
+  var urgent=ls.step==="step2"&&ls.deadline&&(ls.deadline-Date.now())<=0;
+  return '<div class="lockbar'+(urgent?" urgent":"")+'" id="lockbar"><div class="lt">&#128104;&#8205;&#127979; Your teacher is guiding this part</div>'
+    +(ls.step==="step2"?'<div class="lb" id="lockbar-timer">--:--</div>':'<div class="lb">&#128214; What We\'re Learning</div>')+'</div>';
+}
+function startLockTimerInterval(){
+  if(window._lockInterval)return;
+  window._lockInterval=setInterval(updateLockTimerDisplay,1000);
+  updateLockTimerDisplay();
+}
+function stopLockTimerInterval(){
+  if(window._lockInterval){clearInterval(window._lockInterval);window._lockInterval=null;}
+}
+function updateLockTimerDisplay(){
+  var ls=window._liveSession;
+  var el=document.getElementById("lockbar-timer");
+  if(!ls||!ls.active||ls.step!=="step2"||!ls.deadline){return;}
+  var rem=Math.max(0,Math.round((ls.deadline-Date.now())/1000));
+  var mm=Math.floor(rem/60),ss=rem%60;
+  var txt=(rem<=0?"Time's up!":mm+":"+(ss<10?"0":"")+ss);
+  if(el)el.textContent=txt;
+  var bar=document.getElementById("lockbar");
+  if(bar)bar.classList.toggle("urgent",rem<=0);
+}
+function applySessionLock(){
+  if(!CU||UP&&UP.role==="teacher")return;
+  var bnav=document.getElementById("bnav");
+  var ls=window._liveSession||{active:false};
+  if(ls.active){
+    if(bnav)bnav.style.display="none";
+    if(ls.step==="step1"){renderStep1Screen();}
+    else if(ls.step==="step2"){
+      if(!window._quizStarted){startQuiz();window._quizStarted=true;}
+      else{renderQuizStep();}
+    }
+    startLockTimerInterval();
+  } else {
+    if(bnav)bnav.style.display="flex";
+    stopLockTimerInterval();
+    window._quizStarted=false;
+    go("home");
+  }
+}
+
 window.go=function(page){
+  if(window._liveSession&&window._liveSession.active)return;
   setNav(page);
   document.getElementById("mc").innerHTML='<div class="loading">Loading...</div>';
-  var pages={home:renderHome,feed:renderFeed,plan:renderPlan,profile:function(){renderProfile(CU.uid,true);}};
+  var pages={home:renderHome,feed:renderFeed,profile:function(){renderProfile(CU.uid,true);}};
   if(pages[page])pages[page]();else renderHome();
 };
 
 // ── PAGE 1: HOME ──
 async function renderHome(){
+  if(window._liveSession&&window._liveSession.active){applySessionLock();return;}
   var mc=document.getElementById("mc");
   var snap=await get(ref(db,"contracts/"+CU.uid));
   contractData=snap.exists()?snap.val():null;
-  var approved=contractData&&(contractData.status==="approved"||contractData.status==="completed");
   var firstName=(CU.displayName||"").split(" ")[0];
+  var hasProduct=!!(contractData&&contractData.productType);
 
   var html='<div style="font-size:18px;font-weight:700;margin-bottom:14px">Hey, '+esc(firstName)+" &#128075;</div>";
 
-  html+='<div class="card" style="margin-bottom:10px">';
-  html+='<div style="font-size:11px;font-weight:700;color:var(--tm);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px">My Agenda</div>';
-  html+='<div class="agenda-wrap">';
+  var unitTitle="Tap to see today's unit";
+  try{var usnap=await get(ref(db,"unitInfo"));if(usnap.exists()&&usnap.val().title)unitTitle=usnap.val().title;}catch(e){}
+  html+='<div class="step-card" onclick="renderStep1Screen()">';
+  html+='<div class="step-num">1</div><div style="flex:1"><div class="step-title">What are we learning?</div>';
+  html+='<div class="step-sub">'+esc(unitTitle)+'</div></div></div>';
 
-  html+='<div class="agenda-block" onclick="go(\'plan\')" style="border-color:var(--p)">';
-  html+='<div class="ab-icon">&#128161;</div>';
-  html+='<div><div class="ab-title">Get Ideas</div><div class="ab-sub">Find your project</div></div>';
-  html+='</div>';
+  html+='<div class="step-card" onclick="startQuiz()">';
+  html+='<div class="step-num">2</div><div style="flex:1"><div class="step-title">Get Ideas — Find Your Project</div>';
+  html+='<div class="step-sub">'+(hasProduct?"Your project: "+esc(contractData.productType)+" — tap to retake the quiz":"Take a short quiz to find your project idea")+'</div></div></div>';
 
-  var todayLabel="No plan yet";
-  var todayWeekIdx=null;
-  if(contractData&&contractData.weeks){
-    for(var i=0;i<contractData.weeks.length;i++){
-      if(!contractData.weeks[i].closed){todayWeekIdx=i;break;}
-    }
-    if(todayWeekIdx!==null){
-      var tw=contractData.weeks[todayWeekIdx];
-      todayLabel="Week "+(todayWeekIdx+1)+(tw.goal?": "+tw.goal:"");
-    } else {
-      todayLabel="All weeks complete!";
-    }
-  }
-  html+='<div class="agenda-block" onclick="go(\'plan\')" style="border-color:var(--t)">';
-  html+='<div class="ab-icon">&#128197;</div>';
-  html+='<div><div class="ab-title">Today</div><div class="ab-sub" style="line-height:1.4">'+esc(todayLabel)+'</div></div>';
-  html+='</div>';
+  html+='<div class="step-card'+(hasProduct?"":" locked")+'" onclick="'+(hasProduct?"renderStep3Screen()":"toast('Finish Step 2 — Get Ideas — first!')")+'">';
+  html+='<div class="step-num">'+(hasProduct?"3":"&#128274;")+'</div><div style="flex:1"><div class="step-title">My Learning Contract</div>';
+  html+='<div class="step-sub">'+(hasProduct?"4 weeks of tasks for your "+esc(contractData.productType):"Complete Step 2 to unlock")+'</div></div></div>';
 
-  html+='<div class="agenda-block" onclick="go(\'feed\')" style="border-color:var(--a)">';
-  html+='<div class="ab-icon">&#128101;</div>';
-  html+='<div><div class="ab-title">Friends</div><div class="ab-sub">See what they\'re making</div></div>';
-  html+='</div>';
-
-  html+='</div>';
-
-  if(approved&&contractData.weeks){
-    var done=0,total=0;
-    contractData.weeks.forEach(function(w){if(w.tasks)w.tasks.forEach(function(t){total++;if(t.done)done++;});});
-    if(total>0){
-      var pct=Math.round(done/total*100);
-      html+='<div style="margin-top:10px">';
-      html+='<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--tm);margin-bottom:4px"><span>Overall progress</span><span style="color:var(--t);font-weight:700">'+pct+'%</span></div>';
-      html+='<div class="pbw" style="margin:0"><div class="pbf" style="width:'+pct+'%"></div></div></div>';
-    }
-    if(todayWeekIdx!==null){
-      var tw2=contractData.weeks[todayWeekIdx];
-      var tasks=tw2.tasks||[];
-      if(tasks.length){
-        html+='<div style="margin-top:10px">';
-        html+='<div style="font-size:12px;font-weight:700;color:var(--tm);margin-bottom:6px">This week&#39;s tasks:</div>';
-        tasks.slice(0,4).forEach(function(t){
-          html+='<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--gl)">';
-          html+='<div style="width:18px;height:18px;border-radius:50%;border:1.5px solid '+( t.done?"var(--t)":"var(--gb)")+';background:'+( t.done?"var(--t)":"#fff")+';display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0">'+( t.done?"&#10003;":"")+"</div>";
-          html+='<span style="font-size:12px;color:var(--tx);'+(t.done?"text-decoration:line-through;color:var(--tm)":"")+'">'+esc(t.text)+'</span></div>';
-        });
-        if(tasks.length>4)html+='<div style="font-size:11px;color:var(--th);margin-top:4px">+'+( tasks.length-4)+' more — see My Plan</div>';
-        html+='</div>';
-      }
-    }
-  }
-  html+='</div>';
-
-  html+='<div class="card"><div style="font-size:13px;font-weight:700;margin-bottom:8px">&#128172; Ask your assistant</div>'+chatHTML("Ask anything about your project...")+'</div>';
+  html+='<div class="card mt12"><div style="font-size:13px;font-weight:700;margin-bottom:8px">&#128172; Ask your assistant</div>'+chatHTML("Ask anything about your project...")+'</div>';
   mc.innerHTML=html;setNav("home");
 }
 
@@ -657,11 +693,11 @@ function loadFriendViews(view,tab){
       html+='<div><div class="post-name">'+esc(d.studentName||"Student")+'</div><div class="post-meta">'+esc(d.productType||d.product||"")+'</div></div></div>';
       html+='<div class="post-body">';
       if(view==="today"&&d.weeks){
-        var now=Date.now();var tw=null;
-        d.weeks.forEach(function(w,i){if(w.startDate&&w.endDate&&now>=w.startDate&&now<=w.endDate)tw=i;});
-        if(tw!==null){html+='<div style="font-size:13px"><strong>Today (Week '+(tw+1)+'):</strong> '+esc(d.weeks[tw].goal||"")+'</div>';}
+        var tw=0;for(var wi=0;wi<d.weeks.length;wi++){if(!d.weeks[wi].closed){tw=wi;break;}}
+        var tdone=(d.weeks[tw].tasks||[]).filter(function(t){return t.done;}).length,ttotal=(d.weeks[tw].tasks||[]).length;
+        html+='<div style="font-size:13px"><strong>Week '+(tw+1)+' — '+esc(d.weeks[tw].title||"")+':</strong> '+tdone+"/"+ttotal+' tasks done</div>';
       } else {
-        if(d.weeks)d.weeks.forEach(function(w,i){html+='<div style="font-size:12px;margin-bottom:3px;color:var(--tm)"><strong>Week '+(i+1)+':</strong> '+esc(w.goal||"")+'</div>';});
+        if(d.weeks)d.weeks.forEach(function(w,i){var wd=(w.tasks||[]).filter(function(t){return t.done;}).length,wt=(w.tasks||[]).length;html+='<div style="font-size:12px;margin-bottom:3px;color:var(--tm)"><strong>Week '+(i+1)+':</strong> '+wd+"/"+wt+' tasks done</div>';});
       }
       html+='</div></div>';
     });
@@ -686,7 +722,7 @@ window.postAISummary=async function(postId,id){
 window.openNewPost=function(){
   var mc=document.getElementById("mc");
   var wArr=[];if(contractData&&contractData.weeks)wArr=contractData.weeks;
-  var weekOpts=wArr.map(function(w,i){return '<option value="'+i+'">Week '+(i+1)+": "+(w.goal||"")+'</option>';}).join("");
+  var weekOpts=wArr.map(function(w,i){return '<option value="'+i+'">Week '+(i+1)+": "+(w.title||"")+'</option>';}).join("");
 
   var html='<div class="pt">Share Your Work</div>';
   html+='<div class="ps">You need to fill in the self-reflection before sharing.</div>';
@@ -784,251 +820,184 @@ window.deletePost=async function(postId){
 window.viewProf=function(uid){renderProfile(uid,false);setNav("profile");};
 
 // ── PAGE 3: PLAN ──
-async function renderPlan(){
+// ── STEP 1: WHAT ARE WE LEARNING ──
+window.renderStep1Screen=async function(){
   var mc=document.getElementById("mc");
-  var snap=await get(ref(db,"contracts/"+CU.uid));
-  contractData=snap.exists()?snap.val():null;
-
-  var html='<div class="pt">My Plan</div>';
-  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px">';
-
-  html+='<div class="agenda-block" style="grid-column:1/-1;min-height:70px;border-color:var(--p)" onclick="openUnitInfo()">';
-  html+='<div class="ab-icon">&#127979;</div>';
-  html+='<div><div class="ab-title">What are we learning?</div>';
-  html+='<div class="ab-sub" id="unit-info-sub">Tap to see the unit</div></div></div>';
-
-  html+='<div class="agenda-block" onclick="go(\'quiz\')" style="border-color:var(--td)">';
-  html+='<div class="ab-icon">&#128161;</div>';
-  html+='<div><div class="ab-title">Get Project Ideas</div><div class="ab-sub">Take the quiz</div></div></div>';
-
-  var contractLabel="Not set up yet";var contractStyle="border-color:var(--gb)";
-  if(contractData){
-    if(contractData.status==="approved"){contractLabel="Active";contractStyle="border-color:var(--t)";}
-    else if(contractData.status==="pending"){contractLabel="Pending approval";contractStyle="border-color:var(--a)";}
-    else{contractLabel="Draft";contractStyle="border-color:var(--gb)";}
-  }
-  html+='<div class="agenda-block" onclick="openContract()" style="'+contractStyle+'">';
-  html+='<div class="ab-icon">&#128203;</div>';
-  html+='<div><div class="ab-title">My Learning Contract</div><div class="ab-sub">'+contractLabel+'</div></div></div>';
-  html+='</div>';
-
-  if(contractData){html+=renderWeeklyPlan(contractData);}
-  mc.innerHTML=html;
-
-  get(ref(db,"unitInfo")).then(function(snap){
-    var el=document.getElementById("unit-info-sub");
-    if(el&&snap.exists()&&snap.val().title)el.textContent=snap.val().title;
-  });
-}
-
-window.openUnitInfo=async function(){
   var snap=await get(ref(db,"unitInfo"));
   var info=snap.exists()?snap.val():{title:"Unit info coming soon",description:"Your teacher will add this."};
-  var mc=document.getElementById("mc");
-  var html='<button class="btn bts mb8" onclick="go(\'plan\')">&#8592; Back to Plan</button>';
+  var locked=isLockedStep("step1");
+  var html=locked?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">&#8592; Back to Home</button>';
   html+='<div class="card"><div style="font-size:18px;font-weight:700;margin-bottom:6px">&#127979; '+esc(info.title||"Our Unit")+'</div>';
+  if(info.theme)html+='<div style="margin-bottom:10px"><span class="sb sa">Theme: '+esc(info.theme)+'</span></div>';
   if(info.description)html+='<div style="font-size:13px;line-height:1.7;color:var(--tm)">'+esc(info.description)+'</div>';
-  if(info.theme)html+='<div style="margin-top:10px"><span class="sb sa">Theme: '+esc(info.theme)+'</span></div>';
   html+='</div>';
-  mc.innerHTML=html;
+  if(info.grammarTips&&info.grammarTips.trim()){
+    html+='<div class="card"><div style="font-size:13px;font-weight:700;margin-bottom:8px">&#128221; Grammar Tips</div>';
+    info.grammarTips.split("\n").filter(function(l){return l.trim();}).forEach(function(l){
+      html+='<div style="font-size:13px;color:var(--tm);margin-bottom:6px;line-height:1.5">&#8594; '+esc(l.trim())+'</div>';
+    });
+    html+='</div>';
+  }
+  if(info.unitWords&&info.unitWords.trim()){
+    html+='<div class="card"><div style="font-size:13px;font-weight:700;margin-bottom:8px">&#128214; Unit Words</div><div>';
+    info.unitWords.split(/[\n,]/).map(function(w){return w.trim();}).filter(Boolean).forEach(function(w){
+      html+='<span class="word-chip">'+esc(w)+'</span>';
+    });
+    html+='</div></div>';
+  }
+  mc.innerHTML=html;setNav("home");
 };
 
-// ── WEEKLY PLAN (new logic) ──
+// ── STEP 3: MY LEARNING CONTRACT ──
 function getActiveWeek(weeks){
-  var now=Date.now();
-  for(var i=0;i<weeks.length;i++){
-    if(weeks[i].startDate&&weeks[i].endDate&&now>=weeks[i].startDate&&now<=weeks[i].endDate)return i;
-  }
-  for(var i=0;i<weeks.length;i++){
-    if(!weeks[i].closed)return i;
-  }
+  for(var i=0;i<weeks.length;i++){if(!weeks[i].closed)return i;}
   return weeks.length-1;
 }
 
-function renderWeeklyPlan(c){
-  var weeks=c.weeks||[
-    {goal:"",focusSkill:"",resources:"",tasks:[],closed:false,nextPlan:"",closingNote:"",planOk:null},
-    {goal:"",focusSkill:"",resources:"",tasks:[],closed:false,nextPlan:"",closingNote:"",planOk:null},
-    {goal:"",focusSkill:"",resources:"",tasks:[],closed:false,nextPlan:"",closingNote:"",planOk:null},
-    {goal:"",focusSkill:"",resources:"",tasks:[],closed:false,nextPlan:"",closingNote:"",planOk:null}
-  ];
+window.renderStep3Screen=async function(){
+  var mc=document.getElementById("mc");
+  if(!contractData||!contractData.productType){toast("Finish Step 2 — Get Ideas — first!");go("home");return;}
+  var c=contractData;
+  var weeks=c.weeks;
   var activeWeek=getActiveWeek(weeks);
-  var weekLabels=["Week 1 — Choose & Find Resources","Week 2 — Create & Share","Week 3 — Revise & Refine","Week 4 — Present & Reflect"];
   var FOCUS_SKILLS=["Speaking clearly","Organizing ideas","Using new vocabulary","Writing accurately","Being creative","Explaining clearly","Listening actively","Working with sources"];
 
-  var html='<div class="card"><div class="fb mb8">';
-  html+='<span style="font-size:14px;font-weight:700">My Learning Contract</span>';
+  var html='<button class="btn bts mb8" onclick="go(\'home\')">&#8592; Back to Home</button>';
+  html+='<div class="card"><div class="fb mb8">';
+  html+='<span style="font-size:14px;font-weight:700">Step 3 · My Learning Contract</span>';
   if(c.status==="approved")html+='<span class="sb sa">Active</span>';
   else if(c.status==="pending")html+='<span class="sb sp">Pending teacher approval</span>';
   else html+='<span class="sb" style="background:var(--gl);color:var(--tm)">Draft</span>';
   html+='</div>';
-
-  if(c.productType){
-    html+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">';
-    html+='<span style="padding:3px 10px;border-radius:20px;background:var(--pl);color:var(--pd);font-size:12px;font-weight:700">'+esc(c.productType)+'</span>';
-    if(c.weakness)html+='<span style="padding:3px 10px;border-radius:20px;background:var(--al);color:var(--a);font-size:12px;font-weight:700">Focus: '+esc(c.weakness)+'</span>';
-    html+='</div>';
-  }
+  html+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">';
+  html+='<span style="padding:3px 10px;border-radius:20px;background:var(--pl);color:var(--pd);font-size:12px;font-weight:700">'+esc(c.productType)+'</span>';
+  (c.platforms||[]).forEach(function(pf){html+='<span style="padding:3px 10px;border-radius:20px;background:var(--gl);color:var(--tm);font-size:12px">'+esc(pf)+'</span>';});
+  html+='</div>';
   if(c.teacherComment)html+='<div style="background:var(--tl);border-radius:var(--rs);padding:8px 10px;font-size:12px;color:var(--td);margin-bottom:8px"><strong>Teacher:</strong> '+esc(c.teacherComment)+'</div>';
-
   html+='<div class="divider"></div>';
 
   weeks.forEach(function(w,i){
     var isActive=i===activeWeek;
     var isClosed=w.closed;
     var isFuture=i>activeWeek&&!isClosed;
-    var done=w.tasks?(w.tasks.filter(function(t){return t.done;}).length):0;
+    var done=w.tasks?w.tasks.filter(function(t){return t.done;}).length:0;
     var total=w.tasks?w.tasks.length:0;
     var pct=total>0?Math.round(done/total*100):0;
-
     var headerBg=isClosed?"var(--tl)":isActive?"var(--pl)":"var(--gl)";
     var headerBorder=isClosed?"var(--t)":isActive?"var(--p)":"var(--gb)";
     var statusIcon=isClosed?"&#9989;":isActive?"&#128197;":"&#128274;";
-    var statusText=isClosed?"Completed":isActive?"This week":"Upcoming";
 
     html+='<div style="border:1.5px solid '+headerBorder+';border-radius:var(--r);margin-bottom:9px;overflow:hidden">';
-
     html+='<div style="padding:11px 13px;background:'+headerBg+';display:flex;align-items:center;justify-content:space-between;'+(isFuture?"":"cursor:pointer;")+'" '+(isFuture?"":"onclick=\"toggleWeek("+i+")\"")+'">';
-    html+='<div><div style="font-size:13px;font-weight:700">'+statusIcon+' '+weekLabels[i]+'</div>';
-    if(w.goal&&!isFuture)html+='<div style="font-size:11px;color:var(--tm);margin-top:2px">'+esc(w.goal)+'</div>';
+    html+='<div><div style="font-size:13px;font-weight:700">'+statusIcon+' Week '+(i+1)+' — '+w.title+'</div>';
     if(isFuture)html+='<div style="font-size:11px;color:var(--th);margin-top:2px">Complete the current week first</div>';
     html+='</div>';
-    if(isClosed&&total>0)html+='<span class="sb sa">'+pct+'% done</span>';
-    else if(isActive&&total>0)html+='<span style="font-size:11px;color:var(--p);font-weight:700">'+done+"/"+total+' tasks</span>';
+    if(total>0)html+='<span class="sb '+(isClosed?"sa":"")+'" style="'+(isClosed?"":"background:var(--pl);color:var(--pd)")+'">'+done+"/"+total+'</span>';
     html+='</div>';
 
     if(!isFuture){
       html+='<div id="week-body-'+i+'" style="padding:13px;border-top:1px solid '+headerBorder+';background:#fff;display:'+(isActive?"block":"none")+'">';
-
       if(isClosed){
         if(w.closingNote)html+='<div style="font-size:13px;margin-bottom:8px"><strong>What I did:</strong> '+esc(w.closingNote)+'</div>';
-        if(w.planOk!==null){
-          var okLabel=w.planOk==="yes"?"Yes, went as planned":w.planOk==="partly"?"Partly":"Not really";
-          html+='<div style="font-size:13px;margin-bottom:8px"><strong>Went to plan?</strong> '+okLabel+'</div>';
-        }
-        if(w.nextPlan)html+='<div style="font-size:13px;margin-bottom:8px"><strong>What I planned for next week:</strong> '+esc(w.nextPlan)+'</div>';
+        if(w.planOk!==null){var okLabel=w.planOk==="yes"?"Yes, went as planned":w.planOk==="partly"?"Partly":"Not really";html+='<div style="font-size:13px;margin-bottom:8px"><strong>Went to plan?</strong> '+okLabel+'</div>';}
         if(w.focusSkill)html+='<div style="font-size:13px;color:var(--td)"><strong>Focus skill:</strong> '+esc(w.focusSkill)+'</div>';
       } else {
-        if(i>0&&weeks[i-1]&&weeks[i-1].nextPlan){
-          html+='<div style="background:var(--pl);border-radius:var(--rs);padding:9px 11px;margin-bottom:12px">';
-          html+='<div style="font-size:11px;font-weight:700;color:var(--pd);margin-bottom:3px">&#128204; From last week, you planned:</div>';
-          html+='<div style="font-size:13px;color:var(--pd)">'+esc(weeks[i-1].nextPlan)+'</div>';
-          html+='<div style="font-size:11px;color:var(--tm);margin-top:5px">Does this still hold? Update your goal below if things have changed.</div>';
-          html+='</div>';
-        }
-
         if(i===0){
-          html+='<div class="fg">';
-          html+='<label class="fl">To make a great '+esc(c.productType||"product")+', what do you most need to work on?</label>';
-          html+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px" id="focus-skill-chips">';
-          FOCUS_SKILLS.forEach(function(sk){
-            var isSel=w.focusSkill===sk;
-            html+='<div class="chip'+(isSel?" sel":"")+'" onclick="setFocusSkill('+i+',\''+esc(sk)+'\')" style="font-size:12px">'+sk+'</div>';
-          });
+          html+='<div class="fg"><label class="fl">To make a great '+esc(c.productType)+', what do you most need to work on?</label>';
+          html+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px">';
+          FOCUS_SKILLS.forEach(function(sk){html+='<div class="chip'+(w.focusSkill===sk?" sel":"")+'" onclick="setFocusSkill('+i+',\''+esc(sk)+'\')" style="font-size:12px">'+sk+'</div>';});
           html+='</div>';
-          if(w.focusSkill)html+='<div style="font-size:12px;color:var(--td);margin-top:5px">&#9989; Selected: <strong>'+esc(w.focusSkill)+'</strong></div>';
-          html+='</div>';
+          if(w.focusSkill)html+='<div style="font-size:12px;color:var(--td);margin-top:5px">&#9989; Selected: <strong>'+esc(w.focusSkill)+'</strong></div></div>';
+          else html+='</div>';
         } else if(w.focusSkill){
           html+='<div style="background:var(--al);border-radius:var(--rs);padding:7px 10px;font-size:12px;color:var(--a);margin-bottom:10px">&#127919; Focus skill: <strong>'+esc(w.focusSkill)+'</strong></div>';
         }
 
-        html+='<div style="font-size:11px;font-weight:700;color:var(--tm);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px">This week&#39;s work</div>';
-
-        html+='<div class="fg"><label class="fl">My goal this week</label>';
-        html+='<input class="fi" id="w-goal-'+i+'" value="'+esc(w.goal||"")+'" placeholder="e.g. Find 3 sources and write a rough outline" onblur="saveWeekGoal('+i+')"></div>';
-
-        html+='<div class="fg"><label class="fl">Resources I am using</label>';
-        html+='<textarea class="fta" id="w-res-'+i+'" style="min-height:48px" placeholder="Which websites, tools or materials will you use?" onblur="saveWeekRes('+i+')">'+esc(w.resources||"")+'</textarea></div>';
-
-        if(total>0){
-          html+='<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--tm);margin-bottom:3px"><span>Tasks</span><span>'+done+"/"+total+'</span></div>';
-          html+='<div class="pbw" style="margin-bottom:10px"><div class="pbf" style="width:'+pct+'%"></div></div>';
-        }
-
-        if(w.tasks&&w.tasks.length){
-          w.tasks.forEach(function(t,ti){
-            html+='<div class="step-item'+(t.done?" done":"")+'" onclick="toggleTask('+i+','+ti+')">';
-            html+='<div class="step-row"><div class="step-chk'+(t.done?" done":"")+'">'+( t.done?"&#10003;":"")+'</div>';
-            html+='<span class="step-txt'+(t.done?" done":"")+'">'+esc(t.text||"")+'</span></div></div>';
-          });
-        }
+        html+='<div style="font-size:11px;font-weight:700;color:var(--tm);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">This week&#39;s tasks</div>';
+        if(total>0){html+='<div class="pbw"><div class="pbf" style="width:'+pct+'%"></div></div>';}
+        (w.tasks||[]).forEach(function(t,ti){
+          html+='<div class="step-item'+(t.done?" done":"")+'" onclick="toggleTask('+i+','+ti+')">';
+          html+='<div class="step-row"><div class="step-chk'+(t.done?" done":"")+'">'+(t.done?"&#10003;":"")+'</div>';
+          html+='<span class="step-txt'+(t.done?" done":"")+'">'+esc(t.text||"")+'</span></div></div>';
+        });
         html+='<div style="display:flex;gap:7px;margin-top:7px">';
-        html+='<input class="fi" id="new-task-'+i+'" placeholder="Add a task..." style="flex:1" onkeydown="if(event.key===\'Enter\')addTask('+i+')">';
+        html+='<input class="fi" id="new-task-'+i+'" placeholder="Add your own task..." style="flex:1" onkeydown="if(event.key===\'Enter\')addTask('+i+')">';
         html+='<button class="btn btp" style="font-size:12px;padding:7px 12px" onclick="addTask('+i+')">Add</button>';
         html+='</div>';
+        html+='<button class="btn bts btf mt8" style="font-size:12px" onclick="aiSuggestForWeek('+i+')">&#10024; Ask AI for ideas</button>';
+        html+='<div id="ai-sugg-'+i+'" style="margin-top:8px"></div>';
 
         html+='<div class="divider"></div>';
         html+='<div style="border-radius:var(--r);background:var(--pd);padding:14px 16px;margin-top:4px">';
-        html+='<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.65);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Done for this week?</div>';
-        html+='<div style="font-size:13px;color:rgba(255,255,255,.8);margin-bottom:12px;line-height:1.5">';
-        html+=i<3?"Make sure you have shared your work on the Feed first, then close the week.":"Great work! Make sure your final piece is on the Feed, then complete your plan.";
-        html+='</div>';
-        html+='<button class="btn btf" style="background:#fff;color:var(--pd);font-size:13px;font-weight:700;padding:11px" onclick="openCloseWeek('+i+')">';
-        html+=i<3?"&#128274; Close this week &amp; plan next week &#8594;":"&#127942; Complete my plan";
-        html+='</button>';
+        html+='<div style="font-size:13px;color:rgba(255,255,255,.8);margin-bottom:12px;line-height:1.5">'+(i<3?"Make sure you have shared your work on the Feed first, then close the week.":"Great work! Make sure your final piece is on the Feed, then complete your plan.")+'</div>';
+        html+='<button class="btn btf" style="background:#fff;color:var(--pd);font-size:13px;font-weight:700;padding:11px" onclick="openCloseWeek('+i+')">'+(i<3?"&#128274; Close this week &amp; move on &#8594;":"&#127942; Complete my plan")+'</button>';
         html+='</div>';
       }
       html+='</div>';
     }
     html+='</div>';
   });
-
-  if(c.status!=="approved"){
-    html+='<button class="btn bts btf" style="margin-top:4px;font-size:12px" onclick="clearContract()">Clear contract</button>';
-  }
+  if(c.status!=="approved")html+='<button class="btn bts btf" style="margin-top:4px;font-size:12px" onclick="clearContract()">Clear contract</button>';
   html+='</div>';
-  return html;
-}
+  mc.innerHTML=html;setNav("home");
+};
 
 window.setFocusSkill=async function(weekIdx,skill){
-  if(!contractData||!contractData.weeks)return;
   contractData.weeks[weekIdx].focusSkill=skill;
   await update(ref(db,"contracts/"+CU.uid),{weeks:contractData.weeks});
-  renderPlan();
+  renderStep3Screen();
 };
-
-window.toggleWeek=function(i){
-  var el=document.getElementById("week-body-"+i);
-  if(el)el.style.display=el.style.display==="none"?"block":"none";
-};
-
-window.saveWeekGoal=async function(i){
-  var val=((document.getElementById("w-goal-"+i)||{}).value||"").trim();
-  if(!contractData||!contractData.weeks)return;
-  contractData.weeks[i].goal=val;
-  await update(ref(db,"contracts/"+CU.uid),{weeks:contractData.weeks});
-};
-window.saveWeekRes=async function(i){
-  var val=((document.getElementById("w-res-"+i)||{}).value||"").trim();
-  if(!contractData||!contractData.weeks)return;
-  contractData.weeks[i].resources=val;
-  await update(ref(db,"contracts/"+CU.uid),{weeks:contractData.weeks});
-};
+window.toggleWeek=function(i){var el=document.getElementById("week-body-"+i);if(el)el.style.display=el.style.display==="none"?"block":"none";};
 window.addTask=async function(i){
   var inp=document.getElementById("new-task-"+i);
   var text=(inp?inp.value:"").trim();if(!text){toast("Write a task first!");return;}
-  if(!contractData||!contractData.weeks)return;
-  if(!contractData.weeks[i].tasks)contractData.weeks[i].tasks=[];
   contractData.weeks[i].tasks.push({text:text,done:false});
   await update(ref(db,"contracts/"+CU.uid),{weeks:contractData.weeks});
   if(inp)inp.value="";
-  renderPlan();
+  renderStep3Screen();
 };
 window.toggleTask=async function(wi,ti){
-  if(!contractData||!contractData.weeks||!contractData.weeks[wi].tasks)return;
   contractData.weeks[wi].tasks[ti].done=!contractData.weeks[wi].tasks[ti].done;
   await update(ref(db,"contracts/"+CU.uid),{weeks:contractData.weeks});
-  renderPlan();
+  renderStep3Screen();
 };
-window.openContract=function(){renderPlan();};
-window.clearContract=async function(){if(!confirm("Clear your contract?"))return;await remove(ref(db,"contracts/"+CU.uid));contractData=null;renderPlan();};
+window.clearContract=async function(){if(!confirm("Clear your contract? You will need to retake the quiz."))return;await remove(ref(db,"contracts/"+CU.uid));contractData=null;go("home");};
+
+// ── AI TASK/RESOURCE SUGGESTIONS FOR A WEEK ──
+window.aiSuggestForWeek=async function(weekIdx){
+  var el=document.getElementById("ai-sugg-"+weekIdx);if(!el)return;
+  el.innerHTML='<div class="loading" style="padding:10px">Thinking of ideas...</div>';
+  var c=contractData;
+  var prompt="Product: "+c.productType+" (category: "+c.category+")\nPlatforms available: "+(c.platforms||[]).join(", ")+"\nThis week's focus: "+c.weeks[weekIdx].title+"\nStudent's weakest skill: "+(c.weakness||"none stated")+"\n\nSuggest exactly 3 short, concrete tasks (max 10 words each) and exactly 2 relevant resources or platforms/websites for a 12-year-old working on this. Reply in EXACTLY this format, one per line, nothing else:\nTASK: ...\nTASK: ...\nTASK: ...\nRESOURCE: ...\nRESOURCE: ...";
+  var reply=await askAI(prompt,"You are a helpful assistant for a 12-year-old's English class project. Follow the requested output format exactly with no extra commentary.");
+  var lines=reply.split("\n").map(function(l){return l.trim();}).filter(Boolean);
+  var tasks=[],resources=[];
+  lines.forEach(function(l){
+    if(/^TASK:/i.test(l))tasks.push(l.replace(/^TASK:\s*/i,""));
+    else if(/^RESOURCE:/i.test(l))resources.push(l.replace(/^RESOURCE:\s*/i,""));
+  });
+  if(!tasks.length&&!resources.length){el.innerHTML='<div style="font-size:12px;color:var(--tm);background:var(--gl);padding:8px;border-radius:var(--rs)">'+esc(reply)+'</div>';return;}
+  var html='<div style="font-size:11px;font-weight:700;color:var(--th);margin-bottom:5px;text-transform:uppercase">Tap to add a task</div>';
+  tasks.forEach(function(t){html+='<span class="sugg-task" onclick="addSuggestedTask('+weekIdx+',\''+esc(t).replace(/'/g,"&#39;")+'\',this)">+ '+esc(t)+'</span>';});
+  if(resources.length){
+    html+='<div style="font-size:11px;font-weight:700;color:var(--th);margin:8px 0 5px;text-transform:uppercase">Resources to try</div>';
+    resources.forEach(function(r){html+='<span class="sugg-res">'+esc(r)+'</span>';});
+  }
+  el.innerHTML=html;
+};
+window.addSuggestedTask=async function(weekIdx,text,btn){
+  contractData.weeks[weekIdx].tasks.push({text:text,done:false});
+  await update(ref(db,"contracts/"+CU.uid),{weeks:contractData.weeks});
+  toast("Added to your tasks!");
+  renderStep3Screen();
+};
 
 // ── CLOSE WEEK MODAL ──
 window.openCloseWeek=function(weekIdx){
   var mc=document.getElementById("mc");
   var isLast=weekIdx===3;
   var weekLabels=["Week 1","Week 2","Week 3","Week 4"];
-  var html='<button class="btn bts mb8" onclick="renderPlan()">&#8592; Back</button>';
+  var html='<button class="btn bts mb8" onclick="renderStep3Screen()">&#8592; Back</button>';
   html+='<div class="card" style="border-color:var(--p);border-width:2px">';
   html+='<div style="font-size:16px;font-weight:700;margin-bottom:4px">&#128274; Close '+weekLabels[weekIdx]+'</div>';
   html+='<div style="font-size:13px;color:var(--tm);margin-bottom:16px">Before you finish, take 2 minutes to reflect.</div>';
@@ -1089,79 +1058,101 @@ window.submitCloseWeek=async function(weekIdx){
     toast("Week closed! Next week is now unlocked.");
   }
   window._planOkChoice=null;
-  renderPlan();
+  renderStep3Screen();
 };
 
 
-// ── QUIZ ──
-window.go=function(page){
-  setNav(page==="quiz"?"plan":page);
-  document.getElementById("mc").innerHTML='<div class="loading">Loading...</div>';
-  var pages={home:renderHome,feed:renderFeed,plan:renderPlan,quiz:startQuiz,profile:function(){renderProfile(CU.uid,true);}};
-  if(pages[page])pages[page]();else renderHome();
-};
-
-var qState={i:0,answers:{}};
+// ── QUIZ (Step 2): Q1 platforms (multi) → Q2 grouped product (single) → Q3 weakness (single) ──
+var qState={i:0,platforms:[],productId:null,weakness:null};
 
 function startQuiz(){
-  qState={i:0,answers:{}};
-  renderQuiz();
+  qState={i:0,platforms:[],productId:null,weakness:null};
+  setNav("home");
+  renderQuizStep();
 }
 
-function renderQuiz(){
+function renderQuizStep(){
   var mc=document.getElementById("mc");
-  if(qState.i>=QUESTIONS.length){showQuizResult(mc);return;}
-  var q=QUESTIONS[qState.i];
-  var sel=qState.answers[q.id];
-  var pct=Math.round(qState.i/QUESTIONS.length*100);
-  var html='<button class="btn bts mb8" onclick="go(\'plan\')">&#8592; Back to Plan</button>';
-  html+='<div class="qprog"><div class="qpf" style="width:'+pct+'%"></div></div>';
-  html+='<div class="ql">Question '+(qState.i+1)+" of "+QUESTIONS.length+'</div>';
-  html+='<div class="qq">'+q.q+'</div><div class="qs2">'+q.s+'</div>';
+  if(qState.i===0)return renderQ1(mc);
+  if(qState.i===1)return renderQ2(mc);
+  if(qState.i===2)return renderQ3(mc);
+  return showQuizResult(mc);
+}
+
+function quizTopBar(stepIdx){
+  if(isLockedStep("step2"))return lockBarHTML();
+  return '<button class="btn bts mb8" onclick="go(\'home\')">&#8592; Back to Home</button>'
+    +'<div class="qprog"><div class="qpf" style="width:'+Math.round(stepIdx/3*100)+'%"></div></div>'
+    +'<div class="ql">Question '+(stepIdx+1)+' of 3</div>';
+}
+
+function renderQ1(mc){
+  var html=quizTopBar(0);
+  html+='<div class="qq">What can you work with?</div><div class="qs2">Pick everything you have access to.</div>';
   html+='<div class="qopts">';
-  q.opts.forEach(function(o){
-    var on=sel===o.value;
-    html+='<div class="qo'+(on?" sel":"")+'" onclick="qPick(\''+o.value+'\')">';
-    html+='<span style="font-size:16px;width:24px;flex-shrink:0">'+o.e+'</span>';
-    html+='<span style="flex:1">'+o.t+'</span>';
-    html+='<span class="qchk">'+(on?"&#10003;":"")+'</span></div>';
+  PLATFORMS.forEach(function(pf){
+    var on=qState.platforms.indexOf(pf)!==-1;
+    html+='<div class="qo'+(on?" sel":"")+'" onclick="qToggle1(\''+esc(pf)+'\')">';
+    html+='<span style="flex:1">'+pf+'</span><span class="qchk">'+(on?"&#10003;":"")+'</span></div>';
   });
-  html+='</div>';
-  html+='<div class="qnav">';
-  html+='<button class="btn bts" '+(qState.i===0?"disabled":"")+' onclick="qBack()">Back</button>';
-  html+='<button class="btn btp" '+(sel===undefined?"disabled":"")+' onclick="qNext()">'+(qState.i===QUESTIONS.length-1?"See my idea &#8594;":"Continue &#8594;")+'</button>';
-  html+='</div>';
+  html+='</div><div class="qnav"><span></span>';
+  html+='<button class="btn btp" '+(qState.platforms.length===0?"disabled":"")+' onclick="qState.i=1;renderQuizStep()">Continue &#8594;</button></div>';
   mc.innerHTML=html;
 }
-
-window.qPick=function(value){
-  var q=QUESTIONS[qState.i];
-  qState.answers[q.id]=value;
-  renderQuiz();
+window.qToggle1=function(pf){
+  var idx=qState.platforms.indexOf(pf);
+  if(idx===-1)qState.platforms.push(pf);else qState.platforms.splice(idx,1);
+  renderQ1(document.getElementById("mc"));
 };
-window.qBack=function(){if(qState.i>0){qState.i--;renderQuiz();}};
-window.qNext=function(){qState.i++;renderQuiz();};
+
+function renderQ2(mc){
+  var html=quizTopBar(1);
+  html+='<div class="qq">What kind of project do you want to make?</div><div class="qs2">Tap the one that sounds best.</div>';
+  ["written","spoken","visual"].forEach(function(cat){
+    html+='<div style="font-size:11px;font-weight:700;color:var(--th);text-transform:uppercase;letter-spacing:.5px;margin:14px 0 6px">'+CAT_EMOJI[cat]+' '+CAT_LABELS[cat]+'</div>';
+    html+='<div class="qopts">';
+    PRODUCTS_BY_CAT[cat].forEach(function(p){
+      var on=qState.productId===p.id;
+      html+='<div class="qo'+(on?" sel":"")+'" onclick="qPick2(\''+p.id+'\')">';
+      html+='<span style="font-size:16px;width:24px;flex-shrink:0">'+p.e+'</span><span style="flex:1">'+p.name+'</span><span class="qchk">'+(on?"&#10003;":"")+'</span></div>';
+    });
+    html+='</div>';
+  });
+  html+='<div class="qnav"><button class="btn bts" onclick="qState.i=0;renderQuizStep()">Back</button>';
+  html+='<button class="btn btp" '+(!qState.productId?"disabled":"")+' onclick="qState.i=2;renderQuizStep()">Continue &#8594;</button></div>';
+  mc.innerHTML=html;
+}
+window.qPick2=function(id){qState.productId=id;renderQ2(document.getElementById("mc"));};
+
+function renderQ3(mc){
+  var html=quizTopBar(2);
+  html+='<div class="qq">What feels hardest for you right now?</div><div class="qs2">Be honest — we\'ll give you a few tips for this.</div>';
+  html+='<div class="qopts">';
+  WEAKNESS_OPTS.forEach(function(o){
+    var on=qState.weakness===o.value;
+    html+='<div class="qo'+(on?" sel":"")+'" onclick="qPick3(\''+o.value+'\')">';
+    html+='<span style="font-size:16px;width:24px;flex-shrink:0">'+o.e+'</span><span style="flex:1">'+o.t+'</span><span class="qchk">'+(on?"&#10003;":"")+'</span></div>';
+  });
+  html+='</div><div class="qnav"><button class="btn bts" onclick="qState.i=1;renderQuizStep()">Back</button>';
+  html+='<button class="btn btp" '+(!qState.weakness?"disabled":"")+' onclick="qState.i=3;renderQuizStep()">See my idea &#8594;</button></div>';
+  mc.innerHTML=html;
+}
+window.qPick3=function(v){qState.weakness=v;renderQ3(document.getElementById("mc"));};
 
 function showQuizResult(mc){
-  var format=qState.answers.format;
-  var workstyle=qState.answers.workstyle;
-  var weakness=qState.answers.weakness;
-  var recId=RECOMMEND[format][workstyle];
-  var rec=productById(recId);
-  var alternates=PRODUCTS.filter(function(p){return p.format===format&&p.id!==recId;});
-  var whyText="You said you want to make something "+FORMATS[format].label.toLowerCase()+(workstyle==="group"?" and work with a partner or group.":" and work by yourself.");
+  var rec=productById(qState.productId);
+  var cat=catOfProduct(qState.productId);
+  var alternates=PRODUCTS_BY_CAT[cat].filter(function(p){return p.id!==rec.id;}).slice(0,3);
+  var whyText="You chose "+CAT_LABELS[cat].toLowerCase()+(qState.platforms.length?" using "+qState.platforms.join(", ")+".":".");
 
-  var html='<button class="btn bts mb8" onclick="go(\'plan\')">&#8592; Back</button>';
-  html+='<div class="pt">Your Idea</div>';
-  html+='<div class="ps">Based on your answers</div>';
-
+  var html=isLockedStep("step2")?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">&#8592; Back</button>';
+  html+='<div class="pt">Your Idea</div><div class="ps">Based on your answers</div>';
   html+='<div class="card" style="border-color:var(--p);border-width:1.5px;text-align:center;padding:20px">';
   html+='<div style="font-size:34px;margin-bottom:6px">'+rec.e+'</div>';
   html+='<div style="font-size:17px;font-weight:700;margin-bottom:6px">'+rec.name+'</div>';
   html+='<div style="font-size:12px;color:var(--tm);margin-bottom:14px">'+whyText+'</div>';
-  html+='<button class="btn btg btf" onclick="chooseProduct(\''+rec.id+'\',\''+esc(rec.name)+'\')">Choose this &amp; Build My Plan &#8594;</button>';
+  html+='<button class="btn btg btf" onclick="chooseProduct(\''+rec.id+'\',\''+esc(rec.name)+'\')">Choose this &amp; Build My Contract &#8594;</button>';
   html+='</div>';
-
   if(alternates.length){
     html+='<div class="card"><div style="font-size:12px;font-weight:700;color:var(--th);margin-bottom:8px">Other ideas in this style</div>';
     html+='<div style="display:flex;flex-wrap:wrap;gap:6px">';
@@ -1170,44 +1161,51 @@ function showQuizResult(mc){
     });
     html+='</div></div>';
   }
-
-  if(weakness){
-    var tips=SKILL_TIPS[weakness]||[];
-    html+='<div class="card" style="border-left:3px solid var(--c)">';
-    html+='<div style="font-size:13px;font-weight:700;margin-bottom:7px">A few tips for you</div>';
+  if(qState.weakness){
+    var tips=SKILL_TIPS[qState.weakness]||[];
+    html+='<div class="card" style="border-left:3px solid var(--c)"><div style="font-size:13px;font-weight:700;margin-bottom:7px">A few tips for you</div>';
     tips.forEach(function(t){html+='<div style="font-size:12px;color:var(--tm);margin-bottom:4px">&#8594; '+t+'</div>';});
     html+='</div>';
   }
   mc.innerHTML=html;
 }
 
-window.chooseProduct=function(id,name){
-  var weakness=qState.answers.weakness;
-  window._selectedProduct={id:id,name:name,weakness:weakness||null,tips:weakness?(SKILL_TIPS[weakness]||[]):[]};
-  goToContract();
+window.chooseProduct=async function(id,name){
+  var cat=catOfProduct(id);
+  window._selectedProduct={id:id,name:name,cat:cat,platforms:qState.platforms.slice(),weakness:qState.weakness||null,tips:qState.weakness?(SKILL_TIPS[qState.weakness]||[]):[]};
+  await goToContract();
 };
 
 window.goToContract=async function(){
-  if(!window._selectedProduct){toast("Select a product first!");return;}
+  if(!window._selectedProduct){toast("Choose a project first!");return;}
   var p=window._selectedProduct;
-  var weeks=[
-    {goal:"",resources:"",tasks:[],label:"Decide & find resources"},
-    {goal:"",resources:"",tasks:[],label:"Work towards my goal"},
-    {goal:"",resources:"",tasks:[],label:"Refine & get feedback"},
-    {goal:"",resources:"",tasks:[],label:"Present & final review"}
-  ];
+  var templates=TASK_TEMPLATES[p.cat];
+  var weeks=WEEK_TITLES.map(function(title,i){
+    return {title:title,tasks:templates[i].map(function(t){return {text:t.replace("{p}",p.name),done:false};}),closed:false,nextPlan:"",closingNote:"",planOk:null,focusSkill:""};
+  });
   await set(ref(db,"contracts/"+CU.uid),{
-    productId:p.id,productType:p.name,
+    productId:p.id,productType:p.name,category:p.cat,platforms:p.platforms||[],
     weakness:p.weakness||"",weaknessTips:p.tips||[],
     weeks:weeks,status:"draft",
     studentName:CU.displayName,studentEmail:CU.email,
     studentPhoto:CU.photoURL||"",studentId:CU.uid,createdAt:Date.now()
   });
-  contractData=await(await get(ref(db,"contracts/"+CU.uid))).val();
-  toast("Contract created! Fill in your weekly goals.");
-  go("plan");
-  setTimeout(function(){document.getElementById("week-body-0")?.classList.add("open");},300);
+  contractData=(await get(ref(db,"contracts/"+CU.uid))).val();
+  toast("Contract created!");
+  if(isLockedStep("step2")){renderQuizDone();}
+  else{renderStep3Screen();}
 };
+
+function renderQuizDone(){
+  var mc=document.getElementById("mc");
+  var html=lockBarHTML();
+  html+='<div class="card" style="text-align:center;padding:24px;border-color:var(--t);border-width:1.5px">';
+  html+='<div style="font-size:34px;margin-bottom:8px">&#9989;</div>';
+  html+='<div style="font-size:15px;font-weight:700;margin-bottom:4px">You\'re all set!</div>';
+  html+='<div style="font-size:13px;color:var(--tm)">Your project is <strong>'+esc(contractData.productType)+'</strong>. Wait for your teacher to move on.</div>';
+  html+='</div>';
+  mc.innerHTML=html;
+}
 
 // ── PAGE 4: PROFILE ──
 window.renderProfile=async function(uid,isOwn){
@@ -1254,9 +1252,10 @@ window.renderProfile=async function(uid,isOwn){
     if(c.productType)html+='<div style="font-size:13px;margin-bottom:5px"><strong>Product:</strong> '+esc(c.productType)+'</div>';
     var weeks=c.weeks||[];
     weeks.forEach(function(w,i){
-      if(w.goal)html+='<div style="font-size:12px;color:var(--tm);margin-bottom:3px"><strong>Week '+(i+1)+':</strong> '+esc(w.goal)+'</div>';
+      var wd=(w.tasks||[]).filter(function(t){return t.done;}).length,wt=(w.tasks||[]).length;
+      html+='<div style="font-size:12px;color:var(--tm);margin-bottom:3px"><strong>Week '+(i+1)+':</strong> '+esc(w.title||"")+" — "+wd+"/"+wt+' tasks</div>';
     });
-    if(isOwn)html+='<button class="btn bts" style="font-size:12px;padding:6px 11px;margin-top:8px" onclick="go(\'plan\')">Edit plan &#8594;</button>';
+    if(isOwn)html+='<button class="btn bts" style="font-size:12px;padding:6px 11px;margin-top:8px" onclick="renderStep3Screen()">Edit plan &#8594;</button>';
     if(c.teacherComment)html+='<div class="tip mt8"><strong>Teacher:</strong> '+esc(c.teacherComment)+'</div>';
     html+='</div>';
   }
@@ -1405,7 +1404,7 @@ window.genSummary=async function(uid){
   var posts=[];results[0].forEach(function(p){var d=p.val();if(d.uid===uid)posts.push(d);});
   var c=results[1].val();
   var ctx="Student: "+CU.displayName+"\n";
-  if(c){ctx+="Product: "+c.productType+"\n";if(c.weeks)c.weeks.forEach(function(w,i){if(w.goal)ctx+="Week "+(i+1)+" goal: "+w.goal+"\n";});}
+  if(c){ctx+="Product: "+c.productType+"\n";if(c.weeks)c.weeks.forEach(function(w,i){var wd=(w.tasks||[]).filter(function(t){return t.done;}).length,wt=(w.tasks||[]).length;ctx+="Week "+(i+1)+" ("+w.title+"): "+wd+"/"+wt+" tasks done\n";});}
   posts.forEach(function(p){
     ctx+="Work shared: "+p.title+"\nReflection: "+p.reflection+"\n";
     var cms=p.comments?Object.values(p.comments):[];
@@ -1421,6 +1420,7 @@ window.genSummary=async function(uid){
 // ── TEACHER APP ──
 var TNAV=[
   {id:"overview",l:"Overview",i:'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>'},
+  {id:"session",l:"Run Class",i:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'},
   {id:"groups",l:"Groups",i:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>'},
   {id:"evaluate",l:"Evaluate",i:'<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>'},
   {id:"unit",l:"Unit",i:'<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>'}
@@ -1436,7 +1436,77 @@ function renderTeacher(){
 window.tgo=function(page){
   document.querySelectorAll("#bnav .ni").forEach(function(n){n.classList.remove("active");});
   var el=document.getElementById("tnav-"+page);if(el)el.classList.add("active");
-  ({overview:renderTOverview,groups:renderTGroups,evaluate:renderTEvaluate,unit:renderTUnit}[page]||renderTOverview)();
+  ({overview:renderTOverview,session:renderTSession,groups:renderTGroups,evaluate:renderTEvaluate,unit:renderTUnit}[page]||renderTOverview)();
+};
+
+// ── TEACHER: RUN CLASS (live lock-mode control) ──
+async function renderTSession(){
+  var mc=document.getElementById("mc");
+  var snap=await get(ref(db,"liveSession"));
+  var s=snap.exists()?snap.val():{active:false};
+  var html='<div class="pt">Run Class</div><div class="ps">Take control of every student\'s screen for this part of the lesson.</div>';
+
+  html+='<div class="card" style="text-align:center;padding:18px;border-color:'+(s.active?"var(--t)":"var(--gb)")+';border-width:1.5px">';
+  if(!s.active){html+='<div style="font-size:14px;font-weight:700;color:var(--tm)">&#128275; No session live — students are browsing freely</div>';}
+  else if(s.step==="step1"){html+='<div style="font-size:14px;font-weight:700;color:var(--td)">&#128214; Showing "What We\'re Learning" to everyone</div>';}
+  else{
+    var rem=Math.max(0,Math.round((s.deadline-Date.now())/1000));
+    html+='<div style="font-size:14px;font-weight:700;color:var(--td)">&#9203; Get Ideas timer running</div>';
+    html+='<div style="font-size:28px;font-weight:800;margin-top:6px" id="tsession-timer">'+Math.floor(rem/60)+":"+(rem%60<10?"0":"")+(rem%60)+'</div>';
+  }
+  html+='</div>';
+
+  html+='<div class="card"><div style="font-size:13px;font-weight:700;margin-bottom:8px">Step 1 — What We\'re Learning</div>';
+  html+='<button class="btn btp btf" onclick="startSessionStep1()">&#128214; Show to whole class now</button></div>';
+
+  html+='<div class="card"><div style="font-size:13px;font-weight:700;margin-bottom:8px">Step 2 — Get Ideas (timed)</div>';
+  html+='<div class="fg"><label class="fl">Minutes</label><input class="fi" type="number" id="session-minutes" value="10" min="1" style="max-width:100px"></div>';
+  html+='<button class="btn btp btf" onclick="startSessionStep2()">&#9654; Start timer for whole class</button>';
+  if(s.active&&s.step==="step2"){
+    html+='<div style="display:flex;gap:8px;margin-top:8px">';
+    html+='<button class="btn bts" style="flex:1" onclick="adjustSessionTime(-2)">&#8722;2 min</button>';
+    html+='<button class="btn bts" style="flex:1" onclick="adjustSessionTime(2)">+2 min</button>';
+    html+='</div>';
+  }
+  html+='</div>';
+
+  if(s.active)html+='<button class="btn btf" style="background:var(--c);color:#fff" onclick="endSession()">&#9209; End Session — back to free browsing</button>';
+  mc.innerHTML=html;
+
+  if(s.active&&s.step==="step2"){
+    clearInterval(window._tsessionInterval);
+    window._tsessionInterval=setInterval(async function(){
+      var snap2=await get(ref(db,"liveSession"));
+      if(!snap2.exists()||!snap2.val().active){clearInterval(window._tsessionInterval);return;}
+      var s2=snap2.val();var rem2=Math.max(0,Math.round((s2.deadline-Date.now())/1000));
+      var el=document.getElementById("tsession-timer");
+      if(el)el.textContent=Math.floor(rem2/60)+":"+(rem2%60<10?"0":"")+(rem2%60);
+    },1000);
+  } else {
+    clearInterval(window._tsessionInterval);
+  }
+}
+window.startSessionStep1=async function(){
+  await set(ref(db,"liveSession"),{active:true,step:"step1",deadline:null,updatedAt:Date.now()});
+  toast("Now showing 'What We're Learning' to the whole class");
+  renderTSession();
+};
+window.startSessionStep2=async function(){
+  var mins=parseInt((document.getElementById("session-minutes")||{}).value)||10;
+  await set(ref(db,"liveSession"),{active:true,step:"step2",deadline:Date.now()+mins*60000,updatedAt:Date.now()});
+  toast("Timer started for the whole class!");
+  renderTSession();
+};
+window.adjustSessionTime=async function(delta){
+  var snap=await get(ref(db,"liveSession"));if(!snap.exists())return;
+  var s=snap.val();
+  await update(ref(db,"liveSession"),{deadline:(s.deadline||Date.now())+delta*60000,updatedAt:Date.now()});
+  renderTSession();
+};
+window.endSession=async function(){
+  await set(ref(db,"liveSession"),{active:false,step:null,deadline:null,updatedAt:Date.now()});
+  toast("Session ended — students are back to free browsing");
+  renderTSession();
 };
 
 function renderTOverview(){
@@ -1458,7 +1528,7 @@ function renderTOverview(){
         h+='<div><div class="post-name">'+esc(s.studentName||"")+'</div>';
         h+='<div class="post-meta">'+esc(s.productType||"")+'</div></div></div>';
         h+='<div class="post-body">';
-        if(s.weeks)s.weeks.forEach(function(w,i){if(w.goal)h+='<div style="font-size:12px;color:var(--tm);margin-bottom:2px"><strong>W'+(i+1)+':</strong> '+esc(w.goal)+'</div>';});
+        if(s.weeks)s.weeks.forEach(function(w,i){var wd=(w.tasks||[]).filter(function(t){return t.done;}).length,wt=(w.tasks||[]).length;h+='<div style="font-size:12px;color:var(--tm);margin-bottom:2px"><strong>W'+(i+1)+':</strong> '+esc(w.title||"")+" — "+wd+"/"+wt+' tasks</div>';});
         h+='<div class="fg" style="margin-top:8px"><textarea class="fta" id="cm-'+s.id+'" style="min-height:46px" placeholder="Comment for student..."></textarea></div>';
         h+='<div style="display:flex;gap:7px">';
         h+='<button class="btn btg" style="font-size:12px;padding:7px 12px" onclick="approveP(\''+s.id+'\',\''+esc(s.studentName||"")+'\')">Approve</button>';
@@ -1623,15 +1693,17 @@ window.submitTeacherComment=async function(postId,targetUid){
 
 function renderTUnit(){
   var mc=document.getElementById("mc");
-  mc.innerHTML='<div class="pt">Unit Info</div><div class="ps">This is what students see on their plan page.</div><div class="loading">Loading...</div>';
+  mc.innerHTML='<div class="pt">Unit Info</div><div class="ps">This is Step 1 on the student Home page.</div><div class="loading">Loading...</div>';
   get(ref(db,"unitInfo")).then(function(snap){
-    var info=snap.exists()?snap.val():{title:"",description:"",theme:""};
+    var info=snap.exists()?snap.val():{title:"",description:"",theme:"",grammarTips:"",unitWords:""};
     var html='<div class="card">';
     html+='<div class="fg"><label class="fl">Unit Title</label><input class="fi" id="unit-title" value="'+esc(info.title||"")+'" placeholder="e.g. Our Community"></div>';
     html+='<div class="fg"><label class="fl">Theme</label><input class="fi" id="unit-theme" value="'+esc(info.theme||"")+'" placeholder="e.g. Identity & Belonging"></div>';
-    html+='<div class="fg"><label class="fl">Description (shown to students)</label><textarea class="fta" id="unit-desc" style="min-height:100px" placeholder="What will students explore in this unit? What are the key ideas?">'+esc(info.description||"")+'</textarea></div>';
+    html+='<div class="fg"><label class="fl">Description (shown to students)</label><textarea class="fta" id="unit-desc" style="min-height:80px" placeholder="What will students explore in this unit?">'+esc(info.description||"")+'</textarea></div>';
+    html+='<div class="fg"><label class="fl">Grammar Tips (one per line)</label><textarea class="fta" id="unit-grammar" style="min-height:80px" placeholder="e.g. Use past simple for finished actions&#10;Remember -ed for regular verbs">'+esc(info.grammarTips||"")+'</textarea></div>';
+    html+='<div class="fg"><label class="fl">Unit Words (comma or line separated)</label><textarea class="fta" id="unit-words" style="min-height:60px" placeholder="e.g. ancestor, tradition, generation">'+esc(info.unitWords||"")+'</textarea></div>';
     html+='<button class="btn btp btf" onclick="saveUnit()">Save Unit Info</button></div>';
-    mc.innerHTML='<div class="pt">Unit Info</div><div class="ps">This is what students see on their plan page.</div>'+html;
+    mc.innerHTML='<div class="pt">Unit Info</div><div class="ps">This is Step 1 on the student Home page.</div>'+html;
   });
 }
 
@@ -1639,7 +1711,9 @@ window.saveUnit=async function(){
   var title=((document.getElementById("unit-title")||{}).value||"").trim();
   var theme=((document.getElementById("unit-theme")||{}).value||"").trim();
   var desc=((document.getElementById("unit-desc")||{}).value||"").trim();
-  await set(ref(db,"unitInfo"),{title:title,theme:theme,description:desc,updatedAt:Date.now()});
+  var grammarTips=((document.getElementById("unit-grammar")||{}).value||"").trim();
+  var unitWords=((document.getElementById("unit-words")||{}).value||"").trim();
+  await set(ref(db,"unitInfo"),{title:title,theme:theme,description:desc,grammarTips:grammarTips,unitWords:unitWords,updatedAt:Date.now()});
   toast("Unit info saved! Students can now see it.");
 };
 </script>
