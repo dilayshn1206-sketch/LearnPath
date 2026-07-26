@@ -190,6 +190,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .word-chip{display:inline-block;padding:4px 11px;border-radius:20px;background:var(--pl);color:var(--pd);font-size:12px;font-weight:600;margin:3px}
 .sugg-task{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border:1.5px dashed var(--p);border-radius:20px;font-size:12px;color:var(--pd);cursor:pointer;margin:3px;background:var(--pl)}
 .sugg-res{display:inline-block;padding:4px 10px;border-radius:20px;background:var(--al);color:var(--a);font-size:11px;font-weight:600;margin:3px}
+.contract-cols{display:flex;flex-wrap:wrap;gap:12px}
+.contract-col{flex:1 1 220px;min-width:200px;background:var(--gl);border-radius:var(--r);padding:12px}
+.cc-title{font-size:12px;font-weight:700;color:var(--pd);margin-bottom:9px;text-transform:uppercase;letter-spacing:.4px}
+.goal-row{display:flex;align-items:flex-start;gap:8px;padding:7px 0;font-size:12px;line-height:1.5;cursor:pointer;border-bottom:1px solid var(--gb)}
+.goal-row:last-child{border-bottom:none}
+.goal-row.sel{color:var(--td);font-weight:600}
+.goal-row .qchk{margin-top:1px}
+.rubarea{margin-bottom:16px}
+.rubarea-name{font-size:13px;font-weight:700}
+.rubarea-q{font-size:11px;color:var(--tm);margin-bottom:7px}
+.rublevel-opt{border:1.5px solid var(--gb);border-radius:var(--rs);padding:9px 11px;margin-bottom:6px;cursor:pointer;font-size:12px;transition:all .15s}
+.rublevel-opt:hover{border-color:var(--p)}
+.rublevel-opt.sel{border-color:var(--p);background:var(--pl);color:var(--pd);font-weight:600}
+.rublevel-bullets{margin-top:6px;font-size:11px;font-weight:400;color:var(--tm);line-height:1.6}
+.project-card{background:#fff;border-radius:var(--r);border:1px solid var(--gb);padding:12px;margin-bottom:8px}
 </style>
 </head>
 <body>
@@ -255,42 +270,39 @@ const auth=getAuth(fb),db=getDatabase(fb),prov=new GoogleAuthProvider();
 const AKEY="YOUR_NEW_API_KEY_HERE";
 
 let CU=null,UP=null;
-let chatHist=[],rubV=[0,0,0,0,0,0],peerV=[0,0,0,0,0,0];
 let myGid=null,myGname=null,userCoins=0;
 let contractData=null;
 
-// ── QUIZ DATA (v3: platforms multi-select, grouped product picker, weakness) ──
+// ── GET IDEAS CATALOG (teacher-editable, stored in Firebase at ideaCatalog/{cat}/{id}) ──
 const CAT_LABELS={written:"Written",spoken:"Spoken",visual:"Visual"};
 const CAT_EMOJI={written:"✍️",spoken:"🗣️",visual:"🎨"};
-const PRODUCTS_BY_CAT={
-  written:[
-    {id:"short_story",e:"📖",name:"Short Story"},
-    {id:"blog_post",e:"📝",name:"Blog Post"},
-    {id:"howto",e:"🧑‍🏫",name:"How-to Guide"},
-    {id:"class_magazine",e:"📰",name:"Class Magazine Article"},
-    {id:"review",e:"⭐",name:"Book / Movie Review"},
-    {id:"interview_writeup",e:"🗒️",name:"Interview Write-up"}
-  ],
-  spoken:[
-    {id:"speech",e:"🗣️",name:"Speech"},
-    {id:"podcast",e:"🎙️",name:"Podcast"},
-    {id:"interview_audio",e:"🧑‍🤝‍🧑",name:"Recorded Interview"},
-    {id:"radio_ad",e:"📻",name:"Radio Ad"},
-    {id:"debate",e:"🎯",name:"Debate"},
-    {id:"oral_presentation",e:"🎤",name:"Oral Presentation"}
-  ],
-  visual:[
-    {id:"infographic",e:"📊",name:"Poster / Infographic"},
-    {id:"comic_book",e:"📘",name:"Comic Strip"},
-    {id:"illustrated_book",e:"🎨",name:"Illustrated Storybook"},
-    {id:"slides",e:"🖥️",name:"Presentation Slides"},
-    {id:"short_video",e:"🎬",name:"Short Video"},
-    {id:"photo_story",e:"📷",name:"Photo Story"}
-  ]
+const DEFAULT_CATALOG={
+  written:[["mini_story","Mini Story"],["profile_article","Profile Article"],["howto","How-to Guide"],["comparison_article","Comparison Article"],["mini_report","Mini Report"],["proposal_letter","Proposal Letter"]],
+  spoken:[["char_voice_diary","Character Voice Diary"],["audio_tour","Audio Tour"],["audio_tutorial","Audio Tutorial"],["audio_review","Audio Review"],["news_bulletin","News Bulletin"],["one_min_pitch","One-Minute Pitch"]],
+  visual:[["comic_story","Comic Story"],["visual_exhibit","Visual Exhibit"],["process_infographic","Process Infographic"],["comparison_infographic","Comparison Infographic"],["fact_file","Fact File"],["campaign_poster","Campaign Poster"]]
 };
-function allProducts(){return [].concat(PRODUCTS_BY_CAT.written,PRODUCTS_BY_CAT.spoken,PRODUCTS_BY_CAT.visual);}
-function productById(id){return allProducts().find(function(p){return p.id===id;});}
-function catOfProduct(id){for(var c in PRODUCTS_BY_CAT){if(PRODUCTS_BY_CAT[c].some(function(p){return p.id===id;}))return c;}return "written";}
+async function ensureCatalogSeeded(){
+  var snap=await get(ref(db,"ideaCatalog"));
+  if(snap.exists())return;
+  var seed={};
+  ["written","spoken","visual"].forEach(function(cat){
+    seed[cat]={};
+    DEFAULT_CATALOG[cat].forEach(function(pair){seed[cat][pair[0]]={name:pair[1],active:true};});
+  });
+  await set(ref(db,"ideaCatalog"),seed);
+}
+async function loadCatalog(){
+  var snap=await get(ref(db,"ideaCatalog"));
+  var raw=snap.exists()?snap.val():{};
+  var out={written:[],spoken:[],visual:[]};
+  ["written","spoken","visual"].forEach(function(cat){
+    var items=raw[cat]||{};
+    Object.keys(items).forEach(function(id){out[cat].push({id:id,name:items[id].name,active:items[id].active!==false});});
+  });
+  return out;
+}
+function productById(catalog,id){for(var c in catalog){var f=catalog[c].find(function(p){return p.id===id;});if(f)return f;}return null;}
+function catOfProduct(catalog,id){for(var c in catalog){if(catalog[c].some(function(p){return p.id===id;}))return c;}return "written";}
 
 const PLATFORMS=["Canva","Google Docs / Slides","Phone camera / YouTube","Pen & paper","PowerPoint","Audio recording app"];
 
@@ -310,38 +322,100 @@ const WEAKNESS_OPTS=[
   {e:"💡",t:"Coming up with ideas",value:"ideas"}
 ];
 
-// ── CONTRACT TASK TEMPLATES (per category, per week) — {p} is replaced with the product name ──
-const WEEK_TITLES=["Decide & Find Ideas","Create Your First Draft","Get Feedback & Improve","Finish & Present"];
-const TASK_TEMPLATES={
-  written:[
-    ["Write down 3 ideas for your {p}, then circle your favourite","Find 2 real examples of a {p} for inspiration","List 3-4 English words or phrases you'll need"],
-    ["Write a rough first draft of your {p}","Read your draft aloud once and fix anything confusing"],
-    ["Share your draft on the Feed and ask for one comment","Fix at least 2 things based on the feedback you got","Check your spelling and punctuation"],
-    ["Finish your final {p} and share it on the Feed","Write 2-3 sentences about what you learned making it"]
-  ],
-  spoken:[
-    ["Write down 3 ideas for your {p}, then circle your favourite","Listen to one real example of a {p} for inspiration","Write down key vocabulary you'll need"],
-    ["Write a script or notes for your {p}","Practice saying it out loud at least twice"],
-    ["Record a practice version and listen back","Ask someone for one piece of feedback","Fix your pacing or pronunciation based on that feedback"],
-    ["Record or perform your final {p}","Share it on the Feed","Write 2-3 sentences about what you learned making it"]
-  ],
-  visual:[
-    ["Sketch 2 rough layout ideas on paper","Find 2 real examples of a {p} for inspiration","List the key words or labels you'll need"],
-    ["Create a first draft of your {p}","Check that everything is easy to read and understand"],
-    ["Share your draft on the Feed and ask for one comment","Fix at least 2 things based on the feedback you got"],
-    ["Finish your final {p} and share it on the Feed","Write 2-3 sentences about what you learned making it"]
-  ]
+// ── LEARNING CONTRACT GOALS (8.1) ──
+// {grammar} is replaced with the teacher's target-grammar text from Unit Info
+const GOAL_ITEMS=[
+  {id:"unitWords",text:"I will use at least eight unit words."},
+  {id:"organize",text:"I will organize my ideas with proper words. (next, after, and, also, etc.)"},
+  {id:"grammar",text:"I will use the ({grammar}) at least five times."},
+  {id:"tenSentences",text:"I will use at least ten complete sentences."},
+  {id:"evidence",text:"I will support my ideas with evidence or details."},
+  {id:"spelling",text:"I will check my spelling, punctuation (. , / ? : ;), and grammar."},
+  {id:"speakClear",text:"I will speak clearly for 60–90 seconds."},
+  {id:"easyUnderstand",text:"I will make my project easy to understand."}
+];
+// which goals are pre-recommended (pre-checked) per category
+const GOAL_RECOMMEND={
+  written:["unitWords","organize","grammar","tenSentences","evidence","spelling","easyUnderstand"],
+  spoken:["unitWords","organize","grammar","evidence","speakClear","easyUnderstand"],
+  visual:["unitWords","organize","grammar","evidence","spelling","easyUnderstand"]
 };
 
-const RUBRIC=[
-  {label:"Content & Purpose",q:"Is the main idea clear?",lvls:["Hard to understand.","Partly clear, needs more explanation.","Mostly clear.","Clearly explained with details."]},
-  {label:"Organization",q:"Is the work easy to follow?",lvls:["Difficult to follow.","Some organization, parts confusing.","Mostly organized.","Well organized, clear structure."]},
-  {label:"Language Control",q:"Are sentences correct and understandable?",lvls:["Very limited or many mistakes.","Several mistakes, meaning unclear sometimes.","Understandable with some mistakes.","Mostly correct and clear."]},
-  {label:"Vocabulary",q:"Are the right words used for the topic?",lvls:["Not enough vocabulary.","Limited, often repeated words.","Enough but needs more variety.","Good range of suitable words."]},
-  {label:"Communication Strategies",q:"Are helpful strategies used?",lvls:["No strategies used.","Tried but not always helpful.","Some strategies helped.","Examples, visuals, gestures used very effectively."]},
-  {label:"Audience & Style",q:"Does the style fit the audience and task?",lvls:["Does not fit.","Sometimes fits.","Mostly fits.","Fits very well."]}
+// ── SELF & PEER RUBRICS (7 areas x 3 levels, with supporting bullets) ──
+const SELF_RUBRIC=[
+  {area:"Ideas and Opinions",q:"What did I communicate?",levels:[
+    {label:"I shared basic ideas.",bullets:["I gave simple information about a familiar topic.","I said what I liked, disliked, or preferred."]},
+    {label:"I explained my ideas.",bullets:["I gave details about a familiar topic.","I explained my opinions.","I told a simple story or added simple details."]},
+    {label:"I explained and supported my ideas.",bullets:["I discussed familiar topics and some new topics.","I gave reasons and examples.","I used evidence to support my opinions."]}
+  ]},
+  {area:"Topic and Content",q:"How fully did I develop the topic?",levels:[
+    {label:"I communicated about myself.",bullets:["I talked about myself, my family, or my daily life.","I communicated best about topics I had practised."]},
+    {label:"I communicated about everyday life.",bullets:["I discussed topics such as school, friends, hobbies, or my community.","I explained how the topic affected me or other people."]},
+    {label:"I communicated about wider and more complex topics.",bullets:["I discussed community, national, or international topics.","I included some abstract or challenging ideas."]}
+  ]},
+  {area:"Organisation",q:"Was my message easy to follow?",levels:[
+    {label:"I used words and simple sentences.",bullets:["I used short phrases.","My ideas were not always connected."]},
+    {label:"I connected my sentences and ideas.",bullets:["I used complete sentences.","I produced a short paragraph.","My ideas were mostly connected."]},
+    {label:"I organised full paragraphs.",bullets:["I presented my ideas in a clear order.","I included useful details.","My message was easy to follow."]}
+  ]},
+  {area:"Accuracy and Clarity",q:"Was my language understandable?",levels:[
+    {label:"My message was sometimes difficult to understand.",bullets:["I made several grammar or sentence-structure mistakes.","The listener or reader may have needed extra time or help."]},
+    {label:"My message was mostly understandable.",bullets:["I made some mistakes.","My mistakes did not usually stop communication.","Some parts needed improvement."]},
+    {label:"My message was clear and accurate.",bullets:["I made only minor mistakes.","The listener or reader understood me easily."]}
+  ]},
+  {area:"Vocabulary",q:"What kinds of words did I use?",levels:[
+    {label:"I used basic vocabulary.",bullets:["I used common words.","I repeated some of the same words."]},
+    {label:"I used a variety of everyday vocabulary.",bullets:["I used words connected to the topic.","I tried to avoid repeating the same words."]},
+    {label:"I used varied and specific vocabulary.",bullets:["I chose precise words.","I used subject-specific or topic-related vocabulary."]}
+  ]},
+  {area:"Communication Strategies",q:"What did I do when I got stuck?",levels:[
+    {label:"I used simple support strategies.",bullets:["I repeated words.","I sometimes used my first language.","I depended on notes, pictures, or visuals."]},
+    {label:"I found another way to communicate.",bullets:["I simplified my sentences.","I used similar or familiar words.","I corrected some of my own mistakes.","I used notes or references when needed."]},
+    {label:"I managed communication independently.",bullets:["I corrected and improved my language.","I explained ideas in another way.","I used examples and extra details.","I organised my message clearly."]}
+  ]},
+  {area:"Audience and Situation",q:"Did my language fit the situation?",levels:[
+    {label:"I used some polite language.",bullets:["My language did not always fit the audience or situation."]},
+    {label:"My language usually fit the situation.",bullets:["I usually chose appropriate words and expressions.","I was mostly polite and respectful."]},
+    {label:"I adapted my language to the audience and situation.",bullets:["I chose language that suited the audience and purpose.","My language sounded natural, respectful, and appropriate."]}
+  ]}
 ];
-const PEER_Q=["Was the main idea clear?","Was the work easy to follow?","Was the English understandable?","Did the classmate use suitable words?","Did they use examples, visuals, or gestures?","Did the style fit the task?"];
+const PEER_RUBRIC=[
+  {area:"Ideas and Opinions",q:"What did she/he communicate?",levels:[
+    {label:"She/He shared basic ideas.",bullets:["She/He gave simple information about a familiar topic.","She/He said what she/he liked, disliked, or preferred."]},
+    {label:"She/He explained her/his ideas.",bullets:["She/He gave details about a familiar topic.","She/He explained her/his opinions.","She/He told a simple story or added simple details."]},
+    {label:"She/He explained and supported her/his ideas.",bullets:["She/He discussed familiar topics and some new topics.","She/He gave reasons and examples.","She/He used evidence to support her/his opinions."]}
+  ]},
+  {area:"Topic and Content",q:"How fully did she/he develop the topic?",levels:[
+    {label:"She/He communicated about herself/himself.",bullets:["She/He talked about herself/himself, her/his family, or daily life.","She/He communicated best about topics she/he had practised."]},
+    {label:"She/He communicated about everyday life.",bullets:["She/He discussed topics such as school, friends, hobbies, or the community.","She/He explained how the topic affected herself/himself or other people."]},
+    {label:"She/He communicated about wider and more complex topics.",bullets:["She/He discussed community, national, or international topics.","She/He included some abstract or challenging ideas."]}
+  ]},
+  {area:"Organisation",q:"Was her/his message easy to follow?",levels:[
+    {label:"She/He used words and simple sentences.",bullets:["She/He used short phrases.","Her/His ideas were not always connected."]},
+    {label:"She/He connected sentences and ideas.",bullets:["She/He used complete sentences.","She/He produced a short paragraph.","Her/His ideas were mostly connected."]},
+    {label:"She/He organised full paragraphs.",bullets:["She/He presented ideas in a clear order.","She/He included useful details.","Her/His message was easy to follow."]}
+  ]},
+  {area:"Accuracy and Clarity",q:"Was her/his language understandable?",levels:[
+    {label:"Her/His message was sometimes difficult to understand.",bullets:["She/He made several grammar or sentence-structure mistakes.","The listener or reader may have needed extra time or help."]},
+    {label:"Her/His message was mostly understandable.",bullets:["She/He made some mistakes.","The mistakes did not usually stop communication.","Some parts needed improvement."]},
+    {label:"Her/His message was clear and accurate.",bullets:["She/He made only minor mistakes.","The listener or reader understood her/him easily."]}
+  ]},
+  {area:"Vocabulary",q:"What kinds of words did she/he use?",levels:[
+    {label:"She/He used basic vocabulary.",bullets:["She/He used common words.","She/He repeated some of the same words."]},
+    {label:"She/He used a variety of everyday vocabulary.",bullets:["She/He used words connected to the topic.","She/He tried to avoid repeating the same words."]},
+    {label:"She/He used varied and specific vocabulary.",bullets:["She/He chose precise words.","She/He used subject-specific or topic-related vocabulary."]}
+  ]},
+  {area:"Communication Strategies",q:"What did she/he do when she/he got stuck?",levels:[
+    {label:"She/He used simple support strategies.",bullets:["She/He repeated words.","She/He sometimes used her/his first language.","She/He depended on notes, pictures, or visuals."]},
+    {label:"She/He found another way to communicate.",bullets:["She/He simplified sentences.","She/He used similar or familiar words.","She/He corrected some mistakes.","She/He used notes or references when needed."]},
+    {label:"She/He managed communication independently.",bullets:["She/He corrected and improved the language.","She/He explained ideas in another way.","She/He used examples and extra details.","She/He organised the message clearly."]}
+  ]},
+  {area:"Audience and Situation",q:"Did her/his language fit the situation?",levels:[
+    {label:"She/He used some polite language.",bullets:["Her/His language did not always fit the audience or situation."]},
+    {label:"Her/His language usually fit the situation.",bullets:["She/He usually chose appropriate words and expressions.","She/He was mostly polite and respectful."]},
+    {label:"She/He adapted the language to the audience and situation.",bullets:["She/He chose language that suited the audience and purpose.","Her/His language sounded natural, respectful, and appropriate."]}
+  ]}
+];
 
 // ── HELPERS ──
 function toast(m){var t=document.getElementById("toast");t.innerHTML=m;t.classList.add("show");setTimeout(function(){t.classList.remove("show");},3000);}
@@ -349,6 +423,10 @@ window.toast=toast;
 function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 function skc(s){var m={Speaking:"#E1F5EE",Writing:"#EEEDFE",Reading:"#FAEEDA",Listening:"#FAECE7",speaking:"#E1F5EE",writing:"#EEEDFE"};return m[s]||"#F1EFE8";}
 function timeAgo(ts){var d=Date.now()-ts;if(d<60000)return "just now";if(d<3600000)return Math.floor(d/60000)+"m ago";if(d<86400000)return Math.floor(d/3600000)+"h ago";return Math.floor(d/86400000)+"d ago";}
+function extractYouTubeId(url){
+  var m=url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{6,})/);
+  return m?m[1]:null;
+}
 
 // ── AUTH ──
 document.getElementById("gsign").onclick=function(){signInWithPopup(auth,prov).catch(function(e){toast("Error: "+e.message);});};
@@ -374,43 +452,8 @@ async function setRole(role){
 
 function launchApp(role){
   var app=document.getElementById("app");app.style.display="flex";app.style.flexDirection="column";
-  if(role==="teacher"){renderTeacher();}
+  if(role==="teacher"){renderTeacher();ensureCatalogSeeded();}
   else{renderStudent();setTimeout(loadNotifs,1000);setTimeout(loadCoins,1000);}
-}
-
-// ── AI ──
-async function askAI(msg,sys,hist){
-  var messages=hist?[...hist,{role:"user",content:msg}]:[{role:"user",content:msg}];
-  try{
-    var res=await fetch("https://api.anthropic.com/v1/messages",{
-      method:"POST",
-      headers:{"Content-Type":"application/json","x-api-key":AKEY,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
-      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:500,system:sys||"You are a friendly English learning assistant for 7th grade students. Be warm, encouraging, concise.",messages:messages})
-    });
-    var data=await res.json();
-    return (data.content&&data.content[0]&&data.content[0].text)||"I am here to help!";
-  }catch(e){return "Could not connect. Check your API key.";}
-}
-
-window.sendChat=async function(){
-  var inp=document.getElementById("chat-inp");if(!inp)return;
-  var msg=inp.value.trim();if(!msg)return;inp.value="";
-  var msgs=document.getElementById("chat-msgs");if(!msgs)return;
-  msgs.innerHTML+='<div class="msg me">'+esc(msg)+'</div>';
-  msgs.innerHTML+='<div class="msg ai" id="ai-typing">...</div>';
-  msgs.scrollTop=msgs.scrollHeight;
-  chatHist.push({role:"user",content:msg});
-  var reply=await askAI(msg,"You are a friendly English learning assistant for 7th grade students on LearnPath. Help with learning goals, product ideas, and English skills. Be warm, encouraging, and concise.",chatHist.slice(-8));
-  chatHist.push({role:"assistant",content:reply});
-  var el=document.getElementById("ai-typing");if(el)el.outerHTML='<div class="msg ai">'+reply+'</div>';
-  msgs.scrollTop=msgs.scrollHeight;
-};
-
-function chatHTML(ph){
-  return '<div class="chat-wrap">'
-    +'<div class="chat-msgs" id="chat-msgs"><div class="msg ai">Hi! I am your LearnPath assistant. Ask me anything about your English project, goals, or ideas!</div></div>'
-    +'<div class="chat-in"><input id="chat-inp" placeholder="'+(ph||"Ask anything...")+'" onkeydown="if(event.key===\'Enter\')sendChat()"><button class="btn btp" onclick="sendChat()">Send</button></div>'
-    +'</div>';
 }
 
 // ── COINS ──
@@ -491,9 +534,10 @@ function setNav(id){
 function isLockedStep(step){var ls=window._liveSession;return !!(ls&&ls.active&&ls.step===step);}
 function lockBarHTML(){
   var ls=window._liveSession;
-  var urgent=ls.step==="step2"&&ls.deadline&&(ls.deadline-Date.now())<=0;
+  var timed=ls.step==="step2"||ls.step==="step3";
+  var urgent=timed&&ls.deadline&&(ls.deadline-Date.now())<=0;
   return '<div class="lockbar'+(urgent?" urgent":"")+'" id="lockbar"><div class="lt">&#128104;&#8205;&#127979; Your teacher is guiding this part</div>'
-    +(ls.step==="step2"?'<div class="lb" id="lockbar-timer">--:--</div>':'<div class="lb">&#128214; What We\'re Learning</div>')+'</div>';
+    +(timed?'<div class="lb" id="lockbar-timer">--:--</div>':'<div class="lb">&#128214; What We\'re Learning</div>')+'</div>';
 }
 function startLockTimerInterval(){
   if(window._lockInterval)return;
@@ -506,7 +550,7 @@ function stopLockTimerInterval(){
 function updateLockTimerDisplay(){
   var ls=window._liveSession;
   var el=document.getElementById("lockbar-timer");
-  if(!ls||!ls.active||ls.step!=="step2"||!ls.deadline){return;}
+  if(!ls||!ls.active||(ls.step!=="step2"&&ls.step!=="step3")||!ls.deadline){return;}
   var rem=Math.max(0,Math.round((ls.deadline-Date.now())/1000));
   var mm=Math.floor(rem/60),ss=rem%60;
   var txt=(rem<=0?"Time's up!":mm+":"+(ss<10?"0":"")+ss);
@@ -525,6 +569,7 @@ function applySessionLock(){
       if(!window._quizStarted){startQuiz();window._quizStarted=true;}
       else{renderQuizStep();}
     }
+    else if(ls.step==="step3"){renderStep3Screen();}
     startLockTimerInterval();
   } else {
     if(bnav)bnav.style.display="flex";
@@ -550,6 +595,9 @@ async function renderHome(){
   contractData=snap.exists()?snap.val():null;
   var firstName=(CU.displayName||"").split(" ")[0];
   var hasProduct=!!(contractData&&contractData.productType);
+  var awaitingGrouping=hasProduct&&contractData.status==="awaiting_grouping";
+  var editUnlocked=!contractData||contractData.editUnlocked!==false;
+  var step3Unlocked=hasProduct&&!awaitingGrouping;
 
   var html='<div style="font-size:18px;font-weight:700;margin-bottom:14px">Hey, '+esc(firstName)+" &#128075;</div>";
 
@@ -559,75 +607,77 @@ async function renderHome(){
   html+='<div class="step-num">1</div><div style="flex:1"><div class="step-title">What are we learning?</div>';
   html+='<div class="step-sub">'+esc(unitTitle)+'</div></div></div>';
 
-  html+='<div class="step-card" onclick="startQuiz()">';
+  var step2Sub,step2Click;
+  if(!hasProduct){step2Sub="Take a short quiz to find your project idea";step2Click="startQuiz()";}
+  else if(awaitingGrouping){step2Sub="Your idea: "+esc(contractData.productType)+" — now wait for your teacher to group you.";step2Click="toast('Now wait for your teacher to group you.')";}
+  else if(editUnlocked){step2Sub="Your project: "+esc(contractData.productType)+" — tap to retake the quiz";step2Click="startQuiz()";}
+  else{step2Sub="Your project: "+esc(contractData.productType)+" (locked — ask your teacher to unlock editing)";step2Click="toast('Ask your teacher to unlock editing first.')";}
+  html+='<div class="step-card" onclick="'+step2Click+'">';
   html+='<div class="step-num">2</div><div style="flex:1"><div class="step-title">Get Ideas — Find Your Project</div>';
-  html+='<div class="step-sub">'+(hasProduct?"Your project: "+esc(contractData.productType)+" — tap to retake the quiz":"Take a short quiz to find your project idea")+'</div></div></div>';
+  html+='<div class="step-sub">'+step2Sub+'</div></div></div>';
 
-  html+='<div class="step-card'+(hasProduct?"":" locked")+'" onclick="'+(hasProduct?"renderStep3Screen()":"toast('Finish Step 2 — Get Ideas — first!')")+'">';
-  html+='<div class="step-num">'+(hasProduct?"3":"&#128274;")+'</div><div style="flex:1"><div class="step-title">My Learning Contract</div>';
-  html+='<div class="step-sub">'+(hasProduct?"4 weeks of tasks for your "+esc(contractData.productType):"Complete Step 2 to unlock")+'</div></div></div>';
+  html+='<div class="step-card'+(step3Unlocked?"":" locked")+'" onclick="'+(step3Unlocked?"renderStep3Screen()":"toast('Wait for your teacher to group you first!')")+'">';
+  html+='<div class="step-num">'+(step3Unlocked?"3":"&#128274;")+'</div><div style="flex:1"><div class="step-title">My Learning Contract</div>';
+  html+='<div class="step-sub">'+(step3Unlocked?"Your project plan for "+esc(contractData.productType):"Unlocks once your teacher groups the class")+'</div></div></div>';
 
-  html+='<div class="card mt12"><div style="font-size:13px;font-weight:700;margin-bottom:8px">&#128172; Ask your assistant</div>'+chatHTML("Ask anything about your project...")+'</div>';
   mc.innerHTML=html;setNav("home");
 }
 
 // ── PAGE 2: FEED ──
 function renderFeed(){
   var mc=document.getElementById("mc");
-  var html='<div class="pt">Feed</div>';
-
-  html+='<div class="toggle-row">';
-  html+='<button class="toggle-btn act" id="feed-tab-class" onclick="switchFeedTab(\'class\')">Whole Class</button>';
-  html+='<button class="toggle-btn" id="feed-tab-group" onclick="switchFeedTab(\'group\')">My Group'+(myGname?" — "+myGname:"")+'</button>';
-  html+='</div>';
-
-  html+='<div class="toggle-row">';
-  html+='<button class="toggle-btn act" id="view-tab-posts" onclick="switchViewTab(\'posts\')">All Posts</button>';
-  html+='<button class="toggle-btn" id="view-tab-today" onclick="switchViewTab(\'today\')">Friends\' Today</button>';
-  html+='<button class="toggle-btn" id="view-tab-plan" onclick="switchViewTab(\'plan\')">Friends\' Plans</button>';
-  html+='</div>';
-
+  var html='<div class="pt">Feed</div><div class="ps">Everyone\'s projects and shared work, newest first.</div>';
+  html+='<div class="card"><div class="ctitle mb8">Everyone\'s Projects</div><div id="projects-list"><div class="loading">Loading...</div></div></div>';
   html+='<button class="btn btp btf mb8" onclick="openNewPost()">+ Share Your Work</button>';
   html+='<div id="feed-container"><div class="loading">Loading...</div></div>';
   mc.innerHTML=html;
-  window._feedTab="class";window._viewTab="posts";
+  loadProjectsList();
   loadFeed();
 }
 
-window.switchFeedTab=function(tab){
-  window._feedTab=tab;
-  document.getElementById("feed-tab-class").classList.toggle("act",tab==="class");
-  document.getElementById("feed-tab-group").classList.toggle("act",tab==="group");
-  loadFeed();
-};
-window.switchViewTab=function(tab){
-  window._viewTab=tab;
-  document.getElementById("view-tab-posts").classList.toggle("act",tab==="posts");
-  document.getElementById("view-tab-today").classList.toggle("act",tab==="today");
-  document.getElementById("view-tab-plan").classList.toggle("act",tab==="plan");
-  loadFeed();
-};
+function loadProjectsList(){
+  onValue(ref(db,"contracts"),function(snap){
+    var el=document.getElementById("projects-list");if(!el)return;
+    var list=[];
+    if(snap.exists())snap.forEach(function(c){var d=c.val();if(d.productType)list.push(d);});
+    if(!list.length){el.innerHTML='<div class="empty"><div class="ei">&#128203;</div><p>No projects chosen yet.</p></div>';return;}
+    list.sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);});
+    var html="";
+    list.forEach(function(d){
+      var statusLabel=d.status==="approved"?"Approved":d.status==="pending"?"Pending approval":d.status==="awaiting_grouping"?"Awaiting grouping":"Draft";
+      var statusClass=d.status==="approved"?"sa":d.status==="pending"?"sp":"";
+      html+='<div class="project-card"><div style="display:flex;align-items:center;gap:8px">';
+      if(d.studentPhoto)html+='<img src="'+esc(d.studentPhoto)+'" class="post-av" onclick="viewProf(\''+esc(d.studentId||"")+'\')">';
+      else html+='<div class="post-avp" onclick="viewProf(\''+esc(d.studentId||"")+'\')">'+esc((d.studentName||"?")[0])+'</div>';
+      html+='<div style="flex:1"><div style="font-size:13px;font-weight:700">'+esc(d.studentName||"Student")+'</div>';
+      html+='<div style="font-size:12px;color:var(--tm)">'+esc(d.productType)+(d.topic?" — "+esc(d.topic):"")+'</div></div>';
+      html+='<span class="sb '+statusClass+'" style="'+(statusClass?"":"background:var(--gl);color:var(--tm)")+'">'+statusLabel+'</span>';
+      html+='</div>';
+      if(d.teacherComment)html+='<div style="background:var(--tl);border-radius:var(--rs);padding:6px 9px;font-size:11px;color:var(--td);margin-top:7px"><strong>Teacher:</strong> '+esc(d.teacherComment)+'</div>';
+      html+='</div>';
+    });
+    el.innerHTML=html;
+  });
+}
 
 function loadFeed(){
-  var tab=window._feedTab||"class";
-  var view=window._viewTab||"posts";
-  if(view==="today"||view==="plan"){loadFriendViews(view,tab);return;}
   onValue(ref(db,"posts"),function(snap){
     var container=document.getElementById("feed-container");if(!container)return;
     var posts=[];
-    if(snap.exists())snap.forEach(function(p){
-      var d=p.val();
-      if(tab==="group"&&myGid){if(d.groupId!==myGid)return;}
-      posts.push({id:p.key,...d});
-    });
-    posts.reverse();
+    if(snap.exists())snap.forEach(function(p){posts.push({id:p.key,...p.val()});});
+    posts.sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);});
     if(!posts.length){container.innerHTML='<div class="empty"><div class="ei">&#128247;</div><p>Nothing shared yet. Be the first!</p></div>';return;}
     var html="";
-    posts.forEach(function(post){
-      html+=buildPostHTML(post);
-    });
+    posts.forEach(function(post){html+=buildPostHTML(post);});
     container.innerHTML=html;
   });
+}
+
+function rubricSummaryLabel(vals){
+  if(!vals)return null;
+  var done=vals.filter(function(v){return v!==null&&v!==undefined;}).length;
+  if(!done)return null;
+  return done+"/7 areas reflected";
 }
 
 function buildPostHTML(post){
@@ -642,17 +692,11 @@ function buildPostHTML(post){
   html+='</div>';
   html+='<div class="post-body">';
   if(post.title)html+='<div style="font-size:14px;font-weight:700;margin-bottom:5px">'+esc(post.title)+'</div>';
-  if(post.reflection)html+='<div class="post-text">'+esc(post.reflection)+'</div>';
   if(post.link)html+='<a href="'+esc(post.link)+'" target="_blank" class="obtn mb8" style="display:inline-block">View work &#8599;</a>';
-  if(post.rubric&&post.rubric.some(function(v){return v>0;})){
-    html+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:7px">';
-    RUBRIC.forEach(function(r,i){if(post.rubric[i]>0)html+='<span style="padding:2px 7px;border-radius:20px;font-size:10px;font-weight:700;background:var(--pl);color:var(--pd)">'+r.label.split(" ")[0]+": "+post.rubric[i]+"/4</span>";});
-    html+='</div>';
-  }
-  html+='</div>';
-  html+='<div style="padding:0 13px 8px">';
-  html+='<button class="obtn" onclick="postAISummary(\''+post.id+'\',\''+esc(post.id)+'\')" style="font-size:11px">&#10024; AI Summary</button>';
-  html+='<div id="aisumm-'+post.id+'" style="font-size:12px;color:var(--tm);margin-top:6px;display:none"></div>';
+  var summ=rubricSummaryLabel(post.selfRubric);
+  if(summ)html+='<div style="font-size:11px;color:var(--pd);background:var(--pl);display:inline-block;padding:3px 9px;border-radius:20px;margin-bottom:6px">'+summ+'</div>';
+  if(post.well)html+='<div class="post-text"><strong>Did well:</strong> '+esc(post.well)+'</div>';
+  if(post.improve)html+='<div class="post-text"><strong>To improve:</strong> '+esc(post.improve)+'</div>';
   html+='</div>';
   if(comments.length){
     html+='<div class="comments-section">';
@@ -669,7 +713,7 @@ function buildPostHTML(post){
   if(post.uid===CU.uid)html+='<button class="post-act" onclick="deletePost(\''+post.id+'\')">&#128465; Delete</button>';
   html+='</div>';
   html+='<div id="cmform-'+post.id+'" style="display:none;padding:10px 13px;border-top:1px solid var(--gb)">';
-  html+='<div style="font-size:12px;font-weight:600;margin-bottom:8px;color:var(--tm)">Leave a comment (uses rubric):</div>';
+  html+='<div style="font-size:12px;font-weight:600;margin-bottom:8px;color:var(--tm)">Leave feedback:</div>';
   html+='<div id="cm-rub-'+post.id+'"></div>';
   html+='<textarea class="fta mb8" id="cm-text-'+post.id+'" placeholder="Add your comment..." style="min-height:52px"></textarea>';
   html+='<button class="btn btg" style="font-size:12px;padding:7px 14px" onclick="submitComment(\''+post.id+'\',\''+esc(post.uid)+'\')">Submit Comment</button>';
@@ -678,64 +722,40 @@ function buildPostHTML(post){
   return html;
 }
 
-function loadFriendViews(view,tab){
-  var container=document.getElementById("feed-container");if(!container)return;
-  get(ref(db,"contracts")).then(function(snap){
-    if(!snap.exists()){container.innerHTML='<div class="empty"><div class="ei">&#128203;</div><p>No plans yet.</p></div>';return;}
-    var html="";
-    snap.forEach(function(c){
-      var d=c.val();if(d.status!=="approved")return;
-      if(tab==="group"&&myGid){var gid=null;get(ref(db,"users/"+c.key)).then(function(u){if(u.exists()&&u.val().groupId!==myGid)return;});}
-      html+='<div class="post" style="margin-bottom:10px">';
-      html+='<div class="post-hdr">';
-      if(d.studentPhoto)html+='<img src="'+esc(d.studentPhoto)+'" class="post-av" onclick="viewProf(\''+esc(d.studentId||"")+'\')">';
-      else html+='<div class="post-avp" onclick="viewProf(\''+esc(d.studentId||"")+'\')">'+esc((d.studentName||"?")[0])+'</div>';
-      html+='<div><div class="post-name">'+esc(d.studentName||"Student")+'</div><div class="post-meta">'+esc(d.productType||d.product||"")+'</div></div></div>';
-      html+='<div class="post-body">';
-      if(view==="today"&&d.weeks){
-        var tw=0;for(var wi=0;wi<d.weeks.length;wi++){if(!d.weeks[wi].closed){tw=wi;break;}}
-        var tdone=(d.weeks[tw].tasks||[]).filter(function(t){return t.done;}).length,ttotal=(d.weeks[tw].tasks||[]).length;
-        html+='<div style="font-size:13px"><strong>Week '+(tw+1)+' — '+esc(d.weeks[tw].title||"")+':</strong> '+tdone+"/"+ttotal+' tasks done</div>';
-      } else {
-        if(d.weeks)d.weeks.forEach(function(w,i){var wd=(w.tasks||[]).filter(function(t){return t.done;}).length,wt=(w.tasks||[]).length;html+='<div style="font-size:12px;margin-bottom:3px;color:var(--tm)"><strong>Week '+(i+1)+':</strong> '+wd+"/"+wt+' tasks done</div>';});
-      }
-      html+='</div></div>';
+// ── GENERIC RUBRIC SELECTOR (used for self-reflection, peer comments, teacher evaluation) ──
+window._rubricStores={};
+function renderRubricBlock(containerId,rubric,values,storeKey){
+  var el=document.getElementById(containerId);if(!el)return;
+  var html="";
+  rubric.forEach(function(item,ai){
+    html+='<div class="rubarea"><div class="rubarea-name">'+esc(item.area)+'</div><div class="rubarea-q">'+esc(item.q)+'</div>';
+    item.levels.forEach(function(lvl,li){
+      var sel=values[ai]===li;
+      html+='<div class="rublevel-opt'+(sel?" sel":"")+'" onclick="pickRubricLevel(\''+storeKey+'\','+ai+','+li+')">'+esc(lvl.label);
+      if(sel){html+='<div class="rublevel-bullets">';lvl.bullets.forEach(function(b){html+='&#8226; '+esc(b)+'<br>';});html+='</div>';}
+      html+='</div>';
     });
-    container.innerHTML=html||'<div class="empty"><div class="ei">&#128203;</div><p>Nothing to show.</p></div>';
+    html+='</div>';
   });
+  el.innerHTML=html;
 }
-
-window.postAISummary=async function(postId,id){
-  var el=document.getElementById("aisumm-"+id);if(!el)return;
-  el.style.display="block";el.textContent="Generating summary...";
-  var snap=await get(ref(db,"posts/"+postId));
-  if(!snap.exists()){el.textContent="Post not found.";return;}
-  var post=snap.val();
-  var comments=post.comments?Object.values(post.comments):[];
-  var ctx="Post by "+post.name+": "+post.title+"\nReflection: "+post.reflection+"\n";
-  if(post.rubric)RUBRIC.forEach(function(r,i){if(post.rubric[i])ctx+=r.label+": "+post.rubric[i]+"/4\n";});
-  comments.forEach(function(cm){ctx+="Comment from "+cm.from+": "+cm.text+"\n";if(cm.rubric)RUBRIC.forEach(function(r,i){if(cm.rubric&&cm.rubric[i])ctx+=r.label+": "+cm.rubric[i]+"/4\n";});});
-  var reply=await askAI("Summarize this student's work and feedback in 2-3 sentences. Be encouraging and specific.\n\n"+ctx,"You are a supportive English teacher assistant. Write short, warm, specific summaries for 7th grade students.");
-  el.innerHTML='<div style="background:var(--pl);border-radius:var(--rs);padding:8px 10px;color:var(--pd)">'+esc(reply)+'</div>';
+window.pickRubricLevel=function(storeKey,ai,li){
+  var s=window._rubricStores[storeKey];if(!s)return;
+  s.values[ai]=li;
+  renderRubricBlock(s.containerId,s.rubric,s.values,storeKey);
 };
 
 window.openNewPost=function(){
   var mc=document.getElementById("mc");
-  var wArr=[];if(contractData&&contractData.weeks)wArr=contractData.weeks;
-  var weekOpts=wArr.map(function(w,i){return '<option value="'+i+'">Week '+(i+1)+": "+(w.title||"")+'</option>';}).join("");
-
   var html='<div class="pt">Share Your Work</div>';
-  html+='<div class="ps">You need to fill in the self-reflection before sharing.</div>';
+  html+='<div class="ps">Fill in the title and rate your own work below.</div>';
   html+='<div class="card">';
   html+='<div class="fg"><label class="fl">Title of this piece of work</label><input class="fi" id="np-title" placeholder="e.g. My blog post about climate change"></div>';
   html+='<div class="fg"><label class="fl">Link to your work</label><input class="fi" id="np-link" placeholder="Google Drive / YouTube / Canva..."></div>';
   html+='<div style="font-size:11px;color:var(--tm);margin-bottom:10px;background:var(--pl);padding:8px;border-radius:var(--rs)">How to copy a link: Google Drive → Share → Copy link &bull; YouTube → Share &bull; Canva → Share → Copy link</div>';
-  html+='<div class="fg"><label class="fl">Product type</label><input class="fi" id="np-type" placeholder="e.g. Blog post, Podcast, Video..."></div>';
-  if(weekOpts)html+='<div class="fg"><label class="fl">This belongs to</label><select class="fse" id="np-week">'+weekOpts+'</select></div>';
   html+='<div class="fg"><input type="checkbox" id="np-draft"> <label for="np-draft" style="font-size:13px;cursor:pointer"> Share as draft (for feedback before final version)</label></div>';
   html+='<div class="divider"></div>';
   html+='<div style="font-size:13px;font-weight:700;margin-bottom:10px">Self-Reflection</div>';
-  html+='<div class="fg"><label class="fl">Describe your work and what you learned</label><textarea class="fta" id="np-reflection" placeholder="What did you make? What went well? What was challenging? What would you improve?"></textarea></div>';
   html+='<div id="np-rub-rows"></div>';
   html+='<div class="fg" style="margin-top:10px"><label class="fl">One thing I did well...</label><textarea class="fta" id="np-well" style="min-height:50px"></textarea></div>';
   html+='<div class="fg"><label class="fl">One thing I want to improve...</label><textarea class="fta" id="np-improve" style="min-height:50px"></textarea></div>';
@@ -744,65 +764,43 @@ window.openNewPost=function(){
   html+='<button class="btn bts" style="flex:1" onclick="go(\'feed\')">Cancel</button>';
   html+='</div></div>';
   mc.innerHTML=html;
-  var rubRows=document.getElementById("np-rub-rows");
-  if(rubRows)renderRubRows("np-rub-rows",[0,0,0,0,0,0],false,"setNPR");
-  window._npRub=[0,0,0,0,0,0];
-  window.setNPR=function(d,v){window._npRub[d]=v;renderRubRows("np-rub-rows",window._npRub,false,"setNPR");};
+  window._rubricStores.newpost={values:new Array(SELF_RUBRIC.length).fill(null),rubric:SELF_RUBRIC,containerId:"np-rub-rows"};
+  renderRubricBlock("np-rub-rows",SELF_RUBRIC,window._rubricStores.newpost.values,"newpost");
 };
 
 window.submitPost=async function(){
   var title=((document.getElementById("np-title")||{}).value||"").trim();
-  var ref2=(document.getElementById("np-reflection")||{}).value||"";
-  if(!title||!ref2.trim()){toast("Please add a title and fill in your reflection!");return;}
-  var weekIdx=document.getElementById("np-week")?parseInt(document.getElementById("np-week").value):0;
+  if(!title){toast("Please add a title!");return;}
   await push(ref(db,"posts"),{
     uid:CU.uid,name:CU.displayName,photo:CU.photoURL||"",
     title:title,link:((document.getElementById("np-link")||{}).value||"").trim(),
-    productType:((document.getElementById("np-type")||{}).value||"").trim(),
-    reflection:ref2.trim(),rubric:window._npRub||[],
+    productType:(contractData&&contractData.productType)||"",
+    selfRubric:window._rubricStores.newpost?window._rubricStores.newpost.values:[],
     well:((document.getElementById("np-well")||{}).value||"").trim(),
     improve:((document.getElementById("np-improve")||{}).value||"").trim(),
     isDraft:document.getElementById("np-draft")?.checked||false,
-    weekIndex:weekIdx,groupId:myGid||"",
+    groupId:myGid||"",
     createdAt:Date.now()
   });
   toast("Shared!");go("feed");
 };
 
-function renderRubRows(cid,vals,isPeer,setter){
-  var w=document.getElementById(cid);if(!w)return;
-  var html="";
-  RUBRIC.forEach(function(r,i){
-    html+='<div class="rubrow"><div class="rubcrit">'+r.label+'</div>';
-    html+='<div class="rubcdesc">'+(isPeer?PEER_Q[i]:r.q)+'</div>';
-    html+='<div class="rubscale">';
-    [1,2,3,4].forEach(function(n){
-      html+='<button class="rubbtn'+(vals[i]===n?" sel":"")+'" onclick="'+setter+'('+i+','+n+')">'+n+'</button>';
-    });
-    html+='</div><div class="rubanchor"><span>Developing</span><span>Strong</span></div>';
-    if(vals[i]>0)html+='<div class="rublvl">'+r.lvls[vals[i]-1]+'</div>';
-    html+='</div>';
-  });
-  w.innerHTML=html;
-}
-
 window.openComment=function(postId){
   var form=document.getElementById("cmform-"+postId);if(!form)return;
   if(form.style.display!=="none"){form.style.display="none";return;}
   form.style.display="block";
-  var rubId="cm-rub-"+postId;
-  window._cmRub=window._cmRub||{};
-  window._cmRub[postId]=[0,0,0,0,0,0];
-  renderRubRows(rubId,window._cmRub[postId],true,"setCMR_"+postId);
-  window["setCMR_"+postId]=function(d,v){window._cmRub[postId][d]=v;renderRubRows(rubId,window._cmRub[postId],true,"setCMR_"+postId);};
+  var storeKey="comment_"+postId;
+  window._rubricStores[storeKey]={values:new Array(PEER_RUBRIC.length).fill(null),rubric:PEER_RUBRIC,containerId:"cm-rub-"+postId};
+  renderRubricBlock("cm-rub-"+postId,PEER_RUBRIC,window._rubricStores[storeKey].values,storeKey);
 };
 
 window.submitComment=async function(postId,targetUid){
   var text=((document.getElementById("cm-text-"+postId)||{}).value||"").trim();
   if(!text){toast("Write something!");return;}
+  var storeKey="comment_"+postId;
   await push(ref(db,"posts/"+postId+"/comments"),{
     from:CU.displayName,fromId:CU.uid,text:text,
-    rubric:window._cmRub?window._cmRub[postId]||[]:[],createdAt:Date.now()
+    peerRubric:window._rubricStores[storeKey]?window._rubricStores[storeKey].values:[],createdAt:Date.now()
   });
   if(targetUid&&targetUid!==CU.uid){
     await push(ref(db,"notifications/"+targetUid),{type:"comment",message:CU.displayName+" commented on your work!",read:false,createdAt:Date.now()});
@@ -810,7 +808,6 @@ window.submitComment=async function(postId,targetUid){
   }
   toast("Comment submitted! +1 coin");
   var form=document.getElementById("cmform-"+postId);if(form)form.style.display="none";
-  loadFeed();
 };
 
 window.deletePost=async function(postId){
@@ -831,6 +828,13 @@ window.renderStep1Screen=async function(){
   if(info.theme)html+='<div style="margin-bottom:10px"><span class="sb sa">Theme: '+esc(info.theme)+'</span></div>';
   if(info.description)html+='<div style="font-size:13px;line-height:1.7;color:var(--tm)">'+esc(info.description)+'</div>';
   html+='</div>';
+  if(info.imageUrl&&info.imageUrl.trim()){
+    html+='<div class="card" style="padding:0;overflow:hidden"><img src="'+esc(info.imageUrl)+'" style="width:100%;display:block"></div>';
+  }
+  if(info.videoUrl&&info.videoUrl.trim()){
+    var vid=extractYouTubeId(info.videoUrl);
+    if(vid)html+='<div class="card" style="padding:0;overflow:hidden"><div style="position:relative;padding-top:56.25%"><iframe src="https://www.youtube.com/embed/'+vid+'" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" allowfullscreen></iframe></div></div>';
+  }
   if(info.grammarTips&&info.grammarTips.trim()){
     html+='<div class="card"><div style="font-size:13px;font-weight:700;margin-bottom:8px">&#128221; Grammar Tips</div>';
     info.grammarTips.split("\n").filter(function(l){return l.trim();}).forEach(function(l){
@@ -848,226 +852,104 @@ window.renderStep1Screen=async function(){
   mc.innerHTML=html;setNav("home");
 };
 
-// ── STEP 3: MY LEARNING CONTRACT ──
-function getActiveWeek(weeks){
-  for(var i=0;i<weeks.length;i++){if(!weeks[i].closed)return i;}
-  return weeks.length-1;
-}
-
+// ── STEP 3: MY LEARNING CONTRACT (3-column: topic, goals, evaluation) ──
 window.renderStep3Screen=async function(){
   var mc=document.getElementById("mc");
-  if(!contractData||!contractData.productType){toast("Finish Step 2 — Get Ideas — first!");go("home");return;}
+  var snap=await get(ref(db,"contracts/"+CU.uid));
+  contractData=snap.exists()?snap.val():null;
+  if(!contractData||!contractData.productType||contractData.status==="awaiting_grouping"){toast("Wait for your teacher to group you first!");go("home");return;}
   var c=contractData;
-  var weeks=c.weeks;
-  var activeWeek=getActiveWeek(weeks);
-  var FOCUS_SKILLS=["Speaking clearly","Organizing ideas","Using new vocabulary","Writing accurately","Being creative","Explaining clearly","Listening actively","Working with sources"];
+  var locked=isLockedStep("step3");
+  var readOnly=c.status!=="draft"&&c.editUnlocked===false;
+  var uinfo={};
+  try{var usnap=await get(ref(db,"unitInfo"));if(usnap.exists())uinfo=usnap.val();}catch(e){}
 
-  var html='<button class="btn bts mb8" onclick="go(\'home\')">&#8592; Back to Home</button>';
-  html+='<div class="card"><div class="fb mb8">';
-  html+='<span style="font-size:14px;font-weight:700">Step 3 · My Learning Contract</span>';
-  if(c.status==="approved")html+='<span class="sb sa">Active</span>';
-  else if(c.status==="pending")html+='<span class="sb sp">Pending teacher approval</span>';
+  var html=locked?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">&#8592; Back to Home</button>';
+
+  html+='<div class="card"><div style="font-size:12px;font-weight:700;color:var(--th);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">&#127979; What we\'re learning</div>';
+  html+='<div style="font-size:14px;font-weight:700">'+esc(uinfo.title||"")+'</div>';
+  if(uinfo.theme)html+='<div style="font-size:12px;color:var(--tm);margin-top:2px">Theme: '+esc(uinfo.theme)+'</div>';
+  html+='</div>';
+
+  html+='<div class="card"><div class="fb mb8"><span style="font-size:14px;font-weight:700">Step 3 · My Learning Contract</span>';
+  if(c.status==="approved")html+='<span class="sb sa">Approved</span>';
+  else if(c.status==="pending")html+='<span class="sb sp">Waiting for teacher approval</span>';
   else html+='<span class="sb" style="background:var(--gl);color:var(--tm)">Draft</span>';
   html+='</div>';
-  html+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">';
-  html+='<span style="padding:3px 10px;border-radius:20px;background:var(--pl);color:var(--pd);font-size:12px;font-weight:700">'+esc(c.productType)+'</span>';
-  (c.platforms||[]).forEach(function(pf){html+='<span style="padding:3px 10px;border-radius:20px;background:var(--gl);color:var(--tm);font-size:12px">'+esc(pf)+'</span>';});
-  html+='</div>';
-  if(c.teacherComment)html+='<div style="background:var(--tl);border-radius:var(--rs);padding:8px 10px;font-size:12px;color:var(--td);margin-bottom:8px"><strong>Teacher:</strong> '+esc(c.teacherComment)+'</div>';
+  if(c.teacherComment)html+='<div style="background:var(--tl);border-radius:var(--rs);padding:8px 10px;font-size:12px;color:var(--td);margin-bottom:10px"><strong>Teacher:</strong> '+esc(c.teacherComment)+'</div>';
+  if(readOnly)html+='<div class="tip mb8">This is saved. Ask your teacher if you need to change anything.</div>';
   html+='<div class="divider"></div>';
 
-  weeks.forEach(function(w,i){
-    var isActive=i===activeWeek;
-    var isClosed=w.closed;
-    var isFuture=i>activeWeek&&!isClosed;
-    var done=w.tasks?w.tasks.filter(function(t){return t.done;}).length:0;
-    var total=w.tasks?w.tasks.length:0;
-    var pct=total>0?Math.round(done/total*100):0;
-    var headerBg=isClosed?"var(--tl)":isActive?"var(--pl)":"var(--gl)";
-    var headerBorder=isClosed?"var(--t)":isActive?"var(--p)":"var(--gb)";
-    var statusIcon=isClosed?"&#9989;":isActive?"&#128197;":"&#128274;";
+  html+='<div class="contract-cols">';
 
-    html+='<div style="border:1.5px solid '+headerBorder+';border-radius:var(--r);margin-bottom:9px;overflow:hidden">';
-    html+='<div style="padding:11px 13px;background:'+headerBg+';display:flex;align-items:center;justify-content:space-between;'+(isFuture?"":"cursor:pointer;")+'" '+(isFuture?"":"onclick=\"toggleWeek("+i+")\"")+'">';
-    html+='<div><div style="font-size:13px;font-weight:700">'+statusIcon+' Week '+(i+1)+' — '+w.title+'</div>';
-    if(isFuture)html+='<div style="font-size:11px;color:var(--th);margin-top:2px">Complete the current week first</div>';
-    html+='</div>';
-    if(total>0)html+='<span class="sb '+(isClosed?"sa":"")+'" style="'+(isClosed?"":"background:var(--pl);color:var(--pd)")+'">'+done+"/"+total+'</span>';
-    html+='</div>';
+  // Column 1: fill in the blank
+  html+='<div class="contract-col"><div class="cc-title">1. My Project</div>';
+  html+='<div style="font-size:13px;line-height:1.8">I will create a <strong>'+esc(c.productType)+'</strong> about<br>';
+  html+='<input class="fi" id="c-topic" style="margin-top:6px" value="'+esc(c.topic||"")+'" placeholder="your topic..." '+(readOnly?"disabled":"onblur=\"saveTopic()\"")+'>.</div></div>';
 
-    if(!isFuture){
-      html+='<div id="week-body-'+i+'" style="padding:13px;border-top:1px solid '+headerBorder+';background:#fff;display:'+(isActive?"block":"none")+'">';
-      if(isClosed){
-        if(w.closingNote)html+='<div style="font-size:13px;margin-bottom:8px"><strong>What I did:</strong> '+esc(w.closingNote)+'</div>';
-        if(w.planOk!==null){var okLabel=w.planOk==="yes"?"Yes, went as planned":w.planOk==="partly"?"Partly":"Not really";html+='<div style="font-size:13px;margin-bottom:8px"><strong>Went to plan?</strong> '+okLabel+'</div>';}
-        if(w.focusSkill)html+='<div style="font-size:13px;color:var(--td)"><strong>Focus skill:</strong> '+esc(w.focusSkill)+'</div>';
-      } else {
-        if(i===0){
-          html+='<div class="fg"><label class="fl">To make a great '+esc(c.productType)+', what do you most need to work on?</label>';
-          html+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px">';
-          FOCUS_SKILLS.forEach(function(sk){html+='<div class="chip'+(w.focusSkill===sk?" sel":"")+'" onclick="setFocusSkill('+i+',\''+esc(sk)+'\')" style="font-size:12px">'+sk+'</div>';});
-          html+='</div>';
-          if(w.focusSkill)html+='<div style="font-size:12px;color:var(--td);margin-top:5px">&#9989; Selected: <strong>'+esc(w.focusSkill)+'</strong></div></div>';
-          else html+='</div>';
-        } else if(w.focusSkill){
-          html+='<div style="background:var(--al);border-radius:var(--rs);padding:7px 10px;font-size:12px;color:var(--a);margin-bottom:10px">&#127919; Focus skill: <strong>'+esc(w.focusSkill)+'</strong></div>';
-        }
-
-        html+='<div style="font-size:11px;font-weight:700;color:var(--tm);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">This week&#39;s tasks</div>';
-        if(total>0){html+='<div class="pbw"><div class="pbf" style="width:'+pct+'%"></div></div>';}
-        (w.tasks||[]).forEach(function(t,ti){
-          html+='<div class="step-item'+(t.done?" done":"")+'" onclick="toggleTask('+i+','+ti+')">';
-          html+='<div class="step-row"><div class="step-chk'+(t.done?" done":"")+'">'+(t.done?"&#10003;":"")+'</div>';
-          html+='<span class="step-txt'+(t.done?" done":"")+'">'+esc(t.text||"")+'</span></div></div>';
-        });
-        html+='<div style="display:flex;gap:7px;margin-top:7px">';
-        html+='<input class="fi" id="new-task-'+i+'" placeholder="Add your own task..." style="flex:1" onkeydown="if(event.key===\'Enter\')addTask('+i+')">';
-        html+='<button class="btn btp" style="font-size:12px;padding:7px 12px" onclick="addTask('+i+')">Add</button>';
-        html+='</div>';
-        html+='<button class="btn bts btf mt8" style="font-size:12px" onclick="aiSuggestForWeek('+i+')">&#10024; Ask AI for ideas</button>';
-        html+='<div id="ai-sugg-'+i+'" style="margin-top:8px"></div>';
-
-        html+='<div class="divider"></div>';
-        html+='<div style="border-radius:var(--r);background:var(--pd);padding:14px 16px;margin-top:4px">';
-        html+='<div style="font-size:13px;color:rgba(255,255,255,.8);margin-bottom:12px;line-height:1.5">'+(i<3?"Make sure you have shared your work on the Feed first, then close the week.":"Great work! Make sure your final piece is on the Feed, then complete your plan.")+'</div>';
-        html+='<button class="btn btf" style="background:#fff;color:var(--pd);font-size:13px;font-weight:700;padding:11px" onclick="openCloseWeek('+i+')">'+(i<3?"&#128274; Close this week &amp; move on &#8594;":"&#127942; Complete my plan")+'</button>';
-        html+='</div>';
-      }
-      html+='</div>';
-    }
-    html+='</div>';
+  // Column 2: goals
+  html+='<div class="contract-col"><div class="cc-title">2. Choose Your Goals</div>';
+  GOAL_ITEMS.forEach(function(g){
+    var checked=!!(c.goals&&c.goals[g.id]);
+    var text=g.text.replace("{grammar}",esc(uinfo.targetGrammar||"target grammar"));
+    html+='<div class="goal-row'+(checked?" sel":"")+'" onclick="'+(readOnly?"":"toggleGoal('"+g.id+"')")+'">';
+    html+='<span class="qchk">'+(checked?"&#10003;":"")+'</span><span style="flex:1">'+text+'</span></div>';
   });
-  if(c.status!=="approved")html+='<button class="btn bts btf" style="margin-top:4px;font-size:12px" onclick="clearContract()">Clear contract</button>';
+  html+='</div>';
+
+  // Column 3: evaluation
+  html+='<div class="contract-col"><div class="cc-title">3. Evaluation</div>';
+  html+='<div style="font-size:13px;margin-bottom:8px">I will get at least <input class="fi" id="c-teacherpct" type="number" min="0" max="100" style="width:60px;display:inline-block" value="'+esc(c.evalTeacherPct||"")+'" '+(readOnly?"disabled":"onblur=\"saveEval()\"")+'>% from my teacher.</div>';
+  html+='<div style="font-size:13px">I will get at least <input class="fi" id="c-peerpct" type="number" min="0" max="100" style="width:60px;display:inline-block" value="'+esc(c.evalPeerPct||"")+'" '+(readOnly?"disabled":"onblur=\"saveEval()\"")+'>% from my classmates.</div>';
+  html+='</div>';
+
+  html+='</div>'; // end contract-cols
+
+  if(!readOnly&&c.status==="draft"){
+    html+='<button class="btn btg btf mt12" onclick="submitContract()">&#127942; Submit My Plan &amp; Go to Feed</button>';
+  }
   html+='</div>';
   mc.innerHTML=html;setNav("home");
 };
 
-window.setFocusSkill=async function(weekIdx,skill){
-  contractData.weeks[weekIdx].focusSkill=skill;
-  await update(ref(db,"contracts/"+CU.uid),{weeks:contractData.weeks});
+window.saveTopic=async function(){
+  var val=((document.getElementById("c-topic")||{}).value||"").trim();
+  contractData.topic=val;
+  await update(ref(db,"contracts/"+CU.uid),{topic:val});
+};
+window.toggleGoal=async function(gid){
+  if(!contractData.goals)contractData.goals={};
+  contractData.goals[gid]=!contractData.goals[gid];
+  await update(ref(db,"contracts/"+CU.uid),{goals:contractData.goals});
   renderStep3Screen();
 };
-window.toggleWeek=function(i){var el=document.getElementById("week-body-"+i);if(el)el.style.display=el.style.display==="none"?"block":"none";};
-window.addTask=async function(i){
-  var inp=document.getElementById("new-task-"+i);
-  var text=(inp?inp.value:"").trim();if(!text){toast("Write a task first!");return;}
-  contractData.weeks[i].tasks.push({text:text,done:false});
-  await update(ref(db,"contracts/"+CU.uid),{weeks:contractData.weeks});
-  if(inp)inp.value="";
-  renderStep3Screen();
+window.saveEval=async function(){
+  var tp=((document.getElementById("c-teacherpct")||{}).value||"").trim();
+  var pp=((document.getElementById("c-peerpct")||{}).value||"").trim();
+  contractData.evalTeacherPct=tp;contractData.evalPeerPct=pp;
+  await update(ref(db,"contracts/"+CU.uid),{evalTeacherPct:tp,evalPeerPct:pp});
 };
-window.toggleTask=async function(wi,ti){
-  contractData.weeks[wi].tasks[ti].done=!contractData.weeks[wi].tasks[ti].done;
-  await update(ref(db,"contracts/"+CU.uid),{weeks:contractData.weeks});
-  renderStep3Screen();
+window.submitContract=async function(){
+  if(!contractData.topic||!contractData.topic.trim()){toast("Fill in your topic first!");return;}
+  await update(ref(db,"contracts/"+CU.uid),{status:"pending",editUnlocked:false,submittedAt:Date.now()});
+  contractData=(await get(ref(db,"contracts/"+CU.uid))).val();
+  toast("Submitted! Check the Feed to see everyone's ideas.");
+  go("feed");
 };
 window.clearContract=async function(){if(!confirm("Clear your contract? You will need to retake the quiz."))return;await remove(ref(db,"contracts/"+CU.uid));contractData=null;go("home");};
 
-// ── AI TASK/RESOURCE SUGGESTIONS FOR A WEEK ──
-window.aiSuggestForWeek=async function(weekIdx){
-  var el=document.getElementById("ai-sugg-"+weekIdx);if(!el)return;
-  el.innerHTML='<div class="loading" style="padding:10px">Thinking of ideas...</div>';
-  var c=contractData;
-  var prompt="Product: "+c.productType+" (category: "+c.category+")\nPlatforms available: "+(c.platforms||[]).join(", ")+"\nThis week's focus: "+c.weeks[weekIdx].title+"\nStudent's weakest skill: "+(c.weakness||"none stated")+"\n\nSuggest exactly 3 short, concrete tasks (max 10 words each) and exactly 2 relevant resources or platforms/websites for a 12-year-old working on this. Reply in EXACTLY this format, one per line, nothing else:\nTASK: ...\nTASK: ...\nTASK: ...\nRESOURCE: ...\nRESOURCE: ...";
-  var reply=await askAI(prompt,"You are a helpful assistant for a 12-year-old's English class project. Follow the requested output format exactly with no extra commentary.");
-  var lines=reply.split("\n").map(function(l){return l.trim();}).filter(Boolean);
-  var tasks=[],resources=[];
-  lines.forEach(function(l){
-    if(/^TASK:/i.test(l))tasks.push(l.replace(/^TASK:\s*/i,""));
-    else if(/^RESOURCE:/i.test(l))resources.push(l.replace(/^RESOURCE:\s*/i,""));
-  });
-  if(!tasks.length&&!resources.length){el.innerHTML='<div style="font-size:12px;color:var(--tm);background:var(--gl);padding:8px;border-radius:var(--rs)">'+esc(reply)+'</div>';return;}
-  var html='<div style="font-size:11px;font-weight:700;color:var(--th);margin-bottom:5px;text-transform:uppercase">Tap to add a task</div>';
-  tasks.forEach(function(t){html+='<span class="sugg-task" onclick="addSuggestedTask('+weekIdx+',\''+esc(t).replace(/'/g,"&#39;")+'\',this)">+ '+esc(t)+'</span>';});
-  if(resources.length){
-    html+='<div style="font-size:11px;font-weight:700;color:var(--th);margin:8px 0 5px;text-transform:uppercase">Resources to try</div>';
-    resources.forEach(function(r){html+='<span class="sugg-res">'+esc(r)+'</span>';});
-  }
-  el.innerHTML=html;
-};
-window.addSuggestedTask=async function(weekIdx,text,btn){
-  contractData.weeks[weekIdx].tasks.push({text:text,done:false});
-  await update(ref(db,"contracts/"+CU.uid),{weeks:contractData.weeks});
-  toast("Added to your tasks!");
-  renderStep3Screen();
-};
-
-// ── CLOSE WEEK MODAL ──
-window.openCloseWeek=function(weekIdx){
-  var mc=document.getElementById("mc");
-  var isLast=weekIdx===3;
-  var weekLabels=["Week 1","Week 2","Week 3","Week 4"];
-  var html='<button class="btn bts mb8" onclick="renderStep3Screen()">&#8592; Back</button>';
-  html+='<div class="card" style="border-color:var(--p);border-width:2px">';
-  html+='<div style="font-size:16px;font-weight:700;margin-bottom:4px">&#128274; Close '+weekLabels[weekIdx]+'</div>';
-  html+='<div style="font-size:13px;color:var(--tm);margin-bottom:16px">Before you finish, take 2 minutes to reflect.</div>';
-
-  html+='<div class="fg"><label class="fl">What did you do this week? <span style="color:var(--c)">*</span></label>';
-  html+='<textarea class="fta" id="cw-note" placeholder="Describe what you worked on and what you made or started..." style="min-height:72px"></textarea></div>';
-
-  html+='<div class="fg"><label class="fl">Did the week go as planned? <span style="color:var(--c)">*</span></label>';
-  html+='<div style="display:flex;gap:8px;margin-top:4px" id="plan-ok-chips">';
-  html+='<div class="chip" onclick="selectPlanOk(\'yes\')" id="pok-yes">&#9989; Yes</div>';
-  html+='<div class="chip" onclick="selectPlanOk(\'partly\')" id="pok-partly">&#128336; Partly</div>';
-  html+='<div class="chip" onclick="selectPlanOk(\'no\')" id="pok-no">&#10060; Not really</div>';
-  html+='</div></div>';
-
-  if(!isLast){
-    html+='<div class="fg"><label class="fl">What is your plan for next week? <span style="color:var(--c)">*</span></label>';
-    html+='<textarea class="fta" id="cw-next" placeholder="What do you want to focus on next week? What steps will you take?..." style="min-height:64px"></textarea>';
-    html+='<div style="font-size:11px;color:var(--tm);margin-top:4px">This will appear as a reminder when you open next week.</div></div>';
-  }
-
-  html+='<button class="btn btg btf" style="margin-top:8px" onclick="submitCloseWeek('+weekIdx+')">'+( isLast?"&#127942; Complete my plan &amp; submit":"Save &amp; unlock next week &#8594;")+'</button>';
-  html+='</div>';
-  mc.innerHTML=html;
-  window._planOkChoice=null;
-};
-
-window.selectPlanOk=function(val){
-  window._planOkChoice=val;
-  ["yes","partly","no"].forEach(function(v){
-    var el=document.getElementById("pok-"+v);
-    if(el)el.classList.toggle("sel",v===val);
-  });
-};
-
-window.submitCloseWeek=async function(weekIdx){
-  var note=((document.getElementById("cw-note")||{}).value||"").trim();
-  var nextPlan=((document.getElementById("cw-next")||{}).value||"").trim();
-  if(!note){toast("Tell us what you did this week!");return;}
-  if(!window._planOkChoice){toast("Did the week go as planned?");return;}
-  if(weekIdx<3&&!nextPlan){toast("What is your plan for next week?");return;}
-
-  if(!contractData||!contractData.weeks)return;
-  contractData.weeks[weekIdx].closed=true;
-  contractData.weeks[weekIdx].closingNote=note;
-  contractData.weeks[weekIdx].planOk=window._planOkChoice;
-  contractData.weeks[weekIdx].nextPlan=nextPlan||"";
-  contractData.weeks[weekIdx].closedAt=Date.now();
-
-  if(weekIdx<3){
-    contractData.weeks[weekIdx+1].nextPlan=nextPlan;
-  }
-
-  if(weekIdx===3){
-    await update(ref(db,"contracts/"+CU.uid),{weeks:contractData.weeks,status:"completed"});
-    toast("Your plan is complete! Amazing work!");
-  } else {
-    await update(ref(db,"contracts/"+CU.uid),{weeks:contractData.weeks});
-    toast("Week closed! Next week is now unlocked.");
-  }
-  window._planOkChoice=null;
-  renderStep3Screen();
-};
-
 
 // ── QUIZ (Step 2): Q1 platforms (multi) → Q2 grouped product (single) → Q3 weakness (single) ──
-var qState={i:0,platforms:[],productId:null,weakness:null};
+var qState={i:0,platforms:[],productId:null,weakness:null,catalog:null};
 
-function startQuiz(){
-  qState={i:0,platforms:[],productId:null,weakness:null};
+async function startQuiz(){
+  var c=contractData;
+  if(c&&c.productType&&c.editUnlocked===false){toast("Ask your teacher to unlock editing first.");return;}
+  qState={i:0,platforms:[],productId:null,weakness:null,catalog:null};
   setNav("home");
+  document.getElementById("mc").innerHTML='<div class="loading">Loading...</div>';
+  await ensureCatalogSeeded();
+  qState.catalog=await loadCatalog();
   renderQuizStep();
 }
 
@@ -1109,12 +991,14 @@ function renderQ2(mc){
   var html=quizTopBar(1);
   html+='<div class="qq">What kind of project do you want to make?</div><div class="qs2">Tap the one that sounds best.</div>';
   ["written","spoken","visual"].forEach(function(cat){
+    var opts=qState.catalog[cat].filter(function(p){return p.active;});
+    if(!opts.length)return;
     html+='<div style="font-size:11px;font-weight:700;color:var(--th);text-transform:uppercase;letter-spacing:.5px;margin:14px 0 6px">'+CAT_EMOJI[cat]+' '+CAT_LABELS[cat]+'</div>';
     html+='<div class="qopts">';
-    PRODUCTS_BY_CAT[cat].forEach(function(p){
+    opts.forEach(function(p){
       var on=qState.productId===p.id;
       html+='<div class="qo'+(on?" sel":"")+'" onclick="qPick2(\''+p.id+'\')">';
-      html+='<span style="font-size:16px;width:24px;flex-shrink:0">'+p.e+'</span><span style="flex:1">'+p.name+'</span><span class="qchk">'+(on?"&#10003;":"")+'</span></div>';
+      html+='<span style="flex:1">'+esc(p.name)+'</span><span class="qchk">'+(on?"&#10003;":"")+'</span></div>';
     });
     html+='</div>';
   });
@@ -1140,24 +1024,23 @@ function renderQ3(mc){
 window.qPick3=function(v){qState.weakness=v;renderQ3(document.getElementById("mc"));};
 
 function showQuizResult(mc){
-  var rec=productById(qState.productId);
-  var cat=catOfProduct(qState.productId);
-  var alternates=PRODUCTS_BY_CAT[cat].filter(function(p){return p.id!==rec.id;}).slice(0,3);
+  var rec=productById(qState.catalog,qState.productId);
+  var cat=catOfProduct(qState.catalog,qState.productId);
+  var alternates=qState.catalog[cat].filter(function(p){return p.active&&p.id!==rec.id;}).slice(0,3);
   var whyText="You chose "+CAT_LABELS[cat].toLowerCase()+(qState.platforms.length?" using "+qState.platforms.join(", ")+".":".");
 
   var html=isLockedStep("step2")?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">&#8592; Back</button>';
   html+='<div class="pt">Your Idea</div><div class="ps">Based on your answers</div>';
   html+='<div class="card" style="border-color:var(--p);border-width:1.5px;text-align:center;padding:20px">';
-  html+='<div style="font-size:34px;margin-bottom:6px">'+rec.e+'</div>';
-  html+='<div style="font-size:17px;font-weight:700;margin-bottom:6px">'+rec.name+'</div>';
+  html+='<div style="font-size:17px;font-weight:700;margin-bottom:6px">'+esc(rec.name)+'</div>';
   html+='<div style="font-size:12px;color:var(--tm);margin-bottom:14px">'+whyText+'</div>';
-  html+='<button class="btn btg btf" onclick="chooseProduct(\''+rec.id+'\',\''+esc(rec.name)+'\')">Choose this &amp; Build My Contract &#8594;</button>';
+  html+='<button class="btn btg btf" onclick="chooseProduct(\''+rec.id+'\',\''+esc(rec.name)+'\',\''+cat+'\')">Choose this idea &#8594;</button>';
   html+='</div>';
   if(alternates.length){
     html+='<div class="card"><div style="font-size:12px;font-weight:700;color:var(--th);margin-bottom:8px">Other ideas in this style</div>';
     html+='<div style="display:flex;flex-wrap:wrap;gap:6px">';
     alternates.forEach(function(p){
-      html+='<div style="padding:6px 12px;border:1px solid var(--gb);border-radius:20px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px" onclick="chooseProduct(\''+esc(p.id)+'\',\''+esc(p.name)+'\')"><span>'+p.e+'</span><span>'+p.name+'</span></div>';
+      html+='<div style="padding:6px 12px;border:1px solid var(--gb);border-radius:20px;font-size:12px;cursor:pointer" onclick="chooseProduct(\''+esc(p.id)+'\',\''+esc(p.name)+'\',\''+cat+'\')">'+esc(p.name)+'</div>';
     });
     html+='</div></div>';
   }
@@ -1170,39 +1053,26 @@ function showQuizResult(mc){
   mc.innerHTML=html;
 }
 
-window.chooseProduct=async function(id,name){
-  var cat=catOfProduct(id);
-  window._selectedProduct={id:id,name:name,cat:cat,platforms:qState.platforms.slice(),weakness:qState.weakness||null,tips:qState.weakness?(SKILL_TIPS[qState.weakness]||[]):[]};
-  await goToContract();
-};
-
-window.goToContract=async function(){
-  if(!window._selectedProduct){toast("Choose a project first!");return;}
-  var p=window._selectedProduct;
-  var templates=TASK_TEMPLATES[p.cat];
-  var weeks=WEEK_TITLES.map(function(title,i){
-    return {title:title,tasks:templates[i].map(function(t){return {text:t.replace("{p}",p.name),done:false};}),closed:false,nextPlan:"",closingNote:"",planOk:null,focusSkill:""};
-  });
+window.chooseProduct=async function(id,name,cat){
   await set(ref(db,"contracts/"+CU.uid),{
-    productId:p.id,productType:p.name,category:p.cat,platforms:p.platforms||[],
-    weakness:p.weakness||"",weaknessTips:p.tips||[],
-    weeks:weeks,status:"draft",
+    productId:id,productType:name,category:cat,platforms:qState.platforms.slice(),
+    weakness:qState.weakness||"",weaknessTips:qState.weakness?(SKILL_TIPS[qState.weakness]||[]):[],
+    status:"awaiting_grouping",editUnlocked:true,
+    topic:"",goals:{},evalTeacherPct:"",evalPeerPct:"",
     studentName:CU.displayName,studentEmail:CU.email,
     studentPhoto:CU.photoURL||"",studentId:CU.uid,createdAt:Date.now()
   });
   contractData=(await get(ref(db,"contracts/"+CU.uid))).val();
-  toast("Contract created!");
-  if(isLockedStep("step2")){renderQuizDone();}
-  else{renderStep3Screen();}
+  renderQuizDone();
 };
 
 function renderQuizDone(){
   var mc=document.getElementById("mc");
-  var html=lockBarHTML();
+  var html=isLockedStep("step2")?lockBarHTML():"";
   html+='<div class="card" style="text-align:center;padding:24px;border-color:var(--t);border-width:1.5px">';
   html+='<div style="font-size:34px;margin-bottom:8px">&#9989;</div>';
-  html+='<div style="font-size:15px;font-weight:700;margin-bottom:4px">You\'re all set!</div>';
-  html+='<div style="font-size:13px;color:var(--tm)">Your project is <strong>'+esc(contractData.productType)+'</strong>. Wait for your teacher to move on.</div>';
+  html+='<div style="font-size:15px;font-weight:700;margin-bottom:4px">'+esc(contractData.productType)+'</div>';
+  html+='<div style="font-size:14px;color:var(--tm);margin-top:8px">Now wait for your teacher to group you.</div>';
   html+='</div>';
   mc.innerHTML=html;
 }
@@ -1219,7 +1089,7 @@ window.renderProfile=async function(uid,isOwn){
   var u=results[0].val()||{name:"Student",photo:""};
   var c=results[1].val();
   var allPosts=[];if(results[2].exists())results[2].forEach(function(p){var d=p.val();if(d.uid===uid)allPosts.push({id:p.key,...d});});
-  allPosts.reverse();
+  allPosts.sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);});
 
   var html="";
   if(!isOwn)html+='<button class="btn bts mb8" onclick="go(\'feed\')">&#8592; Back</button>';
@@ -1238,24 +1108,18 @@ window.renderProfile=async function(uid,isOwn){
   html+='<div style="font-size:17px;font-weight:700;margin-bottom:4px">'+esc(u.name||"Student")+'</div>';
   var gname=u.groupName||null;var gid=u.groupId||null;
   if(gname)html+='<span class="sb sa">&#128101; '+esc(gname)+'</span>';
-  html+='<div style="display:flex;gap:8px;justify-content:center;margin-top:10px;flex-wrap:wrap">';
-  if(isOwn&&gid)html+='<button class="btn btp" style="font-size:12px;padding:7px 12px" onclick="openForum(\''+gid+'\',\''+esc(gname||"My Group")+'\')">&#128172; Group Chat</button>';
-  if(isOwn)html+='<button class="btn bts" style="font-size:12px;padding:7px 12px" onclick="genSummary(\''+uid+'\')">&#10024; My Summary</button>';
-  html+='</div></div>';
+  if(isOwn&&gid)html+='<div style="margin-top:10px"><button class="btn btp" style="font-size:12px;padding:7px 12px" onclick="openForum(\''+gid+'\',\''+esc(gname||"My Group")+'\')">&#128172; Group Chat</button></div>';
+  html+='</div>';
 
-  if(c){
+  if(c&&c.productType){
     html+='<div class="card"><div class="fb mb8"><span style="font-size:14px;font-weight:700">My Learning Contract</span>';
-    if(c.status==="approved")html+='<span class="sb sa">Active</span>';
+    if(c.status==="approved")html+='<span class="sb sa">Approved</span>';
     else if(c.status==="pending")html+='<span class="sb sp">Pending</span>';
+    else if(c.status==="awaiting_grouping")html+='<span class="sb" style="background:var(--gl);color:var(--tm)">Awaiting group</span>';
     else html+='<span class="sb" style="background:var(--gl);color:var(--tm)">Draft</span>';
     html+='</div>';
-    if(c.productType)html+='<div style="font-size:13px;margin-bottom:5px"><strong>Product:</strong> '+esc(c.productType)+'</div>';
-    var weeks=c.weeks||[];
-    weeks.forEach(function(w,i){
-      var wd=(w.tasks||[]).filter(function(t){return t.done;}).length,wt=(w.tasks||[]).length;
-      html+='<div style="font-size:12px;color:var(--tm);margin-bottom:3px"><strong>Week '+(i+1)+':</strong> '+esc(w.title||"")+" — "+wd+"/"+wt+' tasks</div>';
-    });
-    if(isOwn)html+='<button class="btn bts" style="font-size:12px;padding:6px 11px;margin-top:8px" onclick="renderStep3Screen()">Edit plan &#8594;</button>';
+    html+='<div style="font-size:13px;margin-bottom:5px"><strong>Project:</strong> '+esc(c.productType)+(c.topic?" — "+esc(c.topic):"")+'</div>';
+    if(isOwn&&c.status!=="awaiting_grouping")html+='<button class="btn bts" style="font-size:12px;padding:6px 11px;margin-top:4px" onclick="renderStep3Screen()">View plan &#8594;</button>';
     if(c.teacherComment)html+='<div class="tip mt8"><strong>Teacher:</strong> '+esc(c.teacherComment)+'</div>';
     html+='</div>';
   }
@@ -1276,7 +1140,8 @@ window.renderProfile=async function(uid,isOwn){
       if(post.link)html+='<a href="'+esc(post.link)+'" target="_blank" class="obtn">View</a>';
       html+='<span style="color:var(--tm)">&#8250;</span></div></div>';
       html+='<div id="pdet-'+post.id+'" style="display:none;margin-top:8px">';
-      if(post.reflection)html+='<div style="font-size:12px;color:var(--tm);margin-bottom:7px">'+esc(post.reflection)+'</div>';
+      if(post.well)html+='<div style="font-size:12px;color:var(--tm);margin-bottom:5px"><strong>Did well:</strong> '+esc(post.well)+'</div>';
+      if(post.improve)html+='<div style="font-size:12px;color:var(--tm);margin-bottom:7px"><strong>To improve:</strong> '+esc(post.improve)+'</div>';
       if(isOwn&&comments.length){
         html+='<div style="font-size:12px;font-weight:700;color:var(--tm);margin-bottom:6px">Comments received:</div>';
         comments.forEach(function(cm){
@@ -1293,7 +1158,6 @@ window.renderProfile=async function(uid,isOwn){
     html+='<div class="empty"><div class="ei">&#128247;</div><p>'+(isOwn?"Share your first piece of work!":"Nothing shared yet.")+'</p></div>';
   }
   html+='</div>';
-  html+='<div id="summary-sec"></div>';
   mc.innerHTML=html;
 };
 
@@ -1311,8 +1175,6 @@ window.changeAvatar=async function(){
 };
 
 window.openProfileComment=function(postId,targetUid){
-  window._cmRub=window._cmRub||{};
-  window._cmRub[postId]=[0,0,0,0,0,0];
   var d=document.getElementById("pfform-"+postId);if(!d)return;
   if(d.innerHTML&&d.style.display!=="none"){d.style.display="none";return;}
   d.style.display="block";
@@ -1320,14 +1182,16 @@ window.openProfileComment=function(postId,targetUid){
   html+='<textarea class="fta mb8 mt8" id="pf-text-'+postId+'" placeholder="Your comment..." style="min-height:50px"></textarea>';
   html+='<button class="btn btg" style="font-size:12px;padding:7px 13px" onclick="submitProfileComment(\''+postId+'\',\''+targetUid+'\')">Submit +&#127881;</button>';
   d.innerHTML=html;
-  renderRubRows("pf-rub-"+postId,window._cmRub[postId],true,"setPFR_"+postId);
-  window["setPFR_"+postId]=function(di,v){window._cmRub[postId][di]=v;renderRubRows("pf-rub-"+postId,window._cmRub[postId],true,"setPFR_"+postId);};
+  var storeKey="pfcomment_"+postId;
+  window._rubricStores[storeKey]={values:new Array(PEER_RUBRIC.length).fill(null),rubric:PEER_RUBRIC,containerId:"pf-rub-"+postId};
+  renderRubricBlock("pf-rub-"+postId,PEER_RUBRIC,window._rubricStores[storeKey].values,storeKey);
 };
 
 window.submitProfileComment=async function(postId,targetUid){
   var text=((document.getElementById("pf-text-"+postId)||{}).value||"").trim();
   if(!text){toast("Write a comment!");return;}
-  await push(ref(db,"posts/"+postId+"/comments"),{from:CU.displayName,fromId:CU.uid,text:text,rubric:window._cmRub?window._cmRub[postId]||[]:[],createdAt:Date.now()});
+  var storeKey="pfcomment_"+postId;
+  await push(ref(db,"posts/"+postId+"/comments"),{from:CU.displayName,fromId:CU.uid,text:text,peerRubric:window._rubricStores[storeKey]?window._rubricStores[storeKey].values:[],createdAt:Date.now()});
   await push(ref(db,"notifications/"+targetUid),{type:"comment",message:CU.displayName+" commented on your work!",read:false,createdAt:Date.now()});
   await addCoin();
   toast("Comment submitted! +1 coin");
@@ -1395,33 +1259,12 @@ window.openNotifs=async function(){
   mc.innerHTML=html;
 };
 
-// ── AI SUMMARY ──
-window.genSummary=async function(uid){
-  var sec=document.getElementById("summary-sec");if(!sec)return;
-  sec.innerHTML='<div class="card"><div style="font-size:13px;font-weight:700;margin-bottom:6px">&#10024; My Summary</div><div class="loading">Generating...</div></div>';
-  sec.scrollIntoView({behavior:"smooth"});
-  var results=await Promise.all([get(ref(db,"posts")),get(ref(db,"contracts/"+uid))]);
-  var posts=[];results[0].forEach(function(p){var d=p.val();if(d.uid===uid)posts.push(d);});
-  var c=results[1].val();
-  var ctx="Student: "+CU.displayName+"\n";
-  if(c){ctx+="Product: "+c.productType+"\n";if(c.weeks)c.weeks.forEach(function(w,i){var wd=(w.tasks||[]).filter(function(t){return t.done;}).length,wt=(w.tasks||[]).length;ctx+="Week "+(i+1)+" ("+w.title+"): "+wd+"/"+wt+" tasks done\n";});}
-  posts.forEach(function(p){
-    ctx+="Work shared: "+p.title+"\nReflection: "+p.reflection+"\n";
-    var cms=p.comments?Object.values(p.comments):[];
-    cms.forEach(function(cm){ctx+="Comment from "+cm.from+": "+cm.text+"\n";});
-  });
-  var reply=await askAI("Write a short personalised summary (3-4 sentences) of this student's learning journey. Highlight strengths, one area to improve, and an encouraging next step. Write to the student directly.\n\n"+ctx,"You are a warm supportive English teacher for 7th graders.");
-  sec.innerHTML='<div class="card" style="border-color:var(--p);border-width:1.5px">';
-  sec.innerHTML+='<div style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--pd)">&#10024; My Summary</div>';
-  sec.innerHTML+='<div style="font-size:13px;line-height:1.7;color:var(--tx)">'+esc(reply)+'</div>';
-  sec.innerHTML+='<button class="btn bts btf mt8" onclick="genSummary(\''+uid+'\')">Refresh</button></div>';
-};
-
 // ── TEACHER APP ──
 var TNAV=[
   {id:"overview",l:"Overview",i:'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>'},
   {id:"session",l:"Run Class",i:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'},
-  {id:"groups",l:"Groups",i:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>'},
+  {id:"grouping",l:"Grouping",i:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>'},
+  {id:"ideas",l:"Ideas",i:'<path d="M9 18h6M10 22h4M12 2a6 6 0 0 0-4 10.5c.6.5 1 1.3 1 2.5h6c0-1.2.4-2 1-2.5A6 6 0 0 0 12 2z"/>'},
   {id:"evaluate",l:"Evaluate",i:'<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>'},
   {id:"unit",l:"Unit",i:'<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>'}
 ];
@@ -1436,7 +1279,7 @@ function renderTeacher(){
 window.tgo=function(page){
   document.querySelectorAll("#bnav .ni").forEach(function(n){n.classList.remove("active");});
   var el=document.getElementById("tnav-"+page);if(el)el.classList.add("active");
-  ({overview:renderTOverview,session:renderTSession,groups:renderTGroups,evaluate:renderTEvaluate,unit:renderTUnit}[page]||renderTOverview)();
+  ({overview:renderTOverview,session:renderTSession,grouping:renderTGroups,ideas:renderTIdeas,evaluate:renderTEvaluate,unit:renderTUnit}[page]||renderTOverview)();
 };
 
 // ── TEACHER: RUN CLASS (live lock-mode control) ──
@@ -1451,7 +1294,8 @@ async function renderTSession(){
   else if(s.step==="step1"){html+='<div style="font-size:14px;font-weight:700;color:var(--td)">&#128214; Showing "What We\'re Learning" to everyone</div>';}
   else{
     var rem=Math.max(0,Math.round((s.deadline-Date.now())/1000));
-    html+='<div style="font-size:14px;font-weight:700;color:var(--td)">&#9203; Get Ideas timer running</div>';
+    var label=s.step==="step2"?"Get Ideas timer running":"Project Plan timer running";
+    html+='<div style="font-size:14px;font-weight:700;color:var(--td)">&#9203; '+label+'</div>';
     html+='<div style="font-size:28px;font-weight:800;margin-top:6px" id="tsession-timer">'+Math.floor(rem/60)+":"+(rem%60<10?"0":"")+(rem%60)+'</div>';
   }
   html+='</div>';
@@ -1460,9 +1304,21 @@ async function renderTSession(){
   html+='<button class="btn btp btf" onclick="startSessionStep1()">&#128214; Show to whole class now</button></div>';
 
   html+='<div class="card"><div style="font-size:13px;font-weight:700;margin-bottom:8px">Step 2 — Get Ideas (timed)</div>';
-  html+='<div class="fg"><label class="fl">Minutes</label><input class="fi" type="number" id="session-minutes" value="10" min="1" style="max-width:100px"></div>';
+  html+='<div class="fg"><label class="fl">Minutes</label><input class="fi" type="number" id="session-minutes-2" value="10" min="1" style="max-width:100px"></div>';
   html+='<button class="btn btp btf" onclick="startSessionStep2()">&#9654; Start timer for whole class</button>';
   if(s.active&&s.step==="step2"){
+    html+='<div style="display:flex;gap:8px;margin-top:8px">';
+    html+='<button class="btn bts" style="flex:1" onclick="adjustSessionTime(-2)">&#8722;2 min</button>';
+    html+='<button class="btn bts" style="flex:1" onclick="adjustSessionTime(2)">+2 min</button>';
+    html+='</div>';
+  }
+  html+='</div>';
+
+  html+='<div class="card"><div style="font-size:13px;font-weight:700;margin-bottom:2px">Step 3 — Project Plan (timed)</div>';
+  html+='<div style="font-size:11px;color:var(--tm);margin-bottom:8px">Starting this also unlocks Step 3 for every grouped student.</div>';
+  html+='<div class="fg"><label class="fl">Minutes</label><input class="fi" type="number" id="session-minutes-3" value="15" min="1" style="max-width:100px"></div>';
+  html+='<button class="btn btp btf" onclick="startSessionStep3()">&#9654; Start Project Plan for whole class</button>';
+  if(s.active&&s.step==="step3"){
     html+='<div style="display:flex;gap:8px;margin-top:8px">';
     html+='<button class="btn bts" style="flex:1" onclick="adjustSessionTime(-2)">&#8722;2 min</button>';
     html+='<button class="btn bts" style="flex:1" onclick="adjustSessionTime(2)">+2 min</button>';
@@ -1473,7 +1329,7 @@ async function renderTSession(){
   if(s.active)html+='<button class="btn btf" style="background:var(--c);color:#fff" onclick="endSession()">&#9209; End Session — back to free browsing</button>';
   mc.innerHTML=html;
 
-  if(s.active&&s.step==="step2"){
+  if(s.active&&(s.step==="step2"||s.step==="step3")){
     clearInterval(window._tsessionInterval);
     window._tsessionInterval=setInterval(async function(){
       var snap2=await get(ref(db,"liveSession"));
@@ -1492,9 +1348,22 @@ window.startSessionStep1=async function(){
   renderTSession();
 };
 window.startSessionStep2=async function(){
-  var mins=parseInt((document.getElementById("session-minutes")||{}).value)||10;
+  var mins=parseInt((document.getElementById("session-minutes-2")||{}).value)||10;
   await set(ref(db,"liveSession"),{active:true,step:"step2",deadline:Date.now()+mins*60000,updatedAt:Date.now()});
   toast("Timer started for the whole class!");
+  renderTSession();
+};
+window.startSessionStep3=async function(){
+  var mins=parseInt((document.getElementById("session-minutes-3")||{}).value)||15;
+  // unlock Step 3 for every student who is currently waiting on grouping
+  var snap=await get(ref(db,"contracts"));
+  if(snap.exists()){
+    var updates={};
+    snap.forEach(function(c){if(c.val().status==="awaiting_grouping")updates[c.key+"/status"]="draft";});
+    if(Object.keys(updates).length)await update(ref(db,"contracts"),updates);
+  }
+  await set(ref(db,"liveSession"),{active:true,step:"step3",deadline:Date.now()+mins*60000,updatedAt:Date.now()});
+  toast("Project Plan started — Step 3 is now unlocked for the class!");
   renderTSession();
 };
 window.adjustSessionTime=async function(delta){
@@ -1511,12 +1380,12 @@ window.endSession=async function(){
 
 function renderTOverview(){
   var mc=document.getElementById("mc");
-  mc.innerHTML='<div class="pt">Class Overview</div><div class="ps">Approve plans and monitor students.</div>'
+  mc.innerHTML='<div class="pt">Class Overview</div><div class="ps">Approve plans and manage editing access.</div>'
     +'<div class="card"><div class="ctitle">Waiting for Approval</div><div id="pend-list"><div class="loading">Loading...</div></div></div>'
     +'<div class="card"><div class="ctitle">All Students</div><div id="stud-list"><div class="loading">Loading...</div></div></div>';
   onValue(ref(db,"contracts"),function(snap){
     var all=[],pend=[];
-    if(snap.exists())snap.forEach(function(c){var d={id:c.key,...c.val()};all.push(d);if(d.status==="pending"||d.status==="draft")pend.push(d);});
+    if(snap.exists())snap.forEach(function(c){var d={id:c.key,...c.val()};all.push(d);if(d.status==="pending")pend.push(d);});
     var pl=document.getElementById("pend-list");var sl=document.getElementById("stud-list");if(!pl||!sl)return;
     if(!pend.length)pl.innerHTML='<div class="empty"><div class="ei">&#9989;</div><p>All clear!</p></div>';
     else{
@@ -1528,8 +1397,8 @@ function renderTOverview(){
         h+='<div><div class="post-name">'+esc(s.studentName||"")+'</div>';
         h+='<div class="post-meta">'+esc(s.productType||"")+'</div></div></div>';
         h+='<div class="post-body">';
-        if(s.weeks)s.weeks.forEach(function(w,i){var wd=(w.tasks||[]).filter(function(t){return t.done;}).length,wt=(w.tasks||[]).length;h+='<div style="font-size:12px;color:var(--tm);margin-bottom:2px"><strong>W'+(i+1)+':</strong> '+esc(w.title||"")+" — "+wd+"/"+wt+' tasks</div>';});
-        h+='<div class="fg" style="margin-top:8px"><textarea class="fta" id="cm-'+s.id+'" style="min-height:46px" placeholder="Comment for student..."></textarea></div>';
+        if(s.topic)h+='<div style="font-size:13px;margin-bottom:6px">"'+esc(s.topic)+'"</div>';
+        h+='<div class="fg" style="margin-top:8px"><textarea class="fta" id="cm-'+s.id+'" style="min-height:46px" placeholder="Comment for student...">'+esc(s.teacherComment||"")+'</textarea></div>';
         h+='<div style="display:flex;gap:7px">';
         h+='<button class="btn btg" style="font-size:12px;padding:7px 12px" onclick="approveP(\''+s.id+'\',\''+esc(s.studentName||"")+'\')">Approve</button>';
         h+='<button class="btn bts" style="font-size:12px;padding:7px 12px" onclick="sendCm(\''+s.id+'\')">Comment</button>';
@@ -1541,12 +1410,14 @@ function renderTOverview(){
     else{
       var sh="";
       all.forEach(function(s){
-        sh+='<div class="srow" onclick="tgo(\'evaluate\')">';
+        var unlocked=s.editUnlocked===true;
+        sh+='<div class="srow">';
         if(s.studentPhoto)sh+='<img src="'+esc(s.studentPhoto)+'" class="uav">';
         else sh+='<div style="width:28px;height:28px;border-radius:50%;background:var(--pl);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--p);flex-shrink:0">'+esc((s.studentName||"?")[0])+'</div>';
         sh+='<div style="flex:1"><div style="font-size:13px;font-weight:700">'+esc(s.studentName||"Student")+'</div>';
         sh+='<div style="font-size:11px;color:var(--tm)">'+esc(s.productType||"")+'</div></div>';
-        sh+='<span class="sb '+(s.status==="approved"?"sa":s.status==="pending"?"sp":"sd")+'">'+(s.status==="approved"?"Active":s.status==="pending"?"Pending":"Draft")+'</span>';
+        sh+='<span class="sb '+(s.status==="approved"?"sa":s.status==="pending"?"sp":"")+'" style="'+(s.status==="approved"||s.status==="pending"?"":"background:var(--gl);color:var(--tm)")+'">'+(s.status==="approved"?"Approved":s.status==="pending"?"Pending":s.status==="awaiting_grouping"?"Awaiting group":"Draft")+'</span>';
+        sh+='<button class="obtn" style="margin-left:6px" onclick="toggleEditAccess(\''+s.id+'\','+(unlocked?"false":"true")+')">'+(unlocked?"&#128275; Lock":"&#128273; Unlock edit")+'</button>';
         sh+='</div>';
       });
       sl.innerHTML=sh;
@@ -1563,10 +1434,14 @@ window.sendCm=async function(id){
   if(!cm){toast("Write a comment first!");return;}
   await update(ref(db,"contracts/"+id),{teacherComment:cm});toast("Comment sent!");
 };
+window.toggleEditAccess=async function(id,unlock){
+  await update(ref(db,"contracts/"+id),{editUnlocked:unlock});
+  toast(unlock?"Editing unlocked for this student":"Editing locked for this student");
+};
 
 function renderTGroups(){
   var mc=document.getElementById("mc");
-  mc.innerHTML='<div class="pt">Groups</div><div class="ps">Create groups and assign students.</div>'
+  mc.innerHTML='<div class="pt">Grouping</div><div class="ps">See each student\'s project idea and organise them into groups.</div>'
     +'<div class="card"><div class="ctitle">Create a Group</div>'
     +'<div class="fg"><label class="fl">Group name</label><input class="fi" id="grp-name" placeholder="e.g. Team Speakers"></div>'
     +'<button class="btn btp" onclick="createGroup()">Create</button></div>'
@@ -1602,11 +1477,11 @@ async function loadStudentsForAssign(){
   var snap=await get(ref(db,"contracts"));
   var asd=document.getElementById("asgn-students");if(!asd)return;
   if(!snap.exists()){asd.innerHTML='<p style="font-size:13px;color:var(--tm)">No students yet.</p>';return;}
-  var students=[];snap.forEach(function(c){var d=c.val();students.push({id:c.key,name:d.studentName||"Student"});});
+  var students=[];snap.forEach(function(c){var d=c.val();students.push({id:c.key,name:d.studentName||"Student",product:d.productType||"No project chosen yet"});});
   var sh="";
   students.forEach(function(s){
     sh+='<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--gb)">';
-    sh+='<span style="font-size:13px;flex:1">'+esc(s.name)+'</span>';
+    sh+='<div style="flex:1"><div style="font-size:13px">'+esc(s.name)+'</div><div style="font-size:11px;color:var(--tm)">'+esc(s.product)+'</div></div>';
     sh+='<input type="checkbox" id="asgn-'+s.id+'" data-uid="'+s.id+'" data-name="'+esc(s.name)+'" style="width:16px;height:16px;cursor:pointer">';
     sh+='</div>';
   });
@@ -1636,13 +1511,50 @@ window.saveAssign=async function(){
   toast("Assigned!");loadGroups();
 };
 
+// ── TEACHER: IDEAS CATALOG MANAGER ──
+async function renderTIdeas(){
+  var mc=document.getElementById("mc");
+  mc.innerHTML='<div class="pt">Ideas Catalog</div><div class="ps">Control which project options students see in Step 2.</div><div class="loading">Loading...</div>';
+  await ensureCatalogSeeded();
+  var catalog=await loadCatalog();
+  var html="";
+  ["written","spoken","visual"].forEach(function(cat){
+    html+='<div class="card"><div class="ctitle mb8">'+CAT_EMOJI[cat]+' '+CAT_LABELS[cat]+'</div>';
+    catalog[cat].forEach(function(p){
+      html+='<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--gl)'+(p.active?"":";opacity:.5")+'">';
+      html+='<span style="flex:1;font-size:13px">'+esc(p.name)+'</span>';
+      html+='<button class="obtn" onclick="toggleCatalogItem(\''+cat+'\',\''+p.id+'\','+(!p.active)+')">'+(p.active?"Remove":"Reactivate")+'</button>';
+      html+='</div>';
+    });
+    html+='<div style="display:flex;gap:7px;margin-top:9px">';
+    html+='<input class="fi" id="new-idea-'+cat+'" placeholder="Add a new '+CAT_LABELS[cat].toLowerCase()+' option..." style="flex:1">';
+    html+='<button class="btn btp" style="font-size:12px;padding:7px 12px" onclick="addCatalogItem(\''+cat+'\')">Add</button>';
+    html+='</div></div>';
+  });
+  mc.innerHTML='<div class="pt">Ideas Catalog</div><div class="ps">Control which project options students see in Step 2.</div>'+html;
+}
+window.toggleCatalogItem=async function(cat,id,newActive){
+  await update(ref(db,"ideaCatalog/"+cat+"/"+id),{active:newActive});
+  renderTIdeas();
+};
+window.addCatalogItem=async function(cat){
+  var inp=document.getElementById("new-idea-"+cat);
+  var name=(inp?inp.value:"").trim();
+  if(!name){toast("Write an option name first!");return;}
+  var id=name.toLowerCase().replace(/[^a-z0-9]+/g,"_").replace(/^_+|_+$/g,"")+"_"+Date.now().toString(36).slice(-4);
+  await set(ref(db,"ideaCatalog/"+cat+"/"+id),{name:name,active:true});
+  toast("Added!");
+  renderTIdeas();
+};
+
 function renderTEvaluate(){
   var mc=document.getElementById("mc");
   mc.innerHTML='<div class="pt">Student Work</div><div class="ps">View posts and leave evaluations.</div><div id="eval-feed"><div class="loading">Loading...</div></div>';
   onValue(ref(db,"posts"),function(snap){
     var ef=document.getElementById("eval-feed");if(!ef)return;
     if(!snap.exists()){ef.innerHTML='<div class="empty"><div class="ei">&#128247;</div><p>No posts yet.</p></div>';return;}
-    var posts=[];snap.forEach(function(p){posts.push({id:p.key,...p.val()});});posts.reverse();
+    var posts=[];snap.forEach(function(p){posts.push({id:p.key,...p.val()});});
+    posts.sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);});
     var html="";
     posts.forEach(function(post){
       var comments=post.comments?Object.values(post.comments):[];
@@ -1653,7 +1565,6 @@ function renderTEvaluate(){
       html+='<div class="post-meta">'+esc(post.productType||"")+" &bull; "+timeAgo(post.createdAt||Date.now())+'</div></div></div>';
       html+='<div class="post-body">';
       if(post.title)html+='<div style="font-size:14px;font-weight:700;margin-bottom:4px">'+esc(post.title)+'</div>';
-      if(post.reflection)html+='<div class="post-text">'+esc(post.reflection)+'</div>';
       if(post.link)html+='<a href="'+esc(post.link)+'" target="_blank" class="obtn mb8" style="display:inline-block">View work &#8599;</a>';
       if(comments.length){
         html+='<div style="font-size:12px;font-weight:700;color:var(--tm);margin-top:6px;margin-bottom:5px">'+comments.length+' comment(s)</div>';
@@ -1669,7 +1580,6 @@ function renderTEvaluate(){
       html+='</div></div>';
     });
     ef.innerHTML=html;
-    window._tcRub=window._tcRub||{};
   });
 }
 
@@ -1677,16 +1587,16 @@ window.openTeacherComment=function(postId,targetUid){
   var form=document.getElementById("tcform-"+postId);if(!form)return;
   if(form.style.display!=="none"){form.style.display="none";return;}
   form.style.display="block";
-  if(!window._tcRub)window._tcRub={};
-  window._tcRub[postId]=[0,0,0,0,0,0];
-  renderRubRows("tc-rub-"+postId,window._tcRub[postId],true,"setTCR_"+postId);
-  window["setTCR_"+postId]=function(d,v){window._tcRub[postId][d]=v;renderRubRows("tc-rub-"+postId,window._tcRub[postId],true,"setTCR_"+postId);};
+  var storeKey="tceval_"+postId;
+  window._rubricStores[storeKey]={values:new Array(PEER_RUBRIC.length).fill(null),rubric:PEER_RUBRIC,containerId:"tc-rub-"+postId};
+  renderRubricBlock("tc-rub-"+postId,PEER_RUBRIC,window._rubricStores[storeKey].values,storeKey);
 };
 
 window.submitTeacherComment=async function(postId,targetUid){
   var text=((document.getElementById("tc-text-"+postId)||{}).value||"").trim();
   if(!text){toast("Write your feedback!");return;}
-  await push(ref(db,"posts/"+postId+"/comments"),{from:CU.displayName+" (Teacher)",fromId:CU.uid,text:text,rubric:window._tcRub?window._tcRub[postId]||[]:[],isTeacher:true,createdAt:Date.now()});
+  var storeKey="tceval_"+postId;
+  await push(ref(db,"posts/"+postId+"/comments"),{from:CU.displayName+" (Teacher)",fromId:CU.uid,text:text,peerRubric:window._rubricStores[storeKey]?window._rubricStores[storeKey].values:[],isTeacher:true,createdAt:Date.now()});
   if(targetUid){await push(ref(db,"notifications/"+targetUid),{type:"teacher",message:"Your teacher left feedback on your work!",read:false,createdAt:Date.now()});}
   toast("Evaluation saved!");var f=document.getElementById("tcform-"+postId);if(f)f.style.display="none";
 };
@@ -1695,13 +1605,16 @@ function renderTUnit(){
   var mc=document.getElementById("mc");
   mc.innerHTML='<div class="pt">Unit Info</div><div class="ps">This is Step 1 on the student Home page.</div><div class="loading">Loading...</div>';
   get(ref(db,"unitInfo")).then(function(snap){
-    var info=snap.exists()?snap.val():{title:"",description:"",theme:"",grammarTips:"",unitWords:""};
+    var info=snap.exists()?snap.val():{title:"",description:"",theme:"",grammarTips:"",unitWords:"",imageUrl:"",videoUrl:"",targetGrammar:""};
     var html='<div class="card">';
     html+='<div class="fg"><label class="fl">Unit Title</label><input class="fi" id="unit-title" value="'+esc(info.title||"")+'" placeholder="e.g. Our Community"></div>';
     html+='<div class="fg"><label class="fl">Theme</label><input class="fi" id="unit-theme" value="'+esc(info.theme||"")+'" placeholder="e.g. Identity & Belonging"></div>';
     html+='<div class="fg"><label class="fl">Description (shown to students)</label><textarea class="fta" id="unit-desc" style="min-height:80px" placeholder="What will students explore in this unit?">'+esc(info.description||"")+'</textarea></div>';
+    html+='<div class="fg"><label class="fl">Image URL (optional)</label><input class="fi" id="unit-image" value="'+esc(info.imageUrl||"")+'" placeholder="https://..."></div>';
+    html+='<div class="fg"><label class="fl">YouTube Video URL (optional)</label><input class="fi" id="unit-video" value="'+esc(info.videoUrl||"")+'" placeholder="https://youtube.com/watch?v=..."></div>';
     html+='<div class="fg"><label class="fl">Grammar Tips (one per line)</label><textarea class="fta" id="unit-grammar" style="min-height:80px" placeholder="e.g. Use past simple for finished actions&#10;Remember -ed for regular verbs">'+esc(info.grammarTips||"")+'</textarea></div>';
     html+='<div class="fg"><label class="fl">Unit Words (comma or line separated)</label><textarea class="fta" id="unit-words" style="min-height:60px" placeholder="e.g. ancestor, tradition, generation">'+esc(info.unitWords||"")+'</textarea></div>';
+    html+='<div class="fg"><label class="fl">Target Grammar (used in the contract goal)</label><input class="fi" id="unit-target-grammar" value="'+esc(info.targetGrammar||"")+'" placeholder="e.g. past simple tense"></div>';
     html+='<button class="btn btp btf" onclick="saveUnit()">Save Unit Info</button></div>';
     mc.innerHTML='<div class="pt">Unit Info</div><div class="ps">This is Step 1 on the student Home page.</div>'+html;
   });
@@ -1711,9 +1624,12 @@ window.saveUnit=async function(){
   var title=((document.getElementById("unit-title")||{}).value||"").trim();
   var theme=((document.getElementById("unit-theme")||{}).value||"").trim();
   var desc=((document.getElementById("unit-desc")||{}).value||"").trim();
+  var imageUrl=((document.getElementById("unit-image")||{}).value||"").trim();
+  var videoUrl=((document.getElementById("unit-video")||{}).value||"").trim();
   var grammarTips=((document.getElementById("unit-grammar")||{}).value||"").trim();
   var unitWords=((document.getElementById("unit-words")||{}).value||"").trim();
-  await set(ref(db,"unitInfo"),{title:title,theme:theme,description:desc,grammarTips:grammarTips,unitWords:unitWords,updatedAt:Date.now()});
+  var targetGrammar=((document.getElementById("unit-target-grammar")||{}).value||"").trim();
+  await set(ref(db,"unitInfo"),{title:title,theme:theme,description:desc,imageUrl:imageUrl,videoUrl:videoUrl,grammarTips:grammarTips,unitWords:unitWords,targetGrammar:targetGrammar,updatedAt:Date.now()});
   toast("Unit info saved! Students can now see it.");
 };
 </script>
