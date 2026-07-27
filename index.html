@@ -300,6 +300,28 @@ async function askProjectAI(userMsg){
     return "Couldn't connect to the assistant right now.";
   }
 }
+async function askFeedbackSummaryAI(wells,improves){
+  var ctx="";
+  if(wells.length)ctx+="What classmates said the student did well:\n"+wells.map(function(w){return "- "+w;}).join("\n")+"\n\n";
+  if(improves.length)ctx+="What classmates think the student could improve:\n"+improves.map(function(w){return "- "+w;}).join("\n");
+  try{
+    var res=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{"Content-Type":"application/json","x-api-key":AKEY,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+      body:JSON.stringify({
+        model:"claude-sonnet-4-20250514",
+        max_tokens:150,
+        system:"You summarize peer feedback for a 12-year-old student in ONE short, warm, encouraging sentence (max 25 words). Blend the 'did well' and 'improve' themes naturally, like: \"Classmates felt your writing was clear but wanted more examples.\" No bullet points, no names, just one plain sentence.",
+        messages:[{role:"user",content:ctx}]
+      })
+    });
+    var data=await res.json();
+    if(data&&data.error)return null;
+    return (data.content&&data.content[0]&&data.content[0].text)||null;
+  }catch(e){
+    return null;
+  }
+}
 
 let CU=null,UP=null;
 let myGid=null,myGname=null,userCoins=0;
@@ -828,6 +850,75 @@ function rubricSummaryLabel(vals){
   if(!done)return null;
   return done+"/7 areas reflected";
 }
+function rubricOverallScore(vals){
+  if(!vals)return null;
+  var filled=vals.filter(function(v){return v!==null&&v!==undefined;});
+  if(!filled.length)return null;
+  var avg=filled.reduce(function(a,b){return a+b;},0)/filled.length;
+  return avg+1; // convert 0/1/2 tier index average to a 1-3 scale
+}
+function scoreTierLabel(score){
+  if(score>=2.5)return "Advanced";
+  if(score>=1.5)return "Developing";
+  return "Novice";
+}
+function buildCommentSummary(post,comments){
+  if(!comments.length)return "";
+  var postId=post.id;
+  var perArea={},allVals=[];
+  comments.forEach(function(cm){
+    if(cm.peerRubric)cm.peerRubric.forEach(function(v,ai){
+      if(v!==null&&v!==undefined){allVals.push(v);if(!perArea[ai])perArea[ai]=[];perArea[ai].push(v);}
+    });
+  });
+  var detailId="cmsum-"+postId;
+  var html='<div style="background:var(--gl);border-radius:var(--rs);padding:10px 11px;margin-bottom:9px">';
+  html+='<div style="font-size:12px;font-weight:700;margin-bottom:6px">&#128202; Feedback Summary ('+comments.length+(comments.length===1?" comment)":" comments)")+'</div>';
+  if(post.aiSummary&&post.aiSummary.text){
+    html+='<div style="font-size:13px;font-style:italic;color:var(--pd);background:var(--pl);padding:7px 9px;border-radius:var(--rs);margin-bottom:8px">&#10024; '+esc(post.aiSummary.text)+'</div>';
+  }
+  if(allVals.length){
+    var avg=allVals.reduce(function(a,b){return a+b;},0)/allVals.length+1;
+    html+='<div style="font-size:13px;cursor:pointer" onclick="toggleCat(\''+detailId+'\')">Overall: <strong>'+scoreTierLabel(avg)+'</strong> ('+avg.toFixed(1)+'/3) &#9660;</div>';
+    html+='<div id="'+detailId+'" style="display:none;margin-top:6px">';
+    SELF_RUBRIC.forEach(function(item,ai){
+      if(perArea[ai]){
+        var a=perArea[ai].reduce(function(x,y){return x+y;},0)/perArea[ai].length+1;
+        html+='<div style="font-size:11px;color:var(--tm);margin-bottom:3px">'+esc(item.area)+': '+scoreTierLabel(a)+" ("+a.toFixed(1)+")"+'</div>';
+      }
+    });
+    html+='</div>';
+  }
+  var wells=comments.filter(function(cm){return cm.well;});
+  var improves=comments.filter(function(cm){return cm.improve;});
+  if(wells.length){
+    html+='<div style="font-size:10px;font-weight:700;color:var(--th);margin-top:8px;text-transform:uppercase;letter-spacing:.4px">What classmates said you did well</div>';
+    wells.forEach(function(cm){html+='<div style="font-size:12px;color:var(--tm);margin-top:3px">&#8226; '+esc(cm.well)+' <span style="color:var(--th)">— '+esc(cm.from||"")+'</span></div>';});
+  }
+  if(improves.length){
+    html+='<div style="font-size:10px;font-weight:700;color:var(--th);margin-top:8px;text-transform:uppercase;letter-spacing:.4px">What classmates think you could improve</div>';
+    improves.forEach(function(cm){html+='<div style="font-size:12px;color:var(--tm);margin-top:3px">&#8226; '+esc(cm.improve)+' <span style="color:var(--th)">— '+esc(cm.from||"")+'</span></div>';});
+  }
+  if(wells.length||improves.length){
+    html+='<button class="obtn mt8" onclick="generateFeedbackSummary(\''+postId+'\')">'+(post.aiSummary?"&#128260; Refresh AI Summary":"&#10024; Summarize with AI")+'</button>';
+  }
+  html+='</div>';
+  return html;
+}
+window.generateFeedbackSummary=async function(postId){
+  var snap=await get(ref(db,"posts/"+postId));
+  if(!snap.exists())return;
+  var post=snap.val();
+  var comments=post.comments?Object.values(post.comments):[];
+  var wells=comments.filter(function(cm){return cm.well;}).map(function(cm){return cm.well;});
+  var improves=comments.filter(function(cm){return cm.improve;}).map(function(cm){return cm.improve;});
+  if(!wells.length&&!improves.length){toast("No feedback to summarize yet.");return;}
+  toast("Generating summary...");
+  var text=await askFeedbackSummaryAI(wells,improves);
+  if(!text){toast("Couldn't generate a summary right now — check the assistant is set up.");return;}
+  await update(ref(db,"posts/"+postId),{aiSummary:{text:text,generatedAt:Date.now()}});
+  toast("Summary ready!");
+};
 
 function buildPostHTML(post){
   var comments=post.comments?Object.values(post.comments):[];
@@ -859,8 +950,15 @@ function buildPostHTML(post){
   html+='</div>';
   if(comments.length){
     html+='<div class="comments-section">';
-    comments.slice(-3).forEach(function(cm){
+    html+=buildCommentSummary(post,comments);
+    comments.slice(-3).forEach(function(cm,idx){
+      var score=cm.peerRubric?rubricOverallScore(cm.peerRubric):null;
       html+='<div class="comment"><div class="comment-name">'+esc(cm.from||"Student")+'</div>';
+      if(score!==null){
+        var detailId="cmdetail-"+post.id+"-"+idx;
+        html+='<div style="font-size:11px;color:var(--pd);background:var(--pl);display:inline-block;padding:2px 8px;border-radius:20px;margin:4px 0;cursor:pointer" onclick="toggleCat(\''+detailId+'\')">Overall: '+scoreTierLabel(score)+" ("+score.toFixed(1)+"/3) &#9660;"+'</div>';
+        html+='<div id="'+detailId+'" style="display:none;margin-bottom:6px">'+renderRubricReadonly(PEER_RUBRIC,cm.peerRubric)+'</div>';
+      }
       html+='<div class="comment-text">'+esc(cm.text||"")+'</div>';
       if(cm.well)html+='<div class="comment-text"><strong>Did well:</strong> '+esc(cm.well)+'</div>';
       if(cm.improve)html+='<div class="comment-text"><strong>To improve:</strong> '+esc(cm.improve)+'</div>';
