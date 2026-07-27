@@ -486,6 +486,14 @@ function faviconUrl(url){
     return "https://www.google.com/s2/favicons?domain="+domain+"&sz=64";
   }catch(e){return "";}
 }
+function getLinkThumbnail(url){
+  if(!url)return null;
+  var yt=url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{6,})/);
+  if(yt)return "https://img.youtube.com/vi/"+yt[1]+"/mqdefault.jpg";
+  var gd=url.match(/drive\.google\.com\/(?:file\/d\/|open\?id=)([a-zA-Z0-9_-]+)/);
+  if(gd)return "https://drive.google.com/thumbnail?id="+gd[1]+"&sz=w400";
+  return null;
+}
 
 // ── AUTH ──
 document.getElementById("gsign").onclick=function(){signInWithPopup(auth,prov).catch(function(e){toast("Error: "+e.message);});};
@@ -734,15 +742,29 @@ window.suggestResource=async function(){
 function renderFeed(){
   window._currentScreen="feed";
   var mc=document.getElementById("mc");
-  var html='<div class="pt">Feed</div><div class="ps">Everyone\'s projects and shared work, newest first.</div>';
-  html+='<div class="card"><div class="ctitle mb8">&#128203; Project Plans</div><div id="projects-list"><div class="loading">Loading...</div></div></div>';
-  html+='<div style="font-size:13px;font-weight:700;margin:14px 0 8px">&#128228; Shared Work</div>';
+  window._feedTab=window._feedTab||"plans";
+  var html='<div class="pt">Feed</div>';
+  html+='<div class="toggle-row">';
+  html+='<button class="toggle-btn'+(window._feedTab==="plans"?" act":"")+'" onclick="switchFeedTab(\'plans\')">&#128203; Project Plans</button>';
+  html+='<button class="toggle-btn'+(window._feedTab==="posts"?" act":"")+'" onclick="switchFeedTab(\'posts\')">&#128228; Projects</button>';
+  html+='</div>';
+  html+='<div id="feed-tab-plans" style="display:'+(window._feedTab==="plans"?"block":"none")+'"><div id="projects-list"><div class="loading">Loading...</div></div></div>';
+  html+='<div id="feed-tab-posts" style="display:'+(window._feedTab==="posts"?"block":"none")+'">';
   html+='<button class="btn btp btf mb8" onclick="openNewPost()">+ Share Your Work</button>';
-  html+='<div id="feed-container"><div class="loading">Loading...</div></div>';
+  html+='<div id="feed-container"><div class="loading">Loading...</div></div></div>';
   mc.innerHTML=html;
   loadProjectsList();
   loadFeed();
 }
+window.switchFeedTab=function(tab){
+  window._feedTab=tab;
+  var p=document.getElementById("feed-tab-plans");
+  var s=document.getElementById("feed-tab-posts");
+  if(p)p.style.display=tab==="plans"?"block":"none";
+  if(s)s.style.display=tab==="posts"?"block":"none";
+  var btns=document.querySelectorAll(".toggle-row .toggle-btn");
+  btns.forEach(function(b,i){b.classList.toggle("act",(i===0&&tab==="plans")||(i===1&&tab==="posts"));});
+};
 
 function loadProjectsList(teacherMode){
   onValue(ref(db,"contracts"),function(snap){
@@ -818,8 +840,23 @@ function buildPostHTML(post){
   html+='</div>';
   html+='<div class="post-body">';
   if(post.title)html+='<div style="font-size:14px;font-weight:700;margin-bottom:5px">'+esc(post.title)+'</div>';
-  if(post.link)html+='<a href="'+esc(post.link)+'" target="_blank" class="obtn mb8" style="display:inline-block">View work &#8599;</a>';
-  if(post.fileData)html+='<div class="mb8">'+(post.fileType&&post.fileType.startsWith("image/")?'<img src="'+post.fileData+'" style="max-width:100%;border-radius:8px;display:block">':'<a href="'+post.fileData+'" download="'+esc(post.fileName||"file")+'" class="obtn" style="display:inline-block">&#128206; '+esc(post.fileName||"Download file")+'</a>')+'</div>';
+  var uploadedImg=post.fileData&&post.fileType&&post.fileType.startsWith("image/")?post.fileData:null;
+  var linkThumb=!uploadedImg&&post.link?getLinkThumbnail(post.link):null;
+  var thumb=uploadedImg||linkThumb;
+  if(thumb){
+    html+='<img src="'+thumb+'" style="width:100%;max-height:150px;object-fit:cover;border-radius:8px;display:block;cursor:pointer;margin-bottom:8px" onclick="this.style.maxHeight=this.style.maxHeight===\'150px\'?\'none\':\'150px\';this.style.objectFit=this.style.objectFit===\'cover\'?\'contain\':\'cover\';">';
+  }
+  if(post.link){
+    if(!thumb){
+      var fav=faviconUrl(post.link);
+      html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">';
+      if(fav)html+='<img src="'+fav+'" style="width:20px;height:20px;border-radius:4px" onerror="this.style.display=\'none\'">';
+      html+='<a href="'+esc(post.link)+'" target="_blank" class="obtn" style="display:inline-block">View work &#8599;</a></div>';
+    } else {
+      html+='<a href="'+esc(post.link)+'" target="_blank" class="obtn mb8" style="display:inline-block">View work &#8599;</a>';
+    }
+  }
+  if(post.fileData&&!uploadedImg)html+='<div class="mb8"><a href="'+post.fileData+'" download="'+esc(post.fileName||"file")+'" class="obtn" style="display:inline-block">&#128206; '+esc(post.fileName||"Download file")+'</a></div>';
   var summ=rubricSummaryLabel(post.selfRubric);
   if(summ)html+='<div style="font-size:11px;color:var(--pd);background:var(--pl);display:inline-block;padding:3px 9px;border-radius:20px;margin-bottom:6px;cursor:pointer" onclick="toggleCat(\'refl-'+post.id+'\')">'+summ+' &#9660;</div>';
   if(post.well)html+='<div class="post-text"><strong>Did well:</strong> '+esc(post.well)+'</div>';
