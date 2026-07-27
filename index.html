@@ -296,24 +296,43 @@ const DEFAULT_CATALOG={
   visual:[["comic_story","Comic Story"],["visual_exhibit","Visual Exhibit"],["process_infographic","Process Infographic"],["comparison_infographic","Comparison Infographic"],["fact_file","Fact File"],["campaign_poster","Campaign Poster"]]
 };
 async function ensureCatalogSeeded(){
-  var snap=await get(ref(db,"ideaCatalog"));
-  if(snap.exists())return;
-  var seed={};
-  ["written","spoken","visual"].forEach(function(cat){
-    seed[cat]={};
-    DEFAULT_CATALOG[cat].forEach(function(pair){seed[cat][pair[0]]={name:pair[1],active:true};});
-  });
-  await set(ref(db,"ideaCatalog"),seed);
+  try{
+    var snap=await get(ref(db,"ideaCatalog"));
+    if(snap.exists())return;
+    var seed={};
+    ["written","spoken","visual"].forEach(function(cat){
+      seed[cat]={};
+      DEFAULT_CATALOG[cat].forEach(function(pair){seed[cat][pair[0]]={name:pair[1],active:true};});
+    });
+    await set(ref(db,"ideaCatalog"),seed);
+  }catch(e){
+    console.error("ensureCatalogSeeded failed:",e);
+  }
 }
 async function loadCatalog(){
-  var snap=await get(ref(db,"ideaCatalog"));
-  var raw=snap.exists()?snap.val():{};
-  var out={written:[],spoken:[],visual:[]};
-  ["written","spoken","visual"].forEach(function(cat){
-    var items=raw[cat]||{};
-    Object.keys(items).forEach(function(id){out[cat].push({id:id,name:items[id].name,active:items[id].active!==false});});
-  });
-  return out;
+  try{
+    var snap=await get(ref(db,"ideaCatalog"));
+    var raw=snap.exists()?snap.val():{};
+    var out={written:[],spoken:[],visual:[]};
+    ["written","spoken","visual"].forEach(function(cat){
+      var items=raw[cat]||{};
+      Object.keys(items).forEach(function(id){out[cat].push({id:id,name:items[id].name,active:items[id].active!==false});});
+    });
+    // if nothing came back from the DB (e.g. permission issue), fall back to built-in defaults so the quiz still works
+    if(!out.written.length&&!out.spoken.length&&!out.visual.length){
+      ["written","spoken","visual"].forEach(function(cat){
+        out[cat]=DEFAULT_CATALOG[cat].map(function(pair){return {id:pair[0],name:pair[1],active:true};});
+      });
+    }
+    return out;
+  }catch(e){
+    console.error("loadCatalog failed, using built-in defaults:",e);
+    var out2={written:[],spoken:[],visual:[]};
+    ["written","spoken","visual"].forEach(function(cat){
+      out2[cat]=DEFAULT_CATALOG[cat].map(function(pair){return {id:pair[0],name:pair[1],active:true};});
+    });
+    return out2;
+  }
 }
 function productById(catalog,id){for(var c in catalog){var f=catalog[c].find(function(p){return p.id===id;});if(f)return f;}return null;}
 function catOfProduct(catalog,id){for(var c in catalog){if(catalog[c].some(function(p){return p.id===id;}))return c;}return "written";}
@@ -1001,9 +1020,17 @@ async function startQuiz(){
   qState={i:0,platforms:[],productId:null,weakness:null,catalog:null};
   setNav("home");
   document.getElementById("mc").innerHTML='<div class="loading">Loading...</div>';
-  await ensureCatalogSeeded();
-  qState.catalog=await loadCatalog();
-  renderQuizStep();
+  try{
+    await ensureCatalogSeeded();
+    qState.catalog=await loadCatalog();
+    renderQuizStep();
+  }catch(e){
+    console.error("startQuiz failed:",e);
+    document.getElementById("mc").innerHTML='<button class="btn bts mb8" onclick="go(\'home\')">&#8592; Back to Home</button>'
+      +'<div class="card" style="border-color:var(--c);border-width:1.5px"><div style="font-size:14px;font-weight:700;margin-bottom:6px">Something went wrong loading the quiz</div>'
+      +'<div style="font-size:13px;color:var(--tm);margin-bottom:10px">'+esc(e&&e.message?e.message:"Unknown error")+'</div>'
+      +'<button class="btn btp btf" onclick="startQuiz()">Try again</button></div>';
+  }
 }
 window.startQuiz=startQuiz;
 window.qGoto=function(step){qState.i=step;renderQuizStep();};
