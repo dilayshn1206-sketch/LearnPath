@@ -810,6 +810,11 @@ function loadProjectsList(teacherMode){
       if(d.status!=="awaiting_grouping"){
         html+='<div class="divider" style="margin:9px 0"></div>';
         html+='<div style="font-size:13px;margin-bottom:8px">I will create a <strong>'+esc(d.productType)+'</strong> about <strong>'+(d.topic?esc(d.topic):"—")+'</strong>.</div>';
+        if(d.planSteps&&d.planSteps.filter(function(s){return s&&s.trim();}).length){
+          html+='<div style="font-size:11px;font-weight:700;color:var(--th);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">My Plan</div>';
+          d.planSteps.forEach(function(s,i){if(s&&s.trim())html+='<div style="font-size:12px;margin-bottom:2px">'+(i+1)+". "+esc(s)+'</div>';});
+          html+='<div class="divider" style="margin:9px 0"></div>';
+        }
         var goals=d.goals||{};
         var goalCount=GOAL_ITEMS.filter(function(g){return goals[g.id];}).length;
         html+='<div style="font-size:11px;font-weight:700;color:var(--th);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">Goals ('+goalCount+"/"+GOAL_ITEMS.length+')</div>';
@@ -1283,10 +1288,18 @@ window.renderStep3Screen=async function(){
 
   html+='<div class="contract-cols">';
 
-  // Column 1: fill in the blank
+  // Column 1: fill in the blank + mini plan
   html+='<div class="contract-col"><div class="cc-title">1. My Project</div>';
   html+='<div style="font-size:13px;line-height:1.8">I will create a <strong>'+esc(c.productType)+'</strong> about<br>';
-  html+='<input class="fi" id="c-topic" style="margin-top:6px" value="'+esc(c.topic||"")+'" placeholder="your topic..." '+(readOnly?"disabled":"onblur=\"saveTopic()\"")+'>.</div></div>';
+  html+='<input class="fi" id="c-topic" style="margin-top:6px" value="'+esc(c.topic||"")+'" placeholder="your topic..." '+(readOnly?"disabled":"onblur=\"saveTopic()\"")+'>.</div>';
+  var planSteps=(c.planSteps&&c.planSteps.length)?c.planSteps:["","",""];
+  html+='<div style="font-size:12px;font-weight:700;color:var(--pd);margin:14px 0 8px">My Plan <span style="color:var(--c)">*</span></div>';
+  planSteps.forEach(function(s,i){
+    html+='<input class="fi mb8" value="'+esc(s)+'" placeholder="Step '+(i+1)+'..." '+(readOnly?"disabled":'onblur="savePlanStep('+i+',this.value)"')+'>';
+  });
+  if(!readOnly)html+='<button type="button" class="btn bts btf" style="font-size:12px" onclick="addPlanStep()">+ Add another step</button>';
+  html+='<div style="font-size:11px;color:var(--th);margin-top:9px;line-height:1.7">Example:<br>I will read mini-story examples<br>I will write my mini story<br>I will read my mini story<br>I will make my friends read my mini story</div>';
+  html+='</div>';
 
   // Column 2: goals
   html+='<div class="contract-col"><div class="cc-title">2. Choose Your Goals</div>';
@@ -1318,6 +1331,17 @@ window.saveTopic=async function(){
   contractData.topic=val;
   await update(ref(db,"contracts/"+CU.uid),{topic:val});
 };
+window.savePlanStep=async function(idx,value){
+  if(!contractData.planSteps||contractData.planSteps.length<3)contractData.planSteps=["","",""];
+  contractData.planSteps[idx]=value;
+  await update(ref(db,"contracts/"+CU.uid),{planSteps:contractData.planSteps});
+};
+window.addPlanStep=async function(){
+  if(!contractData.planSteps||contractData.planSteps.length<3)contractData.planSteps=["","",""];
+  contractData.planSteps.push("");
+  await update(ref(db,"contracts/"+CU.uid),{planSteps:contractData.planSteps});
+  renderStep3Screen();
+};
 window.toggleGoal=async function(gid){
   if(!contractData.goals)contractData.goals={};
   contractData.goals[gid]=!contractData.goals[gid];
@@ -1332,6 +1356,8 @@ window.saveEval=async function(){
 };
 window.submitContract=async function(){
   if(!contractData.topic||!contractData.topic.trim()){toast("Fill in your topic first!");return;}
+  var steps=contractData.planSteps||["","",""];
+  if(steps.length<3||steps.some(function(s){return !s||!s.trim();})){toast("Fill in every step of your plan first!");return;}
   await update(ref(db,"contracts/"+CU.uid),{status:"pending",editUnlocked:false,submittedAt:Date.now()});
   contractData=(await get(ref(db,"contracts/"+CU.uid))).val();
   toast("Submitted! Check the Feed to see everyone's ideas.");
@@ -1874,7 +1900,16 @@ window.reviewContract=async function(studentId){
   html+='<div class="contract-cols">';
   html+='<div class="contract-col"><div class="cc-title">1. Project</div>';
   html+='<div style="font-size:13px;line-height:1.8">I will create a <strong>'+esc(c.productType)+'</strong> about<br>';
-  html+='<input class="fi" id="rv-topic" style="margin-top:6px" value="'+esc(c.topic||"")+'"></div></div>';
+  html+='<input class="fi" id="rv-topic" style="margin-top:6px" value="'+esc(c.topic||"")+'"></div>';
+  window._reviewPlanSteps=(c.planSteps&&c.planSteps.length)?c.planSteps.slice():["","",""];
+  html+='<div style="font-size:12px;font-weight:700;color:var(--pd);margin:12px 0 6px">My Plan</div>';
+  html+='<div id="rv-plan-steps">';
+  window._reviewPlanSteps.forEach(function(s,i){
+    html+='<input class="fi mb8" value="'+esc(s)+'" placeholder="Step '+(i+1)+'..." onblur="window._reviewPlanSteps['+i+']=this.value">';
+  });
+  html+='</div>';
+  html+='<button type="button" class="btn bts btf" style="font-size:12px" onclick="addReviewPlanStep()">+ Add another step</button>';
+  html+='</div>';
 
   html+='<div class="contract-col"><div class="cc-title">2. Goals</div>';
   GOAL_ITEMS.forEach(function(g){
@@ -1904,13 +1939,25 @@ window.toggleReviewGoal=function(gid){
   window._reviewGoals[gid]=!window._reviewGoals[gid];
   reviewContract(window._reviewingId);
 };
+window.addReviewPlanStep=function(){
+  window._reviewPlanSteps.push("");
+  var container=document.getElementById("rv-plan-steps");
+  if(container){
+    var i=window._reviewPlanSteps.length-1;
+    var inp=document.createElement("input");
+    inp.className="fi mb8";
+    inp.placeholder="Step "+(i+1)+"...";
+    inp.onblur=function(){window._reviewPlanSteps[i]=inp.value;};
+    container.appendChild(inp);
+  }
+};
 window.saveReview=async function(approve){
   var id=window._reviewingId;if(!id)return;
   var topic=((document.getElementById("rv-topic")||{}).value||"").trim();
   var tp=((document.getElementById("rv-teacherpct")||{}).value||"").trim();
   var pp=((document.getElementById("rv-peerpct")||{}).value||"").trim();
   var cm=((document.getElementById("rv-comment")||{}).value||"").trim();
-  var updates={topic:topic,goals:window._reviewGoals,evalTeacherPct:tp,evalPeerPct:pp,teacherComment:cm};
+  var updates={topic:topic,goals:window._reviewGoals,evalTeacherPct:tp,evalPeerPct:pp,teacherComment:cm,planSteps:window._reviewPlanSteps||[]};
   if(approve)updates.status="approved";
   await update(ref(db,"contracts/"+id),updates);
   toast(approve?"Approved!":"Changes saved!");
