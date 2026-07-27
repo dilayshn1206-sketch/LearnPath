@@ -492,7 +492,8 @@ function getLinkThumbnail(url){
   if(yt)return "https://img.youtube.com/vi/"+yt[1]+"/mqdefault.jpg";
   var gd=url.match(/drive\.google\.com\/(?:file\/d\/|open\?id=)([a-zA-Z0-9_-]+)/);
   if(gd)return "https://drive.google.com/thumbnail?id="+gd[1]+"&sz=w400";
-  return null;
+  // generic screenshot fallback for any other public link (Canva, personal sites, etc.)
+  return "https://s.wordpress.com/mshots/v1/"+encodeURIComponent(url)+"?w=400";
 }
 
 // ── AUTH ──
@@ -844,18 +845,9 @@ function buildPostHTML(post){
   var linkThumb=!uploadedImg&&post.link?getLinkThumbnail(post.link):null;
   var thumb=uploadedImg||linkThumb;
   if(thumb){
-    html+='<img src="'+thumb+'" style="width:100%;max-height:150px;object-fit:cover;border-radius:8px;display:block;cursor:pointer;margin-bottom:8px" onclick="this.style.maxHeight=this.style.maxHeight===\'150px\'?\'none\':\'150px\';this.style.objectFit=this.style.objectFit===\'cover\'?\'contain\':\'cover\';">';
+    html+='<img src="'+thumb+'" style="width:100%;max-height:150px;object-fit:cover;border-radius:8px;display:block;cursor:pointer;margin-bottom:8px" onclick="this.style.maxHeight=this.style.maxHeight===\'150px\'?\'none\':\'150px\';this.style.objectFit=this.style.objectFit===\'cover\'?\'contain\':\'cover\';" onerror="this.style.display=\'none\';">';
   }
-  if(post.link){
-    if(!thumb){
-      var fav=faviconUrl(post.link);
-      html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">';
-      if(fav)html+='<img src="'+fav+'" style="width:20px;height:20px;border-radius:4px" onerror="this.style.display=\'none\'">';
-      html+='<a href="'+esc(post.link)+'" target="_blank" class="obtn" style="display:inline-block">View work &#8599;</a></div>';
-    } else {
-      html+='<a href="'+esc(post.link)+'" target="_blank" class="obtn mb8" style="display:inline-block">View work &#8599;</a>';
-    }
-  }
+  if(post.link)html+='<a href="'+esc(post.link)+'" target="_blank" class="obtn mb8" style="display:inline-block">View work &#8599;</a>';
   if(post.fileData&&!uploadedImg)html+='<div class="mb8"><a href="'+post.fileData+'" download="'+esc(post.fileName||"file")+'" class="obtn" style="display:inline-block">&#128206; '+esc(post.fileName||"Download file")+'</a></div>';
   var summ=rubricSummaryLabel(post.selfRubric);
   if(summ)html+='<div style="font-size:11px;color:var(--pd);background:var(--pl);display:inline-block;padding:3px 9px;border-radius:20px;margin-bottom:6px;cursor:pointer" onclick="toggleCat(\'refl-'+post.id+'\')">'+summ+' &#9660;</div>';
