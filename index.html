@@ -269,7 +269,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import{getAuth,GoogleAuthProvider,signInWithPopup,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import{getDatabase,ref,set,get,push,onValue,update,remove}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-import{getStorage,ref as sref,uploadBytes,getDownloadURL}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
 const fb=initializeApp({
   apiKey:"AIzaSyDFC_bMD8MFxRPyBGO7kqgn7YWLWyEFR4M",
@@ -280,7 +279,7 @@ const fb=initializeApp({
   appId:"1:329452880269:web:f64e787d55ca3f56b67dc4",
   databaseURL:"https://let-s-practice-2eda9-default-rtdb.firebaseio.com"
 });
-const auth=getAuth(fb),db=getDatabase(fb),prov=new GoogleAuthProvider(),storage=getStorage(fb);
+const auth=getAuth(fb),db=getDatabase(fb),prov=new GoogleAuthProvider();
 const AKEY="YOUR_NEW_API_KEY_HERE";
 
 let CU=null,UP=null;
@@ -1012,12 +1011,12 @@ window.clearContract=async function(){if(!confirm("Clear your contract? You will
 
 
 // ── QUIZ (Step 2): Q1 platforms (multi) → Q2 grouped product (single) → Q3 weakness (single) ──
-var qState={i:0,platforms:[],productId:null,weakness:null,catalog:null};
+var qState={i:0,platforms:[],productId:null,weakness:null,catalog:null,reviewChoice:null};
 
 async function startQuiz(){
   var c=contractData;
   if(c&&c.productType&&c.editUnlocked===false){toast("Ask your teacher to unlock editing first.");return;}
-  qState={i:0,platforms:[],productId:null,weakness:null,catalog:null};
+  qState={i:0,platforms:[],productId:null,weakness:null,catalog:null,reviewChoice:null};
   setNav("home");
   document.getElementById("mc").innerHTML='<div class="loading">Loading...</div>';
   try{
@@ -1110,19 +1109,21 @@ function showQuizResult(mc){
   var cat=catOfProduct(qState.catalog,qState.productId);
   var alternates=qState.catalog[cat].filter(function(p){return p.active&&p.id!==rec.id;}).slice(0,3);
   var whyText="You chose "+CAT_LABELS[cat].toLowerCase()+(qState.platforms.length?" using "+qState.platforms.join(", ")+".":".");
+  if(!qState.reviewChoice)qState.reviewChoice=rec.id;
 
-  var html=isLockedStep("step2")?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">&#8592; Back</button>';
-  html+='<div class="pt">Your Idea</div><div class="ps">Based on your answers</div>';
-  html+='<div class="card" style="border-color:var(--p);border-width:1.5px;text-align:center;padding:20px">';
+  var html=isLockedStep("step2")?lockBarHTML():"";
+  html+='<div class="pt">Your Idea</div><div class="ps">Review your answers, then submit when you\'re ready.</div>';
+  html+='<div class="card'+(qState.reviewChoice===rec.id?"":"")+'" style="border-color:var(--p);border-width:1.5px;text-align:center;padding:20px;cursor:pointer" onclick="qReviewPick(\''+rec.id+'\')">';
+  if(qState.reviewChoice===rec.id)html+='<div style="font-size:11px;font-weight:700;color:var(--p);margin-bottom:6px">&#10003; SELECTED</div>';
   html+='<div style="font-size:17px;font-weight:700;margin-bottom:6px">'+esc(rec.name)+'</div>';
-  html+='<div style="font-size:12px;color:var(--tm);margin-bottom:14px">'+whyText+'</div>';
-  html+='<button class="btn btg btf" onclick="chooseProduct(\''+rec.id+'\',\''+esc(rec.name)+'\',\''+cat+'\')">Choose this idea &#8594;</button>';
+  html+='<div style="font-size:12px;color:var(--tm)">'+whyText+'</div>';
   html+='</div>';
   if(alternates.length){
     html+='<div class="card"><div style="font-size:12px;font-weight:700;color:var(--th);margin-bottom:8px">Other ideas in this style</div>';
     html+='<div style="display:flex;flex-wrap:wrap;gap:6px">';
     alternates.forEach(function(p){
-      html+='<div style="padding:6px 12px;border:1px solid var(--gb);border-radius:20px;font-size:12px;cursor:pointer" onclick="chooseProduct(\''+esc(p.id)+'\',\''+esc(p.name)+'\',\''+cat+'\')">'+esc(p.name)+'</div>';
+      var sel=qState.reviewChoice===p.id;
+      html+='<div style="padding:6px 12px;border:1.5px solid '+(sel?"var(--p)":"var(--gb)")+';background:'+(sel?"var(--pl)":"#fff")+';color:'+(sel?"var(--pd)":"var(--tx)")+';border-radius:20px;font-size:12px;cursor:pointer;font-weight:'+(sel?"700":"400")+'" onclick="qReviewPick(\''+esc(p.id)+'\')">'+(sel?"&#10003; ":"")+esc(p.name)+'</div>';
     });
     html+='</div></div>';
   }
@@ -1132,8 +1133,22 @@ function showQuizResult(mc){
     tips.forEach(function(t){html+='<div style="font-size:12px;color:var(--tm);margin-bottom:4px">&#8594; '+t+'</div>';});
     html+='</div>';
   }
+  html+='<div class="qnav">';
+  html+=(isLockedStep("step2")?"<span></span>":'<button class="btn bts" onclick="qGoto(2)">&#8592; Back to Questions</button>');
+  html+='<button class="btn btg" onclick="submitQuizChoice()">Submit My Idea &#8594;</button>';
+  html+='</div>';
   mc.innerHTML=html;
 }
+window.qReviewPick=function(id){
+  qState.reviewChoice=id;
+  showQuizResult(document.getElementById("mc"));
+};
+window.submitQuizChoice=async function(){
+  var cat=catOfProduct(qState.catalog,qState.reviewChoice);
+  var p=productById(qState.catalog,qState.reviewChoice);
+  if(!p){toast("Please select an idea first.");return;}
+  await chooseProduct(p.id,p.name,cat);
+};
 
 window.chooseProduct=async function(id,name,cat){
   await set(ref(db,"contracts/"+CU.uid),{
@@ -1583,30 +1598,37 @@ window.sendBackForEdits=async function(){
 
 function renderTGroups(){
   var mc=document.getElementById("mc");
-  mc.innerHTML='<div class="pt">Grouping</div><div class="ps">See each student\'s project idea and organise them into groups.</div>'
+  mc.innerHTML='<div class="pt">Grouping</div><div class="ps">See each student\'s project idea and organise them into groups. Grouping a student also unlocks their Learning Contract.</div>'
     +'<div class="card"><div class="ctitle">Create a Group</div>'
     +'<div class="fg"><label class="fl">Group name</label><input class="fi" id="grp-name" placeholder="e.g. Team Speakers"></div>'
     +'<button class="btn btp" onclick="createGroup()">Create</button></div>'
     +'<div id="grp-list"><div class="loading">Loading...</div></div>'
     +'<div class="card mt8"><div class="ctitle">Assign Students</div>'
-    +'<div class="fg"><label class="fl">Group</label><select class="fse" id="asgn-sel"></select></div>'
+    +'<div class="fg"><label class="fl">Group</label><select class="fse" id="asgn-sel" onchange="loadStudentsForAssign()"></select></div>'
     +'<div id="asgn-students"><div class="loading">Loading...</div></div>'
-    +'<button class="btn btp mt8" onclick="saveAssign()">Save</button></div>';
-  loadGroups();loadStudentsForAssign();
+    +'<button class="btn btp mt8" onclick="saveAssign()">Save Group Membership</button></div>';
+  loadGroups().then(loadStudentsForAssign);
 }
 
 async function loadGroups(){
   var snap=await get(ref(db,"groups"));
   var gl=document.getElementById("grp-list");if(!gl)return;
-  if(!snap.exists()){gl.innerHTML='<div class="empty"><div class="ei">&#128101;</div><p>No groups yet.</p></div>';return;}
+  if(!snap.exists()){gl.innerHTML='<div class="empty"><div class="ei">&#128101;</div><p>No groups yet.</p></div>';var selEmpty=document.getElementById("asgn-sel");if(selEmpty)selEmpty.innerHTML="";return;}
   var groups=[];snap.forEach(function(g){groups.push({id:g.key,...g.val()});});
   var sel=document.getElementById("asgn-sel");
-  if(sel)sel.innerHTML=groups.map(function(g){return '<option value="'+g.id+'">'+esc(g.name||"Group")+'</option>';}).join("");
+  var prevVal=sel?sel.value:null;
+  if(sel){
+    sel.innerHTML=groups.map(function(g){return '<option value="'+g.id+'">'+esc(g.name||"Group")+'</option>';}).join("");
+    if(prevVal&&groups.some(function(g){return g.id===prevVal;}))sel.value=prevVal;
+  }
   var gh='<div class="ctitle mb8">Existing Groups</div>';
   groups.forEach(function(g){
-    gh+='<div class="card" style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;margin-bottom:7px">';
-    gh+='<span style="font-size:14px;font-weight:700">'+esc(g.name||"")+'</span>';
-    gh+='<button class="obtn" onclick="openForum(\''+g.id+'\',\''+esc(g.name||"Group")+'\')">&#128172; Chat</button></div>';
+    gh+='<div class="card" style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;gap:6px">';
+    gh+='<span style="font-size:14px;font-weight:700;flex:1">'+esc(g.name||"")+'</span>';
+    gh+='<button class="obtn" onclick="openForum(\''+g.id+'\',\''+esc(g.name||"Group")+'\')">&#128172; Chat</button>';
+    gh+='<button class="obtn" onclick="renameGroup(\''+g.id+'\',\''+esc(g.name||"")+'\')">&#9998; Rename</button>';
+    gh+='<button class="obtn" style="color:var(--c);border-color:var(--c)" onclick="terminateGroup(\''+g.id+'\',\''+esc(g.name||"Group")+'\')">&#128465; Terminate</button>';
+    gh+='</div>';
     gh+='<div style="display:flex;flex-wrap:wrap;gap:5px">';
     Object.values(g.members||{}).forEach(function(m){gh+='<span style="padding:3px 8px;border-radius:20px;background:var(--gl);font-size:12px">'+esc(m)+'</span>';});
     if(!Object.keys(g.members||{}).length)gh+='<span style="font-size:12px;color:var(--th)">No members yet</span>';
@@ -1616,15 +1638,20 @@ async function loadGroups(){
 }
 
 async function loadStudentsForAssign(){
+  var selEl=document.getElementById("asgn-sel");
+  var selId=selEl?selEl.value:"";
+  var groupSnap=selId?await get(ref(db,"groups/"+selId)):null;
+  var currentMembers=(groupSnap&&groupSnap.exists()&&groupSnap.val().members)||{};
   var snap=await get(ref(db,"contracts"));
   var asd=document.getElementById("asgn-students");if(!asd)return;
   if(!snap.exists()){asd.innerHTML='<p style="font-size:13px;color:var(--tm)">No students yet.</p>';return;}
   var students=[];snap.forEach(function(c){var d=c.val();students.push({id:c.key,name:d.studentName||"Student",product:d.productType||"No project chosen yet"});});
   var sh="";
   students.forEach(function(s){
+    var isMember=!!currentMembers[s.id];
     sh+='<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--gb)">';
     sh+='<div style="flex:1"><div style="font-size:13px">'+esc(s.name)+'</div><div style="font-size:11px;color:var(--tm)">'+esc(s.product)+'</div></div>';
-    sh+='<input type="checkbox" id="asgn-'+s.id+'" data-uid="'+s.id+'" data-name="'+esc(s.name)+'" style="width:16px;height:16px;cursor:pointer">';
+    sh+='<input type="checkbox" id="asgn-'+s.id+'" data-uid="'+s.id+'" data-name="'+esc(s.name)+'" '+(isMember?"checked":"")+' style="width:16px;height:16px;cursor:pointer">';
     sh+='</div>';
   });
   asd.innerHTML=sh;
@@ -1638,20 +1665,60 @@ window.createGroup=async function(){
   document.getElementById("grp-name").value="";toast("Group created!");loadGroups();
 };
 
+window.renameGroup=async function(gid,oldName){
+  var name=prompt("New group name:",oldName);
+  if(!name||!name.trim())return;
+  name=name.trim();
+  await update(ref(db,"groups/"+gid),{name:name});
+  await update(ref(db,"forums/"+gid+"/info"),{groupName:name});
+  var snap=await get(ref(db,"groups/"+gid));
+  var members=(snap.exists()&&snap.val().members)||{};
+  var updates={};
+  Object.keys(members).forEach(function(uid){updates[uid+"/groupName"]=name;});
+  if(Object.keys(updates).length)await update(ref(db,"users"),updates);
+  toast("Group renamed!");loadGroups();
+};
+
+window.terminateGroup=async function(gid,name){
+  if(!confirm('Terminate "'+name+'"? Members will be removed from the group (their contracts are not affected).'))return;
+  var snap=await get(ref(db,"groups/"+gid));
+  var members=(snap.exists()&&snap.val().members)||{};
+  var updates={};
+  Object.keys(members).forEach(function(uid){updates[uid+"/groupId"]=null;updates[uid+"/groupName"]=null;});
+  if(Object.keys(updates).length)await update(ref(db,"users"),updates);
+  await remove(ref(db,"groups/"+gid));
+  await remove(ref(db,"forums/"+gid));
+  toast("Group terminated.");loadGroups();
+};
+
 window.saveAssign=async function(){
   var selEl=document.getElementById("asgn-sel");var selId=selEl?selEl.value:"";
   var selName=selEl&&selEl.options[selEl.selectedIndex]?selEl.options[selEl.selectedIndex].text:"";
   if(!selId){toast("Select a group!");return;}
-  var checked=Array.from(document.querySelectorAll("#asgn-students input:checked"));
-  if(!checked.length){toast("Select students!");return;}
+  var checkboxes=Array.from(document.querySelectorAll("#asgn-students input[type=checkbox]"));
   var members={};
-  for(var i=0;i<checked.length;i++){
-    var cb=checked[i];members[cb.dataset.uid]=cb.dataset.name;
-    await update(ref(db,"users/"+cb.dataset.uid),{groupId:selId,groupName:selName});
+  for(var i=0;i<checkboxes.length;i++){
+    var cb=checkboxes[i];
+    if(cb.checked){
+      members[cb.dataset.uid]=cb.dataset.name;
+      await update(ref(db,"users/"+cb.dataset.uid),{groupId:selId,groupName:selName});
+      // grouping a student unlocks their Learning Contract and re-locks quiz editing until the teacher unlocks it again
+      var cSnap=await get(ref(db,"contracts/"+cb.dataset.uid));
+      if(cSnap.exists()&&cSnap.val().status==="awaiting_grouping"){
+        await update(ref(db,"contracts/"+cb.dataset.uid),{status:"draft",editUnlocked:false});
+      }
+    } else {
+      // if this student was previously a member of THIS group and got unchecked, remove them from it
+      var u=await get(ref(db,"users/"+cb.dataset.uid));
+      if(u.exists()&&u.val().groupId===selId){
+        await update(ref(db,"users/"+cb.dataset.uid),{groupId:null,groupName:null});
+      }
+    }
   }
-  await update(ref(db,"groups/"+selId),{members:members});
-  toast("Assigned!");loadGroups();
+  await set(ref(db,"groups/"+selId+"/members"),members);
+  toast("Group membership saved!");loadGroups();
 };
+
 
 // ── TEACHER: IDEAS CATALOG MANAGER ──
 async function renderTIdeas(){
@@ -1763,22 +1830,36 @@ function renderTUnit(){
   });
 }
 
-window.uploadUnitImage=async function(input){
+window.uploadUnitImage=function(input){
   var file=input.files[0];if(!file)return;
   var prev=document.getElementById("unit-image-preview");
-  if(prev)prev.innerHTML='<div class="loading" style="padding:10px">Uploading...</div>';
-  try{
-    var path="unitImages/"+Date.now()+"_"+file.name.replace(/[^a-zA-Z0-9.]/g,"_");
-    var fileRef=sref(storage,path);
-    await uploadBytes(fileRef,file);
-    var url=await getDownloadURL(fileRef);
-    window._unitImageUrl=url;
-    if(prev)prev.innerHTML='<img src="'+url+'" style="width:100%;border-radius:8px;display:block">';
-    toast("Image uploaded!");
-  }catch(e){
-    toast("Upload failed — check your connection and try again.");
-    if(prev)prev.innerHTML="";
-  }
+  if(prev)prev.innerHTML='<div class="loading" style="padding:10px">Processing image...</div>';
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var img=new Image();
+    img.onload=function(){
+      try{
+        var maxW=1100;
+        var scale=Math.min(1,maxW/img.width);
+        var canvas=document.createElement("canvas");
+        canvas.width=Math.max(1,Math.round(img.width*scale));
+        canvas.height=Math.max(1,Math.round(img.height*scale));
+        var ctx=canvas.getContext("2d");
+        ctx.drawImage(img,0,0,canvas.width,canvas.height);
+        var dataUrl=canvas.toDataURL("image/jpeg",0.72);
+        window._unitImageUrl=dataUrl;
+        if(prev)prev.innerHTML='<img src="'+dataUrl+'" style="width:100%;border-radius:8px;display:block">';
+        toast("Image ready — click Save Unit Info below to publish it.");
+      }catch(err){
+        toast("Could not process that image.");
+        if(prev)prev.innerHTML="";
+      }
+    };
+    img.onerror=function(){toast("Could not read that image file.");if(prev)prev.innerHTML="";};
+    img.src=e.target.result;
+  };
+  reader.onerror=function(){toast("Could not read that file.");if(prev)prev.innerHTML="";};
+  reader.readAsDataURL(file);
 };
 
 window.saveUnit=async function(){
