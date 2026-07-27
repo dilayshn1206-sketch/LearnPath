@@ -287,17 +287,17 @@ async function askProjectAI(userMsg){
       method:"POST",
       headers:{"Content-Type":"application/json","x-api-key":AKEY,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
       body:JSON.stringify({
-        model:"claude-sonnet-4-20250514",
+        model:"claude-sonnet-5",
         max_tokens:300,
         system:"You are a friendly helper for a 12-year-old English-language student choosing a school project format (examples: Mini Report, Podcast, Comic Strip, Speech, Poster, Blog Post). Explain project types simply in 2-4 short sentences, and give one concrete tip on how to write or make it. Never write the project for them.",
         messages:[{role:"user",content:userMsg}]
       })
     });
     var data=await res.json();
-    if(data&&data.error)return "The assistant isn't set up yet — ask your teacher.";
+    if(data&&data.error)return "Assistant error: "+(data.error.message||data.error.type||"unknown")+". Ask your teacher to check the API key in the file.";
     return (data.content&&data.content[0]&&data.content[0].text)||"Sorry, I couldn't answer that.";
   }catch(e){
-    return "Couldn't connect to the assistant right now.";
+    return "Couldn't connect to the assistant right now ("+(e&&e.message?e.message:"network error")+").";
   }
 }
 async function askFeedbackSummaryAI(wells,improves){
@@ -309,14 +309,14 @@ async function askFeedbackSummaryAI(wells,improves){
       method:"POST",
       headers:{"Content-Type":"application/json","x-api-key":AKEY,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
       body:JSON.stringify({
-        model:"claude-sonnet-4-20250514",
+        model:"claude-sonnet-5",
         max_tokens:150,
         system:"You summarize peer feedback for a 12-year-old student in ONE short, warm, encouraging sentence (max 25 words). Blend the 'did well' and 'improve' themes naturally, like: \"Classmates felt your writing was clear but wanted more examples.\" No bullet points, no names, just one plain sentence.",
         messages:[{role:"user",content:ctx}]
       })
     });
     var data=await res.json();
-    if(data&&data.error)return null;
+    if(data&&data.error){console.error("askFeedbackSummaryAI error:",data.error);return null;}
     return (data.content&&data.content[0]&&data.content[0].text)||null;
   }catch(e){
     return null;
@@ -1594,30 +1594,7 @@ window.renderProfile=async function(uid,isOwn){
   html+='</div>';
   if(allPosts.length){
     allPosts.forEach(function(post){
-      var comments=post.comments?Object.values(post.comments):[];
-      html+='<div class="post" style="margin-bottom:8px">';
-      html+='<div class="post-body" style="padding-top:10px">';
-      html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;cursor:pointer" onclick="toggleCat(\'pdet-'+post.id+'\')">';
-      html+='<span style="font-size:13px;font-weight:700">'+esc(post.title||"Untitled")+'</span>';
-      html+='<div style="display:flex;align-items:center;gap:5px">';
-      if(post.isDraft)html+='<span class="post-draft" style="font-size:10px">Draft</span>';
-      if(comments.length)html+='<span class="sb sa" style="font-size:10px">'+comments.length+' comments</span>';
-      if(post.link)html+='<a href="'+esc(post.link)+'" target="_blank" class="obtn">View</a>';
-      html+='<span style="color:var(--tm)">&#8250;</span></div></div>';
-      html+='<div id="pdet-'+post.id+'" style="display:none;margin-top:8px">';
-      if(post.well)html+='<div style="font-size:12px;color:var(--tm);margin-bottom:5px"><strong>Did well:</strong> '+esc(post.well)+'</div>';
-      if(post.improve)html+='<div style="font-size:12px;color:var(--tm);margin-bottom:7px"><strong>To improve:</strong> '+esc(post.improve)+'</div>';
-      if(isOwn&&comments.length){
-        html+='<div style="font-size:12px;font-weight:700;color:var(--tm);margin-bottom:6px">Comments received:</div>';
-        comments.forEach(function(cm){
-          html+='<div class="comment"><div class="comment-name">'+esc(cm.from||"")+'</div><div class="comment-text">'+esc(cm.text||"")+'</div></div>';
-        });
-      }
-      if(!isOwn&&uid!==CU.uid){
-        html+='<div id="pfform-'+post.id+'" style="display:none"></div>';
-        html+='<button class="btn bts btf" style="font-size:12px;padding:7px 12px;margin-top:6px" onclick="openProfileComment(\''+post.id+'\',\''+uid+'\')">&#128172; Comment +&#127881;</button>';
-      }
-      html+='</div></div></div>';
+      html+=buildPostHTML(post);
     });
   } else {
     html+='<div class="empty"><div class="ei">&#128247;</div><p>'+(isOwn?"Share your first piece of work!":"Nothing shared yet.")+'</p></div>';
@@ -1637,30 +1614,6 @@ window.changeAvatar=async function(){
   document.getElementById("uav").src=url;
   toast("Avatar updated!");
   renderProfile(CU.uid,true);
-};
-
-window.openProfileComment=function(postId,targetUid){
-  var d=document.getElementById("pfform-"+postId);if(!d)return;
-  if(d.innerHTML&&d.style.display!=="none"){d.style.display="none";return;}
-  d.style.display="block";
-  var html='<div id="pf-rub-'+postId+'"></div>';
-  html+='<textarea class="fta mb8 mt8" id="pf-text-'+postId+'" placeholder="Your comment..." style="min-height:50px"></textarea>';
-  html+='<button class="btn btg" style="font-size:12px;padding:7px 13px" onclick="submitProfileComment(\''+postId+'\',\''+targetUid+'\')">Submit +&#127881;</button>';
-  d.innerHTML=html;
-  var storeKey="pfcomment_"+postId;
-  window._rubricStores[storeKey]={values:new Array(PEER_RUBRIC.length).fill(null),rubric:PEER_RUBRIC,containerId:"pf-rub-"+postId};
-  renderRubricBlock("pf-rub-"+postId,PEER_RUBRIC,window._rubricStores[storeKey].values,storeKey);
-};
-
-window.submitProfileComment=async function(postId,targetUid){
-  var text=((document.getElementById("pf-text-"+postId)||{}).value||"").trim();
-  if(!text){toast("Write a comment!");return;}
-  var storeKey="pfcomment_"+postId;
-  await push(ref(db,"posts/"+postId+"/comments"),{from:CU.displayName,fromId:CU.uid,text:text,peerRubric:window._rubricStores[storeKey]?window._rubricStores[storeKey].values:[],createdAt:Date.now()});
-  await push(ref(db,"notifications/"+targetUid),{type:"comment",message:CU.displayName+" commented on your work!",read:false,createdAt:Date.now()});
-  await addCoin();
-  toast("Comment submitted! +1 coin");
-  document.getElementById("pfform-"+postId).style.display="none";
 };
 
 // ── FORUM ──
