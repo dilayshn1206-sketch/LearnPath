@@ -558,6 +558,11 @@ async function loadContractAndStart(){
     window._liveSession=s.exists()?s.val():{active:false};
     applySessionLock();
   });
+  onValue(ref(db,"contracts/"+CU.uid),function(s){
+    contractData=s.exists()?s.val():null;
+    // if the student is just sitting on Home, refresh it live so grouping/approval shows up instantly
+    if(window._currentScreen==="home"&&!(window._liveSession&&window._liveSession.active))renderHome();
+  });
 }
 
 function setNav(id){
@@ -624,6 +629,7 @@ window.go=function(page){
 
 // ── PAGE 1: HOME ──
 async function renderHome(){
+  window._currentScreen="home";
   if(window._liveSession&&window._liveSession.active){applySessionLock();return;}
   var mc=document.getElementById("mc");
   var snap=await get(ref(db,"contracts/"+CU.uid));
@@ -660,6 +666,7 @@ async function renderHome(){
 
 // ── PAGE 2: FEED ──
 function renderFeed(){
+  window._currentScreen="feed";
   var mc=document.getElementById("mc");
   var html='<div class="pt">Feed</div><div class="ps">Everyone\'s projects and shared work, newest first.</div>';
   html+='<div class="card"><div class="ctitle mb8">Everyone\'s Projects</div><div id="projects-list"><div class="loading">Loading...</div></div></div>';
@@ -894,6 +901,7 @@ window.viewProf=function(uid){renderProfile(uid,false);setNav("profile");};
 // ── PAGE 3: PLAN ──
 // ── STEP 1: WHAT ARE WE LEARNING ──
 window.renderStep1Screen=async function(){
+  window._currentScreen="step1";
   var mc=document.getElementById("mc");
   var snap=await get(ref(db,"unitInfo"));
   var info=snap.exists()?snap.val():{title:"Unit info coming soon",description:"Your teacher will add this."};
@@ -925,6 +933,7 @@ window.renderStep1Screen=async function(){
 
 // ── STEP 3: MY LEARNING CONTRACT (3-column: topic, goals, evaluation) ──
 window.renderStep3Screen=async function(){
+  window._currentScreen="step3";
   var mc=document.getElementById("mc");
   var snap=await get(ref(db,"contracts/"+CU.uid));
   contractData=snap.exists()?snap.val():null;
@@ -1035,6 +1044,7 @@ window.startQuiz=startQuiz;
 window.qGoto=function(step){qState.i=step;renderQuizStep();};
 
 function renderQuizStep(){
+  window._currentScreen="quiz";
   var mc=document.getElementById("mc");
   if(qState.i===0)return renderQ1(mc);
   if(qState.i===1)return renderQ2(mc);
@@ -1176,6 +1186,7 @@ function renderQuizDone(){
 
 // ── PAGE 4: PROFILE ──
 window.renderProfile=async function(uid,isOwn){
+  window._currentScreen="profile";
   var mc=document.getElementById("mc");
   mc.innerHTML='<div class="loading">Loading...</div>';
   var results=await Promise.all([
@@ -1697,26 +1708,34 @@ window.saveAssign=async function(){
   if(!selId){toast("Select a group!");return;}
   var checkboxes=Array.from(document.querySelectorAll("#asgn-students input[type=checkbox]"));
   var members={};
-  for(var i=0;i<checkboxes.length;i++){
-    var cb=checkboxes[i];
-    if(cb.checked){
-      members[cb.dataset.uid]=cb.dataset.name;
-      await update(ref(db,"users/"+cb.dataset.uid),{groupId:selId,groupName:selName});
-      // grouping a student unlocks their Learning Contract and re-locks quiz editing until the teacher unlocks it again
-      var cSnap=await get(ref(db,"contracts/"+cb.dataset.uid));
-      if(cSnap.exists()&&cSnap.val().status==="awaiting_grouping"){
-        await update(ref(db,"contracts/"+cb.dataset.uid),{status:"draft",editUnlocked:false});
-      }
-    } else {
-      // if this student was previously a member of THIS group and got unchecked, remove them from it
-      var u=await get(ref(db,"users/"+cb.dataset.uid));
-      if(u.exists()&&u.val().groupId===selId){
-        await update(ref(db,"users/"+cb.dataset.uid),{groupId:null,groupName:null});
+  var unlockedCount=0;
+  try{
+    for(var i=0;i<checkboxes.length;i++){
+      var cb=checkboxes[i];
+      if(cb.checked){
+        members[cb.dataset.uid]=cb.dataset.name;
+        await update(ref(db,"users/"+cb.dataset.uid),{groupId:selId,groupName:selName});
+        // grouping a student unlocks their Learning Contract and re-locks quiz editing until the teacher unlocks it again
+        var cSnap=await get(ref(db,"contracts/"+cb.dataset.uid));
+        if(cSnap.exists()&&cSnap.val().status==="awaiting_grouping"){
+          await update(ref(db,"contracts/"+cb.dataset.uid),{status:"draft",editUnlocked:false});
+          unlockedCount++;
+        }
+      } else {
+        // if this student was previously a member of THIS group and got unchecked, remove them from it
+        var u=await get(ref(db,"users/"+cb.dataset.uid));
+        if(u.exists()&&u.val().groupId===selId){
+          await update(ref(db,"users/"+cb.dataset.uid),{groupId:null,groupName:null});
+        }
       }
     }
+    await set(ref(db,"groups/"+selId+"/members"),members);
+    toast("Saved! "+Object.keys(members).length+" student(s) in this group"+(unlockedCount?", "+unlockedCount+" newly unlocked":"")+".");
+    loadGroups();
+  }catch(e){
+    console.error("saveAssign failed:",e);
+    toast("Couldn't save — "+(e&&e.message?e.message:"unknown error")+". Check your connection and try again.");
   }
-  await set(ref(db,"groups/"+selId+"/members"),members);
-  toast("Group membership saved!");loadGroups();
 };
 
 
