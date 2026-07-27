@@ -650,7 +650,7 @@ async function renderHome(){
 
   var step2Sub,step2Click;
   if(!hasProduct){step2Sub="Take a short quiz to find your project idea";step2Click="startQuiz()";}
-  else if(awaitingGrouping){step2Sub="Your idea: "+esc(contractData.productType)+" — now wait for your teacher to group you.";step2Click="toast('Now wait for your teacher to group you.')";}
+  else if(awaitingGrouping){step2Sub="Your idea: "+esc(contractData.productType)+" — tap to retake, or wait for your teacher to group you.";step2Click="startQuiz()";}
   else if(editUnlocked){step2Sub="Your project: "+esc(contractData.productType)+" — tap to retake the quiz";step2Click="startQuiz()";}
   else{step2Sub="Your project: "+esc(contractData.productType)+" (locked — ask your teacher to unlock editing)";step2Click="toast('Ask your teacher to unlock editing first.')";}
   html+='<div class="step-card" onclick="'+step2Click+'">';
@@ -1610,6 +1610,7 @@ window.sendBackForEdits=async function(){
 function renderTGroups(){
   var mc=document.getElementById("mc");
   mc.innerHTML='<div class="pt">Grouping</div><div class="ps">See each student\'s project idea and organise them into groups. Grouping a student also unlocks their Learning Contract.</div>'
+    +'<div class="card"><div class="ctitle">Waiting to be Grouped</div><div id="waiting-list"><div class="loading">Loading...</div></div></div>'
     +'<div class="card"><div class="ctitle">Create a Group</div>'
     +'<div class="fg"><label class="fl">Group name</label><input class="fi" id="grp-name" placeholder="e.g. Team Speakers"></div>'
     +'<button class="btn btp" onclick="createGroup()">Create</button></div>'
@@ -1618,8 +1619,34 @@ function renderTGroups(){
     +'<div class="fg"><label class="fl">Group</label><select class="fse" id="asgn-sel" onchange="loadStudentsForAssign()"></select></div>'
     +'<div id="asgn-students"><div class="loading">Loading...</div></div>'
     +'<button class="btn btp mt8" onclick="saveAssign()">Save Group Membership</button></div>';
+  loadWaitingList();
   loadGroups().then(loadStudentsForAssign);
 }
+
+async function loadWaitingList(){
+  var el=document.getElementById("waiting-list");if(!el)return;
+  var snap=await get(ref(db,"contracts"));
+  var waiting=[];
+  if(snap.exists())snap.forEach(function(c){var d=c.val();if(d.status==="awaiting_grouping")waiting.push({id:c.key,...d});});
+  if(!waiting.length){el.innerHTML='<div class="empty"><div class="ei">&#9989;</div><p>No one waiting — everyone has been grouped.</p></div>';return;}
+  var html="";
+  waiting.forEach(function(s){
+    html+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--gb)">';
+    html+='<div style="flex:1"><div style="font-size:13px;font-weight:700">'+esc(s.studentName||"Student")+'</div><div style="font-size:11px;color:var(--tm)">'+esc(s.productType||"")+'</div></div>';
+    html+='<button class="btn btg" style="font-size:12px;padding:7px 12px" onclick="unlockStudent(\''+s.id+'\')">Unlock Contract &#8594;</button>';
+    html+='</div>';
+  });
+  el.innerHTML=html;
+}
+window.unlockStudent=async function(uid){
+  try{
+    await update(ref(db,"contracts/"+uid),{status:"draft",editUnlocked:false});
+    toast("Unlocked! They can now see Step 3.");
+    loadWaitingList();
+  }catch(e){
+    toast("Couldn't unlock — "+(e&&e.message?e.message:"unknown error"));
+  }
+};
 
 async function loadGroups(){
   var snap=await get(ref(db,"groups"));
@@ -1732,6 +1759,7 @@ window.saveAssign=async function(){
     await set(ref(db,"groups/"+selId+"/members"),members);
     toast("Saved! "+Object.keys(members).length+" student(s) in this group"+(unlockedCount?", "+unlockedCount+" newly unlocked":"")+".");
     loadGroups();
+    loadWaitingList();
   }catch(e){
     console.error("saveAssign failed:",e);
     toast("Couldn't save — "+(e&&e.message?e.message:"unknown error")+". Check your connection and try again.");
