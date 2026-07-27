@@ -1609,98 +1609,95 @@ window.sendBackForEdits=async function(){
 
 function renderTGroups(){
   var mc=document.getElementById("mc");
-  mc.innerHTML='<div class="pt">Grouping</div><div class="ps">See each student\'s project idea and organise them into groups. Grouping a student also unlocks their Learning Contract.</div>'
-    +'<div class="card"><div class="ctitle">Waiting to be Grouped</div><div id="waiting-list"><div class="loading">Loading...</div></div></div>'
+  mc.innerHTML='<div class="pt">Grouping</div><div class="ps">Pick a group for each student — this immediately assigns them and unlocks their Learning Contract.</div>'
     +'<div class="card"><div class="ctitle">Create a Group</div>'
     +'<div class="fg"><label class="fl">Group name</label><input class="fi" id="grp-name" placeholder="e.g. Team Speakers"></div>'
     +'<button class="btn btp" onclick="createGroup()">Create</button></div>'
     +'<div id="grp-list"><div class="loading">Loading...</div></div>'
-    +'<div class="card mt8"><div class="ctitle">Assign Students</div>'
-    +'<div class="fg"><label class="fl">Group</label><select class="fse" id="asgn-sel" onchange="loadStudentsForAssign()"></select></div>'
-    +'<div id="asgn-students"><div class="loading">Loading...</div></div>'
-    +'<button class="btn btp mt8" onclick="saveAssign()">Save Group Membership</button></div>';
-  loadWaitingList();
-  loadGroups().then(loadStudentsForAssign);
+    +'<div class="card"><div class="ctitle">Students</div><div id="student-group-list"><div class="loading">Loading...</div></div></div>';
+  renderGroupingTab();
 }
 
-async function loadWaitingList(){
-  var el=document.getElementById("waiting-list");if(!el)return;
-  var snap=await get(ref(db,"contracts"));
-  var waiting=[];
-  if(snap.exists())snap.forEach(function(c){var d=c.val();if(d.status==="awaiting_grouping")waiting.push({id:c.key,...d});});
-  if(!waiting.length){el.innerHTML='<div class="empty"><div class="ei">&#9989;</div><p>No one waiting — everyone has been grouped.</p></div>';return;}
+async function renderGroupingTab(){
+  var gSnap=await get(ref(db,"groups"));
+  var groups=[];
+  if(gSnap.exists())gSnap.forEach(function(g){groups.push({id:g.key,...g.val()});});
+
+  var gl=document.getElementById("grp-list");
+  if(gl){
+    if(!groups.length)gl.innerHTML='<div class="empty"><div class="ei">&#128101;</div><p>No groups yet — create one above.</p></div>';
+    else{
+      var gh='<div class="ctitle mb8">Existing Groups</div>';
+      groups.forEach(function(g){
+        gh+='<div class="card" style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;gap:6px">';
+        gh+='<span style="font-size:14px;font-weight:700;flex:1">'+esc(g.name||"")+'</span>';
+        gh+='<button class="obtn" onclick="openForum(\''+g.id+'\',\''+esc(g.name||"Group")+'\')">&#128172; Chat</button>';
+        gh+='<button class="obtn" onclick="renameGroup(\''+g.id+'\',\''+esc(g.name||"")+'\')">&#9998; Rename</button>';
+        gh+='<button class="obtn" style="color:var(--c);border-color:var(--c)" onclick="terminateGroup(\''+g.id+'\',\''+esc(g.name||"Group")+'\')">&#128465; Terminate</button>';
+        gh+='</div>';
+        gh+='<div style="display:flex;flex-wrap:wrap;gap:5px">';
+        Object.values(g.members||{}).forEach(function(m){gh+='<span style="padding:3px 8px;border-radius:20px;background:var(--gl);font-size:12px">'+esc(m)+'</span>';});
+        if(!Object.keys(g.members||{}).length)gh+='<span style="font-size:12px;color:var(--th)">No members yet</span>';
+        gh+='</div></div>';
+      });
+      gl.innerHTML=gh;
+    }
+  }
+
+  var sl=document.getElementById("student-group-list");if(!sl)return;
+  var cSnap=await get(ref(db,"contracts"));
+  var students=[];
+  if(cSnap.exists())cSnap.forEach(function(c){students.push({id:c.key,...c.val()});});
+  if(!students.length){sl.innerHTML='<div class="empty"><div class="ei">&#128100;</div><p>No students have taken the quiz yet.</p></div>';return;}
+  var uSnap=await get(ref(db,"users"));
+  var users=(uSnap.exists()&&uSnap.val())||{};
   var html="";
-  waiting.forEach(function(s){
+  students.forEach(function(s){
+    var currentGid=(users[s.id]&&users[s.id].groupId)||"";
+    var statusLabel=s.status==="awaiting_grouping"?"Waiting to be grouped":s.status==="approved"?"Approved":s.status==="pending"?"Pending approval":"Draft";
     html+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--gb)">';
-    html+='<div style="flex:1"><div style="font-size:13px;font-weight:700">'+esc(s.studentName||"Student")+'</div><div style="font-size:11px;color:var(--tm)">'+esc(s.productType||"")+'</div></div>';
-    html+='<button class="btn btg" style="font-size:12px;padding:7px 12px" onclick="unlockStudent(\''+s.id+'\')">Unlock Contract &#8594;</button>';
-    html+='</div>';
+    html+='<div style="flex:1"><div style="font-size:13px;font-weight:700">'+esc(s.studentName||"Student")+'</div>';
+    html+='<div style="font-size:11px;color:var(--tm)">'+esc(s.productType||"")+" &bull; "+statusLabel+'</div></div>';
+    html+='<select class="fse" style="max-width:150px" onchange="assignStudentGroup(\''+s.id+'\',\''+esc(s.studentName||"Student")+'\',this.value,this.options[this.selectedIndex].text)">';
+    var opts=('<option value="">— No group —</option>'+groups.map(function(g){return '<option value="'+g.id+'"'+(g.id===currentGid?" selected":"")+'>'+esc(g.name||"Group")+'</option>';}).join(""));
+    html+=opts;
+    html+='</select></div>';
   });
-  el.innerHTML=html;
+  sl.innerHTML=html;
 }
-window.unlockStudent=async function(uid){
+
+window.assignStudentGroup=async function(uid,name,groupId,groupName){
   try{
-    await update(ref(db,"contracts/"+uid),{status:"draft",editUnlocked:false});
-    toast("Unlocked! They can now see Step 3.");
-    loadWaitingList();
+    var uSnap=await get(ref(db,"users/"+uid));
+    var oldGroupId=(uSnap.exists()&&uSnap.val().groupId)||null;
+    if(oldGroupId&&oldGroupId!==groupId){await remove(ref(db,"groups/"+oldGroupId+"/members/"+uid));}
+    if(groupId){
+      await update(ref(db,"users/"+uid),{groupId:groupId,groupName:groupName});
+      await set(ref(db,"groups/"+groupId+"/members/"+uid),name);
+      var cSnap=await get(ref(db,"contracts/"+uid));
+      if(cSnap.exists()&&cSnap.val().status==="awaiting_grouping"){
+        await update(ref(db,"contracts/"+uid),{status:"draft",editUnlocked:false});
+        toast(name+" grouped and unlocked!");
+      } else {
+        toast(name+" moved to "+groupName+".");
+      }
+    } else {
+      await update(ref(db,"users/"+uid),{groupId:null,groupName:null});
+      toast(name+" removed from group.");
+    }
+    renderGroupingTab();
   }catch(e){
-    toast("Couldn't unlock — "+(e&&e.message?e.message:"unknown error"));
+    console.error("assignStudentGroup failed:",e);
+    toast("Couldn't save — "+(e&&e.message?e.message:"unknown error"));
   }
 };
-
-async function loadGroups(){
-  var snap=await get(ref(db,"groups"));
-  var gl=document.getElementById("grp-list");if(!gl)return;
-  if(!snap.exists()){gl.innerHTML='<div class="empty"><div class="ei">&#128101;</div><p>No groups yet.</p></div>';var selEmpty=document.getElementById("asgn-sel");if(selEmpty)selEmpty.innerHTML="";return;}
-  var groups=[];snap.forEach(function(g){groups.push({id:g.key,...g.val()});});
-  var sel=document.getElementById("asgn-sel");
-  var prevVal=sel?sel.value:null;
-  if(sel){
-    sel.innerHTML=groups.map(function(g){return '<option value="'+g.id+'">'+esc(g.name||"Group")+'</option>';}).join("");
-    if(prevVal&&groups.some(function(g){return g.id===prevVal;}))sel.value=prevVal;
-  }
-  var gh='<div class="ctitle mb8">Existing Groups</div>';
-  groups.forEach(function(g){
-    gh+='<div class="card" style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;gap:6px">';
-    gh+='<span style="font-size:14px;font-weight:700;flex:1">'+esc(g.name||"")+'</span>';
-    gh+='<button class="obtn" onclick="openForum(\''+g.id+'\',\''+esc(g.name||"Group")+'\')">&#128172; Chat</button>';
-    gh+='<button class="obtn" onclick="renameGroup(\''+g.id+'\',\''+esc(g.name||"")+'\')">&#9998; Rename</button>';
-    gh+='<button class="obtn" style="color:var(--c);border-color:var(--c)" onclick="terminateGroup(\''+g.id+'\',\''+esc(g.name||"Group")+'\')">&#128465; Terminate</button>';
-    gh+='</div>';
-    gh+='<div style="display:flex;flex-wrap:wrap;gap:5px">';
-    Object.values(g.members||{}).forEach(function(m){gh+='<span style="padding:3px 8px;border-radius:20px;background:var(--gl);font-size:12px">'+esc(m)+'</span>';});
-    if(!Object.keys(g.members||{}).length)gh+='<span style="font-size:12px;color:var(--th)">No members yet</span>';
-    gh+='</div></div>';
-  });
-  gl.innerHTML=gh;
-}
-
-async function loadStudentsForAssign(){
-  var selEl=document.getElementById("asgn-sel");
-  var selId=selEl?selEl.value:"";
-  var groupSnap=selId?await get(ref(db,"groups/"+selId)):null;
-  var currentMembers=(groupSnap&&groupSnap.exists()&&groupSnap.val().members)||{};
-  var snap=await get(ref(db,"contracts"));
-  var asd=document.getElementById("asgn-students");if(!asd)return;
-  if(!snap.exists()){asd.innerHTML='<p style="font-size:13px;color:var(--tm)">No students yet.</p>';return;}
-  var students=[];snap.forEach(function(c){var d=c.val();students.push({id:c.key,name:d.studentName||"Student",product:d.productType||"No project chosen yet"});});
-  var sh="";
-  students.forEach(function(s){
-    var isMember=!!currentMembers[s.id];
-    sh+='<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--gb)">';
-    sh+='<div style="flex:1"><div style="font-size:13px">'+esc(s.name)+'</div><div style="font-size:11px;color:var(--tm)">'+esc(s.product)+'</div></div>';
-    sh+='<input type="checkbox" id="asgn-'+s.id+'" data-uid="'+s.id+'" data-name="'+esc(s.name)+'" '+(isMember?"checked":"")+' style="width:16px;height:16px;cursor:pointer">';
-    sh+='</div>';
-  });
-  asd.innerHTML=sh;
-}
 
 window.createGroup=async function(){
   var name=((document.getElementById("grp-name")||{}).value||"").trim();
   if(!name){toast("Enter a name!");return;}
   var nr=await push(ref(db,"groups"),{name:name,members:{},createdAt:Date.now()});
   await set(ref(db,"forums/"+nr.key+"/info"),{groupName:name,createdAt:Date.now()});
-  document.getElementById("grp-name").value="";toast("Group created!");loadGroups();
+  document.getElementById("grp-name").value="";toast("Group created!");renderGroupingTab();
 };
 
 window.renameGroup=async function(gid,oldName){
@@ -1714,7 +1711,7 @@ window.renameGroup=async function(gid,oldName){
   var updates={};
   Object.keys(members).forEach(function(uid){updates[uid+"/groupName"]=name;});
   if(Object.keys(updates).length)await update(ref(db,"users"),updates);
-  toast("Group renamed!");loadGroups();
+  toast("Group renamed!");renderGroupingTab();
 };
 
 window.terminateGroup=async function(gid,name){
@@ -1726,46 +1723,8 @@ window.terminateGroup=async function(gid,name){
   if(Object.keys(updates).length)await update(ref(db,"users"),updates);
   await remove(ref(db,"groups/"+gid));
   await remove(ref(db,"forums/"+gid));
-  toast("Group terminated.");loadGroups();
+  toast("Group terminated.");renderGroupingTab();
 };
-
-window.saveAssign=async function(){
-  var selEl=document.getElementById("asgn-sel");var selId=selEl?selEl.value:"";
-  var selName=selEl&&selEl.options[selEl.selectedIndex]?selEl.options[selEl.selectedIndex].text:"";
-  if(!selId){toast("Select a group!");return;}
-  var checkboxes=Array.from(document.querySelectorAll("#asgn-students input[type=checkbox]"));
-  var members={};
-  var unlockedCount=0;
-  try{
-    for(var i=0;i<checkboxes.length;i++){
-      var cb=checkboxes[i];
-      if(cb.checked){
-        members[cb.dataset.uid]=cb.dataset.name;
-        await update(ref(db,"users/"+cb.dataset.uid),{groupId:selId,groupName:selName});
-        // grouping a student unlocks their Learning Contract and re-locks quiz editing until the teacher unlocks it again
-        var cSnap=await get(ref(db,"contracts/"+cb.dataset.uid));
-        if(cSnap.exists()&&cSnap.val().status==="awaiting_grouping"){
-          await update(ref(db,"contracts/"+cb.dataset.uid),{status:"draft",editUnlocked:false});
-          unlockedCount++;
-        }
-      } else {
-        // if this student was previously a member of THIS group and got unchecked, remove them from it
-        var u=await get(ref(db,"users/"+cb.dataset.uid));
-        if(u.exists()&&u.val().groupId===selId){
-          await update(ref(db,"users/"+cb.dataset.uid),{groupId:null,groupName:null});
-        }
-      }
-    }
-    await set(ref(db,"groups/"+selId+"/members"),members);
-    toast("Saved! "+Object.keys(members).length+" student(s) in this group"+(unlockedCount?", "+unlockedCount+" newly unlocked":"")+".");
-    loadGroups();
-    loadWaitingList();
-  }catch(e){
-    console.error("saveAssign failed:",e);
-    toast("Couldn't save — "+(e&&e.message?e.message:"unknown error")+". Check your connection and try again.");
-  }
-};
-
 
 // ── TEACHER: IDEAS CATALOG MANAGER ──
 async function renderTIdeas(){
