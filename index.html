@@ -1298,7 +1298,7 @@ window.renderStep3Screen=async function(){
     html+='<input class="fi mb8" value="'+esc(s)+'" placeholder="Step '+(i+1)+'..." '+(readOnly?"disabled":'onblur="savePlanStep('+i+',this.value)"')+'>';
   });
   if(!readOnly)html+='<button type="button" class="btn bts btf" style="font-size:12px" onclick="addPlanStep()">+ Add another step</button>';
-  html+='<div style="font-size:11px;color:var(--th);margin-top:9px;line-height:1.7">Example:<br>I will read mini-story examples<br>I will write my mini story<br>I will read my mini story<br>I will make my friends read my mini story</div>';
+  html+='<div style="font-size:11px;color:var(--th);margin-top:9px;line-height:1.7">Example:<br>1- I will read mini-story examples<br>2- I will write my mini-story<br>3- I will read my mini-story<br>4- I will make my friends read my mini-story</div>';
   html+='</div>';
 
   // Column 2: goals
