@@ -205,6 +205,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .rublevel-opt.sel{border-color:var(--p);background:var(--pl);color:var(--pd);font-weight:600}
 .rublevel-bullets{margin-top:6px;font-size:11px;font-weight:400;color:var(--tm);line-height:1.6}
 .project-card{background:#fff;border-radius:var(--r);border:1px solid var(--gb);padding:12px;margin-bottom:8px}
+.rubarea2{background:#fff;border:1px solid var(--gb);border-radius:var(--r);padding:13px;margin-bottom:10px}
+.rubarea2-hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:10px}
+.rub-details-btn{flex-shrink:0;padding:7px 13px;border-radius:20px;border:1.5px solid var(--tx);background:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
+.rub-pills{display:flex;flex-wrap:wrap;gap:7px}
+.rub-pill{display:inline-block;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid transparent}
+.rub-pill.tier0{background:#EAF1FE;color:#2F6FED}
+.rub-pill.tier1{background:var(--tl);color:var(--td)}
+.rub-pill.tier2{background:var(--al);color:var(--a)}
+.rub-pill.sel{border-color:currentColor;box-shadow:0 0 0 1.5px currentColor inset}
+.rub-details-panel{margin-top:11px;display:flex;flex-direction:column;gap:10px}
+.rub-detail-item{background:var(--gl);border-radius:var(--rs);padding:10px 11px;cursor:pointer;border:1.5px solid transparent}
+.rub-detail-item.sel{border-color:var(--p);background:var(--pl)}
+.rub-detail-title{font-size:13px;font-weight:700;color:var(--tx);margin-bottom:2px}
 </style>
 </head>
 <body>
@@ -256,6 +269,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import{getAuth,GoogleAuthProvider,signInWithPopup,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import{getDatabase,ref,set,get,push,onValue,update,remove}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import{getStorage,ref as sref,uploadBytes,getDownloadURL}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
 const fb=initializeApp({
   apiKey:"AIzaSyDFC_bMD8MFxRPyBGO7kqgn7YWLWyEFR4M",
@@ -266,7 +280,7 @@ const fb=initializeApp({
   appId:"1:329452880269:web:f64e787d55ca3f56b67dc4",
   databaseURL:"https://let-s-practice-2eda9-default-rtdb.firebaseio.com"
 });
-const auth=getAuth(fb),db=getDatabase(fb),prov=new GoogleAuthProvider();
+const auth=getAuth(fb),db=getDatabase(fb),prov=new GoogleAuthProvider(),storage=getStorage(fb);
 const AKEY="YOUR_NEW_API_KEY_HERE";
 
 let CU=null,UP=null;
@@ -332,13 +346,14 @@ const GOAL_ITEMS=[
   {id:"evidence",text:"I will support my ideas with evidence or details."},
   {id:"spelling",text:"I will check my spelling, punctuation (. , / ? : ;), and grammar."},
   {id:"speakClear",text:"I will speak clearly for 60–90 seconds."},
-  {id:"easyUnderstand",text:"I will make my project easy to understand."}
+  {id:"easyUnderstand",text:"I will make my project easy to understand."},
+  {id:"workAtHome",text:"I will work at home too to finish my project."}
 ];
 // which goals are pre-recommended (pre-checked) per category
 const GOAL_RECOMMEND={
-  written:["unitWords","organize","grammar","tenSentences","evidence","spelling","easyUnderstand"],
-  spoken:["unitWords","organize","grammar","evidence","speakClear","easyUnderstand"],
-  visual:["unitWords","organize","grammar","evidence","spelling","easyUnderstand"]
+  written:["unitWords","organize","grammar","tenSentences","evidence","spelling","easyUnderstand","workAtHome"],
+  spoken:["unitWords","organize","grammar","evidence","speakClear","easyUnderstand","workAtHome"],
+  visual:["unitWords","organize","grammar","evidence","spelling","easyUnderstand","workAtHome"]
 };
 
 // ── SELF & PEER RUBRICS (7 areas x 3 levels, with supporting bullets) ──
@@ -423,9 +438,11 @@ window.toast=toast;
 function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 function skc(s){var m={Speaking:"#E1F5EE",Writing:"#EEEDFE",Reading:"#FAEEDA",Listening:"#FAECE7",speaking:"#E1F5EE",writing:"#EEEDFE"};return m[s]||"#F1EFE8";}
 function timeAgo(ts){var d=Date.now()-ts;if(d<60000)return "just now";if(d<3600000)return Math.floor(d/60000)+"m ago";if(d<86400000)return Math.floor(d/3600000)+"h ago";return Math.floor(d/86400000)+"d ago";}
-function extractYouTubeId(url){
-  var m=url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{6,})/);
-  return m?m[1]:null;
+function formatDateTime(ts){
+  var d=new Date(ts);
+  var dateStr=d.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"});
+  var timeStr=d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});
+  return dateStr+" &bull; "+timeStr;
 }
 
 // ── AUTH ──
@@ -650,10 +667,25 @@ function loadProjectsList(){
       if(d.studentPhoto)html+='<img src="'+esc(d.studentPhoto)+'" class="post-av" onclick="viewProf(\''+esc(d.studentId||"")+'\')">';
       else html+='<div class="post-avp" onclick="viewProf(\''+esc(d.studentId||"")+'\')">'+esc((d.studentName||"?")[0])+'</div>';
       html+='<div style="flex:1"><div style="font-size:13px;font-weight:700">'+esc(d.studentName||"Student")+'</div>';
-      html+='<div style="font-size:12px;color:var(--tm)">'+esc(d.productType)+(d.topic?" — "+esc(d.topic):"")+'</div></div>';
+      html+='<div style="font-size:12px;color:var(--tm)">'+esc(d.productType)+'</div></div>';
       html+='<span class="sb '+statusClass+'" style="'+(statusClass?"":"background:var(--gl);color:var(--tm)")+'">'+statusLabel+'</span>';
       html+='</div>';
-      if(d.teacherComment)html+='<div style="background:var(--tl);border-radius:var(--rs);padding:6px 9px;font-size:11px;color:var(--td);margin-top:7px"><strong>Teacher:</strong> '+esc(d.teacherComment)+'</div>';
+      if(d.status!=="awaiting_grouping"){
+        html+='<div class="divider" style="margin:9px 0"></div>';
+        html+='<div style="font-size:13px;margin-bottom:8px">I will create a <strong>'+esc(d.productType)+'</strong> about <strong>'+(d.topic?esc(d.topic):"—")+'</strong>.</div>';
+        var goals=d.goals||{};
+        var goalCount=GOAL_ITEMS.filter(function(g){return goals[g.id];}).length;
+        html+='<div style="font-size:11px;font-weight:700;color:var(--th);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">Goals ('+goalCount+"/"+GOAL_ITEMS.length+')</div>';
+        GOAL_ITEMS.forEach(function(g){
+          var checked=!!goals[g.id];
+          html+='<div style="display:flex;align-items:flex-start;gap:7px;padding:3px 0;font-size:12px;'+(checked?"":"color:var(--th)")+'"><span>'+(checked?"&#9989;":"&#11036;")+'</span><span>'+g.text.replace("{grammar}","target grammar")+'</span></div>';
+        });
+        if(d.evalTeacherPct||d.evalPeerPct){
+          html+='<div style="font-size:11px;font-weight:700;color:var(--th);text-transform:uppercase;letter-spacing:.4px;margin:8px 0 4px">Evaluation Goals</div>';
+          html+='<div style="font-size:12px">Teacher: '+esc(d.evalTeacherPct||"—")+"% &bull; Classmates: "+esc(d.evalPeerPct||"—")+'%</div>';
+        }
+      }
+      if(d.teacherComment)html+='<div style="background:var(--tl);border-radius:var(--rs);padding:6px 9px;font-size:11px;color:var(--td);margin-top:9px"><strong>Teacher:</strong> '+esc(d.teacherComment)+'</div>';
       html+='</div>';
     });
     el.innerHTML=html;
@@ -687,7 +719,7 @@ function buildPostHTML(post){
   if(post.photo)html+='<img src="'+esc(post.photo)+'" class="post-av" onclick="viewProf(\''+esc(post.uid)+'\')">';
   else html+='<div class="post-avp" onclick="viewProf(\''+esc(post.uid)+'\')">'+esc((post.name||"?")[0])+'</div>';
   html+='<div style="flex:1"><div class="post-name" onclick="viewProf(\''+esc(post.uid)+'\')">'+esc(post.name||"Student")+'</div>';
-  html+='<div class="post-meta">'+esc(post.productType||"")+" &bull; "+timeAgo(post.createdAt||Date.now())+'</div></div>';
+  html+='<div class="post-meta">'+esc(post.productType||"")+" &bull; "+formatDateTime(post.createdAt||Date.now())+" ("+timeAgo(post.createdAt||Date.now())+")"+'</div></div>';
   if(post.isDraft)html+='<span class="post-draft">Draft</span>';
   html+='</div>';
   html+='<div class="post-body">';
@@ -724,17 +756,36 @@ function buildPostHTML(post){
 
 // ── GENERIC RUBRIC SELECTOR (used for self-reflection, peer comments, teacher evaluation) ──
 window._rubricStores={};
+var TIER_LABELS=["Novice (1)","Developing (2)","Advanced (3)"];
 function renderRubricBlock(containerId,rubric,values,storeKey){
   var el=document.getElementById(containerId);if(!el)return;
+  var store=window._rubricStores[storeKey];
+  if(!store.expanded)store.expanded={};
   var html="";
   rubric.forEach(function(item,ai){
-    html+='<div class="rubarea"><div class="rubarea-name">'+esc(item.area)+'</div><div class="rubarea-q">'+esc(item.q)+'</div>';
+    var isOpen=!!store.expanded[ai];
+    html+='<div class="rubarea2">';
+    html+='<div class="rubarea2-hdr"><div><div class="rubarea-name">'+esc(item.area)+'</div><div class="rubarea-q">'+esc(item.q)+'</div></div>';
+    html+='<button type="button" class="rub-details-btn" onclick="toggleRubDetails(\''+storeKey+'\','+ai+')">Details '+(isOpen?"&#9650;":"&#9660;")+'</button></div>';
+    html+='<div class="rub-pills">';
     item.levels.forEach(function(lvl,li){
       var sel=values[ai]===li;
-      html+='<div class="rublevel-opt'+(sel?" sel":"")+'" onclick="pickRubricLevel(\''+storeKey+'\','+ai+','+li+')">'+esc(lvl.label);
-      if(sel){html+='<div class="rublevel-bullets">';lvl.bullets.forEach(function(b){html+='&#8226; '+esc(b)+'<br>';});html+='</div>';}
-      html+='</div>';
+      html+='<span class="rub-pill tier'+li+(sel?" sel":"")+'" onclick="pickRubricLevel(\''+storeKey+'\','+ai+','+li+')">'+TIER_LABELS[li]+'</span>';
     });
+    html+='</div>';
+    if(isOpen){
+      html+='<div class="rub-details-panel">';
+      item.levels.forEach(function(lvl,li){
+        var sel=values[ai]===li;
+        html+='<div class="rub-detail-item'+(sel?" sel":"")+'" onclick="pickRubricLevel(\''+storeKey+'\','+ai+','+li+')">';
+        html+='<span class="rub-pill tier'+li+(sel?" sel":"")+'" style="margin-bottom:6px">'+TIER_LABELS[li]+'</span>';
+        html+='<div class="rub-detail-title">'+esc(lvl.label)+'</div>';
+        html+='<div class="rublevel-bullets">';
+        lvl.bullets.forEach(function(b){html+='&#8226; '+esc(b)+'<br>';});
+        html+='</div></div>';
+      });
+      html+='</div>';
+    }
     html+='</div>';
   });
   el.innerHTML=html;
@@ -742,6 +793,12 @@ function renderRubricBlock(containerId,rubric,values,storeKey){
 window.pickRubricLevel=function(storeKey,ai,li){
   var s=window._rubricStores[storeKey];if(!s)return;
   s.values[ai]=li;
+  renderRubricBlock(s.containerId,s.rubric,s.values,storeKey);
+};
+window.toggleRubDetails=function(storeKey,ai){
+  var s=window._rubricStores[storeKey];if(!s)return;
+  if(!s.expanded)s.expanded={};
+  s.expanded[ai]=!s.expanded[ai];
   renderRubricBlock(s.containerId,s.rubric,s.values,storeKey);
 };
 
@@ -830,10 +887,6 @@ window.renderStep1Screen=async function(){
   html+='</div>';
   if(info.imageUrl&&info.imageUrl.trim()){
     html+='<div class="card" style="padding:0;overflow:hidden"><img src="'+esc(info.imageUrl)+'" style="width:100%;display:block"></div>';
-  }
-  if(info.videoUrl&&info.videoUrl.trim()){
-    var vid=extractYouTubeId(info.videoUrl);
-    if(vid)html+='<div class="card" style="padding:0;overflow:hidden"><div style="position:relative;padding-top:56.25%"><iframe src="https://www.youtube.com/embed/'+vid+'" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" allowfullscreen></iframe></div></div>';
   }
   if(info.grammarTips&&info.grammarTips.trim()){
     html+='<div class="card"><div style="font-size:13px;font-weight:700;margin-bottom:8px">&#128221; Grammar Tips</div>';
@@ -952,6 +1005,8 @@ async function startQuiz(){
   qState.catalog=await loadCatalog();
   renderQuizStep();
 }
+window.startQuiz=startQuiz;
+window.qGoto=function(step){qState.i=step;renderQuizStep();};
 
 function renderQuizStep(){
   var mc=document.getElementById("mc");
@@ -978,7 +1033,7 @@ function renderQ1(mc){
     html+='<span style="flex:1">'+pf+'</span><span class="qchk">'+(on?"&#10003;":"")+'</span></div>';
   });
   html+='</div><div class="qnav"><span></span>';
-  html+='<button class="btn btp" '+(qState.platforms.length===0?"disabled":"")+' onclick="qState.i=1;renderQuizStep()">Continue &#8594;</button></div>';
+  html+='<button class="btn btp" '+(qState.platforms.length===0?"disabled":"")+' onclick="qGoto(1)">Continue &#8594;</button></div>';
   mc.innerHTML=html;
 }
 window.qToggle1=function(pf){
@@ -1002,8 +1057,8 @@ function renderQ2(mc){
     });
     html+='</div>';
   });
-  html+='<div class="qnav"><button class="btn bts" onclick="qState.i=0;renderQuizStep()">Back</button>';
-  html+='<button class="btn btp" '+(!qState.productId?"disabled":"")+' onclick="qState.i=2;renderQuizStep()">Continue &#8594;</button></div>';
+  html+='<div class="qnav"><button class="btn bts" onclick="qGoto(0)">Back</button>';
+  html+='<button class="btn btp" '+(!qState.productId?"disabled":"")+' onclick="qGoto(2)">Continue &#8594;</button></div>';
   mc.innerHTML=html;
 }
 window.qPick2=function(id){qState.productId=id;renderQ2(document.getElementById("mc"));};
@@ -1017,8 +1072,8 @@ function renderQ3(mc){
     html+='<div class="qo'+(on?" sel":"")+'" onclick="qPick3(\''+o.value+'\')">';
     html+='<span style="font-size:16px;width:24px;flex-shrink:0">'+o.e+'</span><span style="flex:1">'+o.t+'</span><span class="qchk">'+(on?"&#10003;":"")+'</span></div>';
   });
-  html+='</div><div class="qnav"><button class="btn bts" onclick="qState.i=1;renderQuizStep()">Back</button>';
-  html+='<button class="btn btp" '+(!qState.weakness?"disabled":"")+' onclick="qState.i=3;renderQuizStep()">See my idea &#8594;</button></div>';
+  html+='</div><div class="qnav"><button class="btn bts" onclick="qGoto(1)">Back</button>';
+  html+='<button class="btn btp" '+(!qState.weakness?"disabled":"")+' onclick="qGoto(3)">See my idea &#8594;</button></div>';
   mc.innerHTML=html;
 }
 window.qPick3=function(v){qState.weakness=v;renderQ3(document.getElementById("mc"));};
@@ -1398,11 +1453,8 @@ function renderTOverview(){
         h+='<div class="post-meta">'+esc(s.productType||"")+'</div></div></div>';
         h+='<div class="post-body">';
         if(s.topic)h+='<div style="font-size:13px;margin-bottom:6px">"'+esc(s.topic)+'"</div>';
-        h+='<div class="fg" style="margin-top:8px"><textarea class="fta" id="cm-'+s.id+'" style="min-height:46px" placeholder="Comment for student...">'+esc(s.teacherComment||"")+'</textarea></div>';
-        h+='<div style="display:flex;gap:7px">';
-        h+='<button class="btn btg" style="font-size:12px;padding:7px 12px" onclick="approveP(\''+s.id+'\',\''+esc(s.studentName||"")+'\')">Approve</button>';
-        h+='<button class="btn bts" style="font-size:12px;padding:7px 12px" onclick="sendCm(\''+s.id+'\')">Comment</button>';
-        h+='</div></div></div>';
+        h+='<button class="btn btp btf" style="font-size:12px;padding:8px" onclick="reviewContract(\''+s.id+'\')">Review Full Plan &amp; Approve &#8594;</button>';
+        h+='</div></div>';
       });
       pl.innerHTML=h;
     }
@@ -1414,7 +1466,7 @@ function renderTOverview(){
         sh+='<div class="srow">';
         if(s.studentPhoto)sh+='<img src="'+esc(s.studentPhoto)+'" class="uav">';
         else sh+='<div style="width:28px;height:28px;border-radius:50%;background:var(--pl);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--p);flex-shrink:0">'+esc((s.studentName||"?")[0])+'</div>';
-        sh+='<div style="flex:1"><div style="font-size:13px;font-weight:700">'+esc(s.studentName||"Student")+'</div>';
+        sh+='<div style="flex:1;cursor:pointer" onclick="reviewContract(\''+s.id+'\')"><div style="font-size:13px;font-weight:700">'+esc(s.studentName||"Student")+'</div>';
         sh+='<div style="font-size:11px;color:var(--tm)">'+esc(s.productType||"")+'</div></div>';
         sh+='<span class="sb '+(s.status==="approved"?"sa":s.status==="pending"?"sp":"")+'" style="'+(s.status==="approved"||s.status==="pending"?"":"background:var(--gl);color:var(--tm)")+'">'+(s.status==="approved"?"Approved":s.status==="pending"?"Pending":s.status==="awaiting_grouping"?"Awaiting group":"Draft")+'</span>';
         sh+='<button class="obtn" style="margin-left:6px" onclick="toggleEditAccess(\''+s.id+'\','+(unlocked?"false":"true")+')">'+(unlocked?"&#128275; Lock":"&#128273; Unlock edit")+'</button>';
@@ -1424,19 +1476,82 @@ function renderTOverview(){
     }
   });
 }
-window.approveP=async function(id,name){
-  var cm=((document.getElementById("cm-"+id)||{}).value||"").trim();
-  await update(ref(db,"contracts/"+id),{status:"approved",teacherComment:cm||""});
-  toast(name+"'s plan approved!");
-};
-window.sendCm=async function(id){
-  var cm=((document.getElementById("cm-"+id)||{}).value||"").trim();
-  if(!cm){toast("Write a comment first!");return;}
-  await update(ref(db,"contracts/"+id),{teacherComment:cm});toast("Comment sent!");
-};
 window.toggleEditAccess=async function(id,unlock){
   await update(ref(db,"contracts/"+id),{editUnlocked:unlock});
   toast(unlock?"Editing unlocked for this student":"Editing locked for this student");
+};
+
+// ── TEACHER: FULL CONTRACT REVIEW & EDIT ──
+window.reviewContract=async function(studentId){
+  var mc=document.getElementById("mc");
+  mc.innerHTML='<div class="loading">Loading...</div>';
+  var snap=await get(ref(db,"contracts/"+studentId));
+  if(!snap.exists()){toast("No plan found for this student.");tgo("overview");return;}
+  var c=snap.val();
+  window._reviewingId=studentId;
+  window._reviewGoals=Object.assign({},c.goals||{});
+  var uinfo={};
+  try{var usnap=await get(ref(db,"unitInfo"));if(usnap.exists())uinfo=usnap.val();}catch(e){}
+
+  var html='<button class="btn bts mb8" onclick="tgo(\'overview\')">&#8592; Back to Overview</button>';
+  html+='<div class="card"><div style="display:flex;align-items:center;gap:9px;margin-bottom:4px">';
+  if(c.studentPhoto)html+='<img src="'+esc(c.studentPhoto)+'" class="post-av">';
+  else html+='<div class="post-avp">'+esc((c.studentName||"?")[0])+'</div>';
+  html+='<div><div style="font-size:15px;font-weight:700">'+esc(c.studentName||"Student")+'</div>';
+  html+='<div style="font-size:12px;color:var(--tm)">'+esc(c.productType||"")+'</div></div></div>';
+  html+='<span class="sb '+(c.status==="approved"?"sa":c.status==="pending"?"sp":"")+'" style="'+(c.status==="approved"||c.status==="pending"?"":"background:var(--gl);color:var(--tm)")+'">'+(c.status==="approved"?"Approved":c.status==="pending"?"Pending":c.status==="awaiting_grouping"?"Awaiting group":"Draft")+'</span>';
+  html+='</div>';
+
+  html+='<div class="contract-cols">';
+  html+='<div class="contract-col"><div class="cc-title">1. Project</div>';
+  html+='<div style="font-size:13px;line-height:1.8">I will create a <strong>'+esc(c.productType)+'</strong> about<br>';
+  html+='<input class="fi" id="rv-topic" style="margin-top:6px" value="'+esc(c.topic||"")+'"></div></div>';
+
+  html+='<div class="contract-col"><div class="cc-title">2. Goals</div>';
+  GOAL_ITEMS.forEach(function(g){
+    var checked=!!window._reviewGoals[g.id];
+    var text=g.text.replace("{grammar}",esc(uinfo.targetGrammar||"target grammar"));
+    html+='<div class="goal-row'+(checked?" sel":"")+'" onclick="toggleReviewGoal(\''+g.id+'\')"><span class="qchk">'+(checked?"&#10003;":"")+'</span><span style="flex:1">'+text+'</span></div>';
+  });
+  html+='</div>';
+
+  html+='<div class="contract-col"><div class="cc-title">3. Evaluation</div>';
+  html+='<div style="font-size:13px;margin-bottom:8px">Teacher: <input class="fi" id="rv-teacherpct" type="number" min="0" max="100" style="width:60px;display:inline-block" value="'+esc(c.evalTeacherPct||"")+'">%</div>';
+  html+='<div style="font-size:13px">Classmates: <input class="fi" id="rv-peerpct" type="number" min="0" max="100" style="width:60px;display:inline-block" value="'+esc(c.evalPeerPct||"")+'">%</div>';
+  html+='</div>';
+  html+='</div>';
+
+  html+='<div class="fg" style="margin-top:12px"><label class="fl">Comment for student</label><textarea class="fta" id="rv-comment" style="min-height:60px">'+esc(c.teacherComment||"")+'</textarea></div>';
+
+  html+='<div style="display:flex;gap:8px;margin-top:10px">';
+  html+='<button class="btn btg" style="flex:1" onclick="saveReview(false)">Save Changes</button>';
+  html+='<button class="btn btp" style="flex:1" onclick="saveReview(true)">Approve &#9989;</button>';
+  html+='</div>';
+  html+='<button class="btn bts btf mt8" style="font-size:12px" onclick="sendBackForEdits()">Send back to student for edits</button>';
+  html+='</div>';
+  mc.innerHTML=html;
+};
+window.toggleReviewGoal=function(gid){
+  window._reviewGoals[gid]=!window._reviewGoals[gid];
+  reviewContract(window._reviewingId);
+};
+window.saveReview=async function(approve){
+  var id=window._reviewingId;if(!id)return;
+  var topic=((document.getElementById("rv-topic")||{}).value||"").trim();
+  var tp=((document.getElementById("rv-teacherpct")||{}).value||"").trim();
+  var pp=((document.getElementById("rv-peerpct")||{}).value||"").trim();
+  var cm=((document.getElementById("rv-comment")||{}).value||"").trim();
+  var updates={topic:topic,goals:window._reviewGoals,evalTeacherPct:tp,evalPeerPct:pp,teacherComment:cm};
+  if(approve)updates.status="approved";
+  await update(ref(db,"contracts/"+id),updates);
+  toast(approve?"Approved!":"Changes saved!");
+  if(approve)tgo("overview");else reviewContract(id);
+};
+window.sendBackForEdits=async function(){
+  var id=window._reviewingId;if(!id)return;
+  await update(ref(db,"contracts/"+id),{status:"draft",editUnlocked:true});
+  toast("Sent back — student can now edit their plan.");
+  tgo("overview");
 };
 
 function renderTGroups(){
@@ -1562,7 +1677,7 @@ function renderTEvaluate(){
       if(post.photo)html+='<img src="'+esc(post.photo)+'" class="post-av">';
       else html+='<div class="post-avp">'+esc((post.name||"?")[0])+'</div>';
       html+='<div><div class="post-name">'+esc(post.name||"Student")+'</div>';
-      html+='<div class="post-meta">'+esc(post.productType||"")+" &bull; "+timeAgo(post.createdAt||Date.now())+'</div></div></div>';
+      html+='<div class="post-meta">'+esc(post.productType||"")+" &bull; "+formatDateTime(post.createdAt||Date.now())+'</div></div></div>';
       html+='<div class="post-body">';
       if(post.title)html+='<div style="font-size:14px;font-weight:700;margin-bottom:4px">'+esc(post.title)+'</div>';
       if(post.link)html+='<a href="'+esc(post.link)+'" target="_blank" class="obtn mb8" style="display:inline-block">View work &#8599;</a>';
@@ -1605,13 +1720,14 @@ function renderTUnit(){
   var mc=document.getElementById("mc");
   mc.innerHTML='<div class="pt">Unit Info</div><div class="ps">This is Step 1 on the student Home page.</div><div class="loading">Loading...</div>';
   get(ref(db,"unitInfo")).then(function(snap){
-    var info=snap.exists()?snap.val():{title:"",description:"",theme:"",grammarTips:"",unitWords:"",imageUrl:"",videoUrl:"",targetGrammar:""};
+    var info=snap.exists()?snap.val():{title:"",description:"",theme:"",grammarTips:"",unitWords:"",imageUrl:"",targetGrammar:""};
+    window._unitImageUrl=info.imageUrl||"";
     var html='<div class="card">';
     html+='<div class="fg"><label class="fl">Unit Title</label><input class="fi" id="unit-title" value="'+esc(info.title||"")+'" placeholder="e.g. Our Community"></div>';
     html+='<div class="fg"><label class="fl">Theme</label><input class="fi" id="unit-theme" value="'+esc(info.theme||"")+'" placeholder="e.g. Identity & Belonging"></div>';
     html+='<div class="fg"><label class="fl">Description (shown to students)</label><textarea class="fta" id="unit-desc" style="min-height:80px" placeholder="What will students explore in this unit?">'+esc(info.description||"")+'</textarea></div>';
-    html+='<div class="fg"><label class="fl">Image URL (optional)</label><input class="fi" id="unit-image" value="'+esc(info.imageUrl||"")+'" placeholder="https://..."></div>';
-    html+='<div class="fg"><label class="fl">YouTube Video URL (optional)</label><input class="fi" id="unit-video" value="'+esc(info.videoUrl||"")+'" placeholder="https://youtube.com/watch?v=..."></div>';
+    html+='<div class="fg"><label class="fl">Image</label><input type="file" accept="image/*" class="fi" id="unit-image-file" onchange="uploadUnitImage(this)">';
+    html+='<div id="unit-image-preview" style="margin-top:8px">'+(info.imageUrl?'<img src="'+esc(info.imageUrl)+'" style="width:100%;border-radius:8px;display:block">':"")+'</div></div>';
     html+='<div class="fg"><label class="fl">Grammar Tips (one per line)</label><textarea class="fta" id="unit-grammar" style="min-height:80px" placeholder="e.g. Use past simple for finished actions&#10;Remember -ed for regular verbs">'+esc(info.grammarTips||"")+'</textarea></div>';
     html+='<div class="fg"><label class="fl">Unit Words (comma or line separated)</label><textarea class="fta" id="unit-words" style="min-height:60px" placeholder="e.g. ancestor, tradition, generation">'+esc(info.unitWords||"")+'</textarea></div>';
     html+='<div class="fg"><label class="fl">Target Grammar (used in the contract goal)</label><input class="fi" id="unit-target-grammar" value="'+esc(info.targetGrammar||"")+'" placeholder="e.g. past simple tense"></div>';
@@ -1620,16 +1736,33 @@ function renderTUnit(){
   });
 }
 
+window.uploadUnitImage=async function(input){
+  var file=input.files[0];if(!file)return;
+  var prev=document.getElementById("unit-image-preview");
+  if(prev)prev.innerHTML='<div class="loading" style="padding:10px">Uploading...</div>';
+  try{
+    var path="unitImages/"+Date.now()+"_"+file.name.replace(/[^a-zA-Z0-9.]/g,"_");
+    var fileRef=sref(storage,path);
+    await uploadBytes(fileRef,file);
+    var url=await getDownloadURL(fileRef);
+    window._unitImageUrl=url;
+    if(prev)prev.innerHTML='<img src="'+url+'" style="width:100%;border-radius:8px;display:block">';
+    toast("Image uploaded!");
+  }catch(e){
+    toast("Upload failed — check your connection and try again.");
+    if(prev)prev.innerHTML="";
+  }
+};
+
 window.saveUnit=async function(){
   var title=((document.getElementById("unit-title")||{}).value||"").trim();
   var theme=((document.getElementById("unit-theme")||{}).value||"").trim();
   var desc=((document.getElementById("unit-desc")||{}).value||"").trim();
-  var imageUrl=((document.getElementById("unit-image")||{}).value||"").trim();
-  var videoUrl=((document.getElementById("unit-video")||{}).value||"").trim();
+  var imageUrl=window._unitImageUrl||"";
   var grammarTips=((document.getElementById("unit-grammar")||{}).value||"").trim();
   var unitWords=((document.getElementById("unit-words")||{}).value||"").trim();
   var targetGrammar=((document.getElementById("unit-target-grammar")||{}).value||"").trim();
-  await set(ref(db,"unitInfo"),{title:title,theme:theme,description:desc,imageUrl:imageUrl,videoUrl:videoUrl,grammarTips:grammarTips,unitWords:unitWords,targetGrammar:targetGrammar,updatedAt:Date.now()});
+  await set(ref(db,"unitInfo"),{title:title,theme:theme,description:desc,imageUrl:imageUrl,grammarTips:grammarTips,unitWords:unitWords,targetGrammar:targetGrammar,updatedAt:Date.now()});
   toast("Unit info saved! Students can now see it.");
 };
 </script>
