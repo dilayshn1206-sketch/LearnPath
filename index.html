@@ -206,18 +206,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .rublevel-bullets{margin-top:6px;font-size:11px;font-weight:400;color:var(--tm);line-height:1.6}
 .project-card{background:#fff;border-radius:var(--r);border:1px solid var(--gb);padding:12px;margin-bottom:8px}
 .rubarea2{background:#fff;border:1px solid var(--gb);border-radius:var(--r);padding:13px;margin-bottom:10px}
-.rubarea2-hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:10px}
-.rub-details-btn{flex-shrink:0;padding:7px 13px;border-radius:20px;border:1.5px solid var(--tx);background:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
-.rub-pills{display:flex;flex-wrap:wrap;gap:7px}
-.rub-pill{display:inline-block;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid transparent}
+.rub-pill{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;border:1.5px solid transparent}
 .rub-pill.tier0{background:#EAF1FE;color:#2F6FED}
 .rub-pill.tier1{background:var(--tl);color:var(--td)}
 .rub-pill.tier2{background:var(--al);color:var(--a)}
 .rub-pill.sel{border-color:currentColor;box-shadow:0 0 0 1.5px currentColor inset}
-.rub-details-panel{margin-top:11px;display:flex;flex-direction:column;gap:10px}
-.rub-detail-item{background:var(--gl);border-radius:var(--rs);padding:10px 11px;cursor:pointer;border:1.5px solid transparent}
-.rub-detail-item.sel{border-color:var(--p);background:var(--pl)}
-.rub-detail-title{font-size:13px;font-weight:700;color:var(--tx);margin-bottom:2px}
+.rublevel-row{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--gl)}
+.rublevel-row:last-of-type{border-bottom:none}
+.rublevel-row.sel{background:var(--pl);margin:0 -13px;padding:9px 13px;border-radius:var(--rs);border-bottom:none}
+.rub-sentence{font-size:13px}
+.rub-chevron{background:none;border:none;color:var(--th);cursor:pointer;font-size:12px;padding:4px 6px;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -280,7 +278,28 @@ const fb=initializeApp({
   databaseURL:"https://let-s-practice-2eda9-default-rtdb.firebaseio.com"
 });
 const auth=getAuth(fb),db=getDatabase(fb),prov=new GoogleAuthProvider();
-const AKEY="YOUR_NEW_API_KEY_HERE";
+const AKEY="YOUR_NEW_API_KEY_HERE"; // put your own Anthropic API key here to activate the project-helper chat in Step 2
+
+// ── Project-helper AI (Step 2 only) ──
+async function askProjectAI(userMsg){
+  try{
+    var res=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{"Content-Type":"application/json","x-api-key":AKEY,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+      body:JSON.stringify({
+        model:"claude-sonnet-4-20250514",
+        max_tokens:300,
+        system:"You are a friendly helper for a 12-year-old English-language student choosing a school project format (examples: Mini Report, Podcast, Comic Strip, Speech, Poster, Blog Post). Explain project types simply in 2-4 short sentences, and give one concrete tip on how to write or make it. Never write the project for them.",
+        messages:[{role:"user",content:userMsg}]
+      })
+    });
+    var data=await res.json();
+    if(data&&data.error)return "The assistant isn't set up yet — ask your teacher.";
+    return (data.content&&data.content[0]&&data.content[0].text)||"Sorry, I couldn't answer that.";
+  }catch(e){
+    return "Couldn't connect to the assistant right now.";
+  }
+}
 
 let CU=null,UP=null;
 let myGid=null,myGname=null,userCoins=0;
@@ -339,39 +358,38 @@ function catOfProduct(catalog,id){for(var c in catalog){if(catalog[c].some(funct
 const PLATFORMS=["Canva","Google Docs / Slides","Phone camera / YouTube","Pen & paper","PowerPoint","Audio recording app"];
 
 const SKILL_TIPS={
-  writing:["Plan first — even 3 bullet points helps","Read your draft aloud to catch unclear sentences","One clear idea per paragraph"],
-  speaking:["Practice out loud before the real thing","Record yourself once and listen back","Slow down — most people rush when nervous"],
-  visual:["Sketch your layout on paper first","Stick to two colours and two fonts maximum","Every element needs a reason to be there"],
-  collab:["Agree on roles at the very start","Check in before the final deadline","Make sure every voice has been heard"],
-  ideas:["Permission to write a messy first draft","Try starting in the middle of the action","Look at examples you like and notice what works"]
+  writing:["Write three short ideas before you start.","Put one main idea in each paragraph.","Read your work aloud and fix confusing sentences."],
+  speaking:["Practise your talk out loud.","Record yourself once and listen.","Take a breath and speak slowly."],
+  visual:["Draw a quick plan before you start.","Use only two or three colours.","Use large, easy-to-read words."],
+  ideas:["Think about something you know or enjoy.","Write down three possible ideas.","Choose the idea you can explain best."]
 };
 
 const WEAKNESS_OPTS=[
   {e:"✍️",t:"Writing clearly",value:"writing"},
   {e:"🗣️",t:"Speaking in front of others",value:"speaking"},
   {e:"🎨",t:"Designing or making things look good",value:"visual"},
-  {e:"🤝",t:"Working in a group",value:"collab"},
   {e:"💡",t:"Coming up with ideas",value:"ideas"}
 ];
 
 // ── LEARNING CONTRACT GOALS (8.1) ──
-// {grammar} is replaced with the teacher's target-grammar text from Unit Info
 const GOAL_ITEMS=[
   {id:"unitWords",text:"I will use at least eight unit words."},
   {id:"organize",text:"I will organize my ideas with proper words. (next, after, and, also, etc.)"},
-  {id:"grammar",text:"I will use the ({grammar}) at least five times."},
+  {id:"grammar",text:"I will use correct grammar throughout my project."},
   {id:"tenSentences",text:"I will use at least ten complete sentences."},
   {id:"evidence",text:"I will support my ideas with evidence or details."},
   {id:"spelling",text:"I will check my spelling, punctuation (. , / ? : ;), and grammar."},
-  {id:"speakClear",text:"I will speak clearly for 60–90 seconds."},
+  {id:"speakClear",text:"I will speak clearly for 2 minutes."},
   {id:"easyUnderstand",text:"I will make my project easy to understand."},
-  {id:"workAtHome",text:"I will work at home too to finish my project."}
+  {id:"workAtHome",text:"I will work at home too to finish my project."},
+  {id:"topicImpact",text:"I will explain how my topic affects me or other people."},
+  {id:"structure",text:"I will organise my project with a clear beginning, middle, and ending."}
 ];
 // which goals are pre-recommended (pre-checked) per category
 const GOAL_RECOMMEND={
-  written:["unitWords","organize","grammar","tenSentences","evidence","spelling","easyUnderstand","workAtHome"],
-  spoken:["unitWords","organize","grammar","evidence","speakClear","easyUnderstand","workAtHome"],
-  visual:["unitWords","organize","grammar","evidence","spelling","easyUnderstand","workAtHome"]
+  written:["unitWords","organize","grammar","tenSentences","evidence","spelling","easyUnderstand","workAtHome","topicImpact","structure"],
+  spoken:["unitWords","organize","grammar","evidence","speakClear","easyUnderstand","workAtHome","topicImpact","structure"],
+  visual:["unitWords","organize","grammar","evidence","spelling","easyUnderstand","workAtHome","topicImpact","structure"]
 };
 
 // ── SELF & PEER RUBRICS (7 areas x 3 levels, with supporting bullets) ──
@@ -461,6 +479,12 @@ function formatDateTime(ts){
   var dateStr=d.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"});
   var timeStr=d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});
   return dateStr+" &bull; "+timeStr;
+}
+function faviconUrl(url){
+  try{
+    var domain=new URL(url).hostname;
+    return "https://www.google.com/s2/favicons?domain="+domain+"&sz=64";
+  }catch(e){return "";}
 }
 
 // ── AUTH ──
@@ -661,15 +685,58 @@ async function renderHome(){
   html+='<div class="step-num">'+(step3Unlocked?"3":"&#128274;")+'</div><div style="flex:1"><div class="step-title">My Learning Contract</div>';
   html+='<div class="step-sub">'+(step3Unlocked?"Your project plan for "+esc(contractData.productType):"Unlocks once your teacher groups the class")+'</div></div></div>';
 
+  html+='<div class="step-card" onclick="renderResourcesScreen()">';
+  html+='<div class="step-num">4</div><div style="flex:1"><div class="step-title">Choose Resources</div>';
+  html+='<div class="step-sub">Helpful links your teacher and classmates found</div></div></div>';
+
   mc.innerHTML=html;setNav("home");
 }
+
+// ── STEP 4: CHOOSE RESOURCES (always unlocked, teacher-curated) ──
+window.renderResourcesScreen=async function(){
+  window._currentScreen="resources";
+  var mc=document.getElementById("mc");
+  var html='<button class="btn bts mb8" onclick="go(\'home\')">&#8592; Back to Home</button>';
+  html+='<div class="pt">Choose Resources</div><div class="ps">Helpful links for your project.</div>';
+  html+='<div class="card"><div style="font-size:13px;font-weight:700;margin-bottom:4px">&#128161; I have a useful link</div>';
+  html+='<div style="font-size:12px;color:var(--tm);margin-bottom:8px">If you have a useful website, add it here. Your teacher will approve it before everyone can see it.</div>';
+  html+='<div class="fg"><label class="fl">Title</label><input class="fi" id="res-sugg-title" placeholder="e.g. BBC Bitesize"></div>';
+  html+='<div class="fg"><label class="fl">Link</label><input class="fi" id="res-sugg-url" placeholder="https://..."></div>';
+  html+='<button class="btn btp btf" onclick="suggestResource()">Submit for Approval</button></div>';
+
+  var snap=await get(ref(db,"resources"));
+  var list=[];
+  if(snap.exists())snap.forEach(function(r){list.push({id:r.key,...r.val()});});
+  list.sort(function(a,b){return (b.addedAt||0)-(a.addedAt||0);});
+  html+='<div class="card"><div class="ctitle mb8">Approved Resources</div>';
+  if(!list.length)html+='<div class="empty"><div class="ei">&#128279;</div><p>No resources yet.</p></div>';
+  else list.forEach(function(r){
+    html+='<a href="'+esc(r.url)+'" target="_blank" style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--gl);text-decoration:none;color:inherit">';
+    html+='<img src="'+faviconUrl(r.url)+'" style="width:28px;height:28px;border-radius:6px;flex-shrink:0" onerror="this.style.display=\'none\'">';
+    html+='<div style="flex:1"><div style="font-size:13px;font-weight:600">'+esc(r.title||r.url)+'</div><div style="font-size:11px;color:var(--tm)">'+esc(r.addedBy||"")+'</div></div>';
+    html+='<span style="color:var(--th)">&#8599;</span></a>';
+  });
+  html+='</div>';
+  mc.innerHTML=html;setNav("home");
+};
+window.suggestResource=async function(){
+  var title=((document.getElementById("res-sugg-title")||{}).value||"").trim();
+  var url=((document.getElementById("res-sugg-url")||{}).value||"").trim();
+  if(!title||!url){toast("Fill in both fields!");return;}
+  if(!/^https?:\/\//i.test(url)){toast("Link must start with http:// or https://");return;}
+  await push(ref(db,"resourceSuggestions"),{title:title,url:url,suggestedBy:CU.displayName,suggestedById:CU.uid,createdAt:Date.now()});
+  toast("Submitted! Waiting for teacher approval.");
+  document.getElementById("res-sugg-title").value="";
+  document.getElementById("res-sugg-url").value="";
+};
 
 // ── PAGE 2: FEED ──
 function renderFeed(){
   window._currentScreen="feed";
   var mc=document.getElementById("mc");
   var html='<div class="pt">Feed</div><div class="ps">Everyone\'s projects and shared work, newest first.</div>';
-  html+='<div class="card"><div class="ctitle mb8">Everyone\'s Projects</div><div id="projects-list"><div class="loading">Loading...</div></div></div>';
+  html+='<div class="card"><div class="ctitle mb8">&#128203; Project Plans</div><div id="projects-list"><div class="loading">Loading...</div></div></div>';
+  html+='<div style="font-size:13px;font-weight:700;margin:14px 0 8px">&#128228; Shared Work</div>';
   html+='<button class="btn btp btf mb8" onclick="openNewPost()">+ Share Your Work</button>';
   html+='<div id="feed-container"><div class="loading">Loading...</div></div>';
   mc.innerHTML=html;
@@ -677,11 +744,11 @@ function renderFeed(){
   loadFeed();
 }
 
-function loadProjectsList(){
+function loadProjectsList(teacherMode){
   onValue(ref(db,"contracts"),function(snap){
     var el=document.getElementById("projects-list");if(!el)return;
     var list=[];
-    if(snap.exists())snap.forEach(function(c){var d=c.val();if(d.productType)list.push(d);});
+    if(snap.exists())snap.forEach(function(c){var d=c.val();if(d.productType)list.push({id:c.key,...d});});
     if(!list.length){el.innerHTML='<div class="empty"><div class="ei">&#128203;</div><p>No projects chosen yet.</p></div>';return;}
     list.sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);});
     var html="";
@@ -703,13 +770,15 @@ function loadProjectsList(){
         html+='<div style="font-size:11px;font-weight:700;color:var(--th);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">Goals ('+goalCount+"/"+GOAL_ITEMS.length+')</div>';
         GOAL_ITEMS.forEach(function(g){
           var checked=!!goals[g.id];
-          html+='<div style="display:flex;align-items:flex-start;gap:7px;padding:3px 0;font-size:12px;'+(checked?"":"color:var(--th)")+'"><span>'+(checked?"&#9989;":"&#11036;")+'</span><span>'+g.text.replace("{grammar}","target grammar")+'</span></div>';
+          html+='<div style="display:flex;align-items:flex-start;gap:7px;padding:3px 0;font-size:12px;'+(checked?"":"color:var(--th)")+'"><span>'+(checked?"&#9989;":"&#11036;")+'</span><span>'+g.text+'</span></div>';
         });
         if(d.evalTeacherPct||d.evalPeerPct){
           html+='<div style="font-size:11px;font-weight:700;color:var(--th);text-transform:uppercase;letter-spacing:.4px;margin:8px 0 4px">Evaluation Goals</div>';
           html+='<div style="font-size:12px">Teacher: '+esc(d.evalTeacherPct||"—")+"% &bull; Classmates: "+esc(d.evalPeerPct||"—")+'%</div>';
         }
       }
+      if(teacherMode&&d.status==="pending")html+='<button class="btn btg btf mt8" onclick="quickApprove(\''+d.id+'\',\''+esc(d.studentName||"")+'\')">Approve &#9989;</button>';
+      if(teacherMode&&d.status!=="awaiting_grouping")html+='<button class="btn bts btf mt8" style="font-size:12px" onclick="reviewContract(\''+d.id+'\')">Review Full Plan &#8594;</button>';
       if(d.teacherComment)html+='<div style="background:var(--tl);border-radius:var(--rs);padding:6px 9px;font-size:11px;color:var(--td);margin-top:9px"><strong>Teacher:</strong> '+esc(d.teacherComment)+'</div>';
       html+='</div>';
     });
@@ -750,34 +819,68 @@ function buildPostHTML(post){
   html+='<div class="post-body">';
   if(post.title)html+='<div style="font-size:14px;font-weight:700;margin-bottom:5px">'+esc(post.title)+'</div>';
   if(post.link)html+='<a href="'+esc(post.link)+'" target="_blank" class="obtn mb8" style="display:inline-block">View work &#8599;</a>';
+  if(post.fileData)html+='<div class="mb8">'+(post.fileType&&post.fileType.startsWith("image/")?'<img src="'+post.fileData+'" style="max-width:100%;border-radius:8px;display:block">':'<a href="'+post.fileData+'" download="'+esc(post.fileName||"file")+'" class="obtn" style="display:inline-block">&#128206; '+esc(post.fileName||"Download file")+'</a>')+'</div>';
   var summ=rubricSummaryLabel(post.selfRubric);
-  if(summ)html+='<div style="font-size:11px;color:var(--pd);background:var(--pl);display:inline-block;padding:3px 9px;border-radius:20px;margin-bottom:6px">'+summ+'</div>';
+  if(summ)html+='<div style="font-size:11px;color:var(--pd);background:var(--pl);display:inline-block;padding:3px 9px;border-radius:20px;margin-bottom:6px;cursor:pointer" onclick="toggleCat(\'refl-'+post.id+'\')">'+summ+' &#9660;</div>';
   if(post.well)html+='<div class="post-text"><strong>Did well:</strong> '+esc(post.well)+'</div>';
   if(post.improve)html+='<div class="post-text"><strong>To improve:</strong> '+esc(post.improve)+'</div>';
+  if(post.selfRubric&&post.selfRubric.length){
+    html+='<div id="refl-'+post.id+'" style="display:none;margin-top:8px">'+renderRubricReadonly(SELF_RUBRIC,post.selfRubric)+'</div>';
+  }
   html+='</div>';
   if(comments.length){
     html+='<div class="comments-section">';
     comments.slice(-3).forEach(function(cm){
       html+='<div class="comment"><div class="comment-name">'+esc(cm.from||"Student")+'</div>';
-      html+='<div class="comment-text">'+esc(cm.text||"")+'</div></div>';
+      html+='<div class="comment-text">'+esc(cm.text||"")+'</div>';
+      if(cm.well)html+='<div class="comment-text"><strong>Did well:</strong> '+esc(cm.well)+'</div>';
+      if(cm.improve)html+='<div class="comment-text"><strong>To improve:</strong> '+esc(cm.improve)+'</div>';
+      html+='</div>';
     });
     if(comments.length>3)html+='<div style="font-size:11px;color:var(--th);padding:4px 0">'+( comments.length-3)+' more comments</div>';
     html+='</div>';
   }
   html+='<div class="post-actions">';
-  if(post.uid!==CU.uid)html+='<button class="post-act" onclick="openComment(\''+post.id+'\')">&#128172; Comment +&#127881;</button>';
+  var isTeacherViewer=UP&&UP.role==="teacher";
+  if(post.uid!==CU.uid){
+    if(isTeacherViewer)html+='<button class="post-act" onclick="openTeacherComment(\''+post.id+'\',\''+esc(post.uid)+'\')">&#128105;&#8205;&#127979; Add Evaluation</button>';
+    else html+='<button class="post-act" onclick="openComment(\''+post.id+'\')">&#128172; Comment +&#127881;</button>';
+  }
   if(post.link)html+='<button class="post-act" onclick="window.open(\''+esc(post.link)+'\',\'_blank\')">&#128279; View</button>';
   if(post.uid===CU.uid)html+='<button class="post-act" onclick="deletePost(\''+post.id+'\')">&#128465; Delete</button>';
   html+='</div>';
-  html+='<div id="cmform-'+post.id+'" style="display:none;padding:10px 13px;border-top:1px solid var(--gb)">';
-  html+='<div style="font-size:12px;font-weight:600;margin-bottom:8px;color:var(--tm)">Leave feedback:</div>';
-  html+='<div id="cm-rub-'+post.id+'"></div>';
-  html+='<textarea class="fta mb8" id="cm-text-'+post.id+'" placeholder="Add your comment..." style="min-height:52px"></textarea>';
-  html+='<button class="btn btg" style="font-size:12px;padding:7px 14px" onclick="submitComment(\''+post.id+'\',\''+esc(post.uid)+'\')">Submit Comment</button>';
-  html+='</div>';
+  if(isTeacherViewer){
+    html+='<div id="tcform-'+post.id+'" style="display:none;padding:10px 13px;border-top:1px solid var(--gb)">';
+    html+='<div id="tc-rub-'+post.id+'"></div>';
+    html+='<textarea class="fta mt8 mb8" id="tc-text-'+post.id+'" placeholder="Your feedback for this student..."></textarea>';
+    html+='<button class="btn btg" style="font-size:12px;padding:7px 13px" onclick="submitTeacherComment(\''+post.id+'\',\''+esc(post.uid)+'\')">Save Evaluation</button>';
+    html+='</div>';
+  } else {
+    html+='<div id="cmform-'+post.id+'" style="display:none;padding:10px 13px;border-top:1px solid var(--gb)">';
+    html+='<div style="font-size:12px;font-weight:600;margin-bottom:8px;color:var(--tm)">Leave feedback:</div>';
+    html+='<div id="cm-rub-'+post.id+'"></div>';
+    html+='<textarea class="fta mb8" id="cm-text-'+post.id+'" placeholder="Add your comment..." style="min-height:52px"></textarea>';
+    html+='<div class="fg"><label class="fl">One thing they did well</label><textarea class="fta" id="cm-well-'+post.id+'" style="min-height:44px"></textarea></div>';
+    html+='<div class="fg"><label class="fl">One thing to improve</label><textarea class="fta" id="cm-improve-'+post.id+'" style="min-height:44px"></textarea></div>';
+    html+='<button class="btn btg" style="font-size:12px;padding:7px 14px" onclick="submitComment(\''+post.id+'\',\''+esc(post.uid)+'\')">Submit Comment</button>';
+    html+='</div>';
+  }
   html+='</div>';
   return html;
 }
+
+function renderRubricReadonly(rubric,values){
+  var html='<div class="card" style="background:var(--gl);border:none">';
+  rubric.forEach(function(item,ai){
+    var li=values[ai];
+    if(li===null||li===undefined)return;
+    html+='<div style="margin-bottom:8px"><div style="font-size:11px;font-weight:700;color:var(--th)">'+esc(item.area)+'</div>';
+    html+='<div style="font-size:12px"><span class="rub-pill tier'+li+'">'+TIER_LABELS[li]+'</span> '+esc(item.levels[li].label)+'</div></div>';
+  });
+  html+='</div>';
+  return html;
+}
+
 
 // ── GENERIC RUBRIC SELECTOR (used for self-reflection, peer comments, teacher evaluation) ──
 window._rubricStores={};
@@ -788,29 +891,22 @@ function renderRubricBlock(containerId,rubric,values,storeKey){
   if(!store.expanded)store.expanded={};
   var html="";
   rubric.forEach(function(item,ai){
-    var isOpen=!!store.expanded[ai];
     html+='<div class="rubarea2">';
-    html+='<div class="rubarea2-hdr"><div><div class="rubarea-name">'+esc(item.area)+'</div><div class="rubarea-q">'+esc(item.q)+'</div></div>';
-    html+='<button type="button" class="rub-details-btn" onclick="toggleRubDetails(\''+storeKey+'\','+ai+')">Details '+(isOpen?"&#9650;":"&#9660;")+'</button></div>';
-    html+='<div class="rub-pills">';
+    html+='<div class="rubarea-name">'+esc(item.area)+'</div><div class="rubarea-q">'+esc(item.q)+'</div>';
     item.levels.forEach(function(lvl,li){
       var sel=values[ai]===li;
-      html+='<span class="rub-pill tier'+li+(sel?" sel":"")+'" onclick="pickRubricLevel(\''+storeKey+'\','+ai+','+li+')">'+TIER_LABELS[li]+'</span>';
-    });
-    html+='</div>';
-    if(isOpen){
-      html+='<div class="rub-details-panel">';
-      item.levels.forEach(function(lvl,li){
-        var sel=values[ai]===li;
-        html+='<div class="rub-detail-item'+(sel?" sel":"")+'" onclick="pickRubricLevel(\''+storeKey+'\','+ai+','+li+')">';
-        html+='<span class="rub-pill tier'+li+(sel?" sel":"")+'" style="margin-bottom:6px">'+TIER_LABELS[li]+'</span>';
-        html+='<div class="rub-detail-title">'+esc(lvl.label)+'</div>';
+      var key=ai+"_"+li;
+      var isOpen=!!store.expanded[key];
+      html+='<div class="rublevel-row'+(sel?" sel":"")+'">';
+      html+='<div style="flex:1;cursor:pointer" onclick="pickRubricLevel(\''+storeKey+'\','+ai+','+li+')"><span class="rub-pill tier'+li+(sel?" sel":"")+'">'+TIER_LABELS[li]+'</span> <span class="rub-sentence">'+esc(lvl.label)+'</span></div>';
+      html+='<button type="button" class="rub-chevron" onclick="toggleRubDetails(\''+storeKey+'\','+ai+','+li+')">'+(isOpen?"&#9650;":"&#9660;")+'</button>';
+      html+='</div>';
+      if(isOpen){
         html+='<div class="rublevel-bullets">';
         lvl.bullets.forEach(function(b){html+='&#8226; '+esc(b)+'<br>';});
-        html+='</div></div>';
-      });
-      html+='</div>';
-    }
+        html+='</div>';
+      }
+    });
     html+='</div>';
   });
   el.innerHTML=html;
@@ -820,27 +916,30 @@ window.pickRubricLevel=function(storeKey,ai,li){
   s.values[ai]=li;
   renderRubricBlock(s.containerId,s.rubric,s.values,storeKey);
 };
-window.toggleRubDetails=function(storeKey,ai){
+window.toggleRubDetails=function(storeKey,ai,li){
   var s=window._rubricStores[storeKey];if(!s)return;
   if(!s.expanded)s.expanded={};
-  s.expanded[ai]=!s.expanded[ai];
+  var key=ai+"_"+li;
+  s.expanded[key]=!s.expanded[key];
   renderRubricBlock(s.containerId,s.rubric,s.values,storeKey);
 };
 
 window.openNewPost=function(){
   var mc=document.getElementById("mc");
+  window._newPostFile=null;
   var html='<div class="pt">Share Your Work</div>';
   html+='<div class="ps">Fill in the title and rate your own work below.</div>';
   html+='<div class="card">';
   html+='<div class="fg"><label class="fl">Title of this piece of work</label><input class="fi" id="np-title" placeholder="e.g. My blog post about climate change"></div>';
   html+='<div class="fg"><label class="fl">Link to your work</label><input class="fi" id="np-link" placeholder="Google Drive / YouTube / Canva..."></div>';
   html+='<div style="font-size:11px;color:var(--tm);margin-bottom:10px;background:var(--pl);padding:8px;border-radius:var(--rs)">How to copy a link: Google Drive → Share → Copy link &bull; YouTube → Share &bull; Canva → Share → Copy link</div>';
+  html+='<div class="fg"><label class="fl">Or attach a file (image, photo of your work, etc.)</label><input type="file" class="fi" id="np-file" onchange="attachNewPostFile(this)"><div id="np-file-preview" style="margin-top:8px"></div></div>';
   html+='<div class="fg"><input type="checkbox" id="np-draft"> <label for="np-draft" style="font-size:13px;cursor:pointer"> Share as draft (for feedback before final version)</label></div>';
   html+='<div class="divider"></div>';
   html+='<div style="font-size:13px;font-weight:700;margin-bottom:10px">Self-Reflection</div>';
   html+='<div id="np-rub-rows"></div>';
-  html+='<div class="fg" style="margin-top:10px"><label class="fl">One thing I did well...</label><textarea class="fta" id="np-well" style="min-height:50px"></textarea></div>';
-  html+='<div class="fg"><label class="fl">One thing I want to improve...</label><textarea class="fta" id="np-improve" style="min-height:50px"></textarea></div>';
+  html+='<div class="fg" style="margin-top:10px"><label class="fl">One thing I did well... <span style="color:var(--c)">*</span></label><textarea class="fta" id="np-well" style="min-height:50px"></textarea></div>';
+  html+='<div class="fg"><label class="fl">One thing I want to improve... <span style="color:var(--c)">*</span></label><textarea class="fta" id="np-improve" style="min-height:50px"></textarea></div>';
   html+='<div style="display:flex;gap:9px;margin-top:10px">';
   html+='<button class="btn btp" style="flex:1" onclick="submitPost()">Share &#128640;</button>';
   html+='<button class="btn bts" style="flex:1" onclick="go(\'feed\')">Cancel</button>';
@@ -850,20 +949,42 @@ window.openNewPost=function(){
   renderRubricBlock("np-rub-rows",SELF_RUBRIC,window._rubricStores.newpost.values,"newpost");
 };
 
+window.attachNewPostFile=function(input){
+  var file=input.files[0];if(!file)return;
+  if(file.size>1500000){toast("That file is too large — please use something under 1.5MB.");input.value="";return;}
+  var prev=document.getElementById("np-file-preview");
+  if(prev)prev.innerHTML='<div class="loading" style="padding:8px">Reading file...</div>';
+  var reader=new FileReader();
+  reader.onload=function(e){
+    window._newPostFile={data:e.target.result,name:file.name,type:file.type};
+    if(prev){
+      if(file.type.startsWith("image/"))prev.innerHTML='<img src="'+e.target.result+'" style="max-width:100%;border-radius:8px;display:block">';
+      else prev.innerHTML='<div style="font-size:12px;color:var(--tm)">&#128206; '+esc(file.name)+'</div>';
+    }
+  };
+  reader.onerror=function(){toast("Could not read that file.");if(prev)prev.innerHTML="";};
+  reader.readAsDataURL(file);
+};
+
 window.submitPost=async function(){
   var title=((document.getElementById("np-title")||{}).value||"").trim();
+  var well=((document.getElementById("np-well")||{}).value||"").trim();
+  var improve=((document.getElementById("np-improve")||{}).value||"").trim();
   if(!title){toast("Please add a title!");return;}
+  if(!well||!improve){toast("Please fill in what you did well and what to improve!");return;}
   await push(ref(db,"posts"),{
     uid:CU.uid,name:CU.displayName,photo:CU.photoURL||"",
     title:title,link:((document.getElementById("np-link")||{}).value||"").trim(),
+    fileData:window._newPostFile?window._newPostFile.data:"",fileName:window._newPostFile?window._newPostFile.name:"",fileType:window._newPostFile?window._newPostFile.type:"",
     productType:(contractData&&contractData.productType)||"",
     selfRubric:window._rubricStores.newpost?window._rubricStores.newpost.values:[],
-    well:((document.getElementById("np-well")||{}).value||"").trim(),
-    improve:((document.getElementById("np-improve")||{}).value||"").trim(),
+    well:well,
+    improve:improve,
     isDraft:document.getElementById("np-draft")?.checked||false,
     groupId:myGid||"",
     createdAt:Date.now()
   });
+  window._newPostFile=null;
   toast("Shared!");go("feed");
 };
 
@@ -882,6 +1003,8 @@ window.submitComment=async function(postId,targetUid){
   var storeKey="comment_"+postId;
   await push(ref(db,"posts/"+postId+"/comments"),{
     from:CU.displayName,fromId:CU.uid,text:text,
+    well:((document.getElementById("cm-well-"+postId)||{}).value||"").trim(),
+    improve:((document.getElementById("cm-improve-"+postId)||{}).value||"").trim(),
     peerRubric:window._rubricStores[storeKey]?window._rubricStores[storeKey].values:[],createdAt:Date.now()
   });
   if(targetUid&&targetUid!==CU.uid){
@@ -906,6 +1029,12 @@ window.renderStep1Screen=async function(){
   var snap=await get(ref(db,"unitInfo"));
   var info=snap.exists()?snap.val():{title:"Unit info coming soon",description:"Your teacher will add this."};
   var locked=isLockedStep("step1");
+  var wcSnap=await get(ref(db,"wordChecks/"+CU.uid));
+  var myWordChecks=(wcSnap.exists()&&wcSnap.val().checked)||{};
+  var gaSnap=await get(ref(db,"grammarAnswers/"+CU.uid));
+  var myGrammarAnswers=(gaSnap.exists()&&gaSnap.val().answers)||{};
+  var myGrammarSubmitted=gaSnap.exists()&&gaSnap.val().submitted;
+
   var html=locked?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">&#8592; Back to Home</button>';
   html+='<div class="card"><div style="font-size:18px;font-weight:700;margin-bottom:6px">&#127979; '+esc(info.title||"Our Unit")+'</div>';
   if(info.theme)html+='<div style="margin-bottom:10px"><span class="sb sa">Theme: '+esc(info.theme)+'</span></div>';
@@ -914,21 +1043,86 @@ window.renderStep1Screen=async function(){
   if(info.imageUrl&&info.imageUrl.trim()){
     html+='<div class="card" style="padding:0;overflow:hidden"><img src="'+esc(info.imageUrl)+'" style="width:100%;display:block"></div>';
   }
-  if(info.grammarTips&&info.grammarTips.trim()){
-    html+='<div class="card"><div style="font-size:13px;font-weight:700;margin-bottom:8px">&#128221; Grammar Tips</div>';
-    info.grammarTips.split("\n").filter(function(l){return l.trim();}).forEach(function(l){
-      html+='<div style="font-size:13px;color:var(--tm);margin-bottom:6px;line-height:1.5">&#8594; '+esc(l.trim())+'</div>';
+
+  // ── Unit Words checklist ──
+  var wordList=(info.words||"").split("\n").map(function(w){return w.trim();}).filter(Boolean);
+  if(wordList.length){
+    html+='<div class="card"><div style="font-size:13px;font-weight:700;margin-bottom:8px">&#128214; Unit Words</div>';
+    html+='<div style="font-size:12px;color:var(--tm);margin-bottom:8px">Tick every word you already know, then submit.</div>';
+    html+='<div id="word-check-list">';
+    wordList.forEach(function(w){
+      var checked=!!myWordChecks[w];
+      html+='<div class="goal-row'+(checked?" sel":"")+'" onclick="toggleWordCheck(\''+esc(w).replace(/'/g,"&#39;")+'\')"><span class="qchk">'+(checked?"&#10003;":"")+'</span><span style="flex:1">'+esc(w)+'</span></div>';
     });
     html+='</div>';
+    html+='<button class="btn btg btf mt8" onclick="submitWordChecks()">Submit Word Check</button>';
+    html+='</div>';
   }
-  if(info.unitWords&&info.unitWords.trim()){
-    html+='<div class="card"><div style="font-size:13px;font-weight:700;margin-bottom:8px">&#128214; Unit Words</div><div>';
-    info.unitWords.split(/[\n,]/).map(function(w){return w.trim();}).filter(Boolean).forEach(function(w){
-      html+='<span class="word-chip">'+esc(w)+'</span>';
+
+  // ── Grammar MCQ ──
+  var gQs=info.grammarQuestions||[];
+  if(gQs.length){
+    html+='<div class="card"><div style="font-size:13px;font-weight:700;margin-bottom:8px">&#128209; Grammar Practice</div>';
+    if(myGrammarSubmitted){
+      var score=0;
+      gQs.forEach(function(q,qi){if(myGrammarAnswers[qi]===q.correct)score++;});
+      html+='<div class="tip mb8">You scored '+score+"/"+gQs.length+'.</div>';
+    }
+    gQs.forEach(function(q,qi){
+      html+='<div style="margin-bottom:14px"><div style="font-size:13px;font-weight:600;margin-bottom:6px">'+(qi+1)+". "+esc(q.q)+'</div>';
+      q.options.forEach(function(opt,oi){
+        var sel=myGrammarAnswers[qi]===oi;
+        var showResult=myGrammarSubmitted;
+        var isCorrect=oi===q.correct;
+        var style="";
+        if(showResult&&sel&&isCorrect)style="border-color:var(--t);background:var(--tl);color:var(--td)";
+        else if(showResult&&sel&&!isCorrect)style="border-color:var(--c);background:var(--cl);color:var(--c)";
+        else if(showResult&&isCorrect)style="border-color:var(--t)";
+        else if(sel)style="border-color:var(--p);background:var(--pl);color:var(--pd)";
+        html+='<div class="qo" style="'+style+'" onclick="pickGrammarAnswer('+qi+','+oi+')">'+esc(opt)+'</div>';
+      });
+      html+='</div>';
     });
-    html+='</div></div>';
+    if(!myGrammarSubmitted)html+='<button class="btn btg btf" onclick="submitGrammarAnswers()">Submit Answers</button>';
+    else html+='<button class="btn bts btf" onclick="retakeGrammar()">Try Again</button>';
+    html+='</div>';
   }
+
   mc.innerHTML=html;setNav("home");
+};
+
+window._myWordChecks=null;
+window.toggleWordCheck=async function(word){
+  var snap=await get(ref(db,"wordChecks/"+CU.uid));
+  var checked=(snap.exists()&&snap.val().checked)||{};
+  checked[word]=!checked[word];
+  await set(ref(db,"wordChecks/"+CU.uid),{checked:checked,studentName:CU.displayName});
+  renderStep1Screen();
+};
+window.submitWordChecks=async function(){
+  var snap=await get(ref(db,"wordChecks/"+CU.uid));
+  var checked=(snap.exists()&&snap.val().checked)||{};
+  await update(ref(db,"wordChecks/"+CU.uid),{checked:checked,studentName:CU.displayName,submittedAt:Date.now()});
+  toast("Word check submitted!");
+};
+window.pickGrammarAnswer=async function(qi,oi){
+  var snap=await get(ref(db,"grammarAnswers/"+CU.uid));
+  var answers=(snap.exists()&&snap.val().answers)||{};
+  if(snap.exists()&&snap.val().submitted)return;
+  answers[qi]=oi;
+  await set(ref(db,"grammarAnswers/"+CU.uid),{answers:answers,submitted:false,studentName:CU.displayName});
+  renderStep1Screen();
+};
+window.submitGrammarAnswers=async function(){
+  var snap=await get(ref(db,"grammarAnswers/"+CU.uid));
+  var answers=(snap.exists()&&snap.val().answers)||{};
+  await update(ref(db,"grammarAnswers/"+CU.uid),{answers:answers,submitted:true,studentName:CU.displayName,submittedAt:Date.now()});
+  toast("Answers submitted!");
+  renderStep1Screen();
+};
+window.retakeGrammar=async function(){
+  await update(ref(db,"grammarAnswers/"+CU.uid),{submitted:false});
+  renderStep1Screen();
 };
 
 // ── STEP 3: MY LEARNING CONTRACT (3-column: topic, goals, evaluation) ──
@@ -971,7 +1165,7 @@ window.renderStep3Screen=async function(){
   html+='<div class="contract-col"><div class="cc-title">2. Choose Your Goals</div>';
   GOAL_ITEMS.forEach(function(g){
     var checked=!!(c.goals&&c.goals[g.id]);
-    var text=g.text.replace("{grammar}",esc(uinfo.targetGrammar||"target grammar"));
+    var text=g.text;
     html+='<div class="goal-row'+(checked?" sel":"")+'" onclick="'+(readOnly?"":"toggleGoal('"+g.id+"')")+'">';
     html+='<span class="qchk">'+(checked?"&#10003;":"")+'</span><span style="flex:1">'+text+'</span></div>';
   });
@@ -1020,12 +1214,12 @@ window.clearContract=async function(){if(!confirm("Clear your contract? You will
 
 
 // ── QUIZ (Step 2): Q1 platforms (multi) → Q2 grouped product (single) → Q3 weakness (single) ──
-var qState={i:0,platforms:[],productId:null,weakness:null,catalog:null,reviewChoice:null};
+var qState={i:0,platforms:[],platformsOtherText:"",productId:null,weakness:null,catalog:null,reviewChoice:null,aiOpen:false,aiMsgs:[]};
 
 async function startQuiz(){
   var c=contractData;
   if(c&&c.productType&&c.editUnlocked===false){toast("Ask your teacher to unlock editing first.");return;}
-  qState={i:0,platforms:[],productId:null,weakness:null,catalog:null,reviewChoice:null};
+  qState={i:0,platforms:[],platformsOtherText:"",productId:null,weakness:null,catalog:null,reviewChoice:null,aiOpen:false,aiMsgs:[]};
   setNav("home");
   document.getElementById("mc").innerHTML='<div class="loading">Loading...</div>';
   try{
@@ -1061,13 +1255,19 @@ function quizTopBar(stepIdx){
 
 function renderQ1(mc){
   var html=quizTopBar(0);
-  html+='<div class="qq">What can you work with?</div><div class="qs2">Pick everything you have access to.</div>';
+  html+='<div class="qq">What do you need to complete the project?</div><div class="qs2">Pick everything you have access to.</div>';
   html+='<div class="qopts">';
   PLATFORMS.forEach(function(pf){
     var on=qState.platforms.indexOf(pf)!==-1;
     html+='<div class="qo'+(on?" sel":"")+'" onclick="qToggle1(\''+esc(pf)+'\')">';
     html+='<span style="flex:1">'+pf+'</span><span class="qchk">'+(on?"&#10003;":"")+'</span></div>';
   });
+  var otherOn=qState.platforms.indexOf("Something else")!==-1;
+  html+='<div class="qo'+(otherOn?" sel":"")+'" onclick="qToggle1(\'Something else\')">';
+  html+='<span style="flex:1">Something else</span><span class="qchk">'+(otherOn?"&#10003;":"")+'</span></div>';
+  if(otherOn){
+    html+='<input class="fi mt8" id="q1-other-text" placeholder="Tell us what you need..." value="'+esc(qState.platformsOtherText||"")+'" onblur="qSetOtherText(this.value)">';
+  }
   html+='</div><div class="qnav"><span></span>';
   html+='<button class="btn btp" '+(qState.platforms.length===0?"disabled":"")+' onclick="qGoto(1)">Continue &#8594;</button></div>';
   mc.innerHTML=html;
@@ -1077,6 +1277,7 @@ window.qToggle1=function(pf){
   if(idx===-1)qState.platforms.push(pf);else qState.platforms.splice(idx,1);
   renderQ1(document.getElementById("mc"));
 };
+window.qSetOtherText=function(v){qState.platformsOtherText=v;};
 
 function renderQ2(mc){
   var html=quizTopBar(1);
@@ -1093,11 +1294,40 @@ function renderQ2(mc){
     });
     html+='</div>';
   });
+
+  html+='<div class="card mt12"><button type="button" class="btn bts btf" onclick="qAiToggle()">&#128172; '+(qState.aiOpen?"Hide":"Need help choosing? Ask the assistant")+'</button>';
+  if(qState.aiOpen){
+    html+='<div class="chat-wrap mt8"><div class="chat-msgs" id="q2-ai-msgs">';
+    if(!qState.aiMsgs||!qState.aiMsgs.length){
+      html+='<div class="msg ai">Hi! Ask me things like "What is a Mini Report?" or "How do I write a Mini Report?"</div>';
+    } else {
+      qState.aiMsgs.forEach(function(m){html+='<div class="msg '+(m.role==="me"?"me":"ai")+'">'+esc(m.text)+'</div>';});
+    }
+    html+='</div><div class="chat-in"><input id="q2-ai-input" placeholder="Ask a question..." onkeydown="if(event.key===\'Enter\')qAiAsk()"><button class="btn btp" onclick="qAiAsk()">Send</button></div></div>';
+    html+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">';
+    html+='<div class="chip" onclick="qAiAsk(\'What is a Mini Report?\')" style="font-size:11px">What is a Mini Report?</div>';
+    html+='<div class="chip" onclick="qAiAsk(\'How do I write a Mini Report?\')" style="font-size:11px">How to write a Mini Report</div>';
+    html+='</div>';
+  }
+  html+='</div>';
+
   html+='<div class="qnav"><button class="btn bts" onclick="qGoto(0)">Back</button>';
   html+='<button class="btn btp" '+(!qState.productId?"disabled":"")+' onclick="qGoto(2)">Continue &#8594;</button></div>';
   mc.innerHTML=html;
 }
 window.qPick2=function(id){qState.productId=id;renderQ2(document.getElementById("mc"));};
+window.qAiToggle=function(){qState.aiOpen=!qState.aiOpen;renderQ2(document.getElementById("mc"));};
+window.qAiAsk=async function(presetMsg){
+  var inp=document.getElementById("q2-ai-input");
+  var msg=presetMsg||(inp?inp.value.trim():"");
+  if(!msg)return;
+  qState.aiMsgs=qState.aiMsgs||[];
+  qState.aiMsgs.push({role:"me",text:msg});
+  renderQ2(document.getElementById("mc"));
+  var reply=await askProjectAI(msg);
+  qState.aiMsgs.push({role:"ai",text:reply});
+  renderQ2(document.getElementById("mc"));
+};
 
 function renderQ3(mc){
   var html=quizTopBar(2);
@@ -1162,7 +1392,7 @@ window.submitQuizChoice=async function(){
 
 window.chooseProduct=async function(id,name,cat){
   await set(ref(db,"contracts/"+CU.uid),{
-    productId:id,productType:name,category:cat,platforms:qState.platforms.slice(),
+    productId:id,productType:name,category:cat,platforms:qState.platforms.slice(),platformsOtherText:qState.platformsOtherText||"",
     weakness:qState.weakness||"",weaknessTips:qState.weakness?(SKILL_TIPS[qState.weakness]||[]):[],
     status:"awaiting_grouping",editUnlocked:true,
     topic:"",goals:{},evalTeacherPct:"",evalPeerPct:"",
@@ -1370,10 +1600,11 @@ window.openNotifs=async function(){
 // ── TEACHER APP ──
 var TNAV=[
   {id:"overview",l:"Overview",i:'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>'},
+  {id:"feed",l:"Feed",i:'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>'},
   {id:"session",l:"Run Class",i:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'},
   {id:"grouping",l:"Grouping",i:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>'},
   {id:"ideas",l:"Ideas",i:'<path d="M9 18h6M10 22h4M12 2a6 6 0 0 0-4 10.5c.6.5 1 1.3 1 2.5h6c0-1.2.4-2 1-2.5A6 6 0 0 0 12 2z"/>'},
-  {id:"evaluate",l:"Evaluate",i:'<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>'},
+  {id:"resources",l:"Resources",i:'<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>'},
   {id:"unit",l:"Unit",i:'<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>'}
 ];
 
@@ -1387,7 +1618,7 @@ function renderTeacher(){
 window.tgo=function(page){
   document.querySelectorAll("#bnav .ni").forEach(function(n){n.classList.remove("active");});
   var el=document.getElementById("tnav-"+page);if(el)el.classList.add("active");
-  ({overview:renderTOverview,session:renderTSession,grouping:renderTGroups,ideas:renderTIdeas,evaluate:renderTEvaluate,unit:renderTUnit}[page]||renderTOverview)();
+  ({overview:renderTOverview,feed:renderTFeed,session:renderTSession,grouping:renderTGroups,ideas:renderTIdeas,resources:renderTResources,unit:renderTUnit}[page]||renderTOverview)();
 };
 
 // ── TEACHER: RUN CLASS (live lock-mode control) ──
@@ -1535,6 +1766,11 @@ window.toggleEditAccess=async function(id,unlock){
 };
 
 // ── TEACHER: FULL CONTRACT REVIEW & EDIT ──
+window.quickApprove=async function(id,name){
+  await update(ref(db,"contracts/"+id),{status:"approved"});
+  toast(name+"'s plan approved!");
+};
+
 window.reviewContract=async function(studentId){
   var mc=document.getElementById("mc");
   mc.innerHTML='<div class="loading">Loading...</div>';
@@ -1563,7 +1799,7 @@ window.reviewContract=async function(studentId){
   html+='<div class="contract-col"><div class="cc-title">2. Goals</div>';
   GOAL_ITEMS.forEach(function(g){
     var checked=!!window._reviewGoals[g.id];
-    var text=g.text.replace("{grammar}",esc(uinfo.targetGrammar||"target grammar"));
+    var text=g.text;
     html+='<div class="goal-row'+(checked?" sel":"")+'" onclick="toggleReviewGoal(\''+g.id+'\')"><span class="qchk">'+(checked?"&#10003;":"")+'</span><span style="flex:1">'+text+'</span></div>';
   });
   html+='</div>';
@@ -1762,40 +1998,90 @@ window.addCatalogItem=async function(cat){
   renderTIdeas();
 };
 
-function renderTEvaluate(){
+// ── TEACHER: RESOURCES MANAGER ──
+async function renderTResources(){
   var mc=document.getElementById("mc");
-  mc.innerHTML='<div class="pt">Student Work</div><div class="ps">View posts and leave evaluations.</div><div id="eval-feed"><div class="loading">Loading...</div></div>';
-  onValue(ref(db,"posts"),function(snap){
-    var ef=document.getElementById("eval-feed");if(!ef)return;
-    if(!snap.exists()){ef.innerHTML='<div class="empty"><div class="ei">&#128247;</div><p>No posts yet.</p></div>';return;}
-    var posts=[];snap.forEach(function(p){posts.push({id:p.key,...p.val()});});
-    posts.sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);});
-    var html="";
-    posts.forEach(function(post){
-      var comments=post.comments?Object.values(post.comments):[];
-      html+='<div class="post" style="margin-bottom:10px"><div class="post-hdr">';
-      if(post.photo)html+='<img src="'+esc(post.photo)+'" class="post-av">';
-      else html+='<div class="post-avp">'+esc((post.name||"?")[0])+'</div>';
-      html+='<div><div class="post-name">'+esc(post.name||"Student")+'</div>';
-      html+='<div class="post-meta">'+esc(post.productType||"")+" &bull; "+formatDateTime(post.createdAt||Date.now())+'</div></div></div>';
-      html+='<div class="post-body">';
-      if(post.title)html+='<div style="font-size:14px;font-weight:700;margin-bottom:4px">'+esc(post.title)+'</div>';
-      if(post.link)html+='<a href="'+esc(post.link)+'" target="_blank" class="obtn mb8" style="display:inline-block">View work &#8599;</a>';
-      if(comments.length){
-        html+='<div style="font-size:12px;font-weight:700;color:var(--tm);margin-top:6px;margin-bottom:5px">'+comments.length+' comment(s)</div>';
-      }
+  mc.innerHTML='<div class="pt">Resources</div><div class="ps">Curate helpful links for Step 4 on the student Home page.</div><div class="loading">Loading...</div>';
+
+  var pendingSnap=await get(ref(db,"resourceSuggestions"));
+  var pending=[];
+  if(pendingSnap.exists())pendingSnap.forEach(function(s){pending.push({id:s.key,...s.val()});});
+
+  var resSnap=await get(ref(db,"resources"));
+  var list=[];
+  if(resSnap.exists())resSnap.forEach(function(r){list.push({id:r.key,...r.val()});});
+  list.sort(function(a,b){return (b.addedAt||0)-(a.addedAt||0);});
+
+  var html='<div class="card"><div class="ctitle">Add a Resource</div>';
+  html+='<div class="fg"><label class="fl">Title</label><input class="fi" id="tres-title" placeholder="e.g. BBC Bitesize"></div>';
+  html+='<div class="fg"><label class="fl">Link</label><input class="fi" id="tres-url" placeholder="https://..."></div>';
+  html+='<button class="btn btp btf" onclick="addResourceDirect()">Add</button></div>';
+
+  if(pending.length){
+    html+='<div class="card"><div class="ctitle mb8">Student Suggestions ('+pending.length+')</div>';
+    pending.forEach(function(p){
+      html+='<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--gb)">';
+      html+='<img src="'+faviconUrl(p.url)+'" style="width:24px;height:24px;border-radius:6px;flex-shrink:0" onerror="this.style.display=\'none\'">';
+      html+='<div style="flex:1"><div style="font-size:13px;font-weight:600">'+esc(p.title)+'</div><div style="font-size:11px;color:var(--tm)">'+esc(p.url)+' &bull; from '+esc(p.suggestedBy||"")+'</div></div>';
+      html+='<button class="btn btg" style="font-size:11px;padding:6px 10px" onclick="approveResource(\''+p.id+'\')">Approve</button>';
+      html+='<button class="obtn" onclick="rejectResource(\''+p.id+'\')">Reject</button>';
       html+='</div>';
-      html+='<div class="post-actions">';
-      html+='<button class="post-act" onclick="openTeacherComment(\''+post.id+'\',\''+esc(post.uid)+'\')">&#128105;&#8205;&#127979; Add Evaluation</button>';
-      html+='</div>';
-      html+='<div id="tcform-'+post.id+'" style="display:none;padding:10px 13px;border-top:1px solid var(--gb)">';
-      html+='<div id="tc-rub-'+post.id+'"></div>';
-      html+='<textarea class="fta mt8 mb8" id="tc-text-'+post.id+'" placeholder="Your feedback for this student..."></textarea>';
-      html+='<button class="btn btg" style="font-size:12px;padding:7px 13px" onclick="submitTeacherComment(\''+post.id+'\',\''+esc(post.uid)+'\')">Save Evaluation</button>';
-      html+='</div></div>';
     });
-    ef.innerHTML=html;
+    html+='</div>';
+  }
+
+  html+='<div class="card"><div class="ctitle mb8">Approved Resources</div>';
+  if(!list.length)html+='<div class="empty"><div class="ei">&#128279;</div><p>No resources yet.</p></div>';
+  else list.forEach(function(r){
+    html+='<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--gb)">';
+    html+='<img src="'+faviconUrl(r.url)+'" style="width:24px;height:24px;border-radius:6px;flex-shrink:0" onerror="this.style.display=\'none\'">';
+    html+='<div style="flex:1"><div style="font-size:13px;font-weight:600">'+esc(r.title||r.url)+'</div><div style="font-size:11px;color:var(--tm)">'+esc(r.addedBy||"")+'</div></div>';
+    html+='<button class="obtn" onclick="deleteResource(\''+r.id+'\')">&#128465;</button>';
+    html+='</div>';
   });
+  html+='</div>';
+
+  mc.innerHTML='<div class="pt">Resources</div><div class="ps">Curate helpful links for Step 4 on the student Home page.</div>'+html;
+}
+window.addResourceDirect=async function(){
+  var title=((document.getElementById("tres-title")||{}).value||"").trim();
+  var url=((document.getElementById("tres-url")||{}).value||"").trim();
+  if(!title||!url){toast("Fill in both fields!");return;}
+  if(!/^https?:\/\//i.test(url)){toast("Link must start with http:// or https://");return;}
+  await push(ref(db,"resources"),{title:title,url:url,addedBy:"Teacher",addedAt:Date.now()});
+  toast("Resource added!");
+  renderTResources();
+};
+window.approveResource=async function(id){
+  var snap=await get(ref(db,"resourceSuggestions/"+id));
+  if(!snap.exists())return;
+  var s=snap.val();
+  await push(ref(db,"resources"),{title:s.title,url:s.url,addedBy:s.suggestedBy||"Student",addedAt:Date.now()});
+  await remove(ref(db,"resourceSuggestions/"+id));
+  toast("Approved and added!");
+  renderTResources();
+};
+window.rejectResource=async function(id){
+  await remove(ref(db,"resourceSuggestions/"+id));
+  toast("Rejected.");
+  renderTResources();
+};
+window.deleteResource=async function(id){
+  if(!confirm("Remove this resource?"))return;
+  await remove(ref(db,"resources/"+id));
+  toast("Removed.");
+  renderTResources();
+};
+
+function renderTFeed(){
+  var mc=document.getElementById("mc");
+  var html='<div class="pt">Feed</div><div class="ps">Approve projects and give feedback on shared work.</div>';
+  html+='<div class="card"><div class="ctitle mb8">&#128203; Project Plans</div><div id="projects-list"><div class="loading">Loading...</div></div></div>';
+  html+='<div style="font-size:13px;font-weight:700;margin:14px 0 8px">&#128228; Shared Work</div>';
+  html+='<div id="feed-container"><div class="loading">Loading...</div></div>';
+  mc.innerHTML=html;
+  loadProjectsList(true);
+  loadFeed();
 }
 
 window.openTeacherComment=function(postId,targetUid){
@@ -1820,7 +2106,7 @@ function renderTUnit(){
   var mc=document.getElementById("mc");
   mc.innerHTML='<div class="pt">Unit Info</div><div class="ps">This is Step 1 on the student Home page.</div><div class="loading">Loading...</div>';
   get(ref(db,"unitInfo")).then(function(snap){
-    var info=snap.exists()?snap.val():{title:"",description:"",theme:"",grammarTips:"",unitWords:"",imageUrl:"",targetGrammar:""};
+    var info=snap.exists()?snap.val():{title:"",description:"",theme:"",words:"",imageUrl:"",grammarQuestions:[]};
     window._unitImageUrl=info.imageUrl||"";
     var html='<div class="card">';
     html+='<div class="fg"><label class="fl">Unit Title</label><input class="fi" id="unit-title" value="'+esc(info.title||"")+'" placeholder="e.g. Our Community"></div>';
@@ -1828,10 +2114,33 @@ function renderTUnit(){
     html+='<div class="fg"><label class="fl">Description (shown to students)</label><textarea class="fta" id="unit-desc" style="min-height:80px" placeholder="What will students explore in this unit?">'+esc(info.description||"")+'</textarea></div>';
     html+='<div class="fg"><label class="fl">Image</label><input type="file" accept="image/*" class="fi" id="unit-image-file" onchange="uploadUnitImage(this)">';
     html+='<div id="unit-image-preview" style="margin-top:8px">'+(info.imageUrl?'<img src="'+esc(info.imageUrl)+'" style="width:100%;border-radius:8px;display:block">':"")+'</div></div>';
-    html+='<div class="fg"><label class="fl">Grammar Tips (one per line)</label><textarea class="fta" id="unit-grammar" style="min-height:80px" placeholder="e.g. Use past simple for finished actions&#10;Remember -ed for regular verbs">'+esc(info.grammarTips||"")+'</textarea></div>';
-    html+='<div class="fg"><label class="fl">Unit Words (comma or line separated)</label><textarea class="fta" id="unit-words" style="min-height:60px" placeholder="e.g. ancestor, tradition, generation">'+esc(info.unitWords||"")+'</textarea></div>';
-    html+='<div class="fg"><label class="fl">Target Grammar (used in the contract goal)</label><input class="fi" id="unit-target-grammar" value="'+esc(info.targetGrammar||"")+'" placeholder="e.g. past simple tense"></div>';
     html+='<button class="btn btp btf" onclick="saveUnit()">Save Unit Info</button></div>';
+
+    html+='<div class="card"><div class="ctitle mb8">&#128214; Unit Words</div>';
+    html+='<div class="fg"><label class="fl">One word per line</label><textarea class="fta" id="unit-words" style="min-height:100px" placeholder="ancestor&#10;tradition&#10;generation">'+esc(info.words||"")+'</textarea></div>';
+    html+='<div style="font-size:11px;color:var(--tm)">Students will see a checklist and tick the words they already know.</div>';
+    html+='<button class="btn btp btf mt8" onclick="saveUnitWords()">Save Unit Words</button></div>';
+
+    html+='<div class="card"><div class="ctitle mb8">&#128209; Grammar Questions (multiple choice)</div>';
+    var qs=info.grammarQuestions||[];
+    if(!qs.length)html+='<div style="font-size:12px;color:var(--th);margin-bottom:10px">No questions yet.</div>';
+    qs.forEach(function(q,qi){
+      html+='<div style="border:1px solid var(--gb);border-radius:var(--rs);padding:9px;margin-bottom:8px">';
+      html+='<div style="display:flex;justify-content:space-between;gap:6px"><div style="font-size:13px;font-weight:600;flex:1">'+(qi+1)+". "+esc(q.q)+'</div>';
+      html+='<button class="obtn" onclick="deleteGrammarQuestion('+qi+')">&#128465;</button></div>';
+      q.options.forEach(function(opt,oi){html+='<div style="font-size:12px;color:'+(oi===q.correct?"var(--t)":"var(--tm)")+';margin-top:3px">'+(oi===q.correct?"&#9989; ":"&#11036; ")+esc(opt)+'</div>';});
+      html+='</div>';
+    });
+    html+='<div class="divider"></div>';
+    html+='<div class="fg"><label class="fl">New question</label><input class="fi" id="gq-text" placeholder="e.g. Which sentence uses past simple correctly?"></div>';
+    for(var i=0;i<4;i++){
+      html+='<div class="fg" style="display:flex;align-items:center;gap:8px">';
+      html+='<input type="radio" name="gq-correct" value="'+i+'" '+(i===0?"checked":"")+' style="width:16px;height:16px">';
+      html+='<input class="fi" id="gq-opt-'+i+'" placeholder="Option '+(i+1)+'" style="flex:1"></div>';
+    }
+    html+='<div style="font-size:11px;color:var(--tm);margin-bottom:8px">Tick the radio button next to the correct answer.</div>';
+    html+='<button class="btn btg btf" onclick="addGrammarQuestion()">Add Question</button></div>';
+
     mc.innerHTML='<div class="pt">Unit Info</div><div class="ps">This is Step 1 on the student Home page.</div>'+html;
   });
 }
@@ -1873,11 +2182,37 @@ window.saveUnit=async function(){
   var theme=((document.getElementById("unit-theme")||{}).value||"").trim();
   var desc=((document.getElementById("unit-desc")||{}).value||"").trim();
   var imageUrl=window._unitImageUrl||"";
-  var grammarTips=((document.getElementById("unit-grammar")||{}).value||"").trim();
-  var unitWords=((document.getElementById("unit-words")||{}).value||"").trim();
-  var targetGrammar=((document.getElementById("unit-target-grammar")||{}).value||"").trim();
-  await set(ref(db,"unitInfo"),{title:title,theme:theme,description:desc,imageUrl:imageUrl,grammarTips:grammarTips,unitWords:unitWords,targetGrammar:targetGrammar,updatedAt:Date.now()});
+  await update(ref(db,"unitInfo"),{title:title,theme:theme,description:desc,imageUrl:imageUrl,updatedAt:Date.now()});
   toast("Unit info saved! Students can now see it.");
+};
+window.saveUnitWords=async function(){
+  var words=((document.getElementById("unit-words")||{}).value||"").trim();
+  await update(ref(db,"unitInfo"),{words:words,updatedAt:Date.now()});
+  toast("Unit words saved!");
+};
+window.addGrammarQuestion=async function(){
+  var qText=((document.getElementById("gq-text")||{}).value||"").trim();
+  var opts=[];
+  for(var i=0;i<4;i++){opts.push(((document.getElementById("gq-opt-"+i)||{}).value||"").trim());}
+  var correctEl=document.querySelector('input[name="gq-correct"]:checked');
+  var correct=correctEl?parseInt(correctEl.value):0;
+  if(!qText||opts.some(function(o){return !o;})){toast("Fill in the question and all 4 options!");return;}
+  var snap=await get(ref(db,"unitInfo"));
+  var info=(snap.exists()&&snap.val())||{};
+  var qs=info.grammarQuestions||[];
+  qs.push({q:qText,options:opts,correct:correct});
+  await update(ref(db,"unitInfo"),{grammarQuestions:qs});
+  toast("Question added!");
+  renderTUnit();
+};
+window.deleteGrammarQuestion=async function(idx){
+  var snap=await get(ref(db,"unitInfo"));
+  var info=(snap.exists()&&snap.val())||{};
+  var qs=info.grammarQuestions||[];
+  qs.splice(idx,1);
+  await update(ref(db,"unitInfo"),{grammarQuestions:qs});
+  toast("Question removed.");
+  renderTUnit();
 };
 </script>
 </body>
