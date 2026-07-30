@@ -4,18 +4,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>LearnPath</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --p:#7F77DD;--pl:#EEEDFE;--pd:#3C3489;
-  --t:#1D9E75;--tl:#E1F5EE;--td:#085041;
-  --a:#BA7517;--al:#FAEEDA;
-  --c:#D85A30;--cl:#FAECE7;
-  --gl:#F1EFE8;--gb:#D3D1C7;
-  --tx:#2C2C2A;--tm:#5F5E5A;--th:#888780;
-  --bg:#F7F6F2;--r:12px;--rs:8px;--sh:0 1px 8px rgba(0,0,0,.07)
+  --p:#7C4DFF;--pl:#F1ECFF;--pd:#4A2FB0;
+  --t:#00C896;--tl:#DEFBF3;--td:#00694D;
+  --a:#FFB300;--al:#FFF4D9;
+  --c:#FF5A6E;--cl:#FFE9EC;
+  --gl:#F3F0FC;--gb:#E1D9F7;
+  --tx:#2D2A45;--tm:#6B6584;--th:#A79FC7;
+  --bg:#FBF8FF;--r:18px;--rs:13px;--sh:0 4px 16px rgba(124,77,255,.12)
 }
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--tx);min-height:100vh}
+body{font-family:'Nunito',-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--tx);min-height:100vh}
+h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2','Nunito',sans-serif}
 #auth{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(135deg,var(--pl),var(--tl))}
 .auth-card{background:#fff;border-radius:24px;padding:44px 36px;max-width:420px;width:100%;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.12)}
 .alogo{width:56px;height:56px;background:var(--p);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
@@ -44,33 +47,34 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .uinfo{display:flex;align-items:center;gap:7px}
 .uav{width:28px;height:28px;border-radius:50%;object-fit:cover;cursor:pointer;border:2px solid var(--gb)}
 .uname{font-size:12px;font-weight:600}
-.coin-pill{display:flex;align-items:center;gap:4px;background:var(--al);border-radius:20px;padding:3px 9px;font-size:12px;font-weight:700;color:var(--a);cursor:pointer;border:none}
+.coin-pill{display:flex;align-items:center;gap:4px;background:var(--al);border-radius:20px;padding:4px 11px;font-size:13px;font-weight:800;color:var(--a);cursor:pointer;border:2px solid #fff;box-shadow:0 2px 0 rgba(255,179,0,.25)}
 .nbtn{position:relative;background:none;border:none;cursor:pointer;padding:3px}
 .nbtn svg{width:19px;height:19px;stroke:var(--tm);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:block}
 .ndot{display:none;position:absolute;top:-1px;right:-1px;background:var(--c);color:#fff;font-size:8px;font-weight:700;width:14px;height:14px;border-radius:50%;align-items:center;justify-content:center;line-height:14px;text-align:center}
 .sob{font-size:11px;color:var(--tm);cursor:pointer;border:1px solid var(--gb);padding:3px 7px;border-radius:6px;background:none}
 .mc{flex:1;overflow-y:auto;padding:14px;max-width:640px;margin:0 auto;width:100%;padding-bottom:70px}
-.bnav{background:#fff;border-top:1px solid var(--gb);display:flex;position:fixed;bottom:0;left:0;right:0;z-index:100}
-.ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:7px 3px;cursor:pointer;gap:2px;border:none;background:none;color:var(--tm);font-size:10px;font-weight:500;transition:color .15s}
-.ni.active{color:var(--p)}
+.bnav{background:#fff;border-top:2px solid var(--gb);display:flex;position:fixed;bottom:0;left:0;right:0;z-index:100}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 3px;cursor:pointer;gap:2px;border:none;background:none;color:var(--th);font-size:10px;font-weight:800;transition:all .15s}
+.ni.active{color:var(--p);transform:translateY(-2px)}
 .ni svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.card{background:#fff;border-radius:var(--r);padding:14px;margin-bottom:10px;box-shadow:var(--sh);border:1px solid var(--gb)}
-.pt{font-size:19px;font-weight:700;margin-bottom:2px}
+.card{background:#fff;border-radius:var(--r);padding:14px;margin-bottom:10px;box-shadow:var(--sh);border:1.5px solid var(--gb)}
+.pt{font-size:21px;font-weight:800;margin-bottom:2px}
 .ps{font-size:13px;color:var(--tm);margin-bottom:14px}
-.btn{padding:9px 18px;border-radius:var(--rs);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .18s;display:inline-block}
-.btp{background:var(--p);color:#fff}
-.bts{background:var(--gl);color:var(--tx)}
-.btg{background:var(--t);color:#fff}
-.bto{background:none;border:1.5px solid var(--gb);color:var(--tm)}
+.btn{padding:11px 20px;border-radius:14px;font-size:14px;font-weight:800;cursor:pointer;border:none;transition:all .12s;display:inline-block;box-shadow:0 3px 0 rgba(0,0,0,.15);transform:translateY(0)}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.15)}
+.btp{background:var(--p);color:#fff;box-shadow:0 3px 0 #4A2FB0}
+.bts{background:var(--gl);color:var(--tx);box-shadow:0 3px 0 var(--gb)}
+.btg{background:var(--t);color:#fff;box-shadow:0 3px 0 #00694D}
+.bto{background:none;border:1.5px solid var(--gb);color:var(--tm);box-shadow:none}
 .btf{width:100%}
-.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn:disabled{opacity:.35;cursor:not-allowed;box-shadow:none;transform:none}
 .fg{margin-bottom:11px}
-.fl{font-size:12px;font-weight:600;color:var(--tm);margin-bottom:4px;display:block}
-.fi,.fse,.fta{width:100%;padding:9px 11px;border:1.5px solid var(--gb);border-radius:var(--rs);font-size:13px;color:var(--tx);background:#fff;font-family:inherit;transition:border-color .2s}
+.fl{font-size:12px;font-weight:700;color:var(--tm);margin-bottom:4px;display:block}
+.fi,.fse,.fta{width:100%;padding:10px 12px;border:2px solid var(--gb);border-radius:var(--rs);font-size:13px;color:var(--tx);background:#fff;font-family:inherit;transition:border-color .2s}
 .fi:focus,.fse:focus,.fta:focus{outline:none;border-color:var(--p)}
 .fta{min-height:64px;resize:vertical}
 .tip{background:var(--al);border-left:3px solid var(--a);padding:8px 11px;border-radius:0 var(--rs) var(--rs) 0;font-size:12px;color:var(--a);margin-top:5px;line-height:1.5}
-.chip{padding:6px 12px;border-radius:20px;border:1.5px solid var(--gb);font-size:12px;font-weight:600;cursor:pointer;background:#fff;transition:all .15s;display:inline-block;margin:3px}
+.chip{padding:6px 12px;border-radius:20px;border:2px solid var(--gb);font-size:12px;font-weight:700;cursor:pointer;background:#fff;transition:all .15s;display:inline-block;margin:3px}
 .chip.sel{border-color:var(--p);background:var(--pl);color:var(--pd)}
 .divider{height:1px;background:var(--gb);margin:13px 0}
 .sb{display:inline-flex;align-items:center;gap:2px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
@@ -158,10 +162,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .prof-av-img{width:70px;height:70px;border-radius:50%;object-fit:cover;border:3px solid var(--p);display:block}
 .prof-av-plc{width:70px;height:70px;border-radius:50%;background:var(--pl);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;color:var(--p);border:3px solid var(--p)}
 .prof-av-edit{position:absolute;bottom:0;right:0;width:22px;height:22px;background:var(--p);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff}
-.sticker-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:10px}
-.sticker{aspect-ratio:1;border-radius:var(--rs);display:flex;align-items:center;justify-content:center;font-size:24px;border:1.5px solid var(--gb);background:#fff}
-.sticker.earned{border-color:var(--a);background:var(--al)}
-.sticker.locked{opacity:.35}
+.badge-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:6px}
+.badge-item{display:flex;flex-direction:column;align-items:center;gap:6px}
+.badge-icon{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px}
+.badge-icon.earned{background:linear-gradient(145deg,var(--a),#FF8F00);box-shadow:0 4px 0 #C67800,0 0 0 4px var(--al);animation:badgePop .4s ease}
+.badge-icon.locked{background:var(--gl);color:var(--th);opacity:.6}
+.badge-name{font-size:10px;font-weight:700;text-align:center;color:var(--tm);line-height:1.3}
+@keyframes badgePop{0%{transform:scale(.5);opacity:0}60%{transform:scale(1.15)}100%{transform:scale(1)}}
 .pbw{background:var(--gb);border-radius:5px;height:7px;margin:5px 0 11px;overflow:hidden}
 .pbf{height:100%;border-radius:5px;background:var(--t);transition:width .5s}
 .obtn{padding:4px 10px;border-radius:20px;border:1.5px solid var(--gb);font-size:11px;font-weight:600;cursor:pointer;background:none;color:var(--tm);text-decoration:none;transition:all .15s;display:inline-block}
@@ -179,12 +186,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .toggle-row{display:flex;border-radius:var(--rs);overflow:hidden;border:1.5px solid var(--gb);margin-bottom:12px}
 .toggle-btn{flex:1;padding:8px 0;font-size:12px;font-weight:600;cursor:pointer;border:none;background:#fff;color:var(--tm);transition:all .15s;text-align:center}
 .toggle-btn.act{background:var(--p);color:#fff}
-.step-card{background:#fff;border-radius:var(--r);border:1.5px solid var(--gb);padding:15px;margin-bottom:11px;cursor:pointer;transition:all .18s;display:flex;gap:12px;align-items:flex-start}
-.step-card:hover{border-color:var(--p);box-shadow:var(--sh)}
-.step-card.locked{opacity:.55;cursor:not-allowed}
-.step-card.locked:hover{border-color:var(--gb);box-shadow:none}
-.step-num{width:30px;height:30px;border-radius:50%;background:var(--p);color:#fff;font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.step-card.locked .step-num{background:var(--gb);color:var(--tm)}
+.step-path{position:relative;padding-left:8px}
+.step-card{position:relative;background:#fff;border-radius:20px;border:2px solid var(--gb);padding:16px;margin-bottom:14px;margin-left:20px;cursor:pointer;transition:all .15s;display:flex;gap:14px;align-items:center;box-shadow:0 3px 0 var(--gb)}
+.step-card:hover{border-color:var(--p);transform:translateY(-2px);box-shadow:0 5px 0 var(--pl)}
+.step-card:active{transform:translateY(1px)}
+.step-card.locked{opacity:.5;cursor:not-allowed;box-shadow:none}
+.step-card.locked:hover{border-color:var(--gb);transform:none;box-shadow:none}
+.step-card.done{border-color:var(--t)}
+.step-card::before{content:"";position:absolute;left:-20px;top:50%;width:16px;height:3px;background:var(--gb);display:none}
+.step-num{width:44px;height:44px;border-radius:50%;background:linear-gradient(145deg,var(--p),var(--pd));color:#fff;font-weight:800;font-size:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 3px 0 var(--pd);font-family:'Baloo 2',sans-serif}
+.step-card.locked .step-num{background:var(--gb);color:var(--tm);box-shadow:none;font-size:16px}
+.step-card.done .step-num{background:linear-gradient(145deg,var(--t),var(--td));box-shadow:0 3px 0 var(--td)}
 .step-title{font-size:14px;font-weight:700;margin-bottom:2px}
 .step-sub{font-size:12px;color:var(--tm);line-height:1.4}
 .lockbar{position:sticky;top:0;background:var(--pd);color:#fff;padding:10px 13px;border-radius:var(--r);margin-bottom:14px;text-align:center;z-index:5}
@@ -286,47 +298,6 @@ const fb=initializeApp({
   databaseURL:"https://let-s-practice-2eda9-default-rtdb.firebaseio.com"
 });
 const auth=getAuth(fb),db=getDatabase(fb),prov=new GoogleAuthProvider();
-const AKEY="AQ.Ab8RN6LVzWKDI_aua7ykMkT1cxNCD64uCr4YgpZqMPSatNMqug"; // Gemini API key
-
-// ── Project-helper AI (Step 2 only) ──
-async function askProjectAI(userMsg){
-  try{
-    var res=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",{
-      method:"POST",
-      headers:{"Content-Type":"application/json","x-goog-api-key":AKEY},
-      body:JSON.stringify({
-        system_instruction:{parts:[{text:"You are a friendly helper for a 12-year-old English-language student choosing a school project format (examples: Mini Report, Podcast, Comic Strip, Speech, Poster, Blog Post). Explain project types simply in 2-4 short sentences, and give one concrete tip on how to write or make it. Never write the project for them."}]},
-        contents:[{parts:[{text:userMsg}]}]
-      })
-    });
-    var data=await res.json();
-    if(data&&data.error)return "Assistant error: "+(data.error.message||"unknown")+". Ask your teacher to check the API key in the file.";
-    return (data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]&&data.candidates[0].content.parts[0].text)||"Sorry, I couldn't answer that.";
-  }catch(e){
-    return "Couldn't connect to the assistant right now ("+(e&&e.message?e.message:"network error")+").";
-  }
-}
-async function askFeedbackSummaryAI(wells,improves){
-  var ctx="";
-  if(wells.length)ctx+="What classmates said the student did well:\n"+wells.map(function(w){return "- "+w;}).join("\n")+"\n\n";
-  if(improves.length)ctx+="What classmates think the student could improve:\n"+improves.map(function(w){return "- "+w;}).join("\n");
-  try{
-    var res=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",{
-      method:"POST",
-      headers:{"Content-Type":"application/json","x-goog-api-key":AKEY},
-      body:JSON.stringify({
-        system_instruction:{parts:[{text:"You summarize peer feedback for a 12-year-old student in ONE short, warm, encouraging sentence (max 25 words). Blend the 'did well' and 'improve' themes naturally, like: \"Classmates felt your writing was clear but wanted more examples.\" No bullet points, no names, just one plain sentence."}]},
-        contents:[{parts:[{text:ctx}]}]
-      })
-    });
-    var data=await res.json();
-    if(data&&data.error){console.error("askFeedbackSummaryAI error:",data.error);return null;}
-    return (data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]&&data.candidates[0].content.parts[0].text)||null;
-  }catch(e){
-    return null;
-  }
-}
-
 let CU=null,UP=null;
 let myGid=null,myGname=null,userCoins=0;
 let contractData=null;
@@ -557,20 +528,32 @@ async function addCoin(){
 
 window.openCoins=function(){
   var mc=document.getElementById("mc");setNav("profile");
-  var stickers=["&#127775;","&#128293;","&#128142;","&#128640;","&#127919;","&#127942;","&#9889;","&#127912;","&#128218;","&#127926;","&#127756;","&#128170;","&#127968;","&#129351;","&#127873;"];
+  var badges=[
+    {e:"&#127775;",name:"Idea Spark"},{e:"&#9997;",name:"Word Wizard"},{e:"&#127908;",name:"Voice Star"},
+    {e:"&#127912;",name:"Creative Genius"},{e:"&#128218;",name:"Bookworm"},{e:"&#129309;",name:"Team Player"},
+    {e:"&#128640;",name:"Rising Star"},{e:"&#127942;",name:"Project Master"},{e:"&#128161;",name:"Bright Thinker"},
+    {e:"&#127919;",name:"Goal Getter"},{e:"&#128293;",name:"On Fire"},{e:"&#9889;",name:"Speedy Helper"},
+    {e:"&#127984;",name:"Story Builder"},{e:"&#129351;",name:"Champion"},{e:"&#127881;",name:"Superstar"}
+  ];
   var earned=Math.floor(userCoins/3);
-  var html='<div class="pt">Coins &amp; Stickers</div>';
-  html+='<div class="ps">Comment on a classmate\'s work to earn coins. Every 3 coins unlocks a sticker!</div>';
-  html+='<div class="card" style="text-align:center;padding:20px">';
-  html+='<div style="font-size:42px;margin-bottom:6px">&#127881;</div>';
-  html+='<div style="font-size:36px;font-weight:800;color:var(--a)">'+userCoins+'</div>';
-  html+='<div style="font-size:13px;color:var(--tm);margin-bottom:14px">coins collected</div>';
-  if(userCoins>=3){html+='<button class="btn btf" style="background:var(--a);color:#fff" onclick="spendCoins()">Unlock a sticker (3 coins)</button>';}
-  else{html+='<div style="font-size:13px;color:var(--tm)">Earn '+(3-userCoins)+" more to unlock a sticker</div>";}
+  var level=earned+1;
+  var html='<div class="pt">Coins &amp; Badges</div>';
+  html+='<div class="ps">Comment on a classmate\'s work to earn coins. Every 3 coins unlocks a new badge!</div>';
+  html+='<div class="card" style="text-align:center;padding:22px;background:linear-gradient(135deg,var(--a),#FF8F00);color:#fff;box-shadow:0 4px 0 #C67800">';
+  html+='<div style="font-size:12px;font-weight:800;letter-spacing:.5px;opacity:.9">LEVEL '+level+'</div>';
+  html+='<div style="font-size:44px;margin:4px 0">&#127881;</div>';
+  html+='<div style="font-size:38px;font-weight:800">'+userCoins+'</div>';
+  html+='<div style="font-size:13px;opacity:.9;margin-bottom:14px">coins collected</div>';
+  if(userCoins>=3){html+='<button class="btn btf" style="background:#fff;color:var(--a);box-shadow:0 3px 0 rgba(0,0,0,.15)" onclick="spendCoins()">&#127873; Unlock a Badge (3 coins)</button>';}
+  else{html+='<div style="font-size:13px;opacity:.9">Earn '+(3-userCoins)+" more to unlock your next badge!</div>";}
   html+='</div>';
-  html+='<div class="card"><div class="ctitle" style="margin-bottom:10px">My Sticker Collection</div>';
-  html+='<div class="sticker-grid">';
-  stickers.forEach(function(s,i){html+='<div class="sticker'+(i<earned?" earned":" locked")+'">'+s+'</div>';});
+  html+='<div class="card"><div class="ctitle" style="margin-bottom:12px">&#127942; My Badge Collection</div>';
+  html+='<div class="badge-grid">';
+  badges.forEach(function(b,i){
+    var isEarned=i<earned;
+    html+='<div class="badge-item"><div class="badge-icon'+(isEarned?" earned":" locked")+'">'+(isEarned?b.e:"&#128274;")+'</div>';
+    html+='<div class="badge-name">'+(isEarned?b.name:"???")+'</div></div>';
+  });
   html+='</div></div>';
   mc.innerHTML=html;
 };
@@ -579,7 +562,7 @@ window.spendCoins=async function(){
   if(userCoins<3){toast("Not enough coins!");return;}
   userCoins-=3;await set(ref(db,"coins/"+CU.uid),userCoins);
   document.getElementById("coins-count").textContent=userCoins;
-  toast("New sticker unlocked!");openCoins();
+  toast("&#127881; New badge unlocked!");openCoins();
 };
 
 // ── STUDENT NAV ──
@@ -811,13 +794,21 @@ async function renderHome(){
   var awaitingGrouping=hasProduct&&contractData.status==="awaiting_grouping";
   var editUnlocked=!contractData||contractData.editUnlocked!==false;
   var step3Unlocked=hasProduct&&!awaitingGrouping;
+  var step3Done=contractData&&(contractData.status==="approved"||contractData.status==="pending");
+  var doneCount=(hasProduct?1:0)+(step3Done?1:0);
 
-  var html='<div style="font-size:18px;font-weight:700;margin-bottom:14px">Hey, '+esc(firstName)+" &#128075;</div>";
+  var html='<div class="card" style="background:linear-gradient(135deg,var(--p),var(--pd));color:#fff;box-shadow:0 4px 0 var(--pd)">';
+  html+='<div style="font-size:19px;font-weight:800;font-family:\'Baloo 2\',sans-serif">Hey, '+esc(firstName)+'! &#128075;</div>';
+  html+='<div style="font-size:12px;opacity:.85;margin-top:2px">You\'ve completed '+doneCount+' of 2 big milestones &#127942;</div>';
+  html+='<div class="pbw" style="background:rgba(255,255,255,.3);margin-top:8px"><div class="pbf" style="background:#fff;width:'+(doneCount/2*100)+'%"></div></div>';
+  html+='</div>';
+
+  html+='<div class="step-path">';
 
   var unitTitle="Tap to see today's unit";
   try{var usnap=await get(ref(db,"unitInfo"));if(usnap.exists()&&usnap.val().title)unitTitle=usnap.val().title;}catch(e){}
   html+='<div class="step-card" onclick="renderStep1Screen()">';
-  html+='<div class="step-num">1</div><div style="flex:1"><div class="step-title">What are we learning?</div>';
+  html+='<div class="step-num">1</div><div style="flex:1"><div class="step-title">&#128218; What are we learning?</div>';
   html+='<div class="step-sub">'+esc(unitTitle)+'</div></div></div>';
 
   var step2Sub,step2Click;
@@ -825,18 +816,19 @@ async function renderHome(){
   else if(awaitingGrouping){step2Sub="Your idea: "+esc(contractData.productType)+" — tap to retake, or wait for your teacher to group you.";step2Click="startQuiz()";}
   else if(editUnlocked){step2Sub="Your project: "+esc(contractData.productType)+" — tap to retake the quiz";step2Click="startQuiz()";}
   else{step2Sub="Your project: "+esc(contractData.productType)+" (locked — ask your teacher to unlock editing)";step2Click="toast('Ask your teacher to unlock editing first.')";}
-  html+='<div class="step-card" onclick="'+step2Click+'">';
-  html+='<div class="step-num">2</div><div style="flex:1"><div class="step-title">Get Ideas — Find Your Project</div>';
+  html+='<div class="step-card'+(hasProduct?" done":"")+'" onclick="'+step2Click+'">';
+  html+='<div class="step-num">'+(hasProduct?"&#9989;":"2")+'</div><div style="flex:1"><div class="step-title">&#128161; Get Ideas — Find Your Project</div>';
   html+='<div class="step-sub">'+step2Sub+'</div></div></div>';
 
-  html+='<div class="step-card'+(step3Unlocked?"":" locked")+'" onclick="'+(step3Unlocked?"renderStep3Screen()":"toast('Wait for your teacher to group you first!')")+'">';
-  html+='<div class="step-num">'+(step3Unlocked?"3":"&#128274;")+'</div><div style="flex:1"><div class="step-title">My Learning Contract</div>';
+  html+='<div class="step-card'+(step3Unlocked?(step3Done?" done":""):" locked")+'" onclick="'+(step3Unlocked?"renderStep3Screen()":"toast('Wait for your teacher to group you first!')")+'">';
+  html+='<div class="step-num">'+(step3Unlocked?(step3Done?"&#9989;":"3"):"&#128274;")+'</div><div style="flex:1"><div class="step-title">&#128221; My Learning Contract</div>';
   html+='<div class="step-sub">'+(step3Unlocked?"Your project plan for "+esc(contractData.productType):"Unlocks once your teacher groups the class")+'</div></div></div>';
 
   html+='<div class="step-card" onclick="renderResourcesScreen()">';
-  html+='<div class="step-num">4</div><div style="flex:1"><div class="step-title">Choose Resources</div>';
+  html+='<div class="step-num">4</div><div style="flex:1"><div class="step-title">&#128279; Choose Resources</div>';
   html+='<div class="step-sub">Helpful links your teacher and classmates found</div></div></div>';
 
+  html+='</div>';
   mc.innerHTML=html;setNav("home");
 }
 
@@ -998,9 +990,6 @@ function buildCommentSummary(post,comments){
   var detailId="cmsum-"+postId;
   var html='<div style="background:var(--gl);border-radius:var(--rs);padding:10px 11px;margin-bottom:9px">';
   html+='<div style="font-size:12px;font-weight:700;margin-bottom:6px">&#128202; Feedback Summary ('+comments.length+(comments.length===1?" comment)":" comments)")+'</div>';
-  if(post.aiSummary&&post.aiSummary.text){
-    html+='<div style="font-size:13px;font-style:italic;color:var(--pd);background:var(--pl);padding:7px 9px;border-radius:var(--rs);margin-bottom:8px">&#10024; '+esc(post.aiSummary.text)+'</div>';
-  }
   if(allVals.length){
     var avg=allVals.reduce(function(a,b){return a+b;},0)/allVals.length+1;
     html+='<div style="font-size:13px;cursor:pointer" onclick="toggleCat(\''+detailId+'\')">Overall: <strong>'+scoreTierLabel(avg)+'</strong> ('+avg.toFixed(1)+'/3) &#9660;</div>';
@@ -1023,27 +1012,9 @@ function buildCommentSummary(post,comments){
     html+='<div style="font-size:10px;font-weight:700;color:var(--th);margin-top:8px;text-transform:uppercase;letter-spacing:.4px">What classmates think you could improve</div>';
     improves.forEach(function(cm){html+='<div style="font-size:12px;color:var(--tm);margin-top:3px">&#8226; '+esc(cm.improve)+' <span style="color:var(--th)">— '+esc(cm.from||"")+'</span></div>';});
   }
-  if(wells.length||improves.length){
-    html+='<button class="obtn mt8" onclick="generateFeedbackSummary(\''+postId+'\')">'+(post.aiSummary?"&#128260; Click to Summarise Again":"&#10024; Click to Summarise")+'</button>';
-  }
   html+='</div>';
   return html;
 }
-window.generateFeedbackSummary=async function(postId){
-  var snap=await get(ref(db,"posts/"+postId));
-  if(!snap.exists())return;
-  var post=snap.val();
-  var comments=post.comments?Object.values(post.comments):[];
-  var wells=comments.filter(function(cm){return cm.well;}).map(function(cm){return cm.well;});
-  var improves=comments.filter(function(cm){return cm.improve;}).map(function(cm){return cm.improve;});
-  if(!wells.length&&!improves.length){toast("No feedback to summarize yet.");return;}
-  toast("Generating summary...");
-  var text=await askFeedbackSummaryAI(wells,improves);
-  if(!text){toast("Couldn't generate a summary right now — check the assistant is set up.");return;}
-  await update(ref(db,"posts/"+postId),{aiSummary:{text:text,generatedAt:Date.now()}});
-  toast("Summary ready!");
-};
-
 function buildPostHTML(post){
   var comments=post.comments?Object.values(post.comments):[];
   var html='<div class="post" id="post-'+post.id+'">';
@@ -1474,12 +1445,12 @@ window.clearContract=async function(){if(!confirm("Clear your contract? You will
 
 
 // ── QUIZ (Step 2): Q1 platforms (multi) → Q2 grouped product (single) → Q3 weakness (single) ──
-var qState={i:0,platforms:[],platformsOtherText:"",productId:null,weakness:null,catalog:null,reviewChoice:null,aiOpen:false,aiMsgs:[]};
+var qState={i:0,platforms:[],platformsOtherText:"",productId:null,weakness:null,catalog:null,reviewChoice:null};
 
 async function startQuiz(){
   var c=contractData;
   if(c&&c.productType&&c.editUnlocked===false){toast("Ask your teacher to unlock editing first.");return;}
-  qState={i:0,platforms:[],platformsOtherText:"",productId:null,weakness:null,catalog:null,reviewChoice:null,aiOpen:false,aiMsgs:[]};
+  qState={i:0,platforms:[],platformsOtherText:"",productId:null,weakness:null,catalog:null,reviewChoice:null};
   setNav("home");
   document.getElementById("mc").innerHTML='<div class="loading">Loading...</div>';
   try{
@@ -1555,39 +1526,11 @@ function renderQ2(mc){
     html+='</div>';
   });
 
-  html+='<div class="card mt12"><button type="button" class="btn bts btf" onclick="qAiToggle()">&#128172; '+(qState.aiOpen?"Hide":"Need help choosing? Ask the assistant")+'</button>';
-  if(qState.aiOpen){
-    html+='<div class="chat-wrap mt8"><div class="chat-msgs" id="q2-ai-msgs">';
-    if(!qState.aiMsgs||!qState.aiMsgs.length){
-      html+='<div class="msg ai">Hi! Ask me things like "What is a Mini Report?" or "How do I write a Mini Report?"</div>';
-    } else {
-      qState.aiMsgs.forEach(function(m){html+='<div class="msg '+(m.role==="me"?"me":"ai")+'">'+esc(m.text)+'</div>';});
-    }
-    html+='</div><div class="chat-in"><input id="q2-ai-input" placeholder="Ask a question..." onkeydown="if(event.key===\'Enter\')qAiAsk()"><button class="btn btp" onclick="qAiAsk()">Send</button></div></div>';
-    html+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">';
-    html+='<div class="chip" onclick="qAiAsk(\'What is a Mini Report?\')" style="font-size:11px">What is a Mini Report?</div>';
-    html+='<div class="chip" onclick="qAiAsk(\'How do I write a Mini Report?\')" style="font-size:11px">How to write a Mini Report</div>';
-    html+='</div>';
-  }
-  html+='</div>';
-
   html+='<div class="qnav"><button class="btn bts" onclick="qGoto(0)">Back</button>';
   html+='<button class="btn btp" '+(!qState.productId?"disabled":"")+' onclick="qGoto(2)">Continue &#8594;</button></div>';
   mc.innerHTML=html;
 }
 window.qPick2=function(id){qState.productId=id;renderQ2(document.getElementById("mc"));};
-window.qAiToggle=function(){qState.aiOpen=!qState.aiOpen;renderQ2(document.getElementById("mc"));};
-window.qAiAsk=async function(presetMsg){
-  var inp=document.getElementById("q2-ai-input");
-  var msg=presetMsg||(inp?inp.value.trim():"");
-  if(!msg)return;
-  qState.aiMsgs=qState.aiMsgs||[];
-  qState.aiMsgs.push({role:"me",text:msg});
-  renderQ2(document.getElementById("mc"));
-  var reply=await askProjectAI(msg);
-  qState.aiMsgs.push({role:"ai",text:reply});
-  renderQ2(document.getElementById("mc"));
-};
 
 function renderQ3(mc){
   var html=quizTopBar(2);
