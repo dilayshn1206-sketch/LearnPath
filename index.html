@@ -286,14 +286,14 @@ const fb=initializeApp({
   databaseURL:"https://let-s-practice-2eda9-default-rtdb.firebaseio.com"
 });
 const auth=getAuth(fb),db=getDatabase(fb),prov=new GoogleAuthProvider();
-const AKEY="AQ.Ab8RN6LVzWKDI_aua7ykMkT1cxNCD64uCr4YgpZqMPSatNMqug"; // Gemini API key
+const AKEY="AQ.Ab8RN6JylQ7RfMkk9Qm-0L2mbP8FmgQeocepHBrT3lis40cHvQ"; // Gemini API key
 
 // ── Project-helper AI (Step 2 only) ──
 async function askProjectAI(userMsg){
   try{
-    var res=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="+AKEY,{
+    var res=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",{
       method:"POST",
-      headers:{"Content-Type":"application/json"},
+      headers:{"Content-Type":"application/json","x-goog-api-key":AKEY},
       body:JSON.stringify({
         system_instruction:{parts:[{text:"You are a friendly helper for a 12-year-old English-language student choosing a school project format (examples: Mini Report, Podcast, Comic Strip, Speech, Poster, Blog Post). Explain project types simply in 2-4 short sentences, and give one concrete tip on how to write or make it. Never write the project for them."}]},
         contents:[{parts:[{text:userMsg}]}]
@@ -311,9 +311,9 @@ async function askFeedbackSummaryAI(wells,improves){
   if(wells.length)ctx+="What classmates said the student did well:\n"+wells.map(function(w){return "- "+w;}).join("\n")+"\n\n";
   if(improves.length)ctx+="What classmates think the student could improve:\n"+improves.map(function(w){return "- "+w;}).join("\n");
   try{
-    var res=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="+AKEY,{
+    var res=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",{
       method:"POST",
-      headers:{"Content-Type":"application/json"},
+      headers:{"Content-Type":"application/json","x-goog-api-key":AKEY},
       body:JSON.stringify({
         system_instruction:{parts:[{text:"You summarize peer feedback for a 12-year-old student in ONE short, warm, encouraging sentence (max 25 words). Blend the 'did well' and 'improve' themes naturally, like: \"Classmates felt your writing was clear but wanted more examples.\" No bullet points, no names, just one plain sentence."}]},
         contents:[{parts:[{text:ctx}]}]
