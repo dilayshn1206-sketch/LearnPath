@@ -169,6 +169,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .empty{text-align:center;padding:28px 14px;color:var(--tm)}
 .ei{font-size:30px;margin-bottom:7px}
 .toast{position:fixed;bottom:76px;left:50%;transform:translateX(-50%);background:#2C2C2A;color:#fff;padding:9px 18px;border-radius:var(--rs);font-size:13px;font-weight:600;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;max-width:88vw;text-align:center}
+.modal-overlay{position:fixed;inset:0;background:rgba(20,20,20,.55);z-index:600;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal-card{background:#fff;border-radius:16px;padding:20px;max-width:420px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.eval2-item{border-bottom:1px solid var(--gl);padding-bottom:12px;margin-bottom:12px}
+.eval2-item:last-of-type{border-bottom:none}
 .toast.show{opacity:1}
 .loading{text-align:center;padding:32px;color:var(--tm);font-size:13px}
 .mt8{margin-top:8px}.mb8{margin-bottom:8px}.mt12{margin-top:12px}
@@ -263,6 +267,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 
 <div class="toast" id="toast"></div>
 
+<div class="modal-overlay" id="eval-modal-overlay" style="display:none">
+  <div class="modal-card" id="eval-modal-card"></div>
+</div>
+
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import{getAuth,GoogleAuthProvider,signInWithPopup,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
@@ -278,24 +286,22 @@ const fb=initializeApp({
   databaseURL:"https://let-s-practice-2eda9-default-rtdb.firebaseio.com"
 });
 const auth=getAuth(fb),db=getDatabase(fb),prov=new GoogleAuthProvider();
-const AKEY="YOUR_NEW_API_KEY_HERE"; // put your own Anthropic API key here to activate the project-helper chat in Step 2
+const AKEY="AQ.Ab8RN6LBIvPJDcLJhOhdYnWSIcDz2_LeQtSOeAKm7tc_Tz34sw"; // Gemini API key
 
 // ── Project-helper AI (Step 2 only) ──
 async function askProjectAI(userMsg){
   try{
-    var res=await fetch("https://api.anthropic.com/v1/messages",{
+    var res=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="+AKEY,{
       method:"POST",
-      headers:{"Content-Type":"application/json","x-api-key":AKEY,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+      headers:{"Content-Type":"application/json"},
       body:JSON.stringify({
-        model:"claude-sonnet-5",
-        max_tokens:300,
-        system:"You are a friendly helper for a 12-year-old English-language student choosing a school project format (examples: Mini Report, Podcast, Comic Strip, Speech, Poster, Blog Post). Explain project types simply in 2-4 short sentences, and give one concrete tip on how to write or make it. Never write the project for them.",
-        messages:[{role:"user",content:userMsg}]
+        system_instruction:{parts:[{text:"You are a friendly helper for a 12-year-old English-language student choosing a school project format (examples: Mini Report, Podcast, Comic Strip, Speech, Poster, Blog Post). Explain project types simply in 2-4 short sentences, and give one concrete tip on how to write or make it. Never write the project for them."}]},
+        contents:[{parts:[{text:userMsg}]}]
       })
     });
     var data=await res.json();
-    if(data&&data.error)return "Assistant error: "+(data.error.message||data.error.type||"unknown")+". Ask your teacher to check the API key in the file.";
-    return (data.content&&data.content[0]&&data.content[0].text)||"Sorry, I couldn't answer that.";
+    if(data&&data.error)return "Assistant error: "+(data.error.message||"unknown")+". Ask your teacher to check the API key in the file.";
+    return (data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]&&data.candidates[0].content.parts[0].text)||"Sorry, I couldn't answer that.";
   }catch(e){
     return "Couldn't connect to the assistant right now ("+(e&&e.message?e.message:"network error")+").";
   }
@@ -305,19 +311,17 @@ async function askFeedbackSummaryAI(wells,improves){
   if(wells.length)ctx+="What classmates said the student did well:\n"+wells.map(function(w){return "- "+w;}).join("\n")+"\n\n";
   if(improves.length)ctx+="What classmates think the student could improve:\n"+improves.map(function(w){return "- "+w;}).join("\n");
   try{
-    var res=await fetch("https://api.anthropic.com/v1/messages",{
+    var res=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="+AKEY,{
       method:"POST",
-      headers:{"Content-Type":"application/json","x-api-key":AKEY,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+      headers:{"Content-Type":"application/json"},
       body:JSON.stringify({
-        model:"claude-sonnet-5",
-        max_tokens:150,
-        system:"You summarize peer feedback for a 12-year-old student in ONE short, warm, encouraging sentence (max 25 words). Blend the 'did well' and 'improve' themes naturally, like: \"Classmates felt your writing was clear but wanted more examples.\" No bullet points, no names, just one plain sentence.",
-        messages:[{role:"user",content:ctx}]
+        system_instruction:{parts:[{text:"You summarize peer feedback for a 12-year-old student in ONE short, warm, encouraging sentence (max 25 words). Blend the 'did well' and 'improve' themes naturally, like: \"Classmates felt your writing was clear but wanted more examples.\" No bullet points, no names, just one plain sentence."}]},
+        contents:[{parts:[{text:ctx}]}]
       })
     });
     var data=await res.json();
     if(data&&data.error){console.error("askFeedbackSummaryAI error:",data.error);return null;}
-    return (data.content&&data.content[0]&&data.content[0].text)||null;
+    return (data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]&&data.candidates[0].content.parts[0].text)||null;
   }catch(e){
     return null;
   }
@@ -657,6 +661,19 @@ function applySessionLock(){
   if(!CU||UP&&UP.role==="teacher")return;
   var bnav=document.getElementById("bnav");
   var ls=window._liveSession||{active:false};
+  var overlay=document.getElementById("eval-modal-overlay");
+  if(ls.active&&(ls.step==="eval1"||ls.step==="eval2")){
+    if(overlay){
+      overlay.style.display="flex";
+      var card=document.getElementById("eval-modal-card");
+      if(card&&!card.innerHTML)card.innerHTML='<div class="loading">Loading...</div>';
+    }
+    if(ls.step==="eval1")renderEval1Modal();else renderEval2Modal();
+    return;
+  } else if(overlay){
+    overlay.style.display="none";
+    document.getElementById("eval-modal-card").innerHTML="";
+  }
   if(ls.active){
     if(bnav)bnav.style.display="none";
     if(ls.step==="step1"){renderStep1Screen();}
@@ -673,6 +690,116 @@ function applySessionLock(){
     go("home");
   }
 }
+
+// ── TEACHER-PUSHED POPUP: Stage 1, Lesson Reflection ──
+async function renderEval1Modal(){
+  var card=document.getElementById("eval-modal-card");
+  if(!card)return;
+  var sessionKey=window._liveSession.updatedAt;
+  var snap=await get(ref(db,"lessonReflections/"+CU.uid));
+  var already=false;
+  if(snap.exists())snap.forEach(function(e){if(e.val().sessionKey===sessionKey)already=true;});
+  if(already){
+    card.innerHTML='<div style="text-align:center;padding:24px"><div style="font-size:34px;margin-bottom:8px">&#9989;</div><div style="font-size:14px;font-weight:700">Submitted! Thanks.</div><div style="font-size:12px;color:var(--tm);margin-top:6px">Waiting for your teacher to move on.</div></div>';
+    return;
+  }
+  var today=new Date().toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"});
+  var html='<div style="font-size:16px;font-weight:700;margin-bottom:2px">&#128221; Lesson Reflection</div>';
+  html+='<div style="font-size:12px;color:var(--tm);margin-bottom:14px">Your teacher wants to hear how it went.</div>';
+  html+='<div class="fg"><label class="fl">Name</label><input class="fi" value="'+esc(CU.displayName||"")+'" disabled></div>';
+  html+='<div class="fg"><label class="fl">Date</label><input class="fi" value="'+today+'" disabled></div>';
+  html+='<div class="fg"><label class="fl">What I learned today / this week</label><textarea class="fta" id="ev1-learned" style="min-height:50px"></textarea></div>';
+  html+='<div class="fg"><label class="fl">Resource or tool I used</label><input class="fi" id="ev1-resource"></div>';
+  html+='<div class="fg"><label class="fl">The most difficult part for me</label><textarea class="fta" id="ev1-difficult" style="min-height:50px"></textarea></div>';
+  html+='<div class="fg"><label class="fl">My next goal</label><textarea class="fta" id="ev1-nextgoal" style="min-height:50px"></textarea></div>';
+  html+='<button class="btn btg btf" onclick="submitEval1()">Submit</button>';
+  card.innerHTML=html;
+}
+window.submitEval1=async function(){
+  var learned=((document.getElementById("ev1-learned")||{}).value||"").trim();
+  var resource=((document.getElementById("ev1-resource")||{}).value||"").trim();
+  var difficult=((document.getElementById("ev1-difficult")||{}).value||"").trim();
+  var nextGoal=((document.getElementById("ev1-nextgoal")||{}).value||"").trim();
+  if(!learned||!difficult||!nextGoal){toast("Please fill in the required fields!");return;}
+  await push(ref(db,"lessonReflections/"+CU.uid),{
+    name:CU.displayName,date:new Date().toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}),
+    learned:learned,resource:resource,difficult:difficult,nextGoal:nextGoal,
+    sessionKey:window._liveSession.updatedAt,createdAt:Date.now()
+  });
+  toast("Submitted! Thank you.");
+  renderEval1Modal();
+};
+
+// ── TEACHER-PUSHED POPUP: Stage 2, Project Evaluation ──
+async function renderEval2Modal(){
+  var card=document.getElementById("eval-modal-card");
+  if(!card)return;
+  var sessionKey=window._liveSession.updatedAt;
+  var snap=await get(ref(db,"contracts/"+CU.uid));
+  var c=snap.exists()?snap.val():null;
+  if(!c||!c.productType){
+    card.innerHTML='<div style="text-align:center;padding:24px;font-size:13px;color:var(--tm)">You don\'t have a project yet.</div>';
+    return;
+  }
+  if(c.projectEval&&c.projectEval.sessionKey===sessionKey){
+    card.innerHTML='<div style="text-align:center;padding:24px"><div style="font-size:34px;margin-bottom:8px">&#9989;</div><div style="font-size:14px;font-weight:700">Submitted! Thanks.</div><div style="font-size:12px;color:var(--tm);margin-top:6px">Waiting for your teacher to move on.</div></div>';
+    return;
+  }
+  window._eval2Scores=c.projectEval?{satisfied:c.projectEval.satisfied,followedPlan:c.projectEval.followedPlan,achievedGoals:c.projectEval.achievedGoals,gotScore:c.projectEval.gotScore}:{};
+
+  var html='<div style="font-size:16px;font-weight:700;margin-bottom:2px">&#127942; Project Evaluation</div>';
+  html+='<div style="font-size:12px;color:var(--tm);margin-bottom:14px">Rate each — 1 (not really) to 3 (yes, definitely).</div>';
+
+  html+='<div class="eval2-item"><div style="font-size:13px;margin-bottom:4px">I am satisfied with the product I chose and completed: <strong>'+esc(c.productType)+'</strong></div>';
+  html+=eval2ScoreButtons("satisfied");
+  html+='</div>';
+
+  html+='<div class="eval2-item"><div style="font-size:13px;margin-bottom:4px">I followed my project plan.</div>';
+  if(c.planSteps&&c.planSteps.length){
+    html+='<div style="font-size:11px;color:var(--tm);margin-bottom:6px;line-height:1.6">';
+    c.planSteps.forEach(function(s,i){if(s&&s.trim())html+=(i+1)+". "+esc(s)+"<br>";});
+    html+='</div>';
+  }
+  html+=eval2ScoreButtons("followedPlan");
+  html+='</div>';
+
+  html+='<div class="eval2-item"><div style="font-size:13px;margin-bottom:4px">I achieved my goals.</div>';
+  if(c.goals){
+    html+='<div style="font-size:11px;color:var(--tm);margin-bottom:6px;line-height:1.6">';
+    GOAL_ITEMS.forEach(function(g){if(c.goals[g.id])html+="&#9989; "+esc(g.text)+"<br>";});
+    if(c.goalsOtherText)html+="&#9989; "+esc(c.goalsOtherText)+"<br>";
+    html+='</div>';
+  }
+  html+=eval2ScoreButtons("achievedGoals");
+  html+='</div>';
+
+  html+='<div class="eval2-item"><div style="font-size:13px;margin-bottom:4px">I got the score I wanted from my teacher and classmates.</div>';
+  html+=eval2ScoreButtons("gotScore");
+  html+='</div>';
+
+  html+='<button class="btn btg btf" onclick="submitEval2()">Submit</button>';
+  card.innerHTML=html;
+}
+function eval2ScoreButtons(key){
+  var val=(window._eval2Scores||{})[key];
+  var html='<div style="display:flex;gap:6px;margin-bottom:4px">';
+  [1,2,3].forEach(function(n){
+    html+='<button type="button" class="btn '+(val===n?"btp":"bts")+'" style="flex:1;padding:8px 0" onclick="setEval2Score(\''+key+'\','+n+')">'+n+'</button>';
+  });
+  html+='</div>';
+  return html;
+}
+window.setEval2Score=function(key,val){
+  window._eval2Scores[key]=val;
+  renderEval2Modal();
+};
+window.submitEval2=async function(){
+  var s=window._eval2Scores||{};
+  if(!s.satisfied||!s.followedPlan||!s.achievedGoals||!s.gotScore){toast("Please rate all four statements!");return;}
+  await update(ref(db,"contracts/"+CU.uid),{projectEval:{satisfied:s.satisfied,followedPlan:s.followedPlan,achievedGoals:s.achievedGoals,gotScore:s.gotScore,sessionKey:window._liveSession.updatedAt,submittedAt:Date.now()}});
+  toast("Submitted! Thank you.");
+  renderEval2Modal();
+};
 
 window.go=function(page){
   if(window._liveSession&&window._liveSession.active)return;
@@ -742,8 +869,9 @@ window.renderResourcesScreen=async function(){
   html+='<div class="card"><div class="ctitle mb8">Approved Resources</div>';
   if(!list.length)html+='<div class="empty"><div class="ei">&#128279;</div><p>No resources yet.</p></div>';
   else list.forEach(function(r){
+    var thumb=getLinkThumbnail(r.url)||faviconUrl(r.url);
     html+='<a href="'+esc(r.url)+'" target="_blank" style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--gl);text-decoration:none;color:inherit">';
-    html+='<img src="'+faviconUrl(r.url)+'" style="width:28px;height:28px;border-radius:6px;flex-shrink:0" onerror="this.style.display=\'none\'">';
+    html+='<img src="'+thumb+'" style="width:52px;height:52px;object-fit:cover;border-radius:8px;flex-shrink:0;background:var(--gl)" onerror="this.src=\''+faviconUrl(r.url)+'\';this.onerror=null;">';
     html+='<div style="flex:1"><div style="font-size:13px;font-weight:600">'+esc(r.title||r.url)+'</div><div style="font-size:11px;color:var(--tm)">'+esc(r.addedBy||"")+'</div></div>';
     html+='<span style="color:var(--th)">&#8599;</span></a>';
   });
@@ -822,6 +950,7 @@ function loadProjectsList(teacherMode){
           var checked=!!goals[g.id];
           html+='<div style="display:flex;align-items:flex-start;gap:7px;padding:3px 0;font-size:12px;'+(checked?"":"color:var(--th)")+'"><span>'+(checked?"&#9989;":"&#11036;")+'</span><span>'+g.text+'</span></div>';
         });
+        if(d.goalsOtherText)html+='<div style="display:flex;align-items:flex-start;gap:7px;padding:3px 0;font-size:12px"><span>&#9989;</span><span>'+esc(d.goalsOtherText)+'</span></div>';
         if(d.evalTeacherPct||d.evalPeerPct){
           html+='<div style="font-size:11px;font-weight:700;color:var(--th);text-transform:uppercase;letter-spacing:.4px;margin:8px 0 4px">Evaluation Goals</div>';
           html+='<div style="font-size:12px">Teacher: '+esc(d.evalTeacherPct||"—")+"% &bull; Classmates: "+esc(d.evalPeerPct||"—")+'%</div>';
@@ -905,7 +1034,7 @@ function buildCommentSummary(post,comments){
     improves.forEach(function(cm){html+='<div style="font-size:12px;color:var(--tm);margin-top:3px">&#8226; '+esc(cm.improve)+' <span style="color:var(--th)">— '+esc(cm.from||"")+'</span></div>';});
   }
   if(wells.length||improves.length){
-    html+='<button class="obtn mt8" onclick="generateFeedbackSummary(\''+postId+'\')">'+(post.aiSummary?"&#128260; Refresh AI Summary":"&#10024; Summarize with AI")+'</button>';
+    html+='<button class="obtn mt8" onclick="generateFeedbackSummary(\''+postId+'\')">'+(post.aiSummary?"&#128260; Click to Summarise Again":"&#10024; Click to Summarise")+'</button>';
   }
   html+='</div>';
   return html;
@@ -1298,7 +1427,7 @@ window.renderStep3Screen=async function(){
     html+='<input class="fi mb8" value="'+esc(s)+'" placeholder="Step '+(i+1)+'..." '+(readOnly?"disabled":'onblur="savePlanStep('+i+',this.value)"')+'>';
   });
   if(!readOnly)html+='<button type="button" class="btn bts btf" style="font-size:12px" onclick="addPlanStep()">+ Add another step</button>';
-  html+='<div style="font-size:11px;color:var(--th);margin-top:9px;line-height:1.7">Example:<br>1- I will read mini-story examples<br>2- I will write my mini-story<br>3- I will read my mini-story<br>4- I will make my friends read my mini-story</div>';
+  html+='<div style="font-size:11px;color:var(--th);margin-top:9px;line-height:1.7">Example:<br>I will read mini-story examples<br>I will write my mini story<br>I will read my mini story<br>I will make my friends read my mini story</div>';
   html+='</div>';
 
   // Column 2: goals
@@ -1309,6 +1438,7 @@ window.renderStep3Screen=async function(){
     html+='<div class="goal-row'+(checked?" sel":"")+'" onclick="'+(readOnly?"":"toggleGoal('"+g.id+"')")+'">';
     html+='<span class="qchk">'+(checked?"&#10003;":"")+'</span><span style="flex:1">'+text+'</span></div>';
   });
+  html+='<div class="fg" style="margin-top:10px"><label class="fl">Something else...</label><input class="fi" id="c-goals-other" value="'+esc(c.goalsOtherText||"")+'" placeholder="Write your own goal" '+(readOnly?"disabled":"onblur=\"saveGoalsOther()\"")+'></div>';
   html+='</div>';
 
   // Column 3: evaluation
@@ -1347,6 +1477,11 @@ window.toggleGoal=async function(gid){
   contractData.goals[gid]=!contractData.goals[gid];
   await update(ref(db,"contracts/"+CU.uid),{goals:contractData.goals});
   renderStep3Screen();
+};
+window.saveGoalsOther=async function(){
+  var val=((document.getElementById("c-goals-other")||{}).value||"").trim();
+  contractData.goalsOtherText=val;
+  await update(ref(db,"contracts/"+CU.uid),{goalsOtherText:val});
 };
 window.saveEval=async function(){
   var tp=((document.getElementById("c-teacherpct")||{}).value||"").trim();
@@ -1737,6 +1872,8 @@ async function renderTSession(){
   html+='<div class="card" style="text-align:center;padding:18px;border-color:'+(s.active?"var(--t)":"var(--gb)")+';border-width:1.5px">';
   if(!s.active){html+='<div style="font-size:14px;font-weight:700;color:var(--tm)">&#128275; No session live — students are browsing freely</div>';}
   else if(s.step==="step1"){html+='<div style="font-size:14px;font-weight:700;color:var(--td)">&#128214; Showing "What We\'re Learning" to everyone</div>';}
+  else if(s.step==="eval1"){html+='<div style="font-size:14px;font-weight:700;color:var(--td)">&#128221; Lesson Reflection popup is live</div>';}
+  else if(s.step==="eval2"){html+='<div style="font-size:14px;font-weight:700;color:var(--td)">&#127942; Project Evaluation popup is live</div>';}
   else{
     var rem=Math.max(0,Math.round((s.deadline-Date.now())/1000));
     var label=s.step==="step2"?"Get Ideas timer running":"Project Plan timer running";
@@ -1770,6 +1907,14 @@ async function renderTSession(){
     html+='</div>';
   }
   html+='</div>';
+
+  html+='<div class="card"><div style="font-size:13px;font-weight:700;margin-bottom:2px">&#128221; Lesson Reflection (pop-up)</div>';
+  html+='<div style="font-size:11px;color:var(--tm);margin-bottom:8px">Pops up on every student\'s screen until they submit — good for end of lesson or end of week.</div>';
+  html+='<button class="btn btp btf" onclick="startSessionEval1()">Send Lesson Reflection</button></div>';
+
+  html+='<div class="card"><div style="font-size:13px;font-weight:700;margin-bottom:2px">&#127942; Project Evaluation (pop-up)</div>';
+  html+='<div style="font-size:11px;color:var(--tm);margin-bottom:8px">Send once a student has finished their project.</div>';
+  html+='<button class="btn btp btf" onclick="startSessionEval2()">Send Project Evaluation</button></div>';
 
   if(s.active)html+='<button class="btn btf" style="background:var(--c);color:#fff" onclick="endSession()">&#9209; End Session — back to free browsing</button>';
   mc.innerHTML=html;
@@ -1811,6 +1956,16 @@ window.startSessionStep3=async function(){
   toast("Project Plan started — Step 3 is now unlocked for the class!");
   renderTSession();
 };
+window.startSessionEval1=async function(){
+  await set(ref(db,"liveSession"),{active:true,step:"eval1",deadline:null,updatedAt:Date.now()});
+  toast("Lesson Reflection sent to every student!");
+  renderTSession();
+};
+window.startSessionEval2=async function(){
+  await set(ref(db,"liveSession"),{active:true,step:"eval2",deadline:null,updatedAt:Date.now()});
+  toast("Project Evaluation sent to every student!");
+  renderTSession();
+};
 window.adjustSessionTime=async function(delta){
   var snap=await get(ref(db,"liveSession"));if(!snap.exists())return;
   var s=snap.val();
@@ -1827,7 +1982,11 @@ function renderTOverview(){
   var mc=document.getElementById("mc");
   mc.innerHTML='<div class="pt">Class Overview</div><div class="ps">Approve plans and manage editing access.</div>'
     +'<div class="card"><div class="ctitle">Waiting for Approval</div><div id="pend-list"><div class="loading">Loading...</div></div></div>'
-    +'<div class="card"><div class="ctitle">All Students</div><div id="stud-list"><div class="loading">Loading...</div></div></div>';
+    +'<div class="card"><div class="ctitle">All Students</div><div id="stud-list"><div class="loading">Loading...</div></div></div>'
+    +'<div class="card"><div class="ctitle mb8">&#128221; Lesson Reflections</div><div id="reflections-list"><div class="loading">Loading...</div></div></div>'
+    +'<div class="card"><div class="ctitle mb8">&#127942; Project Evaluations</div><div id="projeval-list"><div class="loading">Loading...</div></div></div>';
+  loadReflectionsList();
+  loadProjectEvalList();
   onValue(ref(db,"contracts"),function(snap){
     var all=[],pend=[];
     if(snap.exists())snap.forEach(function(c){var d={id:c.key,...c.val()};all.push(d);if(d.status==="pending")pend.push(d);});
@@ -1839,6 +1998,7 @@ function renderTOverview(){
         h+='<div class="post" style="margin-bottom:8px"><div class="post-hdr">';
         if(s.studentPhoto)h+='<img src="'+esc(s.studentPhoto)+'" class="post-av">';
         else h+='<div class="post-avp">'+esc((s.studentName||"?")[0])+'</div>';
+
         h+='<div><div class="post-name">'+esc(s.studentName||"")+'</div>';
         h+='<div class="post-meta">'+esc(s.productType||"")+'</div></div></div>';
         h+='<div class="post-body">';
@@ -1870,6 +2030,44 @@ window.toggleEditAccess=async function(id,unlock){
   await update(ref(db,"contracts/"+id),{editUnlocked:unlock});
   toast(unlock?"Editing unlocked for this student":"Editing locked for this student");
 };
+
+async function loadReflectionsList(){
+  var el=document.getElementById("reflections-list");if(!el)return;
+  var snap=await get(ref(db,"lessonReflections"));
+  var all=[];
+  if(snap.exists())snap.forEach(function(u){u.forEach(function(r){all.push(r.val());});});
+  all.sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);});
+  if(!all.length){el.innerHTML='<div class="empty"><div class="ei">&#128221;</div><p>No reflections submitted yet.</p></div>';return;}
+  var html="";
+  all.slice(0,20).forEach(function(r){
+    html+='<div style="border-bottom:1px solid var(--gb);padding:9px 0">';
+    html+='<div style="font-size:13px;font-weight:700">'+esc(r.name||"Student")+' <span style="font-weight:400;color:var(--th);font-size:11px">'+esc(r.date||"")+'</span></div>';
+    html+='<div style="font-size:12px;color:var(--tm);margin-top:3px"><strong>Learned:</strong> '+esc(r.learned||"")+'</div>';
+    if(r.resource)html+='<div style="font-size:12px;color:var(--tm)"><strong>Resource:</strong> '+esc(r.resource)+'</div>';
+    html+='<div style="font-size:12px;color:var(--tm)"><strong>Hardest part:</strong> '+esc(r.difficult||"")+'</div>';
+    html+='<div style="font-size:12px;color:var(--tm)"><strong>Next goal:</strong> '+esc(r.nextGoal||"")+'</div>';
+    html+='</div>';
+  });
+  el.innerHTML=html;
+}
+
+async function loadProjectEvalList(){
+  var el=document.getElementById("projeval-list");if(!el)return;
+  var snap=await get(ref(db,"contracts"));
+  var all=[];
+  if(snap.exists())snap.forEach(function(c){var d=c.val();if(d.projectEval)all.push(d);});
+  if(!all.length){el.innerHTML='<div class="empty"><div class="ei">&#127942;</div><p>No project evaluations submitted yet.</p></div>';return;}
+  var html="";
+  all.forEach(function(d){
+    var e=d.projectEval;
+    html+='<div style="border-bottom:1px solid var(--gb);padding:9px 0">';
+    html+='<div style="font-size:13px;font-weight:700">'+esc(d.studentName||"Student")+'</div>';
+    html+='<div style="font-size:12px;color:var(--tm);margin-top:3px">Satisfied with product: <strong>'+e.satisfied+'</strong>/3 &bull; Followed plan: <strong>'+e.followedPlan+'</strong>/3</div>';
+    html+='<div style="font-size:12px;color:var(--tm)">Achieved goals: <strong>'+e.achievedGoals+'</strong>/3 &bull; Got wanted score: <strong>'+e.gotScore+'</strong>/3</div>';
+    html+='</div>';
+  });
+  el.innerHTML=html;
+}
 
 // ── TEACHER: FULL CONTRACT REVIEW & EDIT ──
 window.quickApprove=async function(id,name){
@@ -1917,6 +2115,7 @@ window.reviewContract=async function(studentId){
     var text=g.text;
     html+='<div class="goal-row'+(checked?" sel":"")+'" onclick="toggleReviewGoal(\''+g.id+'\')"><span class="qchk">'+(checked?"&#10003;":"")+'</span><span style="flex:1">'+text+'</span></div>';
   });
+  html+='<div class="fg" style="margin-top:10px"><label class="fl">Something else...</label><input class="fi" id="rv-goals-other" value="'+esc(c.goalsOtherText||"")+'"></div>';
   html+='</div>';
 
   html+='<div class="contract-col"><div class="cc-title">3. Evaluation</div>';
@@ -1957,7 +2156,8 @@ window.saveReview=async function(approve){
   var tp=((document.getElementById("rv-teacherpct")||{}).value||"").trim();
   var pp=((document.getElementById("rv-peerpct")||{}).value||"").trim();
   var cm=((document.getElementById("rv-comment")||{}).value||"").trim();
-  var updates={topic:topic,goals:window._reviewGoals,evalTeacherPct:tp,evalPeerPct:pp,teacherComment:cm,planSteps:window._reviewPlanSteps||[]};
+  var goalsOther=((document.getElementById("rv-goals-other")||{}).value||"").trim();
+  var updates={topic:topic,goals:window._reviewGoals,evalTeacherPct:tp,evalPeerPct:pp,teacherComment:cm,planSteps:window._reviewPlanSteps||[],goalsOtherText:goalsOther};
   if(approve)updates.status="approved";
   await update(ref(db,"contracts/"+id),updates);
   toast(approve?"Approved!":"Changes saved!");
@@ -2148,7 +2348,7 @@ async function renderTResources(){
     html+='<div class="card"><div class="ctitle mb8">Student Suggestions ('+pending.length+')</div>';
     pending.forEach(function(p){
       html+='<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--gb)">';
-      html+='<img src="'+faviconUrl(p.url)+'" style="width:24px;height:24px;border-radius:6px;flex-shrink:0" onerror="this.style.display=\'none\'">';
+      html+='<img src="'+(getLinkThumbnail(p.url)||faviconUrl(p.url))+'" style="width:36px;height:36px;object-fit:cover;border-radius:8px;flex-shrink:0;background:var(--gl)" onerror="this.src=\''+faviconUrl(p.url)+'\';this.onerror=null;">';
       html+='<div style="flex:1"><div style="font-size:13px;font-weight:600">'+esc(p.title)+'</div><div style="font-size:11px;color:var(--tm)">'+esc(p.url)+' &bull; from '+esc(p.suggestedBy||"")+'</div></div>';
       html+='<button class="btn btg" style="font-size:11px;padding:6px 10px" onclick="approveResource(\''+p.id+'\')">Approve</button>';
       html+='<button class="obtn" onclick="rejectResource(\''+p.id+'\')">Reject</button>';
@@ -2160,8 +2360,9 @@ async function renderTResources(){
   html+='<div class="card"><div class="ctitle mb8">Approved Resources</div>';
   if(!list.length)html+='<div class="empty"><div class="ei">&#128279;</div><p>No resources yet.</p></div>';
   else list.forEach(function(r){
+    var thumb=getLinkThumbnail(r.url)||faviconUrl(r.url);
     html+='<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--gb)">';
-    html+='<img src="'+faviconUrl(r.url)+'" style="width:24px;height:24px;border-radius:6px;flex-shrink:0" onerror="this.style.display=\'none\'">';
+    html+='<img src="'+thumb+'" style="width:44px;height:44px;object-fit:cover;border-radius:8px;flex-shrink:0;background:var(--gl)" onerror="this.src=\''+faviconUrl(r.url)+'\';this.onerror=null;">';
     html+='<div style="flex:1"><div style="font-size:13px;font-weight:600">'+esc(r.title||r.url)+'</div><div style="font-size:11px;color:var(--tm)">'+esc(r.addedBy||"")+'</div></div>';
     html+='<button class="obtn" onclick="deleteResource(\''+r.id+'\')">&#128465;</button>';
     html+='</div>';
