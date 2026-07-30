@@ -420,77 +420,67 @@ const GOAL_RECOMMEND={
 
 // ── SELF & PEER RUBRICS (7 areas x 3 levels, with supporting bullets) ──
 const SELF_RUBRIC=[
-  {area:"Ideas and Opinions",q:"What did I communicate?",levels:[
-    {label:"I shared basic ideas.",bullets:["I gave simple information about a familiar topic.","I said what I liked, disliked, or preferred."]},
-    {label:"I explained my ideas.",bullets:["I gave details about a familiar topic.","I explained my opinions.","I told a simple story or added simple details."]},
-    {label:"I explained and supported my ideas.",bullets:["I discussed familiar topics and some new topics.","I gave reasons and examples.","I used evidence to support my opinions."]}
+  {area:"Ideas",q:"What am I checking?",levels:[
+    {label:"I give simple information or say what I think or like."},
+    {label:"I explain my ideas and add details."},
+    {label:"I support my ideas with reasons or examples."}
   ]},
-  {area:"Topic and Content",q:"How fully did I develop the topic?",levels:[
-    {label:"I communicated about myself.",bullets:["I talked about myself, my family, or my daily life.","I communicated best about topics I had practised."]},
-    {label:"I communicated about everyday life.",bullets:["I discussed topics such as school, friends, hobbies, or my community.","I explained how the topic affected me or other people."]},
-    {label:"I communicated about wider and more complex topics.",bullets:["I discussed community, national, or international topics.","I included some abstract or challenging ideas."]}
+  {area:"Order",q:"What am I checking?",levels:[
+    {label:"My ideas are short or separate."},
+    {label:"I connect my ideas using words such as and, but, because, first, and next."},
+    {label:"I put my ideas in a clear order with a beginning, middle, and end."}
   ]},
-  {area:"Organisation",q:"Was my message easy to follow?",levels:[
-    {label:"I used words and simple sentences.",bullets:["I used short phrases.","My ideas were not always connected."]},
-    {label:"I connected my sentences and ideas.",bullets:["I used complete sentences.","I produced a short paragraph.","My ideas were mostly connected."]},
-    {label:"I organised full paragraphs.",bullets:["I presented my ideas in a clear order.","I included useful details.","My message was easy to follow."]}
+  {area:"Clear English",q:"What am I checking?",levels:[
+    {label:"Some parts of my work are difficult to understand."},
+    {label:"My meaning is clear, but I need to fix some mistakes."},
+    {label:"My meaning is easy to understand, with only small mistakes."}
   ]},
-  {area:"Accuracy and Clarity",q:"Was my language understandable?",levels:[
-    {label:"My message was sometimes difficult to understand.",bullets:["I made several grammar or sentence-structure mistakes.","The listener or reader may have needed extra time or help."]},
-    {label:"My message was mostly understandable.",bullets:["I made some mistakes.","My mistakes did not usually stop communication.","Some parts needed improvement."]},
-    {label:"My message was clear and accurate.",bullets:["I made only minor mistakes.","The listener or reader understood me easily."]}
+  {area:"Words",q:"What am I checking?",levels:[
+    {label:"I use basic words and repeat some words."},
+    {label:"I use different everyday and topic words."},
+    {label:"I use varied and specific words that fit my topic."}
   ]},
-  {area:"Vocabulary",q:"What kinds of words did I use?",levels:[
-    {label:"I used basic vocabulary.",bullets:["I used common words.","I repeated some of the same words."]},
-    {label:"I used a variety of everyday vocabulary.",bullets:["I used words connected to the topic.","I tried to avoid repeating the same words."]},
-    {label:"I used varied and specific vocabulary.",bullets:["I chose precise words.","I used subject-specific or topic-related vocabulary."]}
+  {area:"When I get stuck",q:"What am I checking?",levels:[
+    {label:"I often stop or need help."},
+    {label:"I use notes, pictures, or simpler words to continue."},
+    {label:"I explain my idea in another way, give an example, or correct myself."}
   ]},
-  {area:"Communication Strategies",q:"What did I do when I got stuck?",levels:[
-    {label:"I used simple support strategies.",bullets:["I repeated words.","I sometimes used my first language.","I depended on notes, pictures, or visuals."]},
-    {label:"I found another way to communicate.",bullets:["I simplified my sentences.","I used similar or familiar words.","I corrected some of my own mistakes.","I used notes or references when needed."]},
-    {label:"I managed communication independently.",bullets:["I corrected and improved my language.","I explained ideas in another way.","I used examples and extra details.","I organised my message clearly."]}
-  ]},
-  {area:"Audience and Situation",q:"Did my language fit the situation?",levels:[
-    {label:"I used some polite language.",bullets:["My language did not always fit the audience or situation."]},
-    {label:"My language usually fit the situation.",bullets:["I usually chose appropriate words and expressions.","I was mostly polite and respectful."]},
-    {label:"I adapted my language to the audience and situation.",bullets:["I chose language that suited the audience and purpose.","My language sounded natural, respectful, and appropriate."]}
+  {area:"Audience",q:"What am I checking?",levels:[
+    {label:"My words do not always fit the person or situation."},
+    {label:"My words usually fit the person and situation."},
+    {label:"I choose words that clearly fit the person and situation."}
   ]}
 ];
 const PEER_RUBRIC=[
-  {area:"Ideas and Opinions",q:"What did she/he communicate?",levels:[
-    {label:"She/He shared basic ideas.",bullets:["She/He gave simple information about a familiar topic.","She/He said what she/he liked, disliked, or preferred."]},
-    {label:"She/He explained her/his ideas.",bullets:["She/He gave details about a familiar topic.","She/He explained her/his opinions.","She/He told a simple story or added simple details."]},
-    {label:"She/He explained and supported her/his ideas.",bullets:["She/He discussed familiar topics and some new topics.","She/He gave reasons and examples.","She/He used evidence to support her/his opinions."]}
+  {area:"Ideas",q:"What am I checking?",levels:[
+    {label:"He/She gives simple information or says what he/she thinks or likes."},
+    {label:"He/She explains his/her ideas and adds details."},
+    {label:"He/She supports his/her ideas with reasons or examples."}
   ]},
-  {area:"Topic and Content",q:"How fully did she/he develop the topic?",levels:[
-    {label:"She/He communicated about herself/himself.",bullets:["She/He talked about herself/himself, her/his family, or daily life.","She/He communicated best about topics she/he had practised."]},
-    {label:"She/He communicated about everyday life.",bullets:["She/He discussed topics such as school, friends, hobbies, or the community.","She/He explained how the topic affected herself/himself or other people."]},
-    {label:"She/He communicated about wider and more complex topics.",bullets:["She/He discussed community, national, or international topics.","She/He included some abstract or challenging ideas."]}
+  {area:"Order",q:"What am I checking?",levels:[
+    {label:"His/Her ideas are short or separate."},
+    {label:"He/She connects ideas using words such as and, but, because, first, and next."},
+    {label:"He/She puts the ideas in a clear order with a beginning, middle, and end."}
   ]},
-  {area:"Organisation",q:"Was her/his message easy to follow?",levels:[
-    {label:"She/He used words and simple sentences.",bullets:["She/He used short phrases.","Her/His ideas were not always connected."]},
-    {label:"She/He connected sentences and ideas.",bullets:["She/He used complete sentences.","She/He produced a short paragraph.","Her/His ideas were mostly connected."]},
-    {label:"She/He organised full paragraphs.",bullets:["She/He presented ideas in a clear order.","She/He included useful details.","Her/His message was easy to follow."]}
+  {area:"Clear English",q:"What am I checking?",levels:[
+    {label:"Some parts of the work are difficult to understand."},
+    {label:"It is clear, but some mistakes need to be fixed."},
+    {label:"It is easy to understand, with only small mistakes."}
   ]},
-  {area:"Accuracy and Clarity",q:"Was her/his language understandable?",levels:[
-    {label:"Her/His message was sometimes difficult to understand.",bullets:["She/He made several grammar or sentence-structure mistakes.","The listener or reader may have needed extra time or help."]},
-    {label:"Her/His message was mostly understandable.",bullets:["She/He made some mistakes.","The mistakes did not usually stop communication.","Some parts needed improvement."]},
-    {label:"Her/His message was clear and accurate.",bullets:["She/He made only minor mistakes.","The listener or reader understood her/him easily."]}
+  {area:"Words",q:"What am I checking?",levels:[
+    {label:"He/She uses basic words and repeats some words."},
+    {label:"He/She uses different everyday and topic words."},
+    {label:"He/She uses varied and specific words that fit the topic."}
   ]},
-  {area:"Vocabulary",q:"What kinds of words did she/he use?",levels:[
-    {label:"She/He used basic vocabulary.",bullets:["She/He used common words.","She/He repeated some of the same words."]},
-    {label:"She/He used a variety of everyday vocabulary.",bullets:["She/He used words connected to the topic.","She/He tried to avoid repeating the same words."]},
-    {label:"She/He used varied and specific vocabulary.",bullets:["She/He chose precise words.","She/He used subject-specific or topic-related vocabulary."]}
+  {area:"When he/she gets stuck",q:"What am I checking?",levels:[
+    {label:"He/She often stops or needs help."},
+    {label:"He/She uses notes, pictures, or simpler words to continue."},
+    {label:"He/She explains the idea in another way, gives an example, or corrects himself/herself."}
   ]},
-  {area:"Communication Strategies",q:"What did she/he do when she/he got stuck?",levels:[
-    {label:"She/He used simple support strategies.",bullets:["She/He repeated words.","She/He sometimes used her/his first language.","She/He depended on notes, pictures, or visuals."]},
-    {label:"She/He found another way to communicate.",bullets:["She/He simplified sentences.","She/He used similar or familiar words.","She/He corrected some mistakes.","She/He used notes or references when needed."]},
-    {label:"She/He managed communication independently.",bullets:["She/He corrected and improved the language.","She/He explained ideas in another way.","She/He used examples and extra details.","She/He organised the message clearly."]}
-  ]},
-  {area:"Audience and Situation",q:"Did her/his language fit the situation?",levels:[
-    {label:"She/He used some polite language.",bullets:["Her/His language did not always fit the audience or situation."]},
-    {label:"Her/His language usually fit the situation.",bullets:["She/He usually chose appropriate words and expressions.","She/He was mostly polite and respectful."]},
-    {label:"She/He adapted the language to the audience and situation.",bullets:["She/He chose language that suited the audience and purpose.","Her/His language sounded natural, respectful, and appropriate."]}
+  {area:"Audience",q:"What am I checking?",levels:[
+    {label:"His/Her words do not always fit the person or situation."},
+    {label:"His/Her words usually fit the person and situation."},
+    {label:"He/She chooses words that clearly fit the person and situation."}
   ]}
 ];
 
@@ -1093,8 +1083,7 @@ function buildPostHTML(post){
         html+='<div style="font-size:11px;color:var(--pd);background:var(--pl);display:inline-block;padding:2px 8px;border-radius:20px;margin:4px 0;cursor:pointer" onclick="toggleCat(\''+detailId+'\')">Overall: '+scoreTierLabel(score)+" ("+score.toFixed(1)+"/3) &#9660;"+'</div>';
         html+='<div id="'+detailId+'" style="display:none;margin-bottom:6px">'+renderRubricReadonly(PEER_RUBRIC,cm.peerRubric)+'</div>';
       }
-      html+='<div class="comment-text">'+esc(cm.text||"")+'</div>';
-      if(cm.well)html+='<div class="comment-text"><strong>Did well:</strong> '+esc(cm.well)+'</div>';
+      if(cm.well)html+='<div class="comment-text"><strong>Good points:</strong> '+esc(cm.well)+'</div>';
       if(cm.improve)html+='<div class="comment-text"><strong>To improve:</strong> '+esc(cm.improve)+'</div>';
       html+='</div>';
     });
@@ -1113,16 +1102,16 @@ function buildPostHTML(post){
   if(isTeacherViewer){
     html+='<div id="tcform-'+post.id+'" style="display:none;padding:10px 13px;border-top:1px solid var(--gb)">';
     html+='<div id="tc-rub-'+post.id+'"></div>';
-    html+='<textarea class="fta mt8 mb8" id="tc-text-'+post.id+'" placeholder="Your feedback for this student..."></textarea>';
+    html+='<div class="fg"><label class="fl">Good points</label><textarea class="fta" id="tc-well-'+post.id+'" style="min-height:44px"></textarea></div>';
+    html+='<div class="fg"><label class="fl">To improve</label><textarea class="fta" id="tc-improve-'+post.id+'" style="min-height:44px"></textarea></div>';
     html+='<button class="btn btg" style="font-size:12px;padding:7px 13px" onclick="submitTeacherComment(\''+post.id+'\',\''+esc(post.uid)+'\')">Save Evaluation</button>';
     html+='</div>';
   } else {
     html+='<div id="cmform-'+post.id+'" style="display:none;padding:10px 13px;border-top:1px solid var(--gb)">';
     html+='<div style="font-size:12px;font-weight:600;margin-bottom:8px;color:var(--tm)">Leave feedback:</div>';
     html+='<div id="cm-rub-'+post.id+'"></div>';
-    html+='<textarea class="fta mb8" id="cm-text-'+post.id+'" placeholder="Add your comment..." style="min-height:52px"></textarea>';
-    html+='<div class="fg"><label class="fl">One thing they did well</label><textarea class="fta" id="cm-well-'+post.id+'" style="min-height:44px"></textarea></div>';
-    html+='<div class="fg"><label class="fl">One thing to improve</label><textarea class="fta" id="cm-improve-'+post.id+'" style="min-height:44px"></textarea></div>';
+    html+='<div class="fg"><label class="fl">Good points</label><textarea class="fta" id="cm-well-'+post.id+'" style="min-height:44px"></textarea></div>';
+    html+='<div class="fg"><label class="fl">To improve</label><textarea class="fta" id="cm-improve-'+post.id+'" style="min-height:44px"></textarea></div>';
     html+='<button class="btn btg" style="font-size:12px;padding:7px 14px" onclick="submitComment(\''+post.id+'\',\''+esc(post.uid)+'\')">Submit Comment</button>';
     html+='</div>';
   }
@@ -1145,28 +1134,18 @@ function renderRubricReadonly(rubric,values){
 
 // ── GENERIC RUBRIC SELECTOR (used for self-reflection, peer comments, teacher evaluation) ──
 window._rubricStores={};
-var TIER_LABELS=["Novice (1)","Developing (2)","Advanced (3)"];
+var TIER_LABELS=["Step 1","Step 2","Step 3"];
 function renderRubricBlock(containerId,rubric,values,storeKey){
   var el=document.getElementById(containerId);if(!el)return;
-  var store=window._rubricStores[storeKey];
-  if(!store.expanded)store.expanded={};
   var html="";
   rubric.forEach(function(item,ai){
     html+='<div class="rubarea2">';
-    html+='<div class="rubarea-name">'+esc(item.area)+'</div><div class="rubarea-q">'+esc(item.q)+'</div>';
+    html+='<div class="rubarea-name">'+esc(item.area)+'</div>';
     item.levels.forEach(function(lvl,li){
       var sel=values[ai]===li;
-      var key=ai+"_"+li;
-      var isOpen=!!store.expanded[key];
-      html+='<div class="rublevel-row'+(sel?" sel":"")+'">';
-      html+='<div style="flex:1;cursor:pointer" onclick="pickRubricLevel(\''+storeKey+'\','+ai+','+li+')"><span class="rub-pill tier'+li+(sel?" sel":"")+'">'+TIER_LABELS[li]+'</span> <span class="rub-sentence">'+esc(lvl.label)+'</span></div>';
-      html+='<button type="button" class="rub-chevron" onclick="toggleRubDetails(\''+storeKey+'\','+ai+','+li+')">'+(isOpen?"&#9650;":"&#9660;")+'</button>';
+      html+='<div class="rublevel-row'+(sel?" sel":"")+'" style="cursor:pointer" onclick="pickRubricLevel(\''+storeKey+'\','+ai+','+li+')">';
+      html+='<span class="rub-pill tier'+li+(sel?" sel":"")+'">'+TIER_LABELS[li]+'</span> <span class="rub-sentence">'+esc(lvl.label)+'</span>';
       html+='</div>';
-      if(isOpen){
-        html+='<div class="rublevel-bullets">';
-        lvl.bullets.forEach(function(b){html+='&#8226; '+esc(b)+'<br>';});
-        html+='</div>';
-      }
     });
     html+='</div>';
   });
@@ -1175,13 +1154,6 @@ function renderRubricBlock(containerId,rubric,values,storeKey){
 window.pickRubricLevel=function(storeKey,ai,li){
   var s=window._rubricStores[storeKey];if(!s)return;
   s.values[ai]=li;
-  renderRubricBlock(s.containerId,s.rubric,s.values,storeKey);
-};
-window.toggleRubDetails=function(storeKey,ai,li){
-  var s=window._rubricStores[storeKey];if(!s)return;
-  if(!s.expanded)s.expanded={};
-  var key=ai+"_"+li;
-  s.expanded[key]=!s.expanded[key];
   renderRubricBlock(s.containerId,s.rubric,s.values,storeKey);
 };
 
@@ -1259,13 +1231,13 @@ window.openComment=function(postId){
 };
 
 window.submitComment=async function(postId,targetUid){
-  var text=((document.getElementById("cm-text-"+postId)||{}).value||"").trim();
-  if(!text){toast("Write something!");return;}
+  var well=((document.getElementById("cm-well-"+postId)||{}).value||"").trim();
+  var improve=((document.getElementById("cm-improve-"+postId)||{}).value||"").trim();
+  if(!well||!improve){toast("Please fill in both good points and to improve!");return;}
   var storeKey="comment_"+postId;
   await push(ref(db,"posts/"+postId+"/comments"),{
-    from:CU.displayName,fromId:CU.uid,text:text,
-    well:((document.getElementById("cm-well-"+postId)||{}).value||"").trim(),
-    improve:((document.getElementById("cm-improve-"+postId)||{}).value||"").trim(),
+    from:CU.displayName,fromId:CU.uid,
+    well:well,improve:improve,
     peerRubric:window._rubricStores[storeKey]?window._rubricStores[storeKey].values:[],createdAt:Date.now()
   });
   if(targetUid&&targetUid!==CU.uid){
@@ -2422,10 +2394,11 @@ window.openTeacherComment=function(postId,targetUid){
 };
 
 window.submitTeacherComment=async function(postId,targetUid){
-  var text=((document.getElementById("tc-text-"+postId)||{}).value||"").trim();
-  if(!text){toast("Write your feedback!");return;}
+  var well=((document.getElementById("tc-well-"+postId)||{}).value||"").trim();
+  var improve=((document.getElementById("tc-improve-"+postId)||{}).value||"").trim();
+  if(!well||!improve){toast("Please fill in both good points and to improve!");return;}
   var storeKey="tceval_"+postId;
-  await push(ref(db,"posts/"+postId+"/comments"),{from:CU.displayName+" (Teacher)",fromId:CU.uid,text:text,peerRubric:window._rubricStores[storeKey]?window._rubricStores[storeKey].values:[],isTeacher:true,createdAt:Date.now()});
+  await push(ref(db,"posts/"+postId+"/comments"),{from:CU.displayName+" (Teacher)",fromId:CU.uid,well:well,improve:improve,peerRubric:window._rubricStores[storeKey]?window._rubricStores[storeKey].values:[],isTeacher:true,createdAt:Date.now()});
   if(targetUid){await push(ref(db,"notifications/"+targetUid),{type:"teacher",message:"Your teacher left feedback on your work!",read:false,createdAt:Date.now()});}
   toast("Evaluation saved!");var f=document.getElementById("tcform-"+postId);if(f)f.style.display="none";
 };
