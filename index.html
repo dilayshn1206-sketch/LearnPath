@@ -98,7 +98,6 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
 .post-text{font-size:13px;line-height:1.6;margin-bottom:7px}
 .post-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
 .post-tag{padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
-.post-draft{background:var(--al);color:var(--a);padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;display:inline-block;margin-bottom:8px}
 .post-actions{display:flex;border-top:1px solid var(--gb)}
 .post-act{flex:1;padding:9px 0;font-size:12px;font-weight:600;color:var(--tm);background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .15s}
 .post-act:hover{background:var(--gl);color:var(--p)}
@@ -507,6 +506,7 @@ async function setRole(role){
 
 function launchApp(role){
   var app=document.getElementById("app");app.style.display="flex";app.style.flexDirection="column";
+  var ov=document.getElementById("eval-modal-overlay");if(ov)ov.style.display="none";
   if(role==="teacher"){renderTeacher();ensureCatalogSeeded();}
   else{renderStudent();setTimeout(loadNotifs,1000);setTimeout(loadCoins,1000);}
 }
@@ -718,10 +718,44 @@ async function renderEval2Modal(){
     card.innerHTML='<div style="text-align:center;padding:24px"><div style="font-size:34px;margin-bottom:8px">&#9989;</div><div style="font-size:14px;font-weight:700">Submitted! Thanks.</div><div style="font-size:12px;color:var(--tm);margin-top:6px">Waiting for your teacher to move on.</div></div>';
     return;
   }
-  window._eval2Scores=c.projectEval?{satisfied:c.projectEval.satisfied,followedPlan:c.projectEval.followedPlan,achievedGoals:c.projectEval.achievedGoals,gotScore:c.projectEval.gotScore}:{};
+
+  var uinfo={};
+  try{var usnap=await get(ref(db,"unitInfo"));if(usnap.exists())uinfo=usnap.val();}catch(e){}
+  var wordList=(uinfo.words||"").split("\n").map(function(w){return w.trim();}).filter(Boolean);
+  var gQs=uinfo.grammarQuestions||[];
+
+  // fresh working state for this evaluation session — resets to blank the first time this session is seen,
+  // but does NOT reset on every re-render (that was wiping out clicks)
+  if(window._eval2SessionKey!==sessionKey){
+    window._eval2Scores=c.projectEval?{satisfied:c.projectEval.satisfied,followedPlan:c.projectEval.followedPlan,achievedGoals:c.projectEval.achievedGoals,gotScore:c.projectEval.gotScore}:{};
+    window._eval2WordState=wordList.map(function(){return false;});
+    window._eval2GrammarAnswers={};
+    window._eval2SessionKey=sessionKey;
+  }
 
   var html='<div style="font-size:16px;font-weight:700;margin-bottom:2px">&#127942; Project Evaluation</div>';
-  html+='<div style="font-size:12px;color:var(--tm);margin-bottom:14px">Rate each — 1 (not really) to 3 (yes, definitely).</div>';
+  html+='<div style="font-size:12px;color:var(--tm);margin-bottom:14px">Let\'s see how much you remember, then rate your project — 1 (not really) to 3 (yes, definitely).</div>';
+
+  if(wordList.length){
+    html+='<div class="eval2-item"><div style="font-size:13px;font-weight:700;margin-bottom:6px">&#128214; Unit Words — tick what you know now</div>';
+    wordList.forEach(function(w,i){
+      var checked=window._eval2WordState[i];
+      html+='<div class="goal-row'+(checked?" sel":"")+'" id="e2-wc-row-'+i+'" onclick="toggleEval2Word('+i+')"><span class="qchk" id="e2-wc-chk-'+i+'">'+(checked?"&#10003;":"")+'</span><span style="flex:1">'+esc(w)+'</span></div>';
+    });
+    html+='</div>';
+  }
+  if(gQs.length){
+    html+='<div class="eval2-item"><div style="font-size:13px;font-weight:700;margin-bottom:6px">&#128209; Grammar — try again</div>';
+    gQs.forEach(function(q,qi){
+      html+='<div style="margin-bottom:10px"><div style="font-size:12px;font-weight:600;margin-bottom:5px">'+(qi+1)+". "+esc(q.q)+'</div>';
+      q.options.forEach(function(opt,oi){
+        var sel=window._eval2GrammarAnswers[qi]===oi;
+        html+='<div class="qo" style="'+(sel?"border-color:var(--p);background:var(--pl);color:var(--pd)":"")+'" onclick="pickEval2Grammar('+qi+','+oi+')">'+esc(opt)+'</div>';
+      });
+      html+='</div>';
+    });
+    html+='</div>';
+  }
 
   html+='<div class="eval2-item"><div style="font-size:13px;margin-bottom:4px">I am satisfied with the product I chose and completed: <strong>'+esc(c.productType)+'</strong></div>';
   html+=eval2ScoreButtons("satisfied");
@@ -753,6 +787,17 @@ async function renderEval2Modal(){
   html+='<button class="btn btg btf" onclick="submitEval2()">Submit</button>';
   card.innerHTML=html;
 }
+window.toggleEval2Word=function(idx){
+  window._eval2WordState[idx]=!window._eval2WordState[idx];
+  var row=document.getElementById("e2-wc-row-"+idx);
+  var chk=document.getElementById("e2-wc-chk-"+idx);
+  if(row)row.classList.toggle("sel",window._eval2WordState[idx]);
+  if(chk)chk.innerHTML=window._eval2WordState[idx]?"&#10003;":"";
+};
+window.pickEval2Grammar=function(qi,oi){
+  window._eval2GrammarAnswers[qi]=oi;
+  renderEval2Modal();
+};
 function eval2ScoreButtons(key){
   var val=(window._eval2Scores||{})[key];
   var html='<div style="display:flex;gap:6px;margin-bottom:4px">';
@@ -769,7 +814,14 @@ window.setEval2Score=function(key,val){
 window.submitEval2=async function(){
   var s=window._eval2Scores||{};
   if(!s.satisfied||!s.followedPlan||!s.achievedGoals||!s.gotScore){toast("Please rate all four statements!");return;}
-  await update(ref(db,"contracts/"+CU.uid),{projectEval:{satisfied:s.satisfied,followedPlan:s.followedPlan,achievedGoals:s.achievedGoals,gotScore:s.gotScore,sessionKey:window._liveSession.updatedAt,submittedAt:Date.now()}});
+  var sessionKey=window._liveSession.updatedAt;
+  await update(ref(db,"contracts/"+CU.uid),{projectEval:{satisfied:s.satisfied,followedPlan:s.followedPlan,achievedGoals:s.achievedGoals,gotScore:s.gotScore,sessionKey:sessionKey,submittedAt:Date.now()}});
+  if(window._eval2WordState&&window._eval2WordState.length){
+    await set(ref(db,"wordChecks/"+CU.uid),{checked:window._eval2WordState,studentName:CU.displayName,submittedAt:Date.now(),sessionKey:sessionKey});
+  }
+  if(window._eval2GrammarAnswers&&Object.keys(window._eval2GrammarAnswers).length){
+    await set(ref(db,"grammarAnswers/"+CU.uid),{answers:window._eval2GrammarAnswers,submitted:true,studentName:CU.displayName,submittedAt:Date.now(),sessionKey:sessionKey});
+  }
   toast("Submitted! Thank you.");
   renderEval2Modal();
 };
@@ -795,20 +847,35 @@ async function renderHome(){
   var editUnlocked=!contractData||contractData.editUnlocked!==false;
   var step3Unlocked=hasProduct&&!awaitingGrouping;
   var step3Done=contractData&&(contractData.status==="approved"||contractData.status==="pending");
-  var doneCount=(hasProduct?1:0)+(step3Done?1:0);
+
+  var unitTitle="Tap to see today's unit";
+  var uinfo={};
+  try{var usnap=await get(ref(db,"unitInfo"));if(usnap.exists()){uinfo=usnap.val();if(uinfo.title)unitTitle=uinfo.title;}}catch(e){}
+  var hasWords=!!(uinfo.words&&uinfo.words.trim());
+  var hasGrammarQs=!!(uinfo.grammarQuestions&&uinfo.grammarQuestions.length);
+  var wcSnap=await get(ref(db,"wordChecks/"+CU.uid));
+  var wordsSubmitted=wcSnap.exists()&&!!wcSnap.val().submittedAt;
+  var gaSnap=await get(ref(db,"grammarAnswers/"+CU.uid));
+  var grammarSubmitted=gaSnap.exists()&&!!gaSnap.val().submitted;
+  var step1Trackable=hasWords||hasGrammarQs;
+  var step1Done=step1Trackable&&(!hasWords||wordsSubmitted)&&(!hasGrammarQs||grammarSubmitted);
+
+  var rsSnap=await get(ref(db,"resourceSuggestions"));
+  var step4Done=false;
+  if(rsSnap.exists())rsSnap.forEach(function(r){if(r.val().suggestedById===CU.uid)step4Done=true;});
+
+  var doneCount=(step1Done?1:0)+(hasProduct?1:0)+(step3Done?1:0)+(step4Done?1:0);
 
   var html='<div class="card" style="background:linear-gradient(135deg,var(--p),var(--pd));color:#fff;box-shadow:0 4px 0 var(--pd)">';
   html+='<div style="font-size:19px;font-weight:800;font-family:\'Baloo 2\',sans-serif">Hey, '+esc(firstName)+'! &#128075;</div>';
-  html+='<div style="font-size:12px;opacity:.85;margin-top:2px">You\'ve completed '+doneCount+' of 2 big milestones &#127942;</div>';
-  html+='<div class="pbw" style="background:rgba(255,255,255,.3);margin-top:8px"><div class="pbf" style="background:#fff;width:'+(doneCount/2*100)+'%"></div></div>';
+  html+='<div style="font-size:12px;opacity:.85;margin-top:2px">You\'ve completed '+doneCount+' of 4 milestones &#127942;</div>';
+  html+='<div class="pbw" style="background:rgba(255,255,255,.3);margin-top:8px"><div class="pbf" style="background:#fff;width:'+(doneCount/4*100)+'%"></div></div>';
   html+='</div>';
 
   html+='<div class="step-path">';
 
-  var unitTitle="Tap to see today's unit";
-  try{var usnap=await get(ref(db,"unitInfo"));if(usnap.exists()&&usnap.val().title)unitTitle=usnap.val().title;}catch(e){}
-  html+='<div class="step-card" onclick="renderStep1Screen()">';
-  html+='<div class="step-num">1</div><div style="flex:1"><div class="step-title">&#128218; What are we learning?</div>';
+  html+='<div class="step-card'+(step1Done?" done":"")+'" onclick="renderStep1Screen()">';
+  html+='<div class="step-num">'+(step1Done?"&#9989;":"1")+'</div><div style="flex:1"><div class="step-title">&#128218; What are we learning?</div>';
   html+='<div class="step-sub">'+esc(unitTitle)+'</div></div></div>';
 
   var step2Sub,step2Click;
@@ -824,8 +891,8 @@ async function renderHome(){
   html+='<div class="step-num">'+(step3Unlocked?(step3Done?"&#9989;":"3"):"&#128274;")+'</div><div style="flex:1"><div class="step-title">&#128221; My Learning Contract</div>';
   html+='<div class="step-sub">'+(step3Unlocked?"Your project plan for "+esc(contractData.productType):"Unlocks once your teacher groups the class")+'</div></div></div>';
 
-  html+='<div class="step-card" onclick="renderResourcesScreen()">';
-  html+='<div class="step-num">4</div><div style="flex:1"><div class="step-title">&#128279; Choose Resources</div>';
+  html+='<div class="step-card'+(step4Done?" done":"")+'" onclick="renderResourcesScreen()">';
+  html+='<div class="step-num">'+(step4Done?"&#9989;":"4")+'</div><div style="flex:1"><div class="step-title">&#128279; Choose Resources</div>';
   html+='<div class="step-sub">Helpful links your teacher and classmates found</div></div></div>';
 
   html+='</div>';
@@ -974,9 +1041,9 @@ function rubricOverallScore(vals){
   return avg+1; // convert 0/1/2 tier index average to a 1-3 scale
 }
 function scoreTierLabel(score){
-  if(score>=2.5)return "Advanced";
-  if(score>=1.5)return "Developing";
-  return "Novice";
+  if(score>=2.5)return "Step 3";
+  if(score>=1.5)return "Step 2";
+  return "Step 1";
 }
 function buildCommentSummary(post,comments){
   if(!comments.length)return "";
@@ -1023,7 +1090,6 @@ function buildPostHTML(post){
   else html+='<div class="post-avp" onclick="viewProf(\''+esc(post.uid)+'\')">'+esc((post.name||"?")[0])+'</div>';
   html+='<div style="flex:1"><div class="post-name" onclick="viewProf(\''+esc(post.uid)+'\')">'+esc(post.name||"Student")+'</div>';
   html+='<div class="post-meta">'+esc(post.productType||"")+" &bull; "+formatDateTime(post.createdAt||Date.now())+" ("+timeAgo(post.createdAt||Date.now())+")"+'</div></div>';
-  if(post.isDraft)html+='<span class="post-draft">Draft</span>';
   html+='</div>';
   html+='<div class="post-body">';
   if(post.title)html+='<div style="font-size:14px;font-weight:700;margin-bottom:5px">'+esc(post.title)+'</div>';
@@ -1138,7 +1204,6 @@ window.openNewPost=function(){
   html+='<div class="fg"><label class="fl">Link to your work</label><input class="fi" id="np-link" placeholder="Google Drive / YouTube / Canva..."></div>';
   html+='<div style="font-size:11px;color:var(--tm);margin-bottom:10px;background:var(--pl);padding:8px;border-radius:var(--rs)">How to copy a link: Google Drive → Share → Copy link &bull; YouTube → Share &bull; Canva → Share → Copy link</div>';
   html+='<div class="fg"><label class="fl">Or attach a file (image, photo of your work, etc.)</label><input type="file" class="fi" id="np-file" onchange="attachNewPostFile(this)"><div id="np-file-preview" style="margin-top:8px"></div></div>';
-  html+='<div class="fg"><input type="checkbox" id="np-draft"> <label for="np-draft" style="font-size:13px;cursor:pointer"> Share as draft (for feedback before final version)</label></div>';
   html+='<div class="divider"></div>';
   html+='<div style="font-size:13px;font-weight:700;margin-bottom:10px">Self-Reflection</div>';
   html+='<div id="np-rub-rows"></div>';
@@ -1184,7 +1249,6 @@ window.submitPost=async function(){
     selfRubric:window._rubricStores.newpost?window._rubricStores.newpost.values:[],
     well:well,
     improve:improve,
-    isDraft:document.getElementById("np-draft")?.checked||false,
     groupId:myGid||"",
     createdAt:Date.now()
   });
@@ -1234,7 +1298,7 @@ window.renderStep1Screen=async function(){
   var info=snap.exists()?snap.val():{title:"Unit info coming soon",description:"Your teacher will add this."};
   var locked=isLockedStep("step1");
   var wcSnap=await get(ref(db,"wordChecks/"+CU.uid));
-  var myWordChecks=(wcSnap.exists()&&wcSnap.val().checked)||{};
+  var savedChecked=(wcSnap.exists()&&wcSnap.val().checked)||[];
   var gaSnap=await get(ref(db,"grammarAnswers/"+CU.uid));
   var myGrammarAnswers=(gaSnap.exists()&&gaSnap.val().answers)||{};
   var myGrammarSubmitted=gaSnap.exists()&&gaSnap.val().submitted;
@@ -1248,15 +1312,16 @@ window.renderStep1Screen=async function(){
     html+='<div class="card" style="padding:0;overflow:hidden"><img src="'+esc(info.imageUrl)+'" style="width:100%;display:block"></div>';
   }
 
-  // ── Unit Words checklist ──
+  // ── Unit Words checklist (index-based, instant feedback) ──
   var wordList=(info.words||"").split("\n").map(function(w){return w.trim();}).filter(Boolean);
+  window._wordCheckState=wordList.map(function(w,i){return !!savedChecked[i];});
   if(wordList.length){
     html+='<div class="card"><div style="font-size:13px;font-weight:700;margin-bottom:8px">&#128214; Unit Words</div>';
     html+='<div style="font-size:12px;color:var(--tm);margin-bottom:8px">Tick every word you already know, then submit.</div>';
     html+='<div id="word-check-list">';
-    wordList.forEach(function(w){
-      var checked=!!myWordChecks[w];
-      html+='<div class="goal-row'+(checked?" sel":"")+'" onclick="toggleWordCheck(\''+esc(w).replace(/'/g,"&#39;")+'\')"><span class="qchk">'+(checked?"&#10003;":"")+'</span><span style="flex:1">'+esc(w)+'</span></div>';
+    wordList.forEach(function(w,i){
+      var checked=window._wordCheckState[i];
+      html+='<div class="goal-row'+(checked?" sel":"")+'" id="wc-row-'+i+'" onclick="toggleWordCheck('+i+')"><span class="qchk" id="wc-chk-'+i+'">'+(checked?"&#10003;":"")+'</span><span style="flex:1">'+esc(w)+'</span></div>';
     });
     html+='</div>';
     html+='<button class="btn btg btf mt8" onclick="submitWordChecks()">Submit Word Check</button>';
@@ -1296,17 +1361,16 @@ window.renderStep1Screen=async function(){
 };
 
 window._myWordChecks=null;
-window.toggleWordCheck=async function(word){
-  var snap=await get(ref(db,"wordChecks/"+CU.uid));
-  var checked=(snap.exists()&&snap.val().checked)||{};
-  checked[word]=!checked[word];
-  await set(ref(db,"wordChecks/"+CU.uid),{checked:checked,studentName:CU.displayName});
-  renderStep1Screen();
+window.toggleWordCheck=async function(idx){
+  window._wordCheckState[idx]=!window._wordCheckState[idx];
+  var row=document.getElementById("wc-row-"+idx);
+  var chk=document.getElementById("wc-chk-"+idx);
+  if(row)row.classList.toggle("sel",window._wordCheckState[idx]);
+  if(chk)chk.innerHTML=window._wordCheckState[idx]?"&#10003;":"";
+  await set(ref(db,"wordChecks/"+CU.uid),{checked:window._wordCheckState,studentName:CU.displayName});
 };
 window.submitWordChecks=async function(){
-  var snap=await get(ref(db,"wordChecks/"+CU.uid));
-  var checked=(snap.exists()&&snap.val().checked)||{};
-  await update(ref(db,"wordChecks/"+CU.uid),{checked:checked,studentName:CU.displayName,submittedAt:Date.now()});
+  await update(ref(db,"wordChecks/"+CU.uid),{checked:window._wordCheckState||[],studentName:CU.displayName,submittedAt:Date.now()});
   toast("Word check submitted!");
 };
 window.pickGrammarAnswer=async function(qi,oi){
