@@ -58,6 +58,10 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
 .ni.active{color:var(--p);transform:translateY(-2px)}
 .ni svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .card{background:#fff;border-radius:var(--r);padding:14px;margin-bottom:10px;box-shadow:var(--sh);border:1.5px solid var(--gb)}
+.qo,.chip,.project-card,.post,.rublevel-row,.badge-item,.goal-row,.rubarea2{transition:transform .15s ease}
+.qo:hover,.chip:hover,.project-card:hover,.post:hover,.badge-item:hover,.goal-row:hover{transform:scale(1.02)}
+.badge-item:hover .badge-icon{transform:scale(1.08)}
+.badge-icon{transition:transform .15s ease}
 .pt{font-size:21px;font-weight:800;margin-bottom:2px}
 .ps{font-size:13px;color:var(--tm);margin-bottom:14px}
 .btn{padding:11px 20px;border-radius:14px;font-size:14px;font-weight:800;cursor:pointer;border:none;transition:all .12s;display:inline-block;box-shadow:0 3px 0 rgba(0,0,0,.15);transform:translateY(0)}
@@ -112,6 +116,12 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
 .qq{font-size:17px;font-weight:600;margin-bottom:4px;line-height:1.4}
 .qs2{font-size:13px;color:var(--tm);margin-bottom:14px}
 .qopts{display:flex;flex-direction:column;gap:7px}
+.q2-col-header{font-size:10px;font-weight:800;color:var(--th);text-transform:uppercase;letter-spacing:.3px;margin-bottom:6px;text-align:center}
+.q2-opt-compact{display:flex;align-items:center;gap:4px;padding:7px 8px;border:1.5px solid var(--gb);border-radius:10px;font-size:10.5px;font-weight:700;margin-bottom:6px;cursor:pointer;line-height:1.25;background:#fff;transition:transform .15s ease}
+.q2-opt-compact:hover{transform:scale(1.03)}
+.q2-opt-compact.sel{border-color:var(--p);background:var(--pl);color:var(--pd)}
+.q2-help{width:17px;height:17px;border-radius:50%;background:var(--gl);color:var(--tm);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;text-decoration:none;flex-shrink:0}
+.q2-help:hover{background:var(--p);color:#fff}
 .qo{padding:11px 13px;border-radius:var(--r);border:1px solid var(--gb);background:#fff;cursor:pointer;text-align:left;font-size:13px;transition:all .15s;display:flex;align-items:flex-start;gap:10px}
 .qo:hover{border-color:var(--p);background:var(--pl)}
 .qo.sel{border-color:var(--p);background:var(--pl);color:var(--pd)}
@@ -519,11 +529,21 @@ async function loadCoins(){
   document.getElementById("coins-count").textContent=userCoins;
 }
 
-async function addCoin(){
-  userCoins++;
+async function addCoin(amount){
+  amount=amount||1;
+  userCoins+=amount;
   await set(ref(db,"coins/"+CU.uid),userCoins);
-  document.getElementById("coins-count").textContent=userCoins;
-  toast("&#127881; +1 coin! You have "+userCoins+" now.");
+  var el=document.getElementById("coins-count");if(el)el.textContent=userCoins;
+  toast("&#127881; +"+amount+" coin"+(amount>1?"s":"")+"! You have "+userCoins+" now.");
+}
+async function awardMilestoneOnce(key,amount){
+  var snap=await get(ref(db,"coinAwards/"+CU.uid+"/"+key));
+  if(snap.exists()&&snap.val())return;
+  await set(ref(db,"coinAwards/"+CU.uid+"/"+key),true);
+  userCoins+=amount;
+  await set(ref(db,"coins/"+CU.uid),userCoins);
+  var el=document.getElementById("coins-count");if(el)el.textContent=userCoins;
+  toast("&#127942; +"+amount+" coins for completing a milestone!");
 }
 
 window.openCoins=function(){
@@ -535,17 +555,17 @@ window.openCoins=function(){
     {e:"&#127919;",name:"Goal Getter"},{e:"&#128293;",name:"On Fire"},{e:"&#9889;",name:"Speedy Helper"},
     {e:"&#127984;",name:"Story Builder"},{e:"&#129351;",name:"Champion"},{e:"&#127881;",name:"Superstar"}
   ];
-  var earned=Math.floor(userCoins/3);
+  var earned=Math.floor(userCoins/8);
   var level=earned+1;
   var html='<div class="pt">Coins &amp; Badges</div>';
-  html+='<div class="ps">Comment on a classmate\'s work to earn coins. Every 3 coins unlocks a new badge!</div>';
+  html+='<div class="ps">Complete steps, share work, add resources, and give feedback to earn coins. Every 8 coins unlocks a new badge!</div>';
   html+='<div class="card" style="text-align:center;padding:22px;background:linear-gradient(135deg,var(--a),#FF8F00);color:#fff;box-shadow:0 4px 0 #C67800">';
   html+='<div style="font-size:12px;font-weight:800;letter-spacing:.5px;opacity:.9">LEVEL '+level+'</div>';
   html+='<div style="font-size:44px;margin:4px 0">&#127881;</div>';
   html+='<div style="font-size:38px;font-weight:800">'+userCoins+'</div>';
   html+='<div style="font-size:13px;opacity:.9;margin-bottom:14px">coins collected</div>';
-  if(userCoins>=3){html+='<button class="btn btf" style="background:#fff;color:var(--a);box-shadow:0 3px 0 rgba(0,0,0,.15)" onclick="spendCoins()">&#127873; Unlock a Badge (3 coins)</button>';}
-  else{html+='<div style="font-size:13px;opacity:.9">Earn '+(3-userCoins)+" more to unlock your next badge!</div>";}
+  if(userCoins>=8){html+='<button class="btn btf" style="background:#fff;color:var(--a);box-shadow:0 3px 0 rgba(0,0,0,.15)" onclick="spendCoins()">&#127873; Unlock a Badge (8 coins)</button>';}
+  else{html+='<div style="font-size:13px;opacity:.9">Earn '+(8-userCoins)+" more to unlock your next badge!</div>";}
   html+='</div>';
   html+='<div class="card"><div class="ctitle" style="margin-bottom:12px">&#127942; My Badge Collection</div>';
   html+='<div class="badge-grid">';
@@ -559,8 +579,8 @@ window.openCoins=function(){
 };
 
 window.spendCoins=async function(){
-  if(userCoins<3){toast("Not enough coins!");return;}
-  userCoins-=3;await set(ref(db,"coins/"+CU.uid),userCoins);
+  if(userCoins<8){toast("Not enough coins!");return;}
+  userCoins-=8;await set(ref(db,"coins/"+CU.uid),userCoins);
   document.getElementById("coins-count").textContent=userCoins;
   toast("&#127881; New badge unlocked!");openCoins();
 };
@@ -891,6 +911,9 @@ async function renderHome(){
   if(rsSnap.exists())rsSnap.forEach(function(r){if(r.val().suggestedById===CU.uid)step4Done=true;});
 
   var doneCount=(step1Done?1:0)+(hasProduct?1:0)+(step3Done?1:0)+(step4Done?1:0);
+  if(step1Done)awardMilestoneOnce("step1",2);
+  if(hasProduct)awardMilestoneOnce("step2",2);
+  if(step3Done)awardMilestoneOnce("step3",2);
 
   var html='<div class="card" style="background:linear-gradient(135deg,var(--p),var(--pd));color:#fff;box-shadow:0 4px 0 var(--pd)">';
   html+='<div style="font-size:19px;font-weight:800;font-family:\'Baloo 2\',sans-serif">Hey, '+esc(firstName)+'! &#128075;</div>';
@@ -959,7 +982,7 @@ window.suggestResource=async function(){
   if(!title||!url){toast("Fill in both fields!");return;}
   if(!/^https?:\/\//i.test(url)){toast("Link must start with http:// or https://");return;}
   await push(ref(db,"resourceSuggestions"),{title:title,url:url,suggestedBy:CU.displayName,suggestedById:CU.uid,createdAt:Date.now()});
-  toast("Submitted! Waiting for teacher approval.");
+  await addCoin(3);
   document.getElementById("res-sugg-title").value="";
   document.getElementById("res-sugg-url").value="";
 };
@@ -1155,21 +1178,23 @@ function buildPostHTML(post){
   }
   html+='<div class="post-actions">';
   var isTeacherViewer=UP&&UP.role==="teacher";
+  var alreadyCommented=comments.some(function(cm){return cm.fromId===CU.uid;});
   if(post.uid!==CU.uid){
-    if(isTeacherViewer)html+='<button class="post-act" onclick="openTeacherComment(\''+post.id+'\',\''+esc(post.uid)+'\')">&#128105;&#8205;&#127979; Add Evaluation</button>';
+    if(alreadyCommented)html+='<span class="post-act" style="color:var(--th);cursor:default">&#9989; Already evaluated</span>';
+    else if(isTeacherViewer)html+='<button class="post-act" onclick="openTeacherComment(\''+post.id+'\',\''+esc(post.uid)+'\')">&#128105;&#8205;&#127979; Add Evaluation</button>';
     else html+='<button class="post-act" onclick="openComment(\''+post.id+'\')">&#128172; Comment +&#127881;</button>';
   }
   if(post.link)html+='<button class="post-act" onclick="window.open(\''+esc(post.link)+'\',\'_blank\')">&#128279; View</button>';
   if(post.uid===CU.uid)html+='<button class="post-act" onclick="deletePost(\''+post.id+'\')">&#128465; Delete</button>';
   html+='</div>';
-  if(isTeacherViewer){
+  if(isTeacherViewer&&!alreadyCommented){
     html+='<div id="tcform-'+post.id+'" style="display:none;padding:10px 13px;border-top:1px solid var(--gb)">';
     html+='<div id="tc-rub-'+post.id+'"></div>';
     html+='<div class="fg"><label class="fl">Good points</label><textarea class="fta" id="tc-well-'+post.id+'" style="min-height:44px"></textarea></div>';
     html+='<div class="fg"><label class="fl">To improve</label><textarea class="fta" id="tc-improve-'+post.id+'" style="min-height:44px"></textarea></div>';
     html+='<button class="btn btg" style="font-size:12px;padding:7px 13px" onclick="submitTeacherComment(\''+post.id+'\',\''+esc(post.uid)+'\')">Save Evaluation</button>';
     html+='</div>';
-  } else {
+  } else if(!isTeacherViewer&&!alreadyCommented){
     html+='<div id="cmform-'+post.id+'" style="display:none;padding:10px 13px;border-top:1px solid var(--gb)">';
     html+='<div style="font-size:12px;font-weight:600;margin-bottom:8px;color:var(--tm)">Leave feedback:</div>';
     html+='<div id="cm-rub-'+post.id+'"></div>';
@@ -1279,7 +1304,8 @@ window.submitPost=async function(){
     createdAt:Date.now()
   });
   window._newPostFile=null;
-  toast("Shared!");go("feed");
+  await addCoin(5);
+  go("feed");
 };
 
 window.openComment=function(postId){
@@ -1295,6 +1321,8 @@ window.submitComment=async function(postId,targetUid){
   var well=((document.getElementById("cm-well-"+postId)||{}).value||"").trim();
   var improve=((document.getElementById("cm-improve-"+postId)||{}).value||"").trim();
   if(!well||!improve){toast("Please fill in both good points and to improve!");return;}
+  var existSnap=await get(ref(db,"posts/"+postId+"/comments"));
+  if(existSnap.exists()){var dup=false;existSnap.forEach(function(c){if(c.val().fromId===CU.uid)dup=true;});if(dup){toast("You've already evaluated this post!");return;}}
   var storeKey="comment_"+postId;
   await push(ref(db,"posts/"+postId+"/comments"),{
     from:CU.displayName,fromId:CU.uid,
@@ -1303,7 +1331,7 @@ window.submitComment=async function(postId,targetUid){
   });
   if(targetUid&&targetUid!==CU.uid){
     await push(ref(db,"notifications/"+targetUid),{type:"comment",message:CU.displayName+" commented on your work!",read:false,createdAt:Date.now()});
-    await addCoin();
+    await addCoin(5);
   }
   toast("Comment submitted! +1 coin");
   var form=document.getElementById("cmform-"+postId);if(form)form.style.display="none";
@@ -1379,7 +1407,6 @@ window.renderStep1Screen=async function(){
       html+='</div>';
     });
     if(!myGrammarSubmitted)html+='<button class="btn btg btf" onclick="submitGrammarAnswers()">Submit Answers</button>';
-    else html+='<button class="btn bts btf" onclick="retakeGrammar()">Try Again</button>';
     html+='</div>';
   }
 
@@ -1414,11 +1441,6 @@ window.submitGrammarAnswers=async function(){
   toast("Answers submitted!");
   renderStep1Screen();
 };
-window.retakeGrammar=async function(){
-  await update(ref(db,"grammarAnswers/"+CU.uid),{submitted:false});
-  renderStep1Screen();
-};
-
 // ── STEP 3: MY LEARNING CONTRACT (3-column: topic, goals, evaluation) ──
 window.renderStep3Screen=async function(){
   window._currentScreen="step3";
@@ -1602,19 +1624,23 @@ window.qSetOtherText=function(v){qState.platformsOtherText=v;};
 
 function renderQ2(mc){
   var html=quizTopBar(1);
-  html+='<div class="qq">What kind of project do you want to make?</div><div class="qs2">Tap the one that sounds best.</div>';
+  html+='<div class="qq">What kind of project do you want to make?</div><div class="qs2">Tap the one that sounds best. Tap &#10068; to learn what it is.</div>';
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">';
   ["written","spoken","visual"].forEach(function(cat){
     var opts=qState.catalog[cat].filter(function(p){return p.active;});
-    if(!opts.length)return;
-    html+='<div style="font-size:11px;font-weight:700;color:var(--th);text-transform:uppercase;letter-spacing:.5px;margin:14px 0 6px">'+CAT_EMOJI[cat]+' '+CAT_LABELS[cat]+'</div>';
-    html+='<div class="qopts">';
+    html+='<div>';
+    if(opts.length)html+='<div class="q2-col-header">'+CAT_EMOJI[cat]+' '+CAT_LABELS[cat]+'</div>';
     opts.forEach(function(p){
       var on=qState.productId===p.id;
-      html+='<div class="qo'+(on?" sel":"")+'" onclick="qPick2(\''+p.id+'\')">';
-      html+='<span style="flex:1">'+esc(p.name)+'</span><span class="qchk">'+(on?"&#10003;":"")+'</span></div>';
+      var searchUrl="https://www.google.com/search?q="+encodeURIComponent("What is a "+p.name+"?");
+      html+='<div class="q2-opt-compact'+(on?" sel":"")+'" onclick="qPick2(\''+p.id+'\')">';
+      html+='<span style="flex:1">'+esc(p.name)+'</span>';
+      html+='<a class="q2-help" href="'+searchUrl+'" target="_blank" onclick="event.stopPropagation()">&#10068;</a>';
+      html+='</div>';
     });
     html+='</div>';
   });
+  html+='</div>';
 
   html+='<div class="qnav"><button class="btn bts" onclick="qGoto(0)">Back</button>';
   html+='<button class="btn btp" '+(!qState.productId?"disabled":"")+' onclick="qGoto(2)">Continue &#8594;</button></div>';
@@ -1662,8 +1688,9 @@ function showQuizResult(mc){
   }
   if(qState.weakness){
     var tips=SKILL_TIPS[qState.weakness]||[];
-    html+='<div class="card" style="border-left:3px solid var(--c)"><div style="font-size:13px;font-weight:700;margin-bottom:7px">A few tips for you</div>';
-    tips.forEach(function(t){html+='<div style="font-size:12px;color:var(--tm);margin-bottom:4px">&#8594; '+t+'</div>';});
+    html+='<div class="card" style="background:linear-gradient(135deg,var(--a),#FF8F00);border:none;color:#fff">';
+    html+='<div style="font-size:14px;font-weight:800;margin-bottom:9px;font-family:\'Baloo 2\',sans-serif">&#128161; A Few Tips For You</div>';
+    tips.forEach(function(t){html+='<div style="font-size:13px;font-weight:700;margin-bottom:7px;background:rgba(255,255,255,.18);padding:8px 10px;border-radius:10px">&#9889; '+t+'</div>';});
     html+='</div>';
   }
   html+='<div class="qnav">';
@@ -1739,7 +1766,6 @@ window.renderProfile=async function(uid,isOwn){
   html+='<div style="font-size:17px;font-weight:700;margin-bottom:4px">'+esc(u.name||"Student")+'</div>';
   var gname=u.groupName||null;var gid=u.groupId||null;
   if(gname)html+='<span class="sb sa">&#128101; '+esc(gname)+'</span>';
-  if(isOwn&&gid)html+='<div style="margin-top:10px"><button class="btn btp" style="font-size:12px;padding:7px 12px" onclick="openForum(\''+gid+'\',\''+esc(gname||"My Group")+'\')">&#128172; Group Chat</button></div>';
   html+='</div>';
 
   if(c&&c.productType){
@@ -1780,38 +1806,6 @@ window.changeAvatar=async function(){
   document.getElementById("uav").src=url;
   toast("Avatar updated!");
   renderProfile(CU.uid,true);
-};
-
-// ── FORUM ──
-window.openForum=function(groupId,groupName){
-  var mc=document.getElementById("mc");
-  var html='<div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">';
-  html+='<button class="btn bts" style="font-size:12px;padding:6px 10px" onclick="go(\'profile\')">&#8592;</button>';
-  html+='<div style="font-size:17px;font-weight:700">&#128172; '+esc(groupName)+'</div></div>';
-  html+='<div id="forum-msgs" style="min-height:180px;margin-bottom:10px"></div>';
-  html+='<div class="card"><textarea class="fta" id="forum-inp" placeholder="Write a message..." style="min-height:50px;margin-bottom:7px"></textarea>';
-  html+='<button class="btn btp btf" onclick="sendForum(\''+groupId+'\')">Send</button></div>';
-  mc.innerHTML=html;
-  onValue(ref(db,"forums/"+groupId),function(snap){
-    var msgs=document.getElementById("forum-msgs");if(!msgs)return;
-    var items=[];if(snap.exists())snap.forEach(function(m){var d=m.val();if(d.text)items.push({id:m.key,...d});});
-    if(!items.length){msgs.innerHTML='<div class="empty"><div class="ei">&#128172;</div><p>No messages yet — say hello!</p></div>';return;}
-    var mh="";
-    items.forEach(function(m){
-      var isMe=m.senderId===CU.uid;
-      mh+='<div style="margin-bottom:9px;'+(isMe?"text-align:right":"text-align:left")+'">';
-      if(!isMe)mh+='<div style="font-size:11px;font-weight:700;color:var(--p);margin-bottom:2px">'+esc(m.senderName||"")+'</div>';
-      mh+='<div class="forum-bbl '+(isMe?"mine":"theirs")+'">'+esc(m.text)+'</div>';
-      mh+='<div style="font-size:10px;color:var(--th);margin-top:2px">'+timeAgo(m.createdAt||Date.now())+'</div></div>';
-    });
-    msgs.innerHTML=mh;msgs.scrollTop=msgs.scrollHeight;
-  });
-};
-window.sendForum=async function(gid){
-  var text=((document.getElementById("forum-inp")||{}).value||"").trim();
-  if(!text){toast("Write something!");return;}
-  await push(ref(db,"forums/"+gid),{text:text,senderName:CU.displayName,senderId:CU.uid,createdAt:Date.now()});
-  document.getElementById("forum-inp").value="";
 };
 
 // ── NOTIFICATIONS ──
@@ -2199,7 +2193,6 @@ async function renderGroupingTab(){
       groups.forEach(function(g){
         gh+='<div class="card" style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;gap:6px">';
         gh+='<span style="font-size:14px;font-weight:700;flex:1">'+esc(g.name||"")+'</span>';
-        gh+='<button class="obtn" onclick="openForum(\''+g.id+'\',\''+esc(g.name||"Group")+'\')">&#128172; Chat</button>';
         gh+='<button class="obtn" onclick="renameGroup(\''+g.id+'\',\''+esc(g.name||"")+'\')">&#9998; Rename</button>';
         gh+='<button class="obtn" style="color:var(--c);border-color:var(--c)" onclick="terminateGroup(\''+g.id+'\',\''+esc(g.name||"Group")+'\')">&#128465; Terminate</button>';
         gh+='</div>';
@@ -2263,8 +2256,7 @@ window.assignStudentGroup=async function(uid,name,groupId,groupName){
 window.createGroup=async function(){
   var name=((document.getElementById("grp-name")||{}).value||"").trim();
   if(!name){toast("Enter a name!");return;}
-  var nr=await push(ref(db,"groups"),{name:name,members:{},createdAt:Date.now()});
-  await set(ref(db,"forums/"+nr.key+"/info"),{groupName:name,createdAt:Date.now()});
+  await push(ref(db,"groups"),{name:name,members:{},createdAt:Date.now()});
   document.getElementById("grp-name").value="";toast("Group created!");renderGroupingTab();
 };
 
@@ -2273,7 +2265,6 @@ window.renameGroup=async function(gid,oldName){
   if(!name||!name.trim())return;
   name=name.trim();
   await update(ref(db,"groups/"+gid),{name:name});
-  await update(ref(db,"forums/"+gid+"/info"),{groupName:name});
   var snap=await get(ref(db,"groups/"+gid));
   var members=(snap.exists()&&snap.val().members)||{};
   var updates={};
@@ -2290,7 +2281,6 @@ window.terminateGroup=async function(gid,name){
   Object.keys(members).forEach(function(uid){updates[uid+"/groupId"]=null;updates[uid+"/groupName"]=null;});
   if(Object.keys(updates).length)await update(ref(db,"users"),updates);
   await remove(ref(db,"groups/"+gid));
-  await remove(ref(db,"forums/"+gid));
   toast("Group terminated.");renderGroupingTab();
 };
 
@@ -2430,6 +2420,8 @@ window.submitTeacherComment=async function(postId,targetUid){
   var well=((document.getElementById("tc-well-"+postId)||{}).value||"").trim();
   var improve=((document.getElementById("tc-improve-"+postId)||{}).value||"").trim();
   if(!well||!improve){toast("Please fill in both good points and to improve!");return;}
+  var existSnap=await get(ref(db,"posts/"+postId+"/comments"));
+  if(existSnap.exists()){var dup=false;existSnap.forEach(function(c){if(c.val().fromId===CU.uid)dup=true;});if(dup){toast("You've already evaluated this post!");return;}}
   var storeKey="tceval_"+postId;
   await push(ref(db,"posts/"+postId+"/comments"),{from:CU.displayName+" (Teacher)",fromId:CU.uid,well:well,improve:improve,peerRubric:window._rubricStores[storeKey]?window._rubricStores[storeKey].values:[],isTeacher:true,createdAt:Date.now()});
   if(targetUid){await push(ref(db,"notifications/"+targetUid),{type:"teacher",message:"Your teacher left feedback on your work!",read:false,createdAt:Date.now()});}
