@@ -630,12 +630,34 @@ function updateLockTimerDisplay(){
   var bar=document.getElementById("lockbar");
   if(bar)bar.classList.toggle("urgent",rem<=0);
 }
-function applySessionLock(){
+async function checkEvalAlreadySubmitted(step,sessionKey){
+  if(step==="eval1"){
+    var snap=await get(ref(db,"lessonReflections/"+CU.uid));
+    var already=false;
+    if(snap.exists())snap.forEach(function(e){if(e.val().sessionKey===sessionKey)already=true;});
+    return already;
+  }
+  if(step==="eval2"){
+    var snap=await get(ref(db,"contracts/"+CU.uid));
+    var c=snap.exists()?snap.val():null;
+    return !!(c&&c.projectEval&&c.projectEval.sessionKey===sessionKey);
+  }
+  return false;
+}
+function closeEvalModal(){
+  var overlay=document.getElementById("eval-modal-overlay");
+  var bnav=document.getElementById("bnav");
+  if(overlay){overlay.style.display="none";document.getElementById("eval-modal-card").innerHTML="";}
+  if(bnav)bnav.style.display="flex";
+}
+async function applySessionLock(){
   if(!CU||UP&&UP.role==="teacher")return;
   var bnav=document.getElementById("bnav");
   var ls=window._liveSession||{active:false};
   var overlay=document.getElementById("eval-modal-overlay");
   if(ls.active&&(ls.step==="eval1"||ls.step==="eval2")){
+    var already=await checkEvalAlreadySubmitted(ls.step,ls.updatedAt);
+    if(already){closeEvalModal();return;}
     if(overlay){
       overlay.style.display="flex";
       var card=document.getElementById("eval-modal-card");
@@ -673,7 +695,7 @@ async function renderEval1Modal(){
   var already=false;
   if(snap.exists())snap.forEach(function(e){if(e.val().sessionKey===sessionKey)already=true;});
   if(already){
-    card.innerHTML='<div style="text-align:center;padding:24px"><div style="font-size:34px;margin-bottom:8px">&#9989;</div><div style="font-size:14px;font-weight:700">Submitted! Thanks.</div><div style="font-size:12px;color:var(--tm);margin-top:6px">Waiting for your teacher to move on.</div></div>';
+    closeEvalModal();
     return;
   }
   var today=new Date().toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"});
@@ -700,7 +722,7 @@ window.submitEval1=async function(){
     sessionKey:window._liveSession.updatedAt,createdAt:Date.now()
   });
   toast("Submitted! Thank you.");
-  renderEval1Modal();
+  closeEvalModal();
 };
 
 // ── TEACHER-PUSHED POPUP: Stage 2, Project Evaluation ──
@@ -715,7 +737,7 @@ async function renderEval2Modal(){
     return;
   }
   if(c.projectEval&&c.projectEval.sessionKey===sessionKey){
-    card.innerHTML='<div style="text-align:center;padding:24px"><div style="font-size:34px;margin-bottom:8px">&#9989;</div><div style="font-size:14px;font-weight:700">Submitted! Thanks.</div><div style="font-size:12px;color:var(--tm);margin-top:6px">Waiting for your teacher to move on.</div></div>';
+    closeEvalModal();
     return;
   }
 
@@ -823,7 +845,7 @@ window.submitEval2=async function(){
     await set(ref(db,"grammarAnswers/"+CU.uid),{answers:window._eval2GrammarAnswers,submitted:true,studentName:CU.displayName,submittedAt:Date.now(),sessionKey:sessionKey});
   }
   toast("Submitted! Thank you.");
-  renderEval2Modal();
+  closeEvalModal();
 };
 
 window.go=function(page){
