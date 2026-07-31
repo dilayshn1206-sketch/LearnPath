@@ -110,8 +110,8 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
 .comment:last-child{border-bottom:none}
 .comment-name{font-size:12px;font-weight:700;color:var(--pd);margin-bottom:3px}
 .comment-text{font-size:12px;color:var(--tm);line-height:1.5}
-.qprog{height:3px;background:var(--gb);border-radius:2px;margin-bottom:18px;overflow:hidden}
-.qpf{height:100%;background:var(--p);border-radius:2px;transition:width .4s}
+.qprog{height:8px;background:var(--gb);border-radius:6px;margin-bottom:18px;overflow:hidden}
+.qpf{height:100%;background:linear-gradient(90deg,var(--p),#9F7AFF);border-radius:6px;transition:width .4s}
 .ql{font-size:11px;color:var(--th);margin-bottom:3px}
 .qq{font-size:17px;font-weight:600;margin-bottom:4px;line-height:1.4}
 .qs2{font-size:13px;color:var(--tm);margin-bottom:14px}
@@ -468,6 +468,14 @@ const PEER_RUBRIC=[
 function toast(m){var t=document.getElementById("toast");t.innerHTML=m;t.classList.add("show");setTimeout(function(){t.classList.remove("show");},3000);}
 window.toast=toast;
 function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function pageHeaderHTML(icon,title,subtitle,colorA,colorB){
+  colorA=colorA||"var(--p)";colorB=colorB||"var(--pd)";
+  var html='<div class="card" style="background:linear-gradient(135deg,'+colorA+','+colorB+');color:#fff;box-shadow:0 4px 0 '+colorB+'">';
+  html+='<div style="font-size:19px;font-weight:800;font-family:\'Baloo 2\',sans-serif">'+icon+' '+esc(title)+'</div>';
+  if(subtitle)html+='<div style="font-size:12px;opacity:.85;margin-top:2px">'+esc(subtitle)+'</div>';
+  html+='</div>';
+  return html;
+}
 function skc(s){var m={Speaking:"#E1F5EE",Writing:"#EEEDFE",Reading:"#FAEEDA",Listening:"#FAECE7",speaking:"#E1F5EE",writing:"#EEEDFE"};return m[s]||"#F1EFE8";}
 function timeAgo(ts){var d=Date.now()-ts;if(d<60000)return "just now";if(d<3600000)return Math.floor(d/60000)+"m ago";if(d<86400000)return Math.floor(d/3600000)+"h ago";return Math.floor(d/86400000)+"d ago";}
 function formatDateTime(ts){
@@ -953,7 +961,7 @@ window.renderResourcesScreen=async function(){
   window._currentScreen="resources";
   var mc=document.getElementById("mc");
   var html='<button class="btn bts mb8" onclick="go(\'home\')">&#8592; Back to Home</button>';
-  html+='<div class="pt">Choose Resources</div><div class="ps">Helpful links for your project.</div>';
+  html+=pageHeaderHTML("&#128279;","Choose Resources","Helpful links for your project","var(--a)","#C67800");
   html+='<div class="card"><div style="font-size:13px;font-weight:700;margin-bottom:4px">&#128161; I have a useful link</div>';
   html+='<div style="font-size:12px;color:var(--tm);margin-bottom:8px">If you have a useful website, add it here. Your teacher will approve it before everyone can see it.</div>';
   html+='<div class="fg"><label class="fl">Title</label><input class="fi" id="res-sugg-title" placeholder="e.g. BBC Bitesize"></div>';
@@ -992,7 +1000,7 @@ function renderFeed(){
   window._currentScreen="feed";
   var mc=document.getElementById("mc");
   window._feedTab=window._feedTab||"plans";
-  var html='<div class="pt">Feed</div>';
+  var html=pageHeaderHTML("&#128228;","The Feed","See what everyone's working on","var(--t)","var(--td)");
   html+='<div class="toggle-row">';
   html+='<button class="toggle-btn'+(window._feedTab==="plans"?" act":"")+'" onclick="switchFeedTab(\'plans\')">&#128203; Project Plans</button>';
   html+='<button class="toggle-btn'+(window._feedTab==="posts"?" act":"")+'" onclick="switchFeedTab(\'posts\')">&#128228; Projects</button>';
@@ -1358,9 +1366,10 @@ window.renderStep1Screen=async function(){
   var myGrammarSubmitted=gaSnap.exists()&&gaSnap.val().submitted;
 
   var html=locked?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">&#8592; Back to Home</button>';
-  html+='<div class="card"><div style="font-size:18px;font-weight:700;margin-bottom:6px">&#127979; '+esc(info.title||"Our Unit")+'</div>';
-  if(info.theme)html+='<div style="margin-bottom:10px"><span class="sb sa">Theme: '+esc(info.theme)+'</span></div>';
-  if(info.description)html+='<div style="font-size:13px;line-height:1.7;color:var(--tm)">'+esc(info.description)+'</div>';
+  html+='<div class="card" style="background:linear-gradient(135deg,var(--p),var(--pd));color:#fff;box-shadow:0 4px 0 var(--pd)">';
+  html+='<div style="font-size:19px;font-weight:800;font-family:\'Baloo 2\',sans-serif">&#127979; '+esc(info.title||"Our Unit")+'</div>';
+  if(info.theme)html+='<div style="margin-top:6px"><span style="background:rgba(255,255,255,.25);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">Theme: '+esc(info.theme)+'</span></div>';
+  if(info.description)html+='<div style="font-size:13px;line-height:1.7;opacity:.95;margin-top:8px">'+esc(info.description)+'</div>';
   html+='</div>';
   if(info.imageUrl&&info.imageUrl.trim()){
     html+='<div class="card" style="padding:0;overflow:hidden"><img src="'+esc(info.imageUrl)+'" style="width:100%;display:block"></div>';
@@ -1461,19 +1470,20 @@ window.renderStep3Screen=async function(){
   if(uinfo.theme)html+='<div style="font-size:12px;color:var(--tm);margin-top:2px">Theme: '+esc(uinfo.theme)+'</div>';
   html+='</div>';
 
-  html+='<div class="card"><div class="fb mb8"><span style="font-size:14px;font-weight:700">Step 3 · My Learning Contract</span>';
-  if(c.status==="approved")html+='<span class="sb sa">Approved</span>';
-  else if(c.status==="pending")html+='<span class="sb sp">Waiting for teacher approval</span>';
-  else html+='<span class="sb" style="background:var(--gl);color:var(--tm)">Draft</span>';
+  var statusText=c.status==="approved"?"&#9989; Approved":c.status==="pending"?"&#8987; Waiting for teacher approval":"&#128221; Draft";
+  html+='<div class="card" style="background:linear-gradient(135deg,var(--t),var(--td));color:#fff;box-shadow:0 4px 0 var(--td)">';
+  html+='<div style="font-size:19px;font-weight:800;font-family:\'Baloo 2\',sans-serif">&#128221; My Learning Contract</div>';
+  html+='<div style="margin-top:6px"><span style="background:rgba(255,255,255,.25);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">'+statusText+'</span></div>';
   html+='</div>';
+
+  html+='<div class="card">';
   if(c.teacherComment)html+='<div style="background:var(--tl);border-radius:var(--rs);padding:8px 10px;font-size:12px;color:var(--td);margin-bottom:10px"><strong>Teacher:</strong> '+esc(c.teacherComment)+'</div>';
   if(readOnly)html+='<div class="tip mb8">This is saved. Ask your teacher if you need to change anything.</div>';
-  html+='<div class="divider"></div>';
 
   html+='<div class="contract-cols">';
 
   // Column 1: fill in the blank + mini plan
-  html+='<div class="contract-col"><div class="cc-title">1. My Project</div>';
+  html+='<div class="contract-col" style="background:var(--pl)"><div class="cc-title">1. My Project</div>';
   html+='<div style="font-size:13px;line-height:1.8">I will create a <strong>'+esc(c.productType)+'</strong> about<br>';
   html+='<input class="fi" id="c-topic" style="margin-top:6px" value="'+esc(c.topic||"")+'" placeholder="your topic..." '+(readOnly?"disabled":"onblur=\"saveTopic()\"")+'>.</div>';
   var planSteps=(c.planSteps&&c.planSteps.length)?c.planSteps:["","",""];
@@ -1486,7 +1496,7 @@ window.renderStep3Screen=async function(){
   html+='</div>';
 
   // Column 2: goals
-  html+='<div class="contract-col"><div class="cc-title">2. Choose Your Goals</div>';
+  html+='<div class="contract-col" style="background:var(--tl)"><div class="cc-title">2. Choose Your Goals</div>';
   GOAL_ITEMS.forEach(function(g){
     var checked=!!(c.goals&&c.goals[g.id]);
     var text=g.text;
@@ -1497,7 +1507,7 @@ window.renderStep3Screen=async function(){
   html+='</div>';
 
   // Column 3: evaluation
-  html+='<div class="contract-col"><div class="cc-title">3. Evaluation</div>';
+  html+='<div class="contract-col" style="background:var(--al)"><div class="cc-title">3. Evaluation</div>';
   html+='<div style="font-size:13px;margin-bottom:8px">I will get at least <input class="fi" id="c-teacherpct" type="number" min="0" max="100" style="width:60px;display:inline-block" value="'+esc(c.evalTeacherPct||"")+'" '+(readOnly?"disabled":"onblur=\"saveEval()\"")+'>% from my teacher.</div>';
   html+='<div style="font-size:13px">I will get at least <input class="fi" id="c-peerpct" type="number" min="0" max="100" style="width:60px;display:inline-block" value="'+esc(c.evalPeerPct||"")+'" '+(readOnly?"disabled":"onblur=\"saveEval()\"")+'>% from my classmates.</div>';
   html+='</div>';
@@ -1671,7 +1681,7 @@ function showQuizResult(mc){
   if(!qState.reviewChoice)qState.reviewChoice=rec.id;
 
   var html=isLockedStep("step2")?lockBarHTML():"";
-  html+='<div class="pt">Your Idea</div><div class="ps">Review your answers, then submit when you\'re ready.</div>';
+  html+=pageHeaderHTML("&#10024;","Your Idea","Review your answers, then submit when you're ready.","var(--p)","var(--pd)");
   html+='<div class="card'+(qState.reviewChoice===rec.id?"":"")+'" style="border-color:var(--p);border-width:1.5px;text-align:center;padding:20px;cursor:pointer" onclick="qReviewPick(\''+rec.id+'\')">';
   if(qState.reviewChoice===rec.id)html+='<div style="font-size:11px;font-weight:700;color:var(--p);margin-bottom:6px">&#10003; SELECTED</div>';
   html+='<div style="font-size:17px;font-weight:700;margin-bottom:6px">'+esc(rec.name)+'</div>';
@@ -1752,24 +1762,24 @@ window.renderProfile=async function(uid,isOwn){
   var html="";
   if(!isOwn)html+='<button class="btn bts mb8" onclick="go(\'feed\')">&#8592; Back</button>';
 
-  html+='<div class="card" style="text-align:center;padding:20px">';
+  html+='<div class="card" style="text-align:center;padding:24px 20px;background:linear-gradient(135deg,var(--c),#E5484D);color:#fff;box-shadow:0 4px 0 #E5484D">';
   if(isOwn){
     html+='<div class="prof-av-wrap" onclick="changeAvatar()">';
-    if(u.photo)html+='<img src="'+esc(u.photo)+'" class="prof-av-img">';
-    else html+='<div class="prof-av-plc">'+esc((u.name||"?")[0])+'</div>';
+    if(u.photo)html+='<img src="'+esc(u.photo)+'" class="prof-av-img" style="border-color:#fff">';
+    else html+='<div class="prof-av-plc" style="border-color:#fff;background:rgba(255,255,255,.25);color:#fff">'+esc((u.name||"?")[0])+'</div>';
     if(!u.avatarChanged)html+='<div class="prof-av-edit">&#9998;</div>';
     html+='</div>';
   } else {
-    if(u.photo)html+='<img src="'+esc(u.photo)+'" style="width:70px;height:70px;border-radius:50%;object-fit:cover;margin:0 auto 10px;display:block;border:3px solid var(--p)">';
-    else html+='<div style="width:70px;height:70px;border-radius:50%;background:var(--pl);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;color:var(--p);margin:0 auto 10px;border:3px solid var(--p)">'+esc((u.name||"?")[0])+'</div>';
+    if(u.photo)html+='<img src="'+esc(u.photo)+'" style="width:70px;height:70px;border-radius:50%;object-fit:cover;margin:0 auto 10px;display:block;border:3px solid #fff">';
+    else html+='<div style="width:70px;height:70px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;color:#fff;margin:0 auto 10px;border:3px solid #fff">'+esc((u.name||"?")[0])+'</div>';
   }
-  html+='<div style="font-size:17px;font-weight:700;margin-bottom:4px">'+esc(u.name||"Student")+'</div>';
+  html+='<div style="font-size:18px;font-weight:800;margin-bottom:4px;font-family:\'Baloo 2\',sans-serif">'+esc(u.name||"Student")+'</div>';
   var gname=u.groupName||null;var gid=u.groupId||null;
-  if(gname)html+='<span class="sb sa">&#128101; '+esc(gname)+'</span>';
+  if(gname)html+='<span style="background:rgba(255,255,255,.25);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">&#128101; '+esc(gname)+'</span>';
   html+='</div>';
 
   if(c&&c.productType){
-    html+='<div class="card"><div class="fb mb8"><span style="font-size:14px;font-weight:700">My Learning Contract</span>';
+    html+='<div class="card"><div class="fb mb8"><span style="font-size:14px;font-weight:700">&#128221; My Learning Contract</span>';
     if(c.status==="approved")html+='<span class="sb sa">Approved</span>';
     else if(c.status==="pending")html+='<span class="sb sp">Pending</span>';
     else if(c.status==="awaiting_grouping")html+='<span class="sb" style="background:var(--gl);color:var(--tm)">Awaiting group</span>';
@@ -2117,7 +2127,7 @@ window.reviewContract=async function(studentId){
   html+='<div class="fg" style="margin-top:10px"><label class="fl">Something else...</label><input class="fi" id="rv-goals-other" value="'+esc(c.goalsOtherText||"")+'"></div>';
   html+='</div>';
 
-  html+='<div class="contract-col"><div class="cc-title">3. Evaluation</div>';
+  html+='<div class="contract-col" style="background:var(--al)"><div class="cc-title">3. Evaluation</div>';
   html+='<div style="font-size:13px;margin-bottom:8px">Teacher: <input class="fi" id="rv-teacherpct" type="number" min="0" max="100" style="width:60px;display:inline-block" value="'+esc(c.evalTeacherPct||"")+'">%</div>';
   html+='<div style="font-size:13px">Classmates: <input class="fi" id="rv-peerpct" type="number" min="0" max="100" style="width:60px;display:inline-block" value="'+esc(c.evalPeerPct||"")+'">%</div>';
   html+='</div>';
