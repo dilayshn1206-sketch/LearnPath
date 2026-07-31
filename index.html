@@ -593,7 +593,9 @@ async function loadContractAndStart(){
   onValue(ref(db,"contracts/"+CU.uid),function(s){
     contractData=s.exists()?s.val():null;
     // if the student is just sitting on Home, refresh it live so grouping/approval shows up instantly
-    if(window._currentScreen==="home"&&!(window._liveSession&&window._liveSession.active))renderHome();
+    var ls1=window._liveSession;
+    var hardLocked=ls1&&ls1.active&&(ls1.step==="step1"||ls1.step==="step2"||ls1.step==="step3");
+    if(window._currentScreen==="home"&&!hardLocked)renderHome();
   });
 }
 
@@ -849,7 +851,8 @@ window.submitEval2=async function(){
 };
 
 window.go=function(page){
-  if(window._liveSession&&window._liveSession.active)return;
+  var ls=window._liveSession;
+  if(ls&&ls.active&&(ls.step==="step1"||ls.step==="step2"||ls.step==="step3"))return;
   setNav(page);
   document.getElementById("mc").innerHTML='<div class="loading">Loading...</div>';
   var pages={home:renderHome,feed:renderFeed,profile:function(){renderProfile(CU.uid,true);}};
@@ -859,7 +862,8 @@ window.go=function(page){
 // ── PAGE 1: HOME ──
 async function renderHome(){
   window._currentScreen="home";
-  if(window._liveSession&&window._liveSession.active){applySessionLock();return;}
+  var ls0=window._liveSession;
+  if(ls0&&ls0.active&&(ls0.step==="step1"||ls0.step==="step2"||ls0.step==="step3")){applySessionLock();return;}
   var mc=document.getElementById("mc");
   var snap=await get(ref(db,"contracts/"+CU.uid));
   contractData=snap.exists()?snap.val():null;
