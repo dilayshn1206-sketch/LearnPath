@@ -127,8 +127,13 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
 .qo.sel{border-color:var(--p);background:var(--pl);color:var(--pd)}
 .qo.skip-opt{border-style:dashed;color:var(--th)}
 .qo.skip-opt.sel{border-color:var(--c);background:var(--cl);color:var(--c);border-style:solid}
-.qchk{width:15px;height:15px;border-radius:3px;border:1.5px solid var(--gb);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center}
-.qo.sel .qchk{border-color:var(--p);background:var(--p);color:#fff;font-size:9px}
+.qchk{width:20px;height:20px;border-radius:7px;border:2px solid var(--gb);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all .15s;background:#fff}
+.qo.sel .qchk{border-color:var(--p);background:var(--p);color:#fff;font-size:11px}
+.goal-row{display:flex;align-items:flex-start;gap:9px;padding:9px 10px;font-size:12px;line-height:1.5;cursor:pointer;border-radius:11px;margin-bottom:5px;background:rgba(255,255,255,.55);transition:all .15s}
+.goal-row:hover{background:#fff}
+.goal-row.sel{background:#fff;font-weight:700;box-shadow:0 2px 0 rgba(0,0,0,.06)}
+.goal-row .qchk{margin-top:1px}
+.goal-row.sel .qchk{border-color:var(--t);background:var(--t);color:#fff;font-size:11px}
 .qnav{display:flex;justify-content:space-between;margin-top:16px}
 .prod-top{border:1.5px solid var(--p);background:var(--pl);border-radius:var(--r);padding:13px;margin-bottom:8px}
 .prod-row{display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid var(--gb);border-radius:var(--rs);background:#fff;margin-bottom:6px;cursor:pointer;transition:all .15s}
@@ -218,10 +223,6 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
 .contract-cols{display:flex;flex-wrap:wrap;gap:12px}
 .contract-col{flex:1 1 220px;min-width:200px;background:var(--gl);border-radius:var(--r);padding:12px}
 .cc-title{font-size:12px;font-weight:700;color:var(--pd);margin-bottom:9px;text-transform:uppercase;letter-spacing:.4px}
-.goal-row{display:flex;align-items:flex-start;gap:8px;padding:7px 0;font-size:12px;line-height:1.5;cursor:pointer;border-bottom:1px solid var(--gb)}
-.goal-row:last-child{border-bottom:none}
-.goal-row.sel{color:var(--td);font-weight:600}
-.goal-row .qchk{margin-top:1px}
 .rubarea{margin-bottom:16px}
 .rubarea-name{font-size:13px;font-weight:700}
 .rubarea-q{font-size:11px;color:var(--tm);margin-bottom:7px}
@@ -229,7 +230,7 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
 .rublevel-opt:hover{border-color:var(--p)}
 .rublevel-opt.sel{border-color:var(--p);background:var(--pl);color:var(--pd);font-weight:600}
 .rublevel-bullets{margin-top:6px;font-size:11px;font-weight:400;color:var(--tm);line-height:1.6}
-.project-card{background:#fff;border-radius:var(--r);border:1px solid var(--gb);padding:12px;margin-bottom:8px}
+.project-card{background:#fff;border-radius:var(--r);border:1px solid var(--gb);border-left:5px solid var(--p);padding:12px;margin-bottom:8px}
 .rubarea2{background:#fff;border:1px solid var(--gb);border-radius:var(--r);padding:13px;margin-bottom:10px}
 .rub-pill{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;border:1.5px solid transparent}
 .rub-pill.tier0{background:#EAF1FE;color:#2F6FED}
@@ -1762,7 +1763,7 @@ window.renderProfile=async function(uid,isOwn){
   var html="";
   if(!isOwn)html+='<button class="btn bts mb8" onclick="go(\'feed\')">&#8592; Back</button>';
 
-  html+='<div class="card" style="text-align:center;padding:24px 20px;background:linear-gradient(135deg,var(--c),#E5484D);color:#fff;box-shadow:0 4px 0 #E5484D">';
+  html+='<div class="card" style="text-align:center;padding:24px 20px;background:linear-gradient(135deg,#FF6FA8,#C23B7A);color:#fff;box-shadow:0 4px 0 #C23B7A">';
   if(isOwn){
     html+='<div class="prof-av-wrap" onclick="changeAvatar()">';
     if(u.photo)html+='<img src="'+esc(u.photo)+'" class="prof-av-img" style="border-color:#fff">';
