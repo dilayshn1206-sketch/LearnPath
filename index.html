@@ -191,6 +191,7 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
 .ei{font-size:30px;margin-bottom:7px}
 .toast{position:fixed;bottom:76px;left:50%;transform:translateX(-50%);background:#2C2C2A;color:#fff;padding:9px 18px;border-radius:var(--rs);font-size:13px;font-weight:600;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;max-width:88vw;text-align:center}
 .modal-overlay{position:fixed;inset:0;background:rgba(20,20,20,.55);z-index:600;display:flex;align-items:center;justify-content:center;padding:16px}
+@keyframes confettiFall{0%{transform:translateY(0) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(360deg);opacity:0}}
 .modal-card{background:#fff;border-radius:16px;padding:20px;max-width:420px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
 .eval2-item{border-bottom:1px solid var(--gl);padding-bottom:12px;margin-bottom:12px}
 .eval2-item:last-of-type{border-bottom:none}
@@ -291,6 +292,10 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
 
 <div class="modal-overlay" id="eval-modal-overlay" style="display:none">
   <div class="modal-card" id="eval-modal-card"></div>
+</div>
+
+<div class="modal-overlay" id="result-popup-overlay" style="display:none" onclick="if(event.target===this)closeResultPopup()">
+  <div class="modal-card" id="result-popup-card" style="text-align:center;padding:26px 20px"></div>
 </div>
 
 <script type="module">
@@ -467,6 +472,34 @@ const PEER_RUBRIC=[
 
 // ── HELPERS ──
 function toast(m){var t=document.getElementById("toast");t.innerHTML=m;t.classList.add("show");setTimeout(function(){t.classList.remove("show");},3000);}
+function celebrate(){
+  var container=document.createElement("div");
+  container.style.cssText="position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden";
+  document.body.appendChild(container);
+  var colors=["#7C4DFF","#00C896","#FFB300","#FF5A6E","#FF6FA8"];
+  for(var i=0;i<26;i++){
+    var piece=document.createElement("div");
+    var color=colors[Math.floor(Math.random()*colors.length)];
+    var left=Math.random()*100;
+    var delay=Math.random()*0.3;
+    var duration=1.2+Math.random()*0.8;
+    var size=6+Math.random()*7;
+    piece.style.cssText="position:absolute;top:-20px;left:"+left+"%;width:"+size+"px;height:"+size+"px;background:"+color+";border-radius:"+(Math.random()>0.5?"50%":"3px")+";animation:confettiFall "+duration+"s ease-in "+delay+"s forwards;opacity:.9";
+    container.appendChild(piece);
+  }
+  setTimeout(function(){container.remove();},2600);
+}
+window.showResultPopup=function(emoji,title,message){
+  var overlay=document.getElementById("result-popup-overlay");
+  var card=document.getElementById("result-popup-card");
+  if(!overlay||!card)return;
+  card.innerHTML='<div style="font-size:44px;margin-bottom:10px">'+emoji+'</div><div style="font-size:17px;font-weight:800;margin-bottom:6px;font-family:\'Baloo 2\',sans-serif">'+esc(title)+'</div><div style="font-size:13px;color:var(--tm);margin-bottom:16px;line-height:1.5">'+esc(message)+'</div><button class="btn btp btf" onclick="closeResultPopup()">Got it!</button>';
+  overlay.style.display="flex";
+};
+window.closeResultPopup=function(){
+  var overlay=document.getElementById("result-popup-overlay");
+  if(overlay)overlay.style.display="none";
+};
 window.toast=toast;
 function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 function pageHeaderHTML(icon,title,subtitle,colorA,colorB){
@@ -552,6 +585,7 @@ async function awardMilestoneOnce(key,amount){
   userCoins+=amount;
   await set(ref(db,"coins/"+CU.uid),userCoins);
   var el=document.getElementById("coins-count");if(el)el.textContent=userCoins;
+  celebrate();
   toast("&#127942; +"+amount+" coins for completing a milestone!");
 }
 
@@ -591,6 +625,7 @@ window.spendCoins=async function(){
   if(userCoins<8){toast("Not enough coins!");return;}
   userCoins-=8;await set(ref(db,"coins/"+CU.uid),userCoins);
   document.getElementById("coins-count").textContent=userCoins;
+  celebrate();
   toast("&#127881; New badge unlocked!");openCoins();
 };
 
@@ -1313,6 +1348,7 @@ window.submitPost=async function(){
     createdAt:Date.now()
   });
   window._newPostFile=null;
+  celebrate();
   await addCoin(5);
   go("feed");
 };
@@ -1448,8 +1484,18 @@ window.submitGrammarAnswers=async function(){
   var snap=await get(ref(db,"grammarAnswers/"+CU.uid));
   var answers=(snap.exists()&&snap.val().answers)||{};
   await update(ref(db,"grammarAnswers/"+CU.uid),{answers:answers,submitted:true,studentName:CU.displayName,submittedAt:Date.now()});
-  toast("Answers submitted!");
+  var uinfo={};
+  try{var usnap=await get(ref(db,"unitInfo"));if(usnap.exists())uinfo=usnap.val();}catch(e){}
+  var gQs=uinfo.grammarQuestions||[];
+  var score=0;gQs.forEach(function(q,qi){if(answers[qi]===q.correct)score++;});
   renderStep1Screen();
+  if(gQs.length){
+    if(score===gQs.length)showResultPopup("&#127775;","Perfect Score!","You got all "+gQs.length+" right! You really know this grammar.");
+    else if(score>=gQs.length/2)showResultPopup("&#128077;","Nice Try!","You got "+score+"/"+gQs.length+" right. Scroll down to see which ones to review.");
+    else showResultPopup("&#128170;","Keep Practicing!","You got "+score+"/"+gQs.length+" right this time. Scroll down to see the correct answers — mistakes help you learn!");
+  } else {
+    toast("Answers submitted!");
+  }
 };
 // ── STEP 3: MY LEARNING CONTRACT (3-column: topic, goals, evaluation) ──
 window.renderStep3Screen=async function(){
@@ -1561,6 +1607,7 @@ window.submitContract=async function(){
   if(steps.length<3||steps.some(function(s){return !s||!s.trim();})){toast("Fill in every step of your plan first!");return;}
   await update(ref(db,"contracts/"+CU.uid),{status:"pending",editUnlocked:false,submittedAt:Date.now()});
   contractData=(await get(ref(db,"contracts/"+CU.uid))).val();
+  celebrate();
   toast("Submitted! Check the Feed to see everyone's ideas.");
   go("feed");
 };
@@ -1731,6 +1778,7 @@ window.chooseProduct=async function(id,name,cat){
     studentPhoto:CU.photoURL||"",studentId:CU.uid,createdAt:Date.now()
   });
   contractData=(await get(ref(db,"contracts/"+CU.uid))).val();
+  celebrate();
   renderQuizDone();
 };
 
@@ -1766,12 +1814,14 @@ window.renderProfile=async function(uid,isOwn){
   html+='<div class="card" style="text-align:center;padding:24px 20px;background:linear-gradient(135deg,#FF6FA8,#C23B7A);color:#fff;box-shadow:0 4px 0 #C23B7A">';
   if(isOwn){
     html+='<div class="prof-av-wrap" onclick="changeAvatar()">';
-    if(u.photo)html+='<img src="'+esc(u.photo)+'" class="prof-av-img" style="border-color:#fff">';
+    if(u.avatarEmoji)html+='<div class="prof-av-plc" style="border-color:#fff;background:rgba(255,255,255,.25)">'+u.avatarEmoji+'</div>';
+    else if(u.photo)html+='<img src="'+esc(u.photo)+'" class="prof-av-img" style="border-color:#fff">';
     else html+='<div class="prof-av-plc" style="border-color:#fff;background:rgba(255,255,255,.25);color:#fff">'+esc((u.name||"?")[0])+'</div>';
-    if(!u.avatarChanged)html+='<div class="prof-av-edit">&#9998;</div>';
+    html+='<div class="prof-av-edit">&#9998;</div>';
     html+='</div>';
   } else {
-    if(u.photo)html+='<img src="'+esc(u.photo)+'" style="width:70px;height:70px;border-radius:50%;object-fit:cover;margin:0 auto 10px;display:block;border:3px solid #fff">';
+    if(u.avatarEmoji)html+='<div style="width:70px;height:70px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 10px;border:3px solid #fff">'+u.avatarEmoji+'</div>';
+    else if(u.photo)html+='<img src="'+esc(u.photo)+'" style="width:70px;height:70px;border-radius:50%;object-fit:cover;margin:0 auto 10px;display:block;border:3px solid #fff">';
     else html+='<div style="width:70px;height:70px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;color:#fff;margin:0 auto 10px;border:3px solid #fff">'+esc((u.name||"?")[0])+'</div>';
   }
   html+='<div style="font-size:18px;font-weight:800;margin-bottom:4px;font-family:\'Baloo 2\',sans-serif">'+esc(u.name||"Student")+'</div>';
@@ -1808,13 +1858,24 @@ window.renderProfile=async function(uid,isOwn){
 
 window.toggleCat=function(id){var el=document.getElementById(id);if(el)el.style.display=el.style.display==="none"?"block":"none";};
 
-window.changeAvatar=async function(){
-  var usnap=await get(ref(db,"users/"+CU.uid));
-  if(usnap.exists()&&usnap.val().avatarChanged){toast("Avatar can only be changed once and has already been set.");return;}
-  var url=prompt("Paste a direct image URL for your new avatar:");
-  if(!url||!url.startsWith("http")){toast("Please enter a valid image URL.");return;}
-  await update(ref(db,"users/"+CU.uid),{photo:url,avatarChanged:true});
-  document.getElementById("uav").src=url;
+window.changeAvatar=function(){
+  var emojis=["&#129418;","&#128060;","&#128640;","&#127912;","&#129409;","&#128054;","&#127775;","&#128025;","&#129417;","&#128044;","&#127752;","&#128293;"];
+  var html='<div style="font-size:16px;font-weight:800;margin-bottom:4px;font-family:\'Baloo 2\',sans-serif">Choose Your Avatar</div>';
+  html+='<div style="font-size:12px;color:var(--tm);margin-bottom:14px">Tap one to make it yours — you can change it anytime!</div>';
+  html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">';
+  emojis.forEach(function(e){
+    html+='<div style="font-size:30px;padding:10px;border-radius:14px;background:var(--gl);cursor:pointer;text-align:center;transition:transform .15s" onclick="pickAvatarEmoji(\''+e+'\')">'+e+'</div>';
+  });
+  html+='</div>';
+  var overlay=document.getElementById("result-popup-overlay");
+  var card=document.getElementById("result-popup-card");
+  if(!overlay||!card)return;
+  card.innerHTML=html;
+  overlay.style.display="flex";
+};
+window.pickAvatarEmoji=async function(emoji){
+  await update(ref(db,"users/"+CU.uid),{avatarEmoji:emoji});
+  closeResultPopup();
   toast("Avatar updated!");
   renderProfile(CU.uid,true);
 };
