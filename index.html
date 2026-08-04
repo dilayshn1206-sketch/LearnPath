@@ -591,43 +591,32 @@ async function awardMilestoneOnce(key,amount){
 
 window.openCoins=function(){
   var mc=document.getElementById("mc");setNav("profile");
-  var badges=[
-    {e:"&#127775;",name:"Idea Spark"},{e:"&#9997;",name:"Word Wizard"},{e:"&#127908;",name:"Voice Star"},
-    {e:"&#127912;",name:"Creative Genius"},{e:"&#128218;",name:"Bookworm"},{e:"&#129309;",name:"Team Player"},
-    {e:"&#128640;",name:"Rising Star"},{e:"&#127942;",name:"Project Master"},{e:"&#128161;",name:"Bright Thinker"},
-    {e:"&#127919;",name:"Goal Getter"},{e:"&#128293;",name:"On Fire"},{e:"&#9889;",name:"Speedy Helper"},
-    {e:"&#127984;",name:"Story Builder"},{e:"&#129351;",name:"Champion"},{e:"&#127881;",name:"Superstar"}
+  var badgeNames=[
+    "First Steps","Word Wizard","Voice Star","Creative Genius","Bookworm","Team Player",
+    "Rising Star","Project Master","Bright Thinker","Goal Getter","On Fire","Speedy Helper",
+    "Story Builder","Champion","Superstar"
   ];
   var earned=Math.floor(userCoins/8);
   var level=earned+1;
   var html='<div class="pt">Coins &amp; Badges</div>';
-  html+='<div class="ps">Complete steps, share work, add resources, and give feedback to earn coins. Every 8 coins unlocks a new badge!</div>';
+  html+='<div class="ps">Complete steps, share work, add resources, and give feedback to earn coins. Every 8 coins unlocks a new badge automatically!</div>';
   html+='<div class="card" style="text-align:center;padding:22px;background:linear-gradient(135deg,var(--a),#FF8F00);color:#fff;box-shadow:0 4px 0 #C67800">';
   html+='<div style="font-size:12px;font-weight:800;letter-spacing:.5px;opacity:.9">LEVEL '+level+'</div>';
-  html+='<div style="font-size:44px;margin:4px 0">&#127881;</div>';
-  html+='<div style="font-size:38px;font-weight:800">'+userCoins+'</div>';
-  html+='<div style="font-size:13px;opacity:.9;margin-bottom:14px">coins collected</div>';
-  if(userCoins>=8){html+='<button class="btn btf" style="background:#fff;color:var(--a);box-shadow:0 3px 0 rgba(0,0,0,.15)" onclick="spendCoins()">&#127873; Unlock a Badge (8 coins)</button>';}
-  else{html+='<div style="font-size:13px;opacity:.9">Earn '+(8-userCoins)+" more to unlock your next badge!</div>";}
+  html+='<div style="font-size:38px;font-weight:800;margin-top:6px">'+userCoins+'</div>';
+  html+='<div style="font-size:13px;opacity:.9">coins collected</div>';
+  if(userCoins<8*(earned+1))html+='<div style="font-size:12px;opacity:.85;margin-top:8px">'+(8*(earned+1)-userCoins)+' more to your next badge</div>';
   html+='</div>';
   html+='<div class="card"><div class="ctitle" style="margin-bottom:12px">&#127942; My Badge Collection</div>';
   html+='<div class="badge-grid">';
-  badges.forEach(function(b,i){
+  badgeNames.forEach(function(name,i){
     var isEarned=i<earned;
-    html+='<div class="badge-item"><div class="badge-icon'+(isEarned?" earned":" locked")+'">'+(isEarned?b.e:"&#128274;")+'</div>';
-    html+='<div class="badge-name">'+(isEarned?b.name:"???")+'</div></div>';
+    html+='<div class="badge-item"><div class="badge-icon'+(isEarned?" earned":" locked")+'">'+(isEarned?(i+1):"&#128274;")+'</div>';
+    html+='<div class="badge-name">'+(isEarned?esc(name):"???")+'</div></div>';
   });
   html+='</div></div>';
   mc.innerHTML=html;
 };
 
-window.spendCoins=async function(){
-  if(userCoins<8){toast("Not enough coins!");return;}
-  userCoins-=8;await set(ref(db,"coins/"+CU.uid),userCoins);
-  document.getElementById("coins-count").textContent=userCoins;
-  celebrate();
-  toast("&#127881; New badge unlocked!");openCoins();
-};
 
 // ── STUDENT NAV ──
 var SNAV=[
@@ -787,7 +776,8 @@ window.submitEval1=async function(){
     learned:learned,resource:resource,difficult:difficult,nextGoal:nextGoal,
     sessionKey:window._liveSession.updatedAt,createdAt:Date.now()
   });
-  toast("Submitted! Thank you.");
+  celebrate();
+  await addCoin(2);
   closeEvalModal();
 };
 
@@ -910,7 +900,8 @@ window.submitEval2=async function(){
   if(window._eval2GrammarAnswers&&Object.keys(window._eval2GrammarAnswers).length){
     await set(ref(db,"grammarAnswers/"+CU.uid),{answers:window._eval2GrammarAnswers,submitted:true,studentName:CU.displayName,submittedAt:Date.now(),sessionKey:sessionKey});
   }
-  toast("Submitted! Thank you.");
+  celebrate();
+  await addCoin(5);
   closeEvalModal();
 };
 
@@ -1026,7 +1017,7 @@ window.suggestResource=async function(){
   if(!title||!url){toast("Fill in both fields!");return;}
   if(!/^https?:\/\//i.test(url)){toast("Link must start with http:// or https://");return;}
   await push(ref(db,"resourceSuggestions"),{title:title,url:url,suggestedBy:CU.displayName,suggestedById:CU.uid,createdAt:Date.now()});
-  await addCoin(3);
+  toast("Submitted! You'll earn coins once your teacher approves it.");
   document.getElementById("res-sugg-title").value="";
   document.getElementById("res-sugg-url").value="";
 };
@@ -1088,6 +1079,9 @@ function loadProjectsList(teacherMode){
         var goals=d.goals||{};
         var goalCount=GOAL_ITEMS.filter(function(g){return goals[g.id];}).length;
         html+='<div style="font-size:11px;font-weight:700;color:var(--th);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">Goals ('+goalCount+"/"+GOAL_ITEMS.length+')</div>';
+        (d.weaknessTips||[]).forEach(function(t){
+          html+='<div style="display:flex;align-items:flex-start;gap:7px;padding:3px 0;font-size:12px"><span>&#9989;</span><span>'+esc(t)+'</span></div>';
+        });
         GOAL_ITEMS.forEach(function(g){
           var checked=!!goals[g.id];
           html+='<div style="display:flex;align-items:flex-start;gap:7px;padding:3px 0;font-size:12px;'+(checked?"":"color:var(--th)")+'"><span>'+(checked?"&#9989;":"&#11036;")+'</span><span>'+g.text+'</span></div>';
@@ -1377,8 +1371,9 @@ window.submitComment=async function(postId,targetUid){
   if(targetUid&&targetUid!==CU.uid){
     await push(ref(db,"notifications/"+targetUid),{type:"comment",message:CU.displayName+" commented on your work!",read:false,createdAt:Date.now()});
     await addCoin(5);
+  } else {
+    toast("Comment submitted!");
   }
-  toast("Comment submitted! +1 coin");
   var form=document.getElementById("cmform-"+postId);if(form)form.style.display="none";
 };
 
@@ -1507,65 +1502,168 @@ window.renderStep3Screen=async function(){
   var c=contractData;
   var locked=isLockedStep("step3");
   var readOnly=c.status!=="draft"&&c.editUnlocked===false;
+
+  if(c.status==="draft"&&!readOnly){
+    if(window._c3Step===undefined||window._c3Step===null)window._c3Step=0;
+    var step=window._c3Step;
+    var labels=["Project","Plan","Goals","Review"];
+    var html=locked?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">&#8592; Back to Home</button>';
+    html+='<div class="qprog"><div class="qpf" style="width:'+Math.round((step+1)/4*100)+'%"></div></div>';
+    html+='<div class="ql">Step '+(step+1)+' of 4 &middot; '+labels[step]+'</div>';
+    if(step===0)html+=renderC3StepProject(c);
+    else if(step===1)html+=renderC3StepPlan(c);
+    else if(step===2)html+=renderC3StepGoals(c);
+    else html+=renderC3StepReview(c);
+    mc.innerHTML=html;setNav("home");
+    return;
+  }
+
   var uinfo={};
   try{var usnap=await get(ref(db,"unitInfo"));if(usnap.exists())uinfo=usnap.val();}catch(e){}
 
-  var html=locked?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">&#8592; Back to Home</button>';
+  var html2=locked?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">&#8592; Back to Home</button>';
 
-  html+='<div class="card"><div style="font-size:12px;font-weight:700;color:var(--th);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">&#127979; What we\'re learning</div>';
-  html+='<div style="font-size:14px;font-weight:700">'+esc(uinfo.title||"")+'</div>';
-  if(uinfo.theme)html+='<div style="font-size:12px;color:var(--tm);margin-top:2px">Theme: '+esc(uinfo.theme)+'</div>';
-  html+='</div>';
+  html2+='<div class="card"><div style="font-size:12px;font-weight:700;color:var(--th);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">&#127979; What we\'re learning</div>';
+  html2+='<div style="font-size:14px;font-weight:700">'+esc(uinfo.title||"")+'</div>';
+  if(uinfo.theme)html2+='<div style="font-size:12px;color:var(--tm);margin-top:2px">Theme: '+esc(uinfo.theme)+'</div>';
+  html2+='</div>';
 
   var statusText=c.status==="approved"?"&#9989; Approved":c.status==="pending"?"&#8987; Waiting for teacher approval":"&#128221; Draft";
-  html+='<div class="card" style="background:linear-gradient(135deg,var(--t),var(--td));color:#fff;box-shadow:0 4px 0 var(--td)">';
-  html+='<div style="font-size:19px;font-weight:800;font-family:\'Baloo 2\',sans-serif">&#128221; My Learning Contract</div>';
-  html+='<div style="margin-top:6px"><span style="background:rgba(255,255,255,.25);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">'+statusText+'</span></div>';
-  html+='</div>';
+  html2+='<div class="card" style="background:linear-gradient(135deg,var(--t),var(--td));color:#fff;box-shadow:0 4px 0 var(--td)">';
+  html2+='<div style="font-size:19px;font-weight:800;font-family:\'Baloo 2\',sans-serif">&#128221; My Learning Contract</div>';
+  html2+='<div style="margin-top:6px"><span style="background:rgba(255,255,255,.25);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">'+statusText+'</span></div>';
+  html2+='</div>';
 
-  html+='<div class="card">';
-  if(c.teacherComment)html+='<div style="background:var(--tl);border-radius:var(--rs);padding:8px 10px;font-size:12px;color:var(--td);margin-bottom:10px"><strong>Teacher:</strong> '+esc(c.teacherComment)+'</div>';
-  if(readOnly)html+='<div class="tip mb8">This is saved. Ask your teacher if you need to change anything.</div>';
+  html2+='<div class="card">';
+  if(c.teacherComment)html2+='<div style="background:var(--tl);border-radius:var(--rs);padding:8px 10px;font-size:12px;color:var(--td);margin-bottom:10px"><strong>Teacher:</strong> '+esc(c.teacherComment)+'</div>';
+  if(readOnly)html2+='<div class="tip mb8">This is saved. Ask your teacher if you need to change anything.</div>';
 
-  html+='<div class="contract-cols">';
+  html2+='<div class="contract-cols">';
 
-  // Column 1: fill in the blank + mini plan
-  html+='<div class="contract-col" style="background:var(--pl)"><div class="cc-title">1. My Project</div>';
-  html+='<div style="font-size:13px;line-height:1.8">I will create a <strong>'+esc(c.productType)+'</strong> about<br>';
-  html+='<input class="fi" id="c-topic" style="margin-top:6px" value="'+esc(c.topic||"")+'" placeholder="your topic..." '+(readOnly?"disabled":"onblur=\"saveTopic()\"")+'>.</div>';
-  var planSteps=(c.planSteps&&c.planSteps.length)?c.planSteps:["","",""];
-  html+='<div style="font-size:12px;font-weight:700;color:var(--pd);margin:14px 0 8px">My Plan <span style="color:var(--c)">*</span></div>';
-  planSteps.forEach(function(s,i){
-    html+='<input class="fi mb8" value="'+esc(s)+'" placeholder="Step '+(i+1)+'..." '+(readOnly?"disabled":'onblur="savePlanStep('+i+',this.value)"')+'>';
+  html2+='<div class="contract-col" style="background:var(--pl)"><div class="cc-title">1. My Project</div>';
+  html2+='<div style="font-size:13px;line-height:1.8">I will create a <strong>'+esc(c.productType)+'</strong> about<br>';
+  html2+='<input class="fi" id="c-topic" style="margin-top:6px" value="'+esc(c.topic||"")+'" placeholder="your topic..." '+(readOnly?"disabled":"onblur=\"saveTopic()\"")+'>.</div>';
+  var planSteps2=(c.planSteps&&c.planSteps.length)?c.planSteps:["","",""];
+  html2+='<div style="font-size:12px;font-weight:700;color:var(--pd);margin:14px 0 8px">My Plan</div>';
+  planSteps2.forEach(function(s,i){
+    html2+='<input class="fi mb8" value="'+esc(s)+'" placeholder="Step '+(i+1)+'..." '+(readOnly?"disabled":'onblur="savePlanStep('+i+',this.value)"')+'>';
   });
-  if(!readOnly)html+='<button type="button" class="btn bts btf" style="font-size:12px" onclick="addPlanStep()">+ Add another step</button>';
-  html+='<div style="font-size:11px;color:var(--th);margin-top:9px;line-height:1.7">Example:<br>I will read mini-story examples<br>I will write my mini story<br>I will read my mini story<br>I will make my friends read my mini story</div>';
-  html+='</div>';
+  if(!readOnly)html2+='<button type="button" class="btn bts btf" style="font-size:12px" onclick="addPlanStep()">+ Add another step</button>';
+  html2+='</div>';
 
-  // Column 2: goals
-  html+='<div class="contract-col" style="background:var(--tl)"><div class="cc-title">2. Choose Your Goals</div>';
+  html2+='<div class="contract-col" style="background:var(--tl)"><div class="cc-title">2. My Goals</div>';
+  (c.weaknessTips||[]).forEach(function(t){
+    html2+='<div class="goal-row sel" style="cursor:default"><span class="qchk">&#10003;</span><span style="flex:1">'+esc(t)+'</span></div>';
+  });
   GOAL_ITEMS.forEach(function(g){
     var checked=!!(c.goals&&c.goals[g.id]);
-    var text=g.text;
-    html+='<div class="goal-row'+(checked?" sel":"")+'" onclick="'+(readOnly?"":"toggleGoal('"+g.id+"')")+'">';
-    html+='<span class="qchk">'+(checked?"&#10003;":"")+'</span><span style="flex:1">'+text+'</span></div>';
+    html2+='<div class="goal-row'+(checked?" sel":"")+'" onclick="'+(readOnly?"":"toggleGoal('"+g.id+"')")+'">';
+    html2+='<span class="qchk">'+(checked?"&#10003;":"")+'</span><span style="flex:1">'+g.text+'</span></div>';
   });
-  html+='<div class="fg" style="margin-top:10px"><label class="fl">Something else...</label><input class="fi" id="c-goals-other" value="'+esc(c.goalsOtherText||"")+'" placeholder="Write your own goal" '+(readOnly?"disabled":"onblur=\"saveGoalsOther()\"")+'></div>';
+  if(c.goalsOtherText)html2+='<div style="font-size:12px;font-weight:700;margin-top:8px">&#9989; '+esc(c.goalsOtherText)+'</div>';
+  html2+='</div>';
+
+  html2+='<div class="contract-col" style="background:var(--al)"><div class="cc-title">3. Evaluation</div>';
+  html2+='<div style="font-size:13px;margin-bottom:8px">I will get at least <input class="fi" id="c-teacherpct" type="number" min="0" max="100" style="width:60px;display:inline-block" value="'+esc(c.evalTeacherPct||"")+'" '+(readOnly?"disabled":"onblur=\"saveEval()\"")+'>% from my teacher.</div>';
+  html2+='<div style="font-size:13px">I will get at least <input class="fi" id="c-peerpct" type="number" min="0" max="100" style="width:60px;display:inline-block" value="'+esc(c.evalPeerPct||"")+'" '+(readOnly?"disabled":"onblur=\"saveEval()\"")+'>% from my classmates.</div>';
+  html2+='</div>';
+
+  html2+='</div>';
+  html2+='</div>';
+  mc.innerHTML=html2;setNav("home");
+};
+
+function renderC3StepProject(c){
+  var html='<div class="card" style="background:linear-gradient(135deg,var(--p),var(--pd));color:#fff;box-shadow:0 4px 0 var(--pd)">';
+  html+='<div style="font-size:19px;font-weight:800;font-family:\'Baloo 2\',sans-serif">&#128221; My Project</div>';
   html+='</div>';
-
-  // Column 3: evaluation
-  html+='<div class="contract-col" style="background:var(--al)"><div class="cc-title">3. Evaluation</div>';
-  html+='<div style="font-size:13px;margin-bottom:8px">I will get at least <input class="fi" id="c-teacherpct" type="number" min="0" max="100" style="width:60px;display:inline-block" value="'+esc(c.evalTeacherPct||"")+'" '+(readOnly?"disabled":"onblur=\"saveEval()\"")+'>% from my teacher.</div>';
-  html+='<div style="font-size:13px">I will get at least <input class="fi" id="c-peerpct" type="number" min="0" max="100" style="width:60px;display:inline-block" value="'+esc(c.evalPeerPct||"")+'" '+(readOnly?"disabled":"onblur=\"saveEval()\"")+'>% from my classmates.</div>';
+  html+='<div class="card"><div style="font-size:14px;line-height:1.9">I will create a <strong>'+esc(c.productType)+'</strong> about<br>';
+  html+='<input class="fi" id="c-topic" style="margin-top:8px" value="'+esc(c.topic||"")+'" placeholder="your topic..." onblur="saveTopic()">.</div></div>';
+  html+='<div class="qnav"><span></span><button class="btn btp" onclick="c3Next()">Continue &#8594;</button></div>';
+  return html;
+}
+function renderC3StepPlan(c){
+  var html='<div class="card" style="background:linear-gradient(135deg,var(--p),var(--pd));color:#fff;box-shadow:0 4px 0 var(--pd)">';
+  html+='<div style="font-size:19px;font-weight:800;font-family:\'Baloo 2\',sans-serif">&#128506; My Plan</div>';
+  html+='<div style="font-size:12px;opacity:.85;margin-top:2px">List the steps you\'ll follow to finish your project.</div>';
   html+='</div>';
-
-  html+='</div>'; // end contract-cols
-
-  if(!readOnly&&c.status==="draft"){
-    html+='<button class="btn btg btf mt12" onclick="submitContract()">&#127942; Submit My Plan &amp; Go to Feed</button>';
+  html+='<div class="card">';
+  var planSteps=(c.planSteps&&c.planSteps.length)?c.planSteps:["","",""];
+  planSteps.forEach(function(s,i){
+    html+='<input class="fi mb8" value="'+esc(s)+'" placeholder="Step '+(i+1)+'..." onblur="savePlanStep('+i+',this.value)">';
+  });
+  html+='<button type="button" class="btn bts btf" style="font-size:12px" onclick="addPlanStep()">+ Add another step</button>';
+  html+='<div style="font-size:11px;color:var(--th);margin-top:9px;line-height:1.7">Example:<br>I will read mini-story examples<br>I will write my mini story<br>I will read my mini story<br>I will make my friends read my mini story</div>';
+  html+='</div>';
+  html+='<div class="qnav"><button class="btn bts" onclick="c3Back()">&#8592; Back</button><button class="btn btp" onclick="c3Next()">Continue &#8594;</button></div>';
+  return html;
+}
+function renderC3StepGoals(c){
+  var checkedCount=GOAL_ITEMS.filter(function(g){return c.goals&&c.goals[g.id];}).length;
+  var otherFilled=!!(c.goalsOtherText&&c.goalsOtherText.trim());
+  var total=checkedCount+(otherFilled?1:0);
+  var tipGoals=c.weaknessTips||[];
+  var html='<div class="card" style="background:linear-gradient(135deg,var(--t),var(--td));color:#fff;box-shadow:0 4px 0 var(--td)">';
+  html+='<div style="font-size:19px;font-weight:800;font-family:\'Baloo 2\',sans-serif">&#127919; Choose Your Goals</div>';
+  html+='<div style="font-size:12px;opacity:.85;margin-top:2px">Choose 3 more from below — '+total+' of 3 selected</div>';
+  html+='</div>';
+  if(tipGoals.length){
+    html+='<div class="card"><div style="font-size:11px;font-weight:800;color:var(--th);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">Your Focus Goals (from your quiz)</div>';
+    tipGoals.forEach(function(t){
+      html+='<div class="goal-row sel" style="cursor:default"><span class="qchk">&#10003;</span><span style="flex:1">'+esc(t)+'</span></div>';
+    });
+    html+='</div>';
   }
+  html+='<div class="card"><div style="font-size:13px;font-weight:700;margin-bottom:8px">Choose 3 from below</div>';
+  GOAL_ITEMS.forEach(function(g){
+    var checked=!!(c.goals&&c.goals[g.id]);
+    html+='<div class="goal-row'+(checked?" sel":"")+'" onclick="toggleGoal(\''+g.id+'\')">';
+    html+='<span class="qchk">'+(checked?"&#10003;":"")+'</span><span style="flex:1">'+g.text+'</span></div>';
+  });
+  html+='<div class="fg" style="margin-top:10px"><label class="fl">Something else...</label><input class="fi" id="c-goals-other" value="'+esc(c.goalsOtherText||"")+'" placeholder="Write your own goal" onblur="saveGoalsOther()"></div>';
   html+='</div>';
-  mc.innerHTML=html;setNav("home");
+  html+='<div class="qnav"><button class="btn bts" onclick="c3Back()">&#8592; Back</button><button class="btn btp" onclick="c3Next()">Continue &#8594;</button></div>';
+  return html;
+}
+function renderC3StepReview(c){
+  var html='<div class="card" style="background:linear-gradient(135deg,var(--t),var(--td));color:#fff;box-shadow:0 4px 0 var(--td)">';
+  html+='<div style="font-size:19px;font-weight:800;font-family:\'Baloo 2\',sans-serif">&#9989; Review &amp; Submit</div>';
+  html+='</div>';
+  html+='<div class="card" style="background:var(--pl)"><div class="cc-title">My Project</div>';
+  html+='<div style="font-size:13px">I will create a <strong>'+esc(c.productType)+'</strong> about <strong>'+(c.topic?esc(c.topic):"—")+'</strong>.</div></div>';
+  html+='<div class="card" style="background:var(--pl)"><div class="cc-title">My Plan</div>';
+  (c.planSteps||[]).forEach(function(s,i){if(s&&s.trim())html+='<div style="font-size:13px;margin-bottom:4px">'+(i+1)+". "+esc(s)+'</div>';});
+  html+='</div>';
+  html+='<div class="card" style="background:var(--tl)"><div class="cc-title">My Goals</div>';
+  (c.weaknessTips||[]).forEach(function(t){html+='<div style="font-size:13px;margin-bottom:4px">&#9989; '+esc(t)+'</div>';});
+  GOAL_ITEMS.forEach(function(g){if(c.goals&&c.goals[g.id])html+='<div style="font-size:13px;margin-bottom:4px">&#9989; '+g.text+'</div>';});
+  if(c.goalsOtherText)html+='<div style="font-size:13px">&#9989; '+esc(c.goalsOtherText)+'</div>';
+  html+='</div>';
+  html+='<div class="card" style="background:var(--al)"><div class="cc-title">Evaluation</div>';
+  html+='<div style="font-size:13px;margin-bottom:8px">I will get at least <input class="fi" id="c-teacherpct" type="number" min="0" max="100" style="width:60px;display:inline-block" value="'+esc(c.evalTeacherPct||"")+'" onblur="saveEval()">% from my teacher.</div>';
+  html+='<div style="font-size:13px">I will get at least <input class="fi" id="c-peerpct" type="number" min="0" max="100" style="width:60px;display:inline-block" value="'+esc(c.evalPeerPct||"")+'" onblur="saveEval()">% from my classmates.</div>';
+  html+='</div>';
+  html+='<div class="qnav"><button class="btn bts" onclick="c3Back()">&#8592; Back</button><button class="btn btg" onclick="submitContract()">&#127942; Submit My Plan</button></div>';
+  return html;
+}
+window.c3Next=function(){
+  var step=window._c3Step||0;
+  if(step===0&&(!contractData.topic||!contractData.topic.trim())){toast("Fill in your topic first!");return;}
+  if(step===1){
+    var steps=contractData.planSteps||["","",""];
+    if(steps.length<3||steps.some(function(s){return !s||!s.trim();})){toast("Fill in every step of your plan first!");return;}
+  }
+  if(step===2){
+    var checkedCount=GOAL_ITEMS.filter(function(g){return contractData.goals&&contractData.goals[g.id];}).length;
+    if(contractData.goalsOtherText&&contractData.goalsOtherText.trim())checkedCount++;
+    if(checkedCount<3){toast("Please choose at least 3 goals!");return;}
+  }
+  window._c3Step=step+1;
+  renderStep3Screen();
+};
+window.c3Back=function(){
+  window._c3Step=Math.max(0,(window._c3Step||0)-1);
+  renderStep3Screen();
 };
 
 window.saveTopic=async function(){
@@ -1605,8 +1703,12 @@ window.submitContract=async function(){
   if(!contractData.topic||!contractData.topic.trim()){toast("Fill in your topic first!");return;}
   var steps=contractData.planSteps||["","",""];
   if(steps.length<3||steps.some(function(s){return !s||!s.trim();})){toast("Fill in every step of your plan first!");return;}
+  var checkedCount=GOAL_ITEMS.filter(function(g){return contractData.goals&&contractData.goals[g.id];}).length;
+  if(contractData.goalsOtherText&&contractData.goalsOtherText.trim())checkedCount++;
+  if(checkedCount<3){toast("Please choose at least 3 goals!");return;}
   await update(ref(db,"contracts/"+CU.uid),{status:"pending",editUnlocked:false,submittedAt:Date.now()});
   contractData=(await get(ref(db,"contracts/"+CU.uid))).val();
+  window._c3Step=0;
   celebrate();
   toast("Submitted! Check the Feed to see everyone's ideas.");
   go("feed");
@@ -1656,7 +1758,7 @@ function quizTopBar(stepIdx){
 
 function renderQ1(mc){
   var html=quizTopBar(0);
-  html+='<div class="qq">What do you need to complete the project?</div><div class="qs2">Pick everything you have access to.</div>';
+  html+='<div class="qq">Which tools can you use?</div><div class="qs2">Pick everything you have access to.</div>';
   html+='<div class="qopts">';
   PLATFORMS.forEach(function(pf){
     var on=qState.platforms.indexOf(pf)!==-1;
@@ -1814,13 +1916,13 @@ window.renderProfile=async function(uid,isOwn){
   html+='<div class="card" style="text-align:center;padding:24px 20px;background:linear-gradient(135deg,#FF6FA8,#C23B7A);color:#fff;box-shadow:0 4px 0 #C23B7A">';
   if(isOwn){
     html+='<div class="prof-av-wrap" onclick="changeAvatar()">';
-    if(u.avatarEmoji)html+='<div class="prof-av-plc" style="border-color:#fff;background:rgba(255,255,255,.25)">'+u.avatarEmoji+'</div>';
+    if(u.avatarColor)html+='<div class="prof-av-plc" style="border-color:#fff;background:'+u.avatarColor+';color:#fff">'+esc((u.name||"?")[0])+'</div>';
     else if(u.photo)html+='<img src="'+esc(u.photo)+'" class="prof-av-img" style="border-color:#fff">';
     else html+='<div class="prof-av-plc" style="border-color:#fff;background:rgba(255,255,255,.25);color:#fff">'+esc((u.name||"?")[0])+'</div>';
     html+='<div class="prof-av-edit">&#9998;</div>';
     html+='</div>';
   } else {
-    if(u.avatarEmoji)html+='<div style="width:70px;height:70px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 10px;border:3px solid #fff">'+u.avatarEmoji+'</div>';
+    if(u.avatarColor)html+='<div style="width:70px;height:70px;border-radius:50%;background:'+u.avatarColor+';display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;color:#fff;margin:0 auto 10px;border:3px solid #fff">'+esc((u.name||"?")[0])+'</div>';
     else if(u.photo)html+='<img src="'+esc(u.photo)+'" style="width:70px;height:70px;border-radius:50%;object-fit:cover;margin:0 auto 10px;display:block;border:3px solid #fff">';
     else html+='<div style="width:70px;height:70px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;color:#fff;margin:0 auto 10px;border:3px solid #fff">'+esc((u.name||"?")[0])+'</div>';
   }
@@ -1859,12 +1961,12 @@ window.renderProfile=async function(uid,isOwn){
 window.toggleCat=function(id){var el=document.getElementById(id);if(el)el.style.display=el.style.display==="none"?"block":"none";};
 
 window.changeAvatar=function(){
-  var emojis=["&#129418;","&#128060;","&#128640;","&#127912;","&#129409;","&#128054;","&#127775;","&#128025;","&#129417;","&#128044;","&#127752;","&#128293;"];
-  var html='<div style="font-size:16px;font-weight:800;margin-bottom:4px;font-family:\'Baloo 2\',sans-serif">Choose Your Avatar</div>';
-  html+='<div style="font-size:12px;color:var(--tm);margin-bottom:14px">Tap one to make it yours — you can change it anytime!</div>';
-  html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">';
-  emojis.forEach(function(e){
-    html+='<div style="font-size:30px;padding:10px;border-radius:14px;background:var(--gl);cursor:pointer;text-align:center;transition:transform .15s" onclick="pickAvatarEmoji(\''+e+'\')">'+e+'</div>';
+  var colors=["#7C4DFF","#00C896","#FFB300","#FF5A6E","#FF6FA8","#2F6FED","#00B8D9","#8D6E63","#546E7A","#D81B60"];
+  var html='<div style="font-size:16px;font-weight:800;margin-bottom:4px;font-family:\'Baloo 2\',sans-serif">Choose Your Colour</div>';
+  html+='<div style="font-size:12px;color:var(--tm);margin-bottom:14px">Pick a colour for your avatar — you can change it anytime.</div>';
+  html+='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px">';
+  colors.forEach(function(c){
+    html+='<div style="width:44px;height:44px;border-radius:50%;background:'+c+';cursor:pointer;margin:0 auto" onclick="pickAvatarColor(\''+c+'\')"></div>';
   });
   html+='</div>';
   var overlay=document.getElementById("result-popup-overlay");
@@ -1873,8 +1975,8 @@ window.changeAvatar=function(){
   card.innerHTML=html;
   overlay.style.display="flex";
 };
-window.pickAvatarEmoji=async function(emoji){
-  await update(ref(db,"users/"+CU.uid),{avatarEmoji:emoji});
+window.pickAvatarColor=async function(color){
+  await update(ref(db,"users/"+CU.uid),{avatarColor:color});
   closeResultPopup();
   toast("Avatar updated!");
   renderProfile(CU.uid,true);
@@ -2453,6 +2555,12 @@ window.approveResource=async function(id){
   var s=snap.val();
   await push(ref(db,"resources"),{title:s.title,url:s.url,addedBy:s.suggestedBy||"Student",addedAt:Date.now()});
   await remove(ref(db,"resourceSuggestions/"+id));
+  if(s.suggestedById){
+    var coinSnap=await get(ref(db,"coins/"+s.suggestedById));
+    var current=(coinSnap.exists()&&coinSnap.val())||0;
+    await set(ref(db,"coins/"+s.suggestedById),current+3);
+    await push(ref(db,"notifications/"+s.suggestedById),{type:"resource",message:"Your resource suggestion was approved! +3 coins",read:false,createdAt:Date.now()});
+  }
   toast("Approved and added!");
   renderTResources();
 };
