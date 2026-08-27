@@ -369,6 +369,22 @@ function catOfProduct(catalog,id){for(var c in catalog){if(catalog[c].some(funct
 
 const PLATFORMS=["Canva","Google Docs / Slides","Phone camera / YouTube","Pen & paper","PowerPoint","Audio recording app"];
 
+// ── AVATAR CATALOG (unlocked with coins — each entry is a real avatar image, not a colour) ──
+const AVATAR_CATALOG=[
+  {id:"explorer",name:"Explorer",cost:0,seed:"Explorer-LearnPath"},
+  {id:"fox",name:"Fox",cost:4,seed:"Fox-LearnPath"},
+  {id:"owl",name:"Owl",cost:8,seed:"Owl-LearnPath"},
+  {id:"panda",name:"Panda",cost:12,seed:"Panda-LearnPath"},
+  {id:"robot",name:"Robot",cost:16,seed:"Robot-LearnPath"},
+  {id:"dragon",name:"Dragon",cost:20,seed:"Dragon-LearnPath"},
+  {id:"unicorn",name:"Unicorn",cost:24,seed:"Unicorn-LearnPath"},
+  {id:"wizard",name:"Wizard",cost:28,seed:"Wizard-LearnPath"},
+  {id:"ninja",name:"Ninja",cost:32,seed:"Ninja-LearnPath"},
+  {id:"pirate",name:"Pirate",cost:36,seed:"Pirate-LearnPath"},
+  {id:"astronaut",name:"Astronaut",cost:40,seed:"Astronaut-LearnPath"},
+  {id:"superhero",name:"Superhero",cost:45,seed:"Superhero-LearnPath"}
+].map(function(a){a.url="https://api.dicebear.com/9.x/adventurer/svg?seed="+encodeURIComponent(a.seed)+"&backgroundType=gradientLinear";return a;});
+
 const SKILL_TIPS={
   writing:["Write three short ideas before you start.","Put one main idea in each paragraph.","Read your work aloud and fix confusing sentences."],
   speaking:["Practise your talk out loud.","Record yourself once and listen.","Take a breath and speak slowly."],
@@ -548,7 +564,7 @@ onAuthStateChanged(auth,async function(user){
   document.getElementById("uname").textContent=(user.displayName||"").split(" ")[0];
   var snap=await get(ref(db,"users/"+user.uid));
   if(!snap.exists()||!snap.val().role){document.getElementById("role").style.display="flex";}
-  else{UP=snap.val();myGid=UP.groupId||null;myGname=UP.groupName||null;launchApp(UP.role);}
+  else{UP=snap.val();myGid=UP.groupId||null;myGname=UP.groupName||null;if(UP.avatarUrl)document.getElementById("uav").src=UP.avatarUrl;launchApp(UP.role);}
 });
 
 async function setRole(role){
@@ -589,32 +605,42 @@ async function awardMilestoneOnce(key,amount){
   toast("&#127942; +"+amount+" coins for completing a milestone!");
 }
 
-window.openCoins=function(){
+window.openCoins=async function(){
   var mc=document.getElementById("mc");setNav("profile");
-  var badgeNames=[
-    "First Steps","Word Wizard","Voice Star","Creative Genius","Bookworm","Team Player",
-    "Rising Star","Project Master","Bright Thinker","Goal Getter","On Fire","Speedy Helper",
-    "Story Builder","Champion","Superstar"
-  ];
-  var earned=Math.floor(userCoins/8);
-  var level=earned+1;
-  var html='<div class="pt">Coins &amp; Badges</div>';
-  html+='<div class="ps">Complete steps, share work, add resources, and give feedback to earn coins. Every 8 coins unlocks a new badge automatically!</div>';
+  mc.innerHTML='<div class="loading">Loading...</div>';
+  await loadCoins();
+  var usnap=await get(ref(db,"users/"+CU.uid));
+  var myAvatarUrl=(usnap.exists()&&usnap.val().avatarUrl)||"";
+  var unlockedCount=AVATAR_CATALOG.filter(function(a){return userCoins>=a.cost;}).length;
+  var next=AVATAR_CATALOG.find(function(a){return a.cost>userCoins;});
+  var html='<div class="pt">Coins &amp; Avatars</div>';
+  html+='<div class="ps">Earn coins by completing steps, sharing work, adding resources, and giving feedback. Collect enough coins to unlock a new avatar!</div>';
   html+='<div class="card" style="text-align:center;padding:22px;background:linear-gradient(135deg,var(--a),#FF8F00);color:#fff;box-shadow:0 4px 0 #C67800">';
-  html+='<div style="font-size:12px;font-weight:800;letter-spacing:.5px;opacity:.9">LEVEL '+level+'</div>';
-  html+='<div style="font-size:38px;font-weight:800;margin-top:6px">'+userCoins+'</div>';
+  html+='<div style="font-size:38px;font-weight:800;margin-top:2px">'+userCoins+'</div>';
   html+='<div style="font-size:13px;opacity:.9">coins collected</div>';
-  if(userCoins<8*(earned+1))html+='<div style="font-size:12px;opacity:.85;margin-top:8px">'+(8*(earned+1)-userCoins)+' more to your next badge</div>';
+  if(next)html+='<div style="font-size:12px;opacity:.85;margin-top:8px">'+(next.cost-userCoins)+' more to unlock '+esc(next.name)+'</div>';
+  else html+='<div style="font-size:12px;opacity:.85;margin-top:8px">All avatars unlocked! &#127881;</div>';
   html+='</div>';
-  html+='<div class="card"><div class="ctitle" style="margin-bottom:12px">&#127942; My Badge Collection</div>';
+  html+='<div class="card"><div class="ctitle" style="margin-bottom:12px">&#127917; My Avatar Collection ('+unlockedCount+'/'+AVATAR_CATALOG.length+')</div>';
   html+='<div class="badge-grid">';
-  badgeNames.forEach(function(name,i){
-    var isEarned=i<earned;
-    html+='<div class="badge-item"><div class="badge-icon'+(isEarned?" earned":" locked")+'">'+(isEarned?(i+1):"&#128274;")+'</div>';
-    html+='<div class="badge-name">'+(isEarned?esc(name):"???")+'</div></div>';
+  AVATAR_CATALOG.forEach(function(a){
+    var unlocked=userCoins>=a.cost;
+    var isActive=myAvatarUrl===a.url;
+    html+='<div class="badge-item" style="cursor:'+(unlocked?"pointer":"default")+'" onclick="'+(unlocked?"pickAvatarImage('"+a.url+"')":"toast('Earn "+(a.cost-userCoins)+" more coins to unlock this avatar!')")+'">';
+    if(unlocked)html+='<div class="badge-icon earned" style="padding:0;overflow:hidden'+(isActive?";box-shadow:0 0 0 3px var(--p),0 4px 0 #C67800":"")+'"><img src="'+a.url+'" style="width:100%;height:100%;object-fit:cover"></div>';
+    else html+='<div class="badge-icon locked">&#128274;</div>';
+    html+='<div class="badge-name">'+(unlocked?esc(a.name):a.cost+" coins")+'</div></div>';
   });
   html+='</div></div>';
   mc.innerHTML=html;
+};
+window.pickAvatarImage=async function(url){
+  var entry=AVATAR_CATALOG.find(function(a){return a.url===url;});
+  if(entry&&userCoins<entry.cost){toast("You haven't unlocked this avatar yet!");return;}
+  await update(ref(db,"users/"+CU.uid),{avatarUrl:url,avatarColor:null});
+  var topAv=document.getElementById("uav");if(topAv)topAv.src=url;
+  toast("Avatar updated!");
+  openCoins();
 };
 
 
@@ -849,9 +875,10 @@ async function renderEval2Modal(){
   html+='</div>';
 
   html+='<div class="eval2-item"><div style="font-size:13px;margin-bottom:4px">I achieved my goals.</div>';
-  if(c.goals){
+  if((c.weaknessTips&&c.weaknessTips.length)||c.goals||c.goalsOtherText){
     html+='<div style="font-size:11px;color:var(--tm);margin-bottom:6px;line-height:1.6">';
-    GOAL_ITEMS.forEach(function(g){if(c.goals[g.id])html+="&#9989; "+esc(g.text)+"<br>";});
+    (c.weaknessTips||[]).forEach(function(t){html+="&#9989; "+esc(t)+"<br>";});
+    GOAL_ITEMS.forEach(function(g){if(c.goals&&c.goals[g.id])html+="&#9989; "+esc(g.text)+"<br>";});
     if(c.goalsOtherText)html+="&#9989; "+esc(c.goalsOtherText)+"<br>";
     html+='</div>';
   }
@@ -1217,6 +1244,9 @@ function buildPostHTML(post){
   html+='<div class="post-actions">';
   var isTeacherViewer=UP&&UP.role==="teacher";
   var alreadyCommented=comments.some(function(cm){return cm.fromId===CU.uid;});
+  var likes=post.likes?Object.keys(post.likes):[];
+  var iLiked=likes.indexOf(CU.uid)!==-1;
+  html+='<button class="post-act" style="'+(iLiked?"color:var(--c)":"")+'" onclick="toggleLike(\''+post.id+'\')">'+(iLiked?"&#10084;&#65039;":"&#129293;")+(likes.length?" "+likes.length:"")+'</button>';
   if(post.uid!==CU.uid){
     if(alreadyCommented)html+='<span class="post-act" style="color:var(--th);cursor:default">&#9989; Already evaluated</span>';
     else if(isTeacherViewer)html+='<button class="post-act" onclick="openTeacherComment(\''+post.id+'\',\''+esc(post.uid)+'\')">&#128105;&#8205;&#127979; Add Evaluation</button>';
@@ -1309,7 +1339,7 @@ window.openNewPost=function(){
 
 window.attachNewPostFile=function(input){
   var file=input.files[0];if(!file)return;
-  if(file.size>1500000){toast("That file is too large — please use something under 1.5MB.");input.value="";return;}
+  if(file.size>5000000){toast("That file is too large — please use something under 5MB.");input.value="";return;}
   var prev=document.getElementById("np-file-preview");
   if(prev)prev.innerHTML='<div class="loading" style="padding:8px">Reading file...</div>';
   var reader=new FileReader();
@@ -1380,6 +1410,16 @@ window.submitComment=async function(postId,targetUid){
 window.deletePost=async function(postId){
   if(!confirm("Delete this post?"))return;
   await remove(ref(db,"posts/"+postId));toast("Deleted.");loadFeed();
+};
+window.toggleLike=async function(postId){
+  var likeRef=ref(db,"posts/"+postId+"/likes/"+CU.uid);
+  var snap=await get(likeRef);
+  if(snap.exists())await remove(likeRef);
+  else await set(likeRef,true);
+  if(window._currentScreen==="profile"&&window._profileViewingUid){
+    renderProfile(window._profileViewingUid,window._profileViewingOwn);
+  }
+  // the feed refreshes on its own via the live "posts" listener
 };
 window.viewProf=function(uid){renderProfile(uid,false);setNav("profile");};
 
@@ -1898,6 +1938,8 @@ function renderQuizDone(){
 // ── PAGE 4: PROFILE ──
 window.renderProfile=async function(uid,isOwn){
   window._currentScreen="profile";
+  window._profileViewingUid=uid;
+  window._profileViewingOwn=isOwn;
   var mc=document.getElementById("mc");
   mc.innerHTML='<div class="loading">Loading...</div>';
   var results=await Promise.all([
@@ -1916,13 +1958,13 @@ window.renderProfile=async function(uid,isOwn){
   html+='<div class="card" style="text-align:center;padding:24px 20px;background:linear-gradient(135deg,#FF6FA8,#C23B7A);color:#fff;box-shadow:0 4px 0 #C23B7A">';
   if(isOwn){
     html+='<div class="prof-av-wrap" onclick="changeAvatar()">';
-    if(u.avatarColor)html+='<div class="prof-av-plc" style="border-color:#fff;background:'+u.avatarColor+';color:#fff">'+esc((u.name||"?")[0])+'</div>';
+    if(u.avatarUrl)html+='<img src="'+esc(u.avatarUrl)+'" class="prof-av-img" style="border-color:#fff;background:#fff">';
     else if(u.photo)html+='<img src="'+esc(u.photo)+'" class="prof-av-img" style="border-color:#fff">';
     else html+='<div class="prof-av-plc" style="border-color:#fff;background:rgba(255,255,255,.25);color:#fff">'+esc((u.name||"?")[0])+'</div>';
     html+='<div class="prof-av-edit">&#9998;</div>';
     html+='</div>';
   } else {
-    if(u.avatarColor)html+='<div style="width:70px;height:70px;border-radius:50%;background:'+u.avatarColor+';display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;color:#fff;margin:0 auto 10px;border:3px solid #fff">'+esc((u.name||"?")[0])+'</div>';
+    if(u.avatarUrl)html+='<img src="'+esc(u.avatarUrl)+'" style="width:70px;height:70px;border-radius:50%;object-fit:cover;margin:0 auto 10px;display:block;border:3px solid #fff;background:#fff">';
     else if(u.photo)html+='<img src="'+esc(u.photo)+'" style="width:70px;height:70px;border-radius:50%;object-fit:cover;margin:0 auto 10px;display:block;border:3px solid #fff">';
     else html+='<div style="width:70px;height:70px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;color:#fff;margin:0 auto 10px;border:3px solid #fff">'+esc((u.name||"?")[0])+'</div>';
   }
@@ -1961,25 +2003,7 @@ window.renderProfile=async function(uid,isOwn){
 window.toggleCat=function(id){var el=document.getElementById(id);if(el)el.style.display=el.style.display==="none"?"block":"none";};
 
 window.changeAvatar=function(){
-  var colors=["#7C4DFF","#00C896","#FFB300","#FF5A6E","#FF6FA8","#2F6FED","#00B8D9","#8D6E63","#546E7A","#D81B60"];
-  var html='<div style="font-size:16px;font-weight:800;margin-bottom:4px;font-family:\'Baloo 2\',sans-serif">Choose Your Colour</div>';
-  html+='<div style="font-size:12px;color:var(--tm);margin-bottom:14px">Pick a colour for your avatar — you can change it anytime.</div>';
-  html+='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px">';
-  colors.forEach(function(c){
-    html+='<div style="width:44px;height:44px;border-radius:50%;background:'+c+';cursor:pointer;margin:0 auto" onclick="pickAvatarColor(\''+c+'\')"></div>';
-  });
-  html+='</div>';
-  var overlay=document.getElementById("result-popup-overlay");
-  var card=document.getElementById("result-popup-card");
-  if(!overlay||!card)return;
-  card.innerHTML=html;
-  overlay.style.display="flex";
-};
-window.pickAvatarColor=async function(color){
-  await update(ref(db,"users/"+CU.uid),{avatarColor:color});
-  closeResultPopup();
-  toast("Avatar updated!");
-  renderProfile(CU.uid,true);
+  openCoins();
 };
 
 // ── NOTIFICATIONS ──
