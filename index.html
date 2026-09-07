@@ -2406,6 +2406,7 @@ function renderTOverview(){
         sh+='<div style="font-size:11px;color:var(--tm)">'+esc(s.productType||"")+'</div></div>';
         sh+='<span class="sb '+(s.status==="approved"?"sa":s.status==="pending"?"sp":"")+'" style="'+(s.status==="approved"||s.status==="pending"?"":"background:var(--gl);color:var(--tm)")+'">'+(s.status==="approved"?"Approved":s.status==="pending"?"Pending":s.status==="awaiting_grouping"?"Awaiting group":"Draft")+'</span>';
         sh+='<button class="obtn" style="margin-left:6px" onclick="toggleEditAccess(\''+s.id+'\','+(unlocked?"false":"true")+')">'+(unlocked?"&#128275; Lock":"&#128273; Unlock edit")+'</button>';
+        sh+='<button class="obtn" style="margin-left:6px;color:var(--c);border-color:var(--c)" onclick="resetStudent(\''+s.id+'\',\''+esc((s.studentName||"this student").replace(/'/g,""))+'\')">&#128465; Reset</button>';
         sh+='</div>';
       });
       sl.innerHTML=sh;
@@ -2415,6 +2416,50 @@ function renderTOverview(){
 window.toggleEditAccess=async function(id,unlock){
   await update(ref(db,"contracts/"+id),{editUnlocked:unlock});
   toast(unlock?"Editing unlocked for this student":"Editing locked for this student");
+};
+// Wipe ALL progress for one student (uid), keeping their account so they can start fresh.
+window.resetStudent=async function(uid,name){
+  var ok=window.confirm("Reset ALL progress for "+name+"?\n\nThis deletes their learning contract, project posts, coins, accessories, reflections, evaluations and notifications. Their account stays so they can start over.\n\nThis cannot be undone.");
+  if(!ok)return;
+  try{
+    // 1) Per-uid nodes
+    await Promise.all([
+      remove(ref(db,"contracts/"+uid)),
+      remove(ref(db,"coins/"+uid)),
+      remove(ref(db,"ownedAccessories/"+uid)),
+      remove(ref(db,"lessonReflections/"+uid)),
+      remove(ref(db,"notifications/"+uid))
+    ]);
+    // 2) Posts authored by this student (+ their Storage files)
+    var psnap=await get(ref(db,"posts"));
+    if(psnap.exists()){
+      var jobs=[];
+      psnap.forEach(function(p){
+        var v=p.val();
+        if(v && v.uid===uid){
+          if(v.filePath){try{jobs.push(deleteObject(sref(storage,v.filePath)).catch(function(){}));}catch(e){}}
+          jobs.push(remove(ref(db,"posts/"+p.key)));
+        }
+      });
+      await Promise.all(jobs);
+    }
+    // 3) Resource suggestions made by this student
+    var rsnap=await get(ref(db,"resourceSuggestions"));
+    if(rsnap.exists()){
+      var rjobs=[];
+      rsnap.forEach(function(r){if(r.val() && r.val().suggestedById===uid)rjobs.push(remove(ref(db,"resourceSuggestions/"+r.key)));});
+      await Promise.all(rjobs);
+    }
+    // 4) Reset progress fields on the user record, keep identity + role
+    await update(ref(db,"users/"+uid),{
+      ideaAnswers:null,completedSteps:null,chosenResources:null,
+      avatarAnimal:null,avatarHead:null,avatarEyes:null,avatarFace:null,
+      avatarId:null,groupId:null,groupName:null
+    });
+    toast(name+"'s progress was reset.");
+  }catch(e){
+    toast("Reset failed: "+(e&&e.message?e.message:"unknown error"));
+  }
 };
 
 async function loadReflectionsList(){
