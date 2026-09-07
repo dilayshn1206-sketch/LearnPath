@@ -2729,9 +2729,9 @@ async function renderTIdeas(){
   ["written","spoken","visual"].forEach(function(cat){
     html+='<div class="card"><div class="ctitle mb8">'+CAT_EMOJI[cat]+' '+CAT_LABELS[cat]+'</div>';
     catalog[cat].forEach(function(p){
-      html+='<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--gl)'+(p.active?"":";opacity:.5")+'">';
+      html+='<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--gl)">';
       html+='<span style="flex:1;font-size:13px">'+esc(p.name)+'</span>';
-      html+='<button class="obtn" onclick="toggleCatalogItem(\''+cat+'\',\''+p.id+'\','+(!p.active)+')">'+(p.active?"Remove":"Reactivate")+'</button>';
+      html+='<button class="obtn" style="color:var(--c);border-color:var(--c)" onclick="deleteCatalogItem(\''+cat+'\',\''+p.id+'\')">&#128465; Delete</button>';
       html+='</div>';
     });
     html+='<div style="display:flex;gap:7px;margin-top:9px">';
@@ -2741,8 +2741,8 @@ async function renderTIdeas(){
   });
   mc.innerHTML=header+html;
 }
-window.toggleCatalogItem=async function(cat,id,newActive){
-  await update(ref(db,"ideaCatalog/"+cat+"/"+id),{active:newActive});
+window.deleteCatalogItem=async function(cat,id){
+  await remove(ref(db,"ideaCatalog/"+cat+"/"+id));
   renderTIdeas();
 };
 window.addCatalogItem=async function(cat){
