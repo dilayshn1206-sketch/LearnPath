@@ -1226,15 +1226,20 @@ function loadProjectsList(teacherMode){
         }
         var goals=d.goals||{};
         var goalCount=GOAL_ITEMS.filter(function(g){return goals[g.id];}).length;
-        html+='<div style="font-size:11px;font-weight:700;color:var(--th);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">Goals ('+goalCount+"/"+GOAL_ITEMS.length+')</div>';
+        var tipCount=(d.weaknessTips||[]).length+(d.goalsOtherText?1:0);
+        var totalGoals=goalCount+tipCount;
+        var gid="plangoals-"+d.id;
+        html+='<div style="font-size:12px;font-weight:700;color:var(--p);cursor:pointer;margin-bottom:2px" onclick="toggleCat(\''+gid+'\')">&#127919; Goals ('+totalGoals+') &middot; click to see &#9660;</div>';
+        html+='<div id="'+gid+'" style="display:none;margin-top:4px">';
         (d.weaknessTips||[]).forEach(function(t){
           html+='<div style="display:flex;align-items:flex-start;gap:7px;padding:3px 0;font-size:12px"><span>&#9989;</span><span>'+esc(t)+'</span></div>';
         });
         GOAL_ITEMS.forEach(function(g){
-          var checked=!!goals[g.id];
-          html+='<div style="display:flex;align-items:flex-start;gap:7px;padding:3px 0;font-size:12px;'+(checked?"":"color:var(--th)")+'"><span>'+(checked?"&#9989;":"&#11036;")+'</span><span>'+g.text+'</span></div>';
+          if(!goals[g.id])return;
+          html+='<div style="display:flex;align-items:flex-start;gap:7px;padding:3px 0;font-size:12px"><span>&#9989;</span><span>'+g.text+'</span></div>';
         });
         if(d.goalsOtherText)html+='<div style="display:flex;align-items:flex-start;gap:7px;padding:3px 0;font-size:12px"><span>&#9989;</span><span>'+esc(d.goalsOtherText)+'</span></div>';
+        html+='</div>';
         if(d.evalTeacherPct||d.evalPeerPct){
           html+='<div style="font-size:11px;font-weight:700;color:var(--th);text-transform:uppercase;letter-spacing:.4px;margin:8px 0 4px">Evaluation Goals</div>';
           html+='<div style="font-size:12px">Teacher: '+esc(d.evalTeacherPct||"—")+"% &bull; Classmates: "+esc(d.evalPeerPct||"—")+'%</div>';
@@ -2419,7 +2424,7 @@ window.toggleEditAccess=async function(id,unlock){
 };
 // Wipe ALL progress for one student (uid), keeping their account so they can start fresh.
 window.resetStudent=async function(uid,name){
-  var ok=window.confirm("Reset ALL progress for "+name+"?\n\nThis deletes their learning contract, project posts, coins, accessories, reflections, evaluations and notifications. Their account stays so they can start over.\n\nThis cannot be undone.");
+  var ok=window.confirm("Reset ALL progress for "+name+"?\n\nThis deletes their learning contract, project posts, coins, accessories, reflections, evaluations, checked unit words, quiz answers and notifications. Their account stays so they can start over.\n\nThis cannot be undone.");
   if(!ok)return;
   try{
     // 1) Per-uid nodes
@@ -2428,7 +2433,9 @@ window.resetStudent=async function(uid,name){
       remove(ref(db,"coins/"+uid)),
       remove(ref(db,"ownedAccessories/"+uid)),
       remove(ref(db,"lessonReflections/"+uid)),
-      remove(ref(db,"notifications/"+uid))
+      remove(ref(db,"notifications/"+uid)),
+      remove(ref(db,"wordChecks/"+uid)),
+      remove(ref(db,"grammarAnswers/"+uid))
     ]);
     // 2) Posts authored by this student (+ their Storage files)
     var psnap=await get(ref(db,"posts"));
