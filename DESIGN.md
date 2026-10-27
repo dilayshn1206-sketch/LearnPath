@@ -1,0 +1,52 @@
+# LearnPath design
+
+## Context
+Grade 6 English project learning, primarily landscape tablets. Source of requirements:
+the user's supplied `Dilay_7_Sinif_Site_Notlari_19_Ekim_2026(3).txt`, with the later
+explicit landscape preference taking precedence. The approved atlas mockup owns
+the visual identity; existing application code owns workflow and permissions.
+
+## North Star
+A calm illustrated learning map leading to the student's own project. Keep
+the actual four milestones, all questions, teacher-defined project catalog,
+teacher grouping and editing locks, uploads, reflections, comments, and records.
+The user's approved Explore/Plan/Create/Reflect map labels are retained as visual
+aliases for the four existing workflow actions; the underlying milestones do not change. No social ranking or new mandatory project format.
+
+## Visual system
+Runtime source of tokens: `assets/learnpath.css`.
+- Navy text `#142d4b`, teal primary `#16787d`, light blue `#edf5f8`.
+- White task paper, opaque enough to read clearly over the atlas.
+- Mustard action `#edbd60`, dark text for contrast.
+- Source Sans 3 body, Bricolage Grotesque restrained headings; system fallbacks.
+- Landscape map above task, 1250px max content width. Natural document scroll.
+- Three equal project-category columns on tablets; one column on narrow screens.
+- Real RGBA images; no blend-mode, chroma key, opaque white sprite background,
+  or opacity on entire controls. Alpha is confined to surfaces and artwork.
+
+## Motion
+Compass companion: 24 unique 256px frames, 6×4 atlas, 3-second loop, 125ms per
+frame. Fixed shared scale and bottom-center anchor. Discrete CSS frame steps.
+Pause/resume control, pause in hidden tabs, static first frame for reduced motion.
+Sprite timing and sheet metadata: `assets/compass-idle.json`.
+
+## Content
+New contracts carry `grade:6`, `goalVersion:grade6-v1`. The eleven goal IDs and
+minimum-three-goals rule are unchanged. New targets are five unit words, five
+sentences, 30–60 seconds of speech. Historical unversioned contracts keep their
+original goal wording in all student and teacher views. No bulk migration.
+Teacher unit content and project names remain teacher-owned and are not overwritten.
+
+## Accessibility
+Visible keyboard focus, labelled controls, natural zoom, large tablet targets,
+status text beside milestone colors, semantic choice buttons, preserved native
+select behavior, reduced motion. Mobile reflow preserves every question/action.
+
+## Verification and limits
+Use isolated Firebase mocks for tests; never test against student records.
+No database, storage, auth configuration, or security rules are changed.
+Live Google sign-in and real upload permissions require staging/account access.
+
+## Anti-references
+No generic purple dashboard, giant marketing hero, floating fantasy islands,
+leaderboard, forced sound, speed race, or answer-hint artwork in vocabulary tests.
