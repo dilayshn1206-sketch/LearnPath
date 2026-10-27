@@ -1,0 +1,15 @@
+{
+  "frames": 24,
+  "columns": 6,
+  "rows": 4,
+  "frameWidth": 256,
+  "frameHeight": 256,
+  "durationMs": 3000,
+  "frameDurationMs": 125,
+  "loop": true,
+  "anchor": "bottom-center",
+  "transparent": true,
+  "format": "RGBA PNG",
+  "animation": "lp-clock-idle",
+  "uniqueFrames": 24
+}
