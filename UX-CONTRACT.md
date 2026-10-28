@@ -10,6 +10,18 @@
 | CRUD | Existing Firebase functions in index.html | Existing storage paths and schema | Same save and navigation destinations | Source comparison + mock tests |
 
 ## Behavior ledger
+- The approved Grade 6 planner/passport is rendered by `assets/planner.html`.
+  Its same-origin bridge only requests actions; the authenticated module in
+  `index.html` owns all Supabase reads/writes, student identity and permission
+  checks. Messages from any other origin/window are ignored. No credential or
+  session token is sent to the planner frame.
+- Draft changes are coalesced and serialized through the existing contract
+  update path. Submit flushes draft writes, validates goals/steps/percentages,
+  sets pending + editing locked, waits for successful persistence, then shows
+  the complete summary. Failures remain visible and never show a sent state.
+- The passport starts with Goals; no redundant project confirmation step.
+  Its small persistent tab respects the current teacher-led session. Grouping,
+  approvals, unlocks and server authorization remain unchanged.
 - Existing callbacks and identifiers own persisted behavior. UI helper does not
   import Firebase, issue requests, store answers, or write data.
 - Home map reads the same completion booleans as the existing cards. Resources
@@ -34,3 +46,11 @@
 The original application uses browser confirmation dialogs for destructive
 actions. This update does not change those actions or their authorization.
 Do not claim the visual patch is a security or end-to-end production audit.
+
+## Unit discovery and record exports (2026-10-28)
+- `renderStep1Screen` and the existing teacher `renderTUnit` own unit discovery. New word inputs are native labelled checkboxes; grammar options are native buttons with visible selection and post-submit disabled state.
+- Word choices save through the existing Supabase paths. Submission shows the unchecked words under “Words to learn” and saves their labels. Resubmission recomputes that list; reopening restores the last submitted list. All words selected produces a clear all-known message.
+- Grammar submission requires an answer to every question. The original selected option and question snapshot are retained; incorrect answers show their supplied option-specific explanation through the shared `LearnPathUI.grammarFeedback` helper. The learner's live answers are never filled by automated UI testing.
+- Teacher JPG processing retains preview-before-save behavior; a JPG up to 10 MB is reduced to at most 1100×1600 pixels before the existing unit save.
+- `sheet_events` captures changed persisted input records transactionally. Google Sheets files are grouped by form type, retain versions and deleted-record payloads, and use a private revocable export capability. Keys remain outside public source and Google credentials remain user-controlled.
+- Class Overview shows the observed Google acknowledgement, with an inactive/setup-needed state before the first successful sync. The local application working does not prove that Google files exist or that the live site has been deployed.

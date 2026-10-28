@@ -31,11 +31,23 @@ Pause/resume control, pause in hidden tabs, static first frame for reduced motio
 Sprite timing and sheet metadata: `assets/compass-idle.json`.
 
 ## Content
-New contracts carry `grade:6`, `goalVersion:grade6-v1`. The eleven goal IDs and
-minimum-three-goals rule are unchanged. New targets are five unit words, five
-sentences, 30–60 seconds of speech. Historical unversioned contracts keep their
+New passports carry `grade:6`, `goalVersion:grade6-v1`. Stored goal IDs remain
+compatible and the minimum-three-project-goals rule is unchanged. New targets
+are five unit words, five sentences and 1.5–2 minutes of speech.
+Historical unversioned contracts keep their
 original goal wording in all student and teacher views. No bulk migration.
 Teacher unit content and project names remain teacher-owned and are not overwritten.
+
+## Approved Learning Passport (2026-10-28)
+The user's reviewed planner supplies six topic prompts plus a centered own-topic
+choice; twelve formats in Written/Spoken/Visual; tools; and the original four
+learning challenges. Teacher-added and renamed formats remain available. The
+compass offers explicitly labelled prepared guidance, with no AI service claim.
+The passport starts at Goals, then Plan and Evaluation. Focus and project goals
+share one paper/card; eight project goals remain offered. Removed options are not
+erased from historical records. Plan fields supply a fixed “I will” prefix. The
+mustard final action says “Save and send to the teacher”. A full saved summary
+and a persistent My Learning Passport tab keep the plan visible.
 
 ## Accessibility
 Visible keyboard focus, labelled controls, natural zoom, large tablet targets,
@@ -44,8 +56,17 @@ select behavior, reduced motion. Mobile reflow preserves every question/action.
 
 ## Verification and limits
 Use isolated Firebase mocks for tests; never test against student records.
-No database, storage, auth configuration, or security rules are changed.
-Live Google sign-in and real upload permissions require staging/account access.
+Supabase owns persistence and server authorization following the 2026-10-27 transition.
+The 2026-10-28 export queue is private; Google sync activation is tracked in
+`integrations/google-sheets/README.md`. Live deployment remains separate from the local draft.
+
+## Unit discovery (2026-10-28)
+Reuse the existing paper/teal surfaces. The unit introduction is a teacher-supplied JPG,
+followed by 29 word-only native checkboxes in three landscape columns, then five grammar
+questions. Submitted unchecked vocabulary is listed as “Words to learn”; all-known and
+no-selection states remain explicit. Incorrect submitted grammar choices use the original
+transparent compass sprite beside the user's supplied explanation. The shared pause,
+hidden-tab pause and reduced-motion behavior apply to these companions too.
 
 ## Anti-references
 No generic purple dashboard, giant marketing hero, floating fantasy islands,
