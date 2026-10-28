@@ -466,17 +466,17 @@ const GOAL_ITEMS=[
   {id:"structure",text:"I will organise my project with a clear beginning, middle, and ending."}
 ];
 const GRADE6_GOALS = {
-  unitWords:"I will use at least five words from this unit.",
-  organize:"I will connect my ideas with linking words to make them easy to follow.",
-  grammar:"I will check the grammar we learned in class.",
-  tenSentences:"I will write at least five complete sentences.",
-  evidence:"I will add an example or a detail.",
-  spelling:"I will check capital letters, spelling, and full stops.",
-  speakClear:"I will speak clearly for 1.5–2 minutes.",
-  easyUnderstand:"I will make my project easy to understand.",
-  workAtHome:"I will finish one small step.",
-  topicImpact:"I will say why this topic matters to me.",
-  structure:"I will introduce my topic, develop my main ideas, and finish with a clear closing."
+  "unitWords": "I will use at least eight unit words.",
+  "organize": "I will organize my ideas with proper words. (next, after, and, also, etc.)",
+  "grammar": "I will use correct grammar throughout my project.",
+  "tenSentences": "I will use at least ten complete sentences.",
+  "evidence": "I will support my ideas with evidence or details.",
+  "spelling": "I will check my spelling, punctuation (. , / ? : ;), and grammar.",
+  "speakClear": "I will speak clearly for 2 minutes.",
+  "easyUnderstand": "I will make my project easy to understand.",
+  "workAtHome": "I will work at home too to finish my project.",
+  "topicImpact": "I will explain how my topic affects me or other people.",
+  "structure": "I will organise my project with a clear beginning, middle, and ending."
 };
 function goalItemsFor(c){
   return c&&c.grade===6 ? GOAL_ITEMS.map(function(g){return {id:g.id,text:GRADE6_GOALS[g.id]||g.text};}) : GOAL_ITEMS;
@@ -3128,7 +3128,7 @@ async function mountPlanner(mode,c,overview){
     ['written','spoken','visual'].forEach(function(cat){extra[cat]=(catalog[cat]||[]).filter(function(item){var original=DEFAULT_CATALOG[cat].find(function(pair){return pair[0]===item.id;});return item.active&&(!original||original[1]!==item.name);});});
   }
   var mc=document.getElementById('mc');
-  mc.innerHTML=(isLockedStep(mode==='idea'?'step2':'step3')?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">← Back to Home</button>')+'<iframe id="lp-planner-frame" title="'+(mode==='idea'?'Plan your project':'My Learning Passport')+'" src="assets/planner.html?v=20261028-5" style="width:100%;height:900px;border:0;display:block" scrolling="no"></iframe>';
+  mc.innerHTML=(isLockedStep(mode==='idea'?'step2':'step3')?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">← Back to Home</button>')+'<iframe id="lp-planner-frame" title="'+(mode==='idea'?'Plan your project':'My Learning Passport')+'" src="assets/planner.html?v=20261028-7" style="width:100%;height:900px;border:0;display:block" scrolling="no"></iframe>';
   window._plannerContext={mode:mode,contract:c,overview:!!overview,readOnly:!!(c&&c.status!=='draft'&&c.editUnlocked===false),extraProducts:extra};
   setNav('home');
 }

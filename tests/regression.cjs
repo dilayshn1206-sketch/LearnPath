@@ -55,7 +55,7 @@ function check(name,fn){fn();results.push(name);}
   await w.__test.home();await w.__test.legacyPassport();await pause();
   check('Grouped student can enter learning contract',()=>assert.ok(w.document.getElementById('c-topic')));
   w._c3Step=1;await w.__test.legacyPassport();await pause();
-  check('All eleven goals remain with Grade 6 targets',()=>{assert.equal(w.document.querySelectorAll('.goal-row').length,11);assert.match(w.document.getElementById('mc').textContent,/five complete sentences/);assert.match(w.document.getElementById('mc').textContent,/1.5–2 minutes/);});
+  check('All eleven goals remain with Grade 6 targets',()=>{assert.equal(w.document.querySelectorAll('.goal-row').length,11);assert.match(w.document.getElementById('mc').textContent,/ten complete sentences/);assert.match(w.document.getElementById('mc').textContent,/2 minutes/);});
   await w.submitContract();
   check('Invalid submit keeps existing draft',()=>assert.equal(g.data.contracts.student.status,'draft'));
   for(const key of ['unitWords','tenSentences','spelling']){await w.toggleGoal(key);await pause();}
