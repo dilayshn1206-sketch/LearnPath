@@ -1,4 +1,5 @@
 /* Approved atlas identity. All legacy controls retain their handlers and IDs. */
+#lp-passport-tab{position:fixed;right:18px;bottom:82px;z-index:80;background:#fff3d9;color:#142d4b;border:2px solid #a46b13;box-shadow:0 3px 12px #142d4b20;max-width:calc(100vw - 36px);min-height:46px}
 [hidden]{display:none!important}
 :root {
   --p:#16787d; --pl:#eaf4f5; --pd:#104d59;
@@ -141,3 +142,26 @@ body[data-role=teacher] .mc{max-width:1400px}body[data-role=teacher] .lp-grade s
 .lp-station strong,.lp-station small{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .lp-station .lp-pin{position:absolute;left:50%;top:0;transform:translateX(-50%);width:clamp(22px,3.63vw,70px);height:clamp(22px,3.63vw,70px);border-width:clamp(2px,.5vw,6px);font-size:clamp(13px,1.9vw,34px);box-shadow:none}
 @media(max-width:700px){.lp-map{height:auto;aspect-ratio:1586/303}.lp-station .lp-pin{width:22px;height:22px;font-size:12px;border-width:2px}}
+
+/* Unit discovery uses the existing paper, teal and companion tokens. */
+.lp-unit-words{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.lp-word-choice{display:flex;align-items:center;gap:12px;min-height:48px;padding:10px 12px;border:1px solid var(--gb);border-radius:var(--rs);cursor:pointer;background:#fff}
+.lp-word-choice:has(input:checked){background:var(--pl);border-color:var(--p)}
+.lp-word-choice:hover{border-color:var(--p)}
+.lp-word-choice input{width:20px;height:20px;accent-color:var(--p);flex-shrink:0}
+.lp-unit-question{border:0;padding:0;margin:24px 0;min-width:0}
+.lp-unit-question legend{font-weight:700;line-height:1.6;margin-bottom:10px}
+.lp-unit-question .qo{width:100%;font-family:inherit;text-align:left;color:inherit;min-height:48px}
+.lp-unit-question .qo:disabled{cursor:default;opacity:1}
+.lp-grammar-feedback{display:flex;align-items:center;gap:12px;background:var(--pl);border:1px solid var(--gb);border-radius:var(--rs);padding:12px;margin-top:12px;line-height:1.6}
+.lp-grammar-feedback .lp-clock{--frame-size:104px}
+.lp-grammar-feedback p{margin:4px 0}
+.lp-grammar-feedback .lp-motion-toggle{margin:6px 0 0}
+.lp-grammar-correct{color:var(--td);font-weight:700;margin-top:8px}
+.lp-unit-error{color:var(--c);font-weight:700;min-height:24px;margin:8px 0}
+.lp-unit-image{width:100%;height:auto;display:block}
+.lp-words-to-learn{border-top:1px solid var(--gb);margin-top:18px;padding-top:18px}
+.lp-words-to-learn h3{font-size:20px;margin-bottom:10px}
+.lp-words-to-learn ul{display:flex;flex-wrap:wrap;gap:8px;list-style:none;padding:0}
+.lp-words-to-learn li{padding:6px 12px;border-radius:var(--rs);background:var(--pl);color:var(--pd)}
+@media(max-width:700px){.lp-unit-words{grid-template-columns:repeat(2,minmax(0,1fr))}.lp-grammar-feedback{align-items:flex-start;gap:4px}.lp-grammar-feedback .lp-clock{--frame-size:72px}}

@@ -43,7 +43,11 @@ export function onAuthStateChanged(_auth,callback){
     const button=document.getElementById('gsign');button.disabled=false;button.textContent='Check teacher approval';
     let note=document.getElementById('lp-approval-note');if(!note){note=document.createElement('p');note.id='lp-approval-note';button.after(note);}
     note.textContent='Your account is waiting for teacher approval. Return here after your teacher approves access.';
-    button.onclick=()=>location.reload();return;
+    button.onclick=()=>location.reload();
+    let switchButton=document.getElementById('lp-switch-account');
+    if(!switchButton){switchButton=document.createElement('button');switchButton.id='lp-switch-account';switchButton.className='gbtn';switchButton.textContent='Use another Google account';note.after(switchButton);}
+    switchButton.onclick=async()=>{switchButton.disabled=true;try{await signOut();await signInWithPopup();}catch(e){switchButton.disabled=false;window.alert('Could not switch accounts. Please try again.');}};
+    return;
    }
    currentUser={uid:session.user.id,displayName:profile.name,email:profile.email,photoURL:profile.photo,role:profile.role};
    await callback(currentUser);
@@ -53,8 +57,8 @@ export function onAuthStateChanged(_auth,callback){
  client.auth.getSession().then(({data,error})=>{if(error)throw error;return deliver(data.session);}).catch(console.error);
  return ()=>data.subscription.unsubscribe();
 }
-export async function signInWithPopup(){const {error}=await client.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+location.pathname}});if(error)throw error;}
-export async function signOut(){const {error}=await client.auth.signOut();if(error)throw error;listeners.clear();currentUser=null;}
+export async function signInWithPopup(){const {error}=await client.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+location.pathname,queryParams:{prompt:'select_account'}}});if(error)throw error;}
+export async function signOut(){const {error}=await client.auth.signOut({scope:'local'});if(error)throw error;listeners.clear();currentUser=null;}
 export async function getDownloadURL(fileRef){
  const cached=urls.get(fileRef.path);if(cached&&cached.expires>Date.now())return cached.url;
  const {data,error}=await client.storage.from('learnpath-work').createSignedUrl(fileRef.path,3600);

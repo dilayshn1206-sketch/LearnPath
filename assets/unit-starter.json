@@ -1,0 +1,11 @@
+{
+  "contentVersion": "digital-world-grade6-v1",
+  "words": "ability\ncommunicate\nconfidence\ncontent\ndigital\neducational\nentertaining\nfollower\ninfluencer\nmental health\npersonal\nsocial media\nsocial networking\ntechnology\ndisplay\ninformed\ninterest\nopportunity\nhack\npassword\nprivate\nsecurity\ntheft\nusername\nbalanced\nbullying\ncomment\nmessage\nviral",
+  "grammarQuestions": [
+    {"q":"It’s Saturday tomorrow and there’s no school, so I ______ wake up early.","options":["must","have to","don’t have to","mustn’t"],"correct":2,"feedback":["There’s no school, so it isn’t necessary.","There’s no school, so you are free.","","Waking up early isn’t against the rules."]},
+    {"q":"Students ______ use their phones during the exam. It’s against the rules.","options":["mustn’t","don’t have to","should","can"],"correct":0,"feedback":["","It’s a rule, so this isn’t the right meaning.","This is advice, but this sentence is about a rule.","Phones are not allowed in the exam."]},
+    {"q":"Excuse me, ______ I open the window, please?","options":["mustn’t","may","have to","doesn’t"],"correct":1,"feedback":["We don’t ask for permission with mustn’t.","","We don’t ask for permission with have to.","We say I don’t, not I doesn’t."]},
+    {"q":"Ali has three cats, two dogs and a parrot at home. He ______ love animals.","options":["mustn’t","can’t","doesn’t have to","must"],"correct":3,"feedback":["This sentence isn’t about a rule.","He has many pets, so he loves animals.","This sentence isn’t about a rule.",""]},
+    {"q":"That boy ______ be Ayşe’s brother. She doesn’t have any brothers.","options":["can’t","must","might","should"],"correct":0,"feedback":["","Ayşe has no brothers, so this is not true.","Ayşe has no brothers, so it isn’t possible.","This is advice, but this sentence is not advice."]}
+  ]
+}
