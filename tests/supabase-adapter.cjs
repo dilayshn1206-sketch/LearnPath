@@ -1,0 +1,28 @@
+const fs=require('node:fs'),assert=require('node:assert/strict');
+const {webcrypto}=require('node:crypto');
+const source=fs.readFileSync('assets/supabase-backend.js','utf8');
+const calls=[];let response=null,error=null,signs=0;
+const mock={rpc:async(name,args)=>{calls.push({name,args});return {data:structuredClone(response),error};},storage:{from:bucket=>({createSignedUrl:async(path,ttl)=>{signs++;assert.equal(bucket,'learnpath-work');assert.equal(ttl,3600);return {data:{signedUrl:'https://example.test/private/'+path},error:null};}})},auth:{}};
+let options;
+const moduleBody=source.replace(/^import[^\r\n]+;\r?\n/gm,'').replace(/\bexport /g,'');
+const api=new Function('createClient','document','setInterval','crypto',moduleBody+'\nreturn {get,set,update,remove,push,getDownloadURL};')((_url,key,opts)=>{assert.ok(key.startsWith('sb_publishable_'));options=opts;return mock;},{hidden:false,addEventListener:()=>{}},()=>{},webcrypto);
+(async()=>{
+ assert.equal(options.auth.flowType,'pkce');
+ assert.doesNotMatch(source,/firebasejs|service_role|sb_secret_/);
+ response={student:{topic:'Saved answer'}};
+ const snap=await api.get('contracts');assert.equal(snap.exists(),true);
+ let read;snap.forEach(x=>{read={key:x.key,...x.val()};});assert.deepEqual(read,{key:'student',topic:'Saved answer'});
+ const copy=snap.val();copy.student.topic='Mutated';assert.equal(snap.val().student.topic,'Saved answer');
+ response=null;assert.equal((await api.get('contracts/missing')).exists(),false);
+ response={filePath:'posts/student/video.mp4',fileUrl:'expired'};
+ const post=(await api.get('posts/item')).val();assert.equal(post.fileUrl,'https://example.test/private/posts/student/video.mp4');
+ await api.getDownloadURL({path:'posts/student/video.mp4'});assert.equal(signs,1);
+ await api.update('contracts/student',{topic:'I will write'});
+ assert.deepEqual(calls.at(-1),{name:'lp_write',args:{p_path:'contracts/student',p_value:{topic:'I will write'},p_operation:'update'}});
+ await api.remove('contracts/student');assert.equal(calls.at(-1).args.p_operation,'remove');
+ const pushed=await api.push('posts',{title:'My work'});assert.match(pushed.key,/^[0-9a-f-]{36}$/);assert.equal(calls.at(-1).args.p_path,'posts/'+pushed.key);
+ error={message:'Access denied',code:'42501'};
+ await assert.rejects(api.get('wordChecks/peer'),e=>e.code==='42501');
+ await assert.rejects(api.set('coins/student',1000),e=>e.code==='42501');
+ console.log('PASS: PKCE, publishable key, immutable snapshots, null reads, private signed files/cache, atomic RPC updates, archive removal, unique IDs, propagated read/write authorization errors.');
+})().catch(e=>{console.error(e);process.exitCode=1;});
