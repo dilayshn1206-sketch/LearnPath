@@ -1,9 +1,12 @@
 -- Isolated synthetic users and all test records are rolled back.
 begin;
 insert into auth.users(id,email,email_confirmed_at,raw_app_meta_data,raw_user_meta_data) values
- ('10000000-0000-4000-8000-000000000001','dilay.sahin@bayetav.k12.tr',now(),'{"provider":"google"}','{"full_name":"Synthetic Teacher"}'),
+ ('10000000-0000-4000-8000-000000000001','learnpath-teacher@example.test',now(),'{"provider":"google"}','{"full_name":"Synthetic Teacher"}'),
  ('10000000-0000-4000-8000-000000000002','learnpath-student@example.test',now(),'{"provider":"google"}','{"full_name":"Synthetic Student"}'),
  ('10000000-0000-4000-8000-000000000003','learnpath-peer@example.test',now(),'{"provider":"google"}','{"full_name":"Synthetic Peer"}');
+-- Fixture-only teacher, avoiding collision with the real school's completed sign-in.
+-- The transaction rolls this member and its auth user back.
+insert into learnpath_backend.members(id,role,enrolled) values('10000000-0000-4000-8000-000000000001','teacher',true);
 set local role authenticated;
 select set_config('request.jwt.claim.sub','10000000-0000-4000-8000-000000000002',true);
 select public.lp_provision();
