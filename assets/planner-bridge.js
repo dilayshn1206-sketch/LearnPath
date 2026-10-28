@@ -15,8 +15,7 @@ function saveError(error){$('#save-status').textContent='Not saved: '+error.mess
 const draftRender=render;
 render=function(){
  draftRender();
- if(passport?.active&&passport.view!=='overview'&&passport.step===0){const paper=$('.contract-paper');if(paper)paper.insertAdjacentHTML('afterbegin','<p class="hint">Name: '+esc(host.contract.studentName||'')+' · Date: '+esc(new Date(host.contract.createdAt||Date.now()).toLocaleDateString('en-GB'))+'</p>');}
- if(passport?.active&&passport.step===3&&!passport.returnToOverview)$('#passport-next')?.classList.add('send-teacher');
+ if(passport?.active&&passport.step===2&&!passport.returnToOverview)$('#passport-next')?.classList.add('send-teacher');
  if(!passport?.active&&state.step===4&&$('#next'))$('#next').textContent='Save my project idea';
  document.querySelectorAll('.demo-label').forEach(el=>el.textContent='Guided help · prepared replies');
  document.querySelectorAll('.chat-footnote').forEach(el=>el.textContent='Your compass offers prepared guidance. Your chat messages are not saved.');
@@ -43,7 +42,7 @@ next=async function(){
 };
 document.addEventListener('click',async event=>{
  const b=event.target.closest('#passport-next,#overview-send');
- if(!b||(b.id!=='overview-send'&&(passport?.step!==3||passport.returnToOverview)))return;
+ if(!b||(b.id!=='overview-send'&&(passport?.step!==2||passport.returnToOverview)))return;
  event.preventDefault();event.stopImmediatePropagation();
  const error=!passport.topic.trim()?'Write your project topic.':allErrors();if(error){($('#passport-error')||$('#save-status')).textContent=error;return;}
  b.disabled=true;b.textContent='Saving and sending…';
@@ -68,10 +67,9 @@ new ResizeObserver(reportHeight).observe(document.body);
   if(host.mode==='passport'){
    const c=host.contract;
    state={...state,step:4,topic:'own',topicOwn:c.topic,category:c.category,format:'own',formatOwn:c.productType,tools:c.platforms||['unsure'],toolOwn:c.platformsOtherText||'',weakness:c.weakness||'ideas',saved:true};
-   passport={...c,focusGoals:c.weaknessTips||[],tools:c.platforms||[],toolOther:c.platformsOtherText||'',goals:c.goals||{},goalsOtherText:c.goalsOtherText||'',planTails:(c.planSteps?.length?c.planSteps:['','','','']).map(tailOnly),evalTeacherPct:c.evalTeacherPct??'',evalPeerPct:c.evalPeerPct??'',step:0,active:true,view:host.overview||host.readOnly?'overview':'edit',returnToOverview:false,submitted:host.readOnly};
+   passport={...c,focusGoals:c.weaknessTips||[],tools:c.platforms||[],toolOther:c.platformsOtherText||'',goals:c.goals||{},goalsOtherText:c.goalsOtherText||'',planTails:(c.planSteps?.length?c.planSteps:['','','']).map(tailOnly),evalTeacherPct:c.evalTeacherPct??'',evalPeerPct:c.evalPeerPct??'',step:0,active:true,view:host.overview||host.readOnly?'overview':'edit',returnToOverview:false,submitted:host.readOnly};
    lastPatch=JSON.stringify(patch());
   }
-  if(passport&&!host.readOnly)while(passport.planTails.length<4)passport.planTails.push('');
   render();if(host.mode==='idea'&&$('#next'))$('#next').textContent='Continue →';
  }catch(error){$('#screen').innerHTML='<h1>Could not open your plan</h1><p>'+esc(error.message)+'</p>';}
 })();
