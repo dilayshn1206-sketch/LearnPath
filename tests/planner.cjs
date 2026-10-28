@@ -38,10 +38,11 @@ const server=http.createServer((req,res)=>{
  await page.evaluate(()=>{__mockDB.contracts.student.status='draft';return renderStep3Screen();});
  await f.locator('[data-goal="unitWords"]').waitFor();
  assert.equal(await f.locator('[data-passport-step]').count(),3);
- assert.equal(await f.locator('[data-goal]').count(),8);
- assert.equal(await f.locator('[data-goal="evidence"],[data-goal="easyUnderstand"],[data-goal="topicImpact"],.structure-help').count(),0);
+ assert.equal(await f.locator('[data-goal]').count(),11);
+ assert.equal(await f.locator('.structure-help').count(),0);
  assert.equal(await f.locator('.contract-paper .contract-focus').count(),1);
- assert.doesNotMatch(await f.locator('#screen').innerText(),/at home|matters to me|detailed description/);
+ assert.match(await f.locator('#screen').innerText(),/eight unit words/);
+ assert.match(await f.locator('#screen').innerText(),/ten complete sentences/);
  await f.locator('#passport-next').click();assert.match(await f.locator('#passport-error').innerText(),/at least 3/);
  for(const key of ['unitWords','spelling','speakClear'])await f.locator('[data-goal="'+key+'"]').check();
  await f.locator('#passport-next').click();
@@ -55,7 +56,7 @@ const server=http.createServer((req,res)=>{
  saved=await page.evaluate(()=>__mockDB.contracts.student);
  assert.equal(saved.status,'pending');assert.equal(saved.editUnlocked,false);assert.equal(saved.evalTeacherPct,'85');assert.equal(saved.evalPeerPct,'90');assert.equal(saved.planSteps[0],'I will prepare my questions.');
  assert.equal(await f.locator('[data-passport-edit]').count(),0);
- assert.match(await f.locator('.focus-overview').innerText(),/Practise your talk|1.5–2 minutes/);
+ assert.match(await f.locator('.focus-overview').innerText(),/Practise your talk|2 minutes/);
  await page.screenshot({path:path.join(root,'verification/passport-production.png'),fullPage:true});
  await f.getByRole('button',{name:'Back to Home',exact:true}).click();
  await page.locator('#lp-passport-tab').click();await f.getByRole('heading',{name:'My Learning Passport',exact:true}).waitFor();
