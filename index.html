@@ -254,7 +254,7 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
 .rub-sentence{font-size:13px}
 .rub-chevron{background:none;border:none;color:var(--th);cursor:pointer;font-size:12px;padding:4px 6px;flex-shrink:0}
 </style>
-<link rel="stylesheet" href="assets/learnpath.css?v=20261029-6">
+<link rel="stylesheet" href="assets/learnpath.css?v=20261029-7">
 </head>
 <body>
 
@@ -310,7 +310,7 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
   <div class="modal-card" id="result-popup-card" style="text-align:center;padding:26px 20px"></div>
 </div>
 
-<script src="assets/learnpath-ui.js?v=20261029-6"></script>
+<script src="assets/learnpath-ui.js?v=20261029-7"></script>
 <script type="module">
 import {auth,db,storage,rpc,ref,set,get,push,onValue,update,remove,sref,uploadBytesResumable,getDownloadURL,deleteObject,onAuthStateChanged,signInWithPopup,signOut} from './assets/supabase-backend.js?v=20261027-2';
 const prov={};
@@ -1166,12 +1166,8 @@ function renderFeed(){
   window._currentScreen="feed";
   var mc=document.getElementById("mc");
   window._feedTab=window._feedTab||"plans";
-  var html=pageHeaderHTML("&#128228;","The Feed","See what everyone's working on","var(--t)","var(--td)");
-  html+='<div class="toggle-row">';
-  html+='<button class="toggle-btn'+(window._feedTab==="plans"?" act":"")+'" onclick="switchFeedTab(\'plans\')">&#128203; Project Plans</button>';
-  html+='<button class="toggle-btn'+(window._feedTab==="posts"?" act":"")+'" onclick="switchFeedTab(\'posts\')">&#128228; Projects</button>';
-  html+='</div>';
-  html+='<div id="feed-tab-plans" style="display:'+(window._feedTab==="plans"?"block":"none")+'"><div id="projects-list"><div class="loading">Loading...</div></div></div>';
+  var html=LearnPathUI.feedHeader(false)+LearnPathUI.feedNavigation(window._feedTab);
+  html+='<div id="feed-tab-plans" style="display:'+(window._feedTab==="plans"?"block":"none")+'"><div id="projects-list" class="lp-feed-plans"><div class="loading">Loading...</div></div></div>';
   html+='<div id="feed-tab-posts" style="display:'+(window._feedTab==="posts"?"block":"none")+'">';
   html+='<button class="btn btp btf mb8" onclick="openNewPost()">+ Share Your Work</button>';
   html+='<div id="feed-container"><div class="loading">Loading...</div></div></div>';
@@ -1186,7 +1182,7 @@ window.switchFeedTab=function(tab){
   if(p)p.style.display=tab==="plans"?"block":"none";
   if(s)s.style.display=tab==="posts"?"block":"none";
   var btns=document.querySelectorAll(".toggle-row .toggle-btn");
-  btns.forEach(function(b,i){b.classList.toggle("act",(i===0&&tab==="plans")||(i===1&&tab==="posts"));});
+  btns.forEach(function(b,i){var selected=(i===0&&tab==="plans")||(i===1&&tab==="posts");b.classList.toggle("act",selected);b.setAttribute("aria-pressed",String(selected));});
 };
 
 function loadProjectsList(teacherMode){
@@ -1194,53 +1190,36 @@ function loadProjectsList(teacherMode){
     var el=document.getElementById("projects-list");if(!el)return;
     var list=[];
     if(snap.exists())snap.forEach(function(c){var d=c.val();if(d.productType)list.push({id:c.key,...d});});
-    if(!list.length){el.innerHTML='<div class="empty"><div class="ei">&#128203;</div><p>No projects chosen yet.</p></div>';return;}
+    if(!list.length){el.innerHTML='<section class="lp-collection-empty">'+LearnPathUI.feedIcon('passport')+'<h2>Our journeys start here</h2><p>Learning plans will appear as classmates choose their projects.</p></section>';return;}
     list.sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);});
     var html="";
     list.forEach(function(d){
-      var statusLabel=d.status==="approved"?"Approved":d.status==="pending"?"Pending approval":d.status==="awaiting_grouping"?"Awaiting grouping":"Draft";
-      var statusClass=d.status==="approved"?"sa":d.status==="pending"?"sp":"";
-      html+='<div class="project-card"><div style="display:flex;align-items:center;gap:8px">';
-      if(d.studentPhoto)html+='<img src="'+esc(d.studentPhoto)+'" class="post-av" onclick="viewProf(\''+esc(d.studentId||"")+'\')">';
-      else html+='<div class="post-avp" onclick="viewProf(\''+esc(d.studentId||"")+'\')">'+esc((d.studentName||"?")[0])+'</div>';
-      html+='<div style="flex:1"><div style="font-size:13px;font-weight:700">'+esc(d.studentName||"Student")+'</div>';
-      html+='<div style="font-size:12px;color:var(--tm)">'+esc(d.productType)+'</div></div>';
-      html+='<span class="sb '+statusClass+'" style="'+(statusClass?"":"background:var(--gl);color:var(--tm)")+'">'+statusLabel+'</span>';
-      html+='</div>';
-      if(d.status!=="awaiting_grouping"){
-        html+='<div class="divider" style="margin:9px 0"></div>';
-        html+='<div style="font-size:13px;margin-bottom:8px">I will create a <strong>'+esc(d.productType)+'</strong> about <strong>'+(d.topic?esc(d.topic):"—")+'</strong>.</div>';
-        if(d.planSteps&&d.planSteps.filter(function(s){return s&&s.trim();}).length){
-          html+='<div style="font-size:11px;font-weight:700;color:var(--th);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">My Plan</div>';
-          d.planSteps.forEach(function(s,i){if(s&&s.trim())html+='<div style="font-size:12px;margin-bottom:2px">'+(i+1)+". "+esc(s)+'</div>';});
-          html+='<div class="divider" style="margin:9px 0"></div>';
-        }
-        var goals=d.goals||{};
-        var goalCount=GOAL_ITEMS.filter(function(g){return goals[g.id];}).length;
-        var otherGoal=customGoalText(d);
-        var tipCount=(d.weaknessTips||[]).length+(otherGoal?1:0);
-        var totalGoals=goalCount+tipCount;
-        var gid="plangoals-"+d.id;
-        html+='<div style="font-size:12px;font-weight:700;color:var(--p);cursor:pointer;margin-bottom:2px" onclick="toggleCat(\''+gid+'\')">&#127919; Goals ('+totalGoals+') &middot; click to see &#9660;</div>';
-        html+='<div id="'+gid+'" style="display:none;margin-top:4px">';
-        (d.weaknessTips||[]).forEach(function(t){
-          html+='<div style="display:flex;align-items:flex-start;gap:7px;padding:3px 0;font-size:12px"><span>&#9989;</span><span>'+esc(t)+'</span></div>';
-        });
-        goalItemsFor(d).forEach(function(g){
-          if(!goals[g.id])return;
-          html+='<div style="display:flex;align-items:flex-start;gap:7px;padding:3px 0;font-size:12px"><span>&#9989;</span><span>'+g.text+'</span></div>';
-        });
-        if(otherGoal)html+='<div style="display:flex;align-items:flex-start;gap:7px;padding:3px 0;font-size:12px"><span>&#9989;</span><span>'+esc(otherGoal)+'</span></div>';
-        html+='</div>';
-        if(d.evalTeacherPct||d.evalPeerPct){
-          html+='<div style="font-size:11px;font-weight:700;color:var(--th);text-transform:uppercase;letter-spacing:.4px;margin:8px 0 4px">Evaluation Goals</div>';
-          html+='<div style="font-size:12px">Teacher: '+esc(d.evalTeacherPct||"—")+"% &bull; Classmates: "+esc(d.evalPeerPct||"—")+'%</div>';
-        }
+      var sent=d.status==="pending",approved=d.status==="approved";
+      var statusLabel=approved?"Approved":sent?"Sent to the teacher":"Plan in progress";
+      var statusClass=approved?"approved":sent?"sent":"draft";
+      var goals=d.goals||{},chosen=goalItemsFor(d).filter(function(g){return goals[g.id];});
+      var otherGoal=customGoalText(d),tips=d.weaknessTips||[],totalGoals=chosen.length+tips.length+(otherGoal?1:0);
+      html+='<article class="project-card lp-feed-passport"><header class="lp-feed-passport-cover"><div class="lp-feed-passport-kicker">'+LearnPathUI.feedIcon('passport')+'<span>'+(LearnPathUI.hasPassport(d)?'Learning passport':'Project plan')+'</span></div>';
+      html+='<button type="button" class="lp-feed-author" onclick="viewProf(\''+esc(d.studentId||'')+'\')">';
+      if(d.studentPhoto)html+='<img src="'+esc(d.studentPhoto)+'" alt="" class="post-av">';
+      else html+='<span class="post-avp" aria-hidden="true">'+esc((d.studentName||"?")[0])+'</span>';
+      html+='<span><strong>'+esc(d.studentName||"Student")+'</strong><small>'+esc(d.productType)+'</small></span></button></header>';
+      html+='<div class="lp-feed-passport-paper"><span class="lp-feed-stamp '+statusClass+'">'+statusLabel+'</span><h2>'+esc(d.topic||d.productType)+'</h2>';
+      if(!d.topic)html+='<p class="lp-feed-draft-note">The topic is still taking shape.</p>';
+      if(d.planSteps&&d.planSteps.some(function(step){return step&&step.trim();})){
+        html+='<section class="lp-feed-plan"><h3>My next steps</h3><ol>';
+        d.planSteps.forEach(function(step){if(step&&step.trim())html+='<li>'+esc(step)+'</li>';});html+='</ol></section>';
       }
-      if(teacherMode&&d.status==="pending")html+='<button class="btn btg btf mt8" onclick="quickApprove(\''+d.id+'\',\''+esc(d.studentName||"")+'\')">Approve &#9989;</button>';
-      if(teacherMode&&d.status!=="awaiting_grouping")html+='<button class="btn bts btf mt8" style="font-size:12px" onclick="reviewContract(\''+d.id+'\')">Review Full Plan &#8594;</button>';
-      if(d.teacherComment)html+='<div style="background:var(--tl);border-radius:var(--rs);padding:6px 9px;font-size:11px;color:var(--td);margin-top:9px"><strong>Teacher:</strong> '+esc(d.teacherComment)+'</div>';
-      html+='</div>';
+      html+='<details class="lp-feed-goals"><summary>'+LearnPathUI.feedIcon('goals')+'<span>My goals</span><span class="lp-feed-count">'+totalGoals+'</span></summary><div>';
+      if(tips.length)html+='<h3>Focus goals</h3><ul>'+tips.map(function(t){return '<li>'+esc(t)+'</li>';}).join('')+'</ul>';
+      if(chosen.length||otherGoal)html+='<h3>Project goals</h3><ul>'+chosen.map(function(g){return '<li>'+esc(g.text)+'</li>';}).join('')+(otherGoal?'<li>'+esc(otherGoal)+'</li>':'')+'</ul>';
+      if(!totalGoals)html+='<p>Goals are still being planned.</p>';
+      html+='</div></details>';
+      var hasTarget=function(v){return v!==undefined&&v!==null&&v!=='';};
+      if(hasTarget(d.evalTeacherPct)||hasTarget(d.evalPeerPct))html+='<section class="lp-feed-targets"><h3>My target scores</h3><div><p><span>Teacher</span><strong>'+esc(hasTarget(d.evalTeacherPct)?d.evalTeacherPct+'%':'Not set')+'</strong></p><p><span>Classmates</span><strong>'+esc(hasTarget(d.evalPeerPct)?d.evalPeerPct+'%':'Not set')+'</strong></p></div></section>';
+      if(teacherMode){html+='<div class="lp-feed-review-actions">';if(sent)html+='<button type="button" class="btn btg" onclick="quickApprove(\''+esc(d.id)+'\',\''+esc(d.studentName||'')+'\')">Approve</button>';if(d.status!=="awaiting_grouping")html+='<button type="button" class="btn bts" onclick="reviewContract(\''+esc(d.id)+'\')">Review full plan →</button>';html+='</div>';}
+      if(d.teacherComment)html+='<blockquote class="lp-feed-teacher-note"><strong>Teacher feedback</strong><p>'+esc(d.teacherComment)+'</p></blockquote>';
+      html+='<footer class="lp-feed-passport-footer">LEARNPATH · OUR CLASS JOURNEYS</footer></div></article>';
     });
     el.innerHTML=html;
   });
@@ -1252,7 +1231,7 @@ function loadFeed(){
     var posts=[];
     if(snap.exists())snap.forEach(function(p){posts.push({id:p.key,...p.val()});});
     posts.sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);});
-    if(!posts.length){container.innerHTML='<div class="empty"><div class="ei">&#128247;</div><p>Nothing shared yet. Be the first!</p></div>';return;}
+    if(!posts.length){container.innerHTML='<section class="lp-collection-empty">'+LearnPathUI.feedIcon('gallery')+'<h2>A space for our creations</h2><p>Shared projects will appear here. Share your work when you are ready.</p></section>';return;}
     var html="";
     posts.forEach(function(post){html+=buildPostHTML(post);});
     container.innerHTML=html;
@@ -1346,7 +1325,7 @@ function buildCommentSummary(post,comments){
 }
 function buildPostHTML(post){
   var comments=post.comments?Object.values(post.comments):[];
-  var html='<div class="post" id="post-'+post.id+'">';
+  var html='<div class="post lp-gallery-post" id="post-'+post.id+'">';
   html+='<div class="post-hdr">';
   if(post.photo)html+='<img src="'+esc(post.photo)+'" class="post-av" onclick="viewProf(\''+esc(post.uid)+'\')">';
   else html+='<div class="post-avp" onclick="viewProf(\''+esc(post.uid)+'\')">'+esc((post.name||"?")[0])+'</div>';
@@ -2876,12 +2855,8 @@ function renderTFeed(){
   window._currentScreen="feed";
   var mc=document.getElementById("mc");
   window._feedTab=window._feedTab||"plans";
-  var html=pageHeaderHTML("&#128228;","Feed","Approve projects and give feedback on shared work.","var(--t)","var(--td)");
-  html+='<div class="toggle-row">';
-  html+='<button class="toggle-btn'+(window._feedTab==="plans"?" act":"")+'" onclick="switchFeedTab(\'plans\')">&#128203; Project Plans</button>';
-  html+='<button class="toggle-btn'+(window._feedTab==="posts"?" act":"")+'" onclick="switchFeedTab(\'posts\')">&#128228; Projects</button>';
-  html+='</div>';
-  html+='<div id="feed-tab-plans" style="display:'+(window._feedTab==="plans"?"block":"none")+'"><div id="projects-list"><div class="loading">Loading...</div></div></div>';
+  var html=LearnPathUI.feedHeader(true)+LearnPathUI.feedNavigation(window._feedTab);
+  html+='<div id="feed-tab-plans" style="display:'+(window._feedTab==="plans"?"block":"none")+'"><div id="projects-list" class="lp-feed-plans"><div class="loading">Loading...</div></div></div>';
   html+='<div id="feed-tab-posts" style="display:'+(window._feedTab==="posts"?"block":"none")+'"><div id="feed-container"><div class="loading">Loading...</div></div></div>';
   mc.innerHTML=html;
   loadProjectsList(true);

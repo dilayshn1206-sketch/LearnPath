@@ -33,6 +33,12 @@ Pause/resume control, pause in hidden tabs, static first frame for reduced motio
 Sprite timing and sheet metadata: `assets/compass-idle.json`.
 
 ## Content
+The classroom feed is “Our learning journeys”, with a class-collection book,
+SVG navigation and warm passport plan cards. Use the same teal covers, gold
+binding and paper as the learner's own passport. Goals use native disclosures;
+shared projects use gallery paper. Preserve author links, status, targets,
+teacher review, media and existing feedback. No social ranking or emoji labels
+in the collection header, plan cards or empty states.
 The owner clarified on 29 October that “My Learning Passport” denotes the
 completed goals-and-plan result. Before completion, use “Set goals and plan”
 and omit its persistent reminder; never present an empty overview as a passport.
