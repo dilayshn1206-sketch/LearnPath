@@ -10,6 +10,12 @@
 | CRUD | Existing Firebase functions in index.html | Existing storage paths and schema | Same save and navigation destinations | Source comparison + mock tests |
 
 ## Behavior ledger
+- Feed and teacher feed share `LearnPathUI.feedHeader/feedNavigation` and the
+  existing `loadProjectsList` data subscription. Learning-plan covers link to
+  the same student profiles; native details reveal the same versioned goals.
+  Teacher approval/review actions retain their original owners. Tabs expose
+  pressed state and keep current selection. Drafts remain explicitly drafts;
+  sent status is display-only. No data writes are introduced by browsing.
 - Successful teacher submission shows “Sent to the teacher” as both a receipt
   stamp and the completed send action. It also reveals the persistent passport
   book tab at the right side. No sent state appears before persistence succeeds.
