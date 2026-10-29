@@ -93,6 +93,7 @@
     var mc = document.getElementById('mc');
     if (!mc) return;
     mc.dataset.screen = window._currentScreen || '';
+    document.body.dataset.sharing = String(window._currentScreen === 'share');
     // Legacy choice rows keep the exact same onclick handler; add keyboard parity.
     mc.querySelectorAll('.qo[onclick],.goal-row[onclick],.chip[onclick],.role-card[onclick]').forEach(function (el) {
       if (!el.getAttribute('onclick')) return;
