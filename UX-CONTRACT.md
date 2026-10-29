@@ -10,6 +10,11 @@
 | CRUD | Existing Firebase functions in index.html | Existing storage paths and schema | Same save and navigation destinations | Source comparison + mock tests |
 
 ## Behavior ledger
+- Saved project ideas use `LearnPathUI.productLaunch` for Compass guidance.
+  The optional search opens a separate tab with only the product format in the
+  query; no student identity or personal topic is shared. Looking at examples is
+  not a prerequisite for opening the passport. Teacher-added formats get a
+  generic observation prompt. Existing answers remain untouched.
 - The approved Grade 6 planner/passport is rendered by `assets/planner.html`.
   Its same-origin bridge only requests actions; the authenticated module in
   `index.html` owns all Supabase reads/writes, student identity and permission

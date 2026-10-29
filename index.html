@@ -254,7 +254,7 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
 .rub-sentence{font-size:13px}
 .rub-chevron{background:none;border:none;color:var(--th);cursor:pointer;font-size:12px;padding:4px 6px;flex-shrink:0}
 </style>
-<link rel="stylesheet" href="assets/learnpath.css?v=20261028-5">
+<link rel="stylesheet" href="assets/learnpath.css?v=20261029-2">
 </head>
 <body>
 
@@ -310,7 +310,7 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
   <div class="modal-card" id="result-popup-card" style="text-align:center;padding:26px 20px"></div>
 </div>
 
-<script src="assets/learnpath-ui.js?v=20261029-1"></script>
+<script src="assets/learnpath-ui.js?v=20261029-2"></script>
 <script type="module">
 import {auth,db,storage,rpc,ref,set,get,push,onValue,update,remove,sref,uploadBytesResumable,getDownloadURL,deleteObject,onAuthStateChanged,signInWithPopup,signOut} from './assets/supabase-backend.js?v=20261027-2';
 const prov={};
@@ -2132,13 +2132,7 @@ window.chooseProduct=async function(id,name,cat){
 
 function renderQuizDone(){
   var mc=document.getElementById("mc");
-  var html=isLockedStep("step2")?lockBarHTML():"";
-  html+='<div class="card" style="text-align:center;padding:24px;border-color:var(--t);border-width:1.5px">';
-  html+='<div style="font-size:34px;margin-bottom:8px">&#9989;</div>';
-  html+='<div style="font-size:15px;font-weight:700;margin-bottom:4px">'+esc(contractData.productType)+'</div>';
-  html+='<div style="font-size:14px;color:var(--tm);margin-top:8px">Your idea is saved. Continue to your Learning Passport.</div>';
-  html+='<button type="button" class="btn btp mt8" onclick="renderStep3Screen()">Open my Learning Passport →</button></div>';
-  mc.innerHTML=html;
+  mc.innerHTML=LearnPathUI.productLaunch(contractData.productType);
 }
 
 // ── PAGE 4: PROFILE ──
