@@ -10,6 +10,11 @@
 | CRUD | Existing Firebase functions in index.html | Existing storage paths and schema | Same save and navigation destinations | Source comparison + mock tests |
 
 ## Behavior ledger
+- Completed passport overview: single article, project → goals → plan → target
+  scores. Editing actions still use the canonical form sections. Topic editing
+  is a labelled disclosure to keep the saved document readable. Compass links
+  to the plan; line animation never gates controls or saving and respects pause
+  and reduced motion. No new inputs or persistence paths.
 - Before the goals/plan flow is completed and sent, use “Set my goals and plan”
   for entry. Do not show the persistent My Learning Passport tab or open a blank
   passport overview. `LearnPathUI.hasPassport` owns this presentation check:

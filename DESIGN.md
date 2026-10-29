@@ -55,6 +55,11 @@ mustard final action says “Save and send to the teacher”. A full saved summa
 and a persistent My Learning Passport tab keep the plan visible.
 
 ## Accessibility
+The completed passport is a single continuous paper document with a Compass
+reading guide outside it. Project, combined goals, ordered actions and target
+scores share one sheet with ruled sections rather than separate colored cards.
+Short staggered line reveals preserve layout, support the shared motion toggle
+and disappear under reduced motion. All text remains in semantic document order.
 Visible keyboard focus, labelled controls, natural zoom, large tablet targets,
 status text beside milestone colors, semantic choice buttons, preserved native
 select behavior, reduced motion. Mobile reflow preserves every question/action.
