@@ -12,6 +12,12 @@ window.addEventListener('message',event=>{
 });
 function patch(){return {topic:passport.topic,goals:{...passport.goals},goalsOtherText:passport.goalsOtherText,planSteps:passport.planTails.map(fullStep),evalTeacherPct:passport.evalTeacherPct,evalPeerPct:passport.evalPeerPct};}
 function saveError(error){$('#save-status').textContent='Not saved: '+error.message;$('#save-status').style.color='var(--c)';}
+function receipt(){
+ const notice=$('.passport-notice');if(!notice)return;
+ notice.innerHTML=passport.submitted?'<strong>Sent to the teacher</strong><span>'+(host.contract.status==='approved'?'Your teacher has approved your passport.':'Your teacher can now review your passport.')+'</span>':'<strong>My saved draft</strong><span>Review your changes and send your passport again.</span>';
+ notice.classList.toggle('passport-sent',passport.submitted);
+ const send=$('#overview-send');if(send){send.disabled=passport.submitted;send.textContent=passport.submitted?'Sent to the teacher':'Save and send to the teacher';}
+}
 const draftRender=render;
 render=function(){
  draftRender();
@@ -22,14 +28,15 @@ render=function(){
  document.querySelectorAll('.contract-guide .hint').forEach(el=>el.textContent='Your teacher will review your Learning Passport.');
  document.querySelectorAll('.reminder-explainer').forEach(el=>el.textContent='Use the My Learning Passport tab on LearnPath to return to your plan.');
  if(passport?.view==='overview'){
-  $('.passport-overview-title .eyebrow').textContent=passport.submitted?(host.contract.status==='approved'?'Approved':'Waiting for teacher approval'):'My saved draft';
-  $('.passport-notice').textContent=passport.submitted?'Your Learning Passport has been saved. '+(host.contract.status==='approved'?'Your teacher has approved it.':'Your teacher can now review it. You can edit and send it again.'):'Your Learning Passport draft is saved automatically. Review your goals, plan and scores below.';
+  $('.passport-overview-title .eyebrow').textContent='LearnPath · Learning journey';
+  receipt();
   $('#overview-back-to-idea').textContent='Back to Home';$('#overview-back-to-idea').onclick=()=>request('home').catch(saveError);
   if(host.readOnly){document.querySelectorAll('[data-passport-edit],#edit-passport').forEach(el=>el.remove());}
   else{
    const send=document.createElement('button');send.type='button';send.id='overview-send';send.className='primary send-teacher';send.textContent='Save and send to the teacher';$('.overview-actions').appendChild(send);
    const project=$('.passport-overview-card');project.insertAdjacentHTML('beforeend','<details class="passport-topic-edit"><summary>Edit my topic</summary>'+field('saved-topic','My topic','Make your topic more specific if you need to.')+'</details>');$('#saved-topic').value=passport.topic;$('#saved-topic').oninput=e=>{passport.topic=e.target.value;passport.submitted=false;};
   }
+  receipt();
  }
  if(passport?.active){
   const back=$('#back-to-idea');
@@ -54,14 +61,14 @@ document.addEventListener('click',async event=>{
  event.preventDefault();event.stopImmediatePropagation();
  const error=!passport.topic.trim()?'Write your project topic.':allErrors();if(error){($('#passport-error')||$('#save-status')).textContent=error;return;}
  b.disabled=true;b.textContent='Saving and sending…';
- try{host.contract=await request('submit',patch());host.readOnly=false;host.passportReady=true;passport.submitted=true;showOverview();$('#save-status').textContent='Saved and sent to your teacher.';}
+ try{host.contract=await request('submit',patch());host.readOnly=false;host.passportReady=true;passport.submitted=true;showOverview();$('#save-status').textContent='Sent to the teacher';}
  catch(e){saveError(e);b.disabled=false;b.textContent='Save and send to the teacher';}
 },true);
 let lastPatch='';
 function scheduleSave(){queueMicrotask(()=>{
  if(!host||host.readOnly||!passport?.active||passport.submitted)return;
  const value=patch(),serialized=JSON.stringify(value);if(serialized===lastPatch)return;lastPatch=serialized;
- request('draft',value).then(()=>{$('#save-status').textContent='Draft saved';$('#save-status').style.color='var(--tm)';}).catch(e=>{lastPatch='';saveError(e);});
+ request('draft',value).then(()=>{$('#save-status').textContent='Draft saved';$('#save-status').style.color='var(--tm)';receipt();}).catch(e=>{lastPatch='';saveError(e);});
 });}
 document.addEventListener('input',scheduleSave);document.addEventListener('change',scheduleSave);document.addEventListener('click',scheduleSave);
 let lastHeight=0;
