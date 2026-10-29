@@ -4,7 +4,7 @@
   var states = [false, false, false, false];
   var enabled = [true, true, false, true];
   var paused = false;
-  var labels = ['What are we learning?', 'Get Ideas', 'My Learning Passport', 'Choose Resources'];
+  var labels = ['What are we learning?', 'Get Ideas', 'Set goals and plan', 'Choose Resources'];
   var mapLabels = ['Explore', 'Plan', 'Create', 'Reflect'];
   var actions = ['renderStep1Screen', 'startQuiz', 'renderStep3Screen', 'renderResourcesScreen'];
   function escapeText(value) {
@@ -12,6 +12,14 @@
   }
   function mascot() {
     return '<div class="lp-mascot"><div class="lp-mascot-note"><strong>One step at a time.</strong><br>Your ideas make this project yours.</div><div class="lp-clock'+(paused?' paused':'')+'" role="img" aria-label="Compass learning companion"></div><button type="button" class="lp-motion-toggle" aria-pressed="'+paused+'" onclick="LearnPathUI.toggleMotion()">'+(paused?'Play animation':'Pause animation')+'</button></div>';
+  }
+  function hasPassport(c) {
+    if (!c || !c.productType || !(c.submittedAt || c.status === 'pending' || c.status === 'approved')) return false;
+    var goals = Object.keys(c.goals || {}).filter(function (key) { return c.goals[key] === true; }).length;
+    if (/[\p{L}\p{N}]/u.test(String(c.goalsOtherText || '').replace(/^\s*i\s+will\b/i, ''))) goals++;
+    return goals >= 3 && Array.isArray(c.planSteps) && c.planSteps.length >= 3 && c.planSteps.every(function (s) {
+      return /[\p{L}\p{N}]/u.test(String(s || '').replace(/^(?:\s*i\s+will\b[\s.…]*)+/i, ''));
+    });
   }
   function productLaunch(product) {
     var name = String(product || 'Your project');
@@ -43,7 +51,7 @@
       + '<p class="lp-launch-invite">Check some '+escapeText(plural)+' online.</p>'
       + '<div class="lp-launch-notice"><strong>Look with Compass</strong><p>'+escapeText(prompt)+'</p><p>Borrow an idea about the format. Use your own words and ideas about Your Digital Self.</p></div>'
       + '<a class="btn bts lp-launch-examples" href="'+escapeText(search)+'" target="_blank" rel="noopener noreferrer">Explore examples <span aria-hidden="true">↗</span><small>Opens a search in a new tab</small></a>'
-      + '<div class="lp-launch-next"><p>Ready to plan your own?</p><button type="button" class="btn btp" onclick="renderStep3Screen()">Open my Learning Passport →</button></div></div></section>';
+      + '<div class="lp-launch-next"><p>Ready to plan your own?</p><button type="button" class="btn btp" onclick="renderStep3Screen()">Set my goals and plan →</button></div></div></section>';
   }
   function drawMap() {
     var host = document.getElementById('lp-map');
@@ -89,6 +97,11 @@
     escapeText:escapeText,
     mascot:mascot,
     productLaunch:productLaunch,
+    hasPassport:hasPassport,
+    setPassportReady:function (ready) {
+      var label = ready ? 'My Learning Passport' : 'Set goals and plan';
+      if (labels[2] !== label) { labels[2] = label; drawMap(); }
+    },
     grammarFeedback:function (question, answer) {
       if (answer === question.correct) return '<p class="lp-grammar-correct">✓ Correct</p>';
       var explanation = (question.feedback || [])[answer] || 'Look at the meaning of the sentence and review the correct answer.';

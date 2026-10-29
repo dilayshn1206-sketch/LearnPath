@@ -31,7 +31,14 @@ render=function(){
    const project=$('.passport-overview-card');project.insertAdjacentHTML('beforeend',field('saved-topic','My topic','Make your topic more specific if you need to.'));$('#saved-topic').value=passport.topic;$('#saved-topic').oninput=e=>{passport.topic=e.target.value;passport.submitted=false;};
   }
  }
- if(passport?.active){const back=$('#back-to-idea');if(back){back.textContent='← My complete Learning Passport';back.onclick=showOverview;}}
+ if(passport?.active){
+  const back=$('#back-to-idea');
+  if(back){back.textContent=host.passportReady?'← My complete Learning Passport':'← Back to Home';back.onclick=host.passportReady?showOverview:()=>request('home').catch(saveError);}
+  if(!host.passportReady&&passport.view!=='overview'){
+   $('.heading .eyebrow').textContent='Goals and plan · '+(passport.step+1)+' of 3';
+   $('.heading .intro').textContent='Choose your goals and write your steps. Your Learning Passport will be ready when you finish.';
+  }
+ }
  reportHeight();
 };
 const originalNext=next;
@@ -46,7 +53,7 @@ document.addEventListener('click',async event=>{
  event.preventDefault();event.stopImmediatePropagation();
  const error=!passport.topic.trim()?'Write your project topic.':allErrors();if(error){($('#passport-error')||$('#save-status')).textContent=error;return;}
  b.disabled=true;b.textContent='Saving and sending…';
- try{host.contract=await request('submit',patch());host.readOnly=false;passport.submitted=true;showOverview();$('#save-status').textContent='Saved and sent to your teacher.';}
+ try{host.contract=await request('submit',patch());host.readOnly=false;host.passportReady=true;passport.submitted=true;showOverview();$('#save-status').textContent='Saved and sent to your teacher.';}
  catch(e){saveError(e);b.disabled=false;b.textContent='Save and send to the teacher';}
 },true);
 let lastPatch='';
