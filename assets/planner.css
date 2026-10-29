@@ -121,15 +121,29 @@ body{padding-bottom:84px}
 .passport-document-guide .lp-clock{--frame-size:160px}
 .passport-document-guide .guide-name{color:var(--pd);font-size:18px;font-weight:700;margin:10px 0}
 .passport-document-guide a{display:inline-block;color:var(--pd);font-weight:700;padding:10px 0;text-underline-offset:4px}
-.passport-document{min-width:0;background:var(--lp-paper);border:1px solid var(--gb);border-top:6px solid var(--p);border-radius:4px;box-shadow:var(--sh);padding:36px 40px}
-.passport-document .passport-overview-title{border-bottom:1px solid var(--gb);padding-bottom:18px;margin-bottom:16px}
-.passport-document .passport-overview-title h1{font-size:34px;margin:10px 0}
-.passport-document .intro{font-size:17px;margin:0}
-.passport-document .passport-notice{border:0;border-left:3px solid var(--t);border-radius:0;background:var(--tl);padding:10px 14px;font-size:15px;margin:0 0 8px}
-.passport-document .passport-overview-grid{display:block}
+.passport-document{--passport-paper:#fffaf0;position:relative;min-width:0;background:var(--passport-paper);border:1px solid #d9cba9;border-left:12px solid var(--pd);border-radius:12px 30px 30px 12px;box-shadow:5px 5px 0 #e6dcc7,9px 9px 0 #f8f1e1,10px 11px 18px #142d4b12;padding:32px 34px}
+.passport-document:before{content:'';position:absolute;inset:12px auto 12px 7px;border-left:1px dashed #b9aa84;pointer-events:none}
+.passport-document .passport-overview-title{position:relative;background:var(--pd);color:var(--al);border-bottom:3px solid var(--lp-mustard);border-radius:0 27px 0 0;padding:30px 112px 26px 34px;margin:-32px -34px 26px;min-height:240px}
+.passport-document .passport-overview-title .eyebrow{color:var(--lp-mustard);font-size:12px;letter-spacing:.15em}
+.passport-document .passport-overview-title h1{color:var(--al);font-size:34px;margin:14px 0 8px;max-width:370px}
+.passport-document .intro{color:var(--al);font-size:16px;margin:0}
+.passport-cover-emblem{position:absolute;right:24px;top:27px;width:72px;height:72px;color:var(--lp-mustard)}
+.passport-cover-emblem svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.4}
+.passport-cover-emblem svg path:last-child{fill:currentColor}
+.passport-holder{margin-top:24px;border-top:1px solid #ffffff3d;padding-top:12px;display:flex;flex-direction:column;gap:4px}
+.passport-holder span{font-size:12px;letter-spacing:.04em;color:var(--al)}
+.passport-holder strong{font-size:21px;font-family:'Bricolage Grotesque',sans-serif;color:var(--al)}
+.passport-document .passport-notice{display:inline-flex;flex-direction:column;gap:5px;border:1px solid var(--gb);border-radius:8px;background:transparent;padding:12px 18px;font-size:14px;margin:0 0 8px;color:var(--tm)}
+.passport-document .passport-notice strong{font-size:17px;color:var(--pd)}
+.passport-document .passport-sent{border:3px double var(--t);transform:rotate(-2deg);color:var(--td);border-radius:10px;padding:12px 22px}
+.passport-document .passport-sent strong{color:var(--td);letter-spacing:.04em}
+.passport-document .send-teacher:disabled{opacity:1;background:var(--tl);color:var(--td);border-color:var(--t);box-shadow:none;cursor:default}
+.passport-page-footer{display:flex;justify-content:space-between;gap:12px;border-top:1px dashed #b9aa84;margin-top:28px;padding-top:12px;color:var(--tm);font-size:10px;letter-spacing:.09em}
+.passport-document .passport-overview-grid{display:block;counter-reset:passport-section}
 .passport-document .passport-overview-card{border:0;border-bottom:1px solid var(--gb);border-radius:0;box-shadow:none;background:transparent;padding:24px 0;height:auto}
 .passport-document .section-title{margin-bottom:14px;align-items:center}
-.passport-document .section-title h2{font-size:23px}
+.passport-document .section-title h2{font-size:23px;display:flex;align-items:center;gap:12px}
+.passport-document .section-title h2:before{counter-increment:passport-section;content:'0' counter(passport-section);display:grid;place-items:center;flex-shrink:0;width:34px;height:34px;border:1px solid #d5c39a;border-radius:50%;font-size:13px;color:var(--pd);background:#f6ebd1}
 .passport-document .passport-product{font-size:17px;color:var(--pd);font-weight:700;margin:0 0 6px}
 .passport-document-topic{font-size:25px;font-weight:700;line-height:1.35;margin:0 0 8px}
 .passport-document .hint{margin:8px 0;font-size:15px}
@@ -155,6 +169,6 @@ body{padding-bottom:84px}
 .passport-document .lp-doc-reveal{animation:passport-line-in .42s ease-out backwards;animation-delay:calc(var(--reveal-order)*.1s)}
 .passport-document.document-motion-off .lp-doc-reveal{animation:none}
 @keyframes passport-line-in{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
-@media(max-width:850px){.passport-document-layout{grid-template-columns:1fr;gap:14px}.passport-document-guide{position:static;padding:0;display:grid;grid-template-columns:85px minmax(0,1fr);column-gap:14px}.passport-document-guide .lp-clock{--frame-size:85px;grid-row:1/4}.passport-document-guide p{margin:0 0 5px}.passport-document-guide .guide-name{margin:0}.passport-document-guide a{padding:4px 0}.passport-document{padding:28px}}
-@media(max-width:550px){.passport-document{padding:22px 18px}.passport-document .passport-overview-title h1{font-size:27px}.passport-document-goals{grid-template-columns:1fr;gap:22px}.passport-document .score-pair{flex-direction:column;gap:14px}.passport-document .overview-actions .primary{flex:auto}.passport-document-topic{font-size:22px}}
+@media(max-width:850px){.passport-document-layout{grid-template-columns:1fr;gap:14px}.passport-document-guide{position:static;padding:0;display:grid;grid-template-columns:85px minmax(0,1fr);column-gap:14px}.passport-document-guide .lp-clock{--frame-size:85px;grid-row:1/4}.passport-document-guide p{margin:0 0 5px}.passport-document-guide .guide-name{margin:0}.passport-document-guide a{padding:4px 0}.passport-document{padding:28px}.passport-document .passport-overview-title{margin:-28px -28px 24px}}
+@media(max-width:550px){.passport-document{padding:22px 18px;border-left-width:8px}.passport-document .passport-overview-title{padding:25px 20px;margin:-22px -18px 22px}.passport-document .passport-overview-title h1{font-size:28px;max-width:230px}.passport-cover-emblem{position:static;width:54px;height:54px;margin-bottom:12px}.passport-document-goals{grid-template-columns:1fr;gap:22px}.passport-document .score-pair{flex-direction:column;gap:14px}.passport-document .overview-actions .primary{flex:auto}.passport-document-topic{font-size:22px}.passport-document .section-title h2{font-size:21px;gap:8px}}
 @media(prefers-reduced-motion:reduce){.passport-document .lp-doc-reveal{animation:none}}

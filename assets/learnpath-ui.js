@@ -99,6 +99,7 @@
     productLaunch:productLaunch,
     hasPassport:hasPassport,
     setPassportReady:function (ready) {
+      document.body.dataset.passportReady = String(ready);
       var label = ready ? 'My Learning Passport' : 'Set goals and plan';
       if (labels[2] !== label) { labels[2] = label; drawMap(); }
     },

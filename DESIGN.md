@@ -55,6 +55,11 @@ mustard final action says “Save and send to the teacher”. A full saved summa
 and a persistent My Learning Passport tab keep the plan visible.
 
 ## Accessibility
+The owner wants a friendly travel-passport identity, not a plain report: teal
+cover, gold compass seal, named holder, warm paper, bound edge and four numbered
+sections. A “Sent to the teacher” stamp is shown only after confirmed submission.
+The saved passport appears as a small book tab at the right side on tablets,
+with reserved reading space; mobile uses the compact bottom variant.
 The completed passport is a single continuous paper document with a Compass
 reading guide outside it. Project, combined goals, ordered actions and target
 scores share one sheet with ruled sections rather than separate colored cards.

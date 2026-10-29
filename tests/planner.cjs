@@ -79,8 +79,13 @@ const server=http.createServer((req,res)=>{
  await f.locator('#teacher-target').fill('85');await f.locator('#peer-target').fill('90');
  assert.equal(await f.locator('.send-teacher').innerText(),'Save and send to the teacher');
  await f.getByRole('button',{name:'Save and send to the teacher',exact:true}).click();
- await f.getByText('Your Learning Passport has been saved. Your teacher can now review it. You can edit and send it again.').waitFor();
+ await f.locator('.passport-sent strong').filter({hasText:'Sent to the teacher'}).waitFor();
  await page.locator('#lp-passport-tab').waitFor();
+ assert.equal(await f.locator('#overview-send').innerText(),'Sent to the teacher');
+ assert.ok(await f.locator('#overview-send').isDisabled());
+ assert.equal(await page.locator('#lp-passport-tab svg').count(),1);
+ assert.equal(await page.locator('body').getAttribute('data-passport-ready'),'true');
+ assert.equal(await f.locator('.passport-cover-emblem svg').count(),1);
  saved=await page.evaluate(()=>__mockDB.contracts.student);
  assert.equal(saved.status,'pending');assert.equal(saved.editUnlocked,true);assert.equal(saved.evalTeacherPct,'85');assert.equal(saved.evalPeerPct,'90');assert.equal(saved.planSteps[0],'I will prepare my questions.');
  assert.equal(await f.locator('[data-passport-edit]').count(),3);
@@ -112,6 +117,8 @@ const server=http.createServer((req,res)=>{
  await page.evaluate(()=>renderStep3Screen(true));await f.getByRole('heading',{name:'My Learning Passport',exact:true}).waitFor();
  assert.match(await f.locator('#screen').innerText(),/I will revise my questions/);
  assert.equal(await page.evaluate(()=>__mockDB.contracts.student.status),'draft');
+ assert.match(await f.locator('.passport-notice').innerText(),/My saved draft/);
+ assert.ok(await f.locator('#overview-send').isEnabled());
  await page.evaluate(()=>startQuiz());await f.locator('[data-choice="privacy"]').waitFor();
  assert.deepEqual(errors,[]);console.log('PASS: no grouping/edit/deadline locks; existing locked records edit; approved edits return to draft; send/reopen/retake; scores, tablet/mobile, no external calls.');
  }finally{await browser.close();await new Promise(r=>server.close(r));}
