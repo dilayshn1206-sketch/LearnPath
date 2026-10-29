@@ -254,7 +254,7 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
 .rub-sentence{font-size:13px}
 .rub-chevron{background:none;border:none;color:var(--th);cursor:pointer;font-size:12px;padding:4px 6px;flex-shrink:0}
 </style>
-<link rel="stylesheet" href="assets/learnpath.css?v=20261029-8">
+<link rel="stylesheet" href="assets/learnpath.css?v=20261029-9">
 </head>
 <body>
 
@@ -310,7 +310,7 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
   <div class="modal-card" id="result-popup-card" style="text-align:center;padding:26px 20px"></div>
 </div>
 
-<script src="assets/learnpath-ui.js?v=20261029-8"></script>
+<script src="assets/learnpath-ui.js?v=20261029-9"></script>
 <script type="module">
 import {auth,db,storage,rpc,ref,set,get,push,onValue,update,remove,sref,uploadBytesResumable,getDownloadURL,deleteObject,onAuthStateChanged,signInWithPopup,signOut} from './assets/supabase-backend.js?v=20261027-2';
 const prov={};
@@ -1204,7 +1204,7 @@ function loadProjectsList(teacherMode){
       if(d.studentPhoto)html+='<img src="'+esc(d.studentPhoto)+'" alt="" class="post-av">';
       else html+='<span class="post-avp" aria-hidden="true">'+esc((d.studentName||"?")[0])+'</span>';
       html+='<span><strong>'+esc(d.studentName||"Student")+'</strong><small>'+esc(d.productType)+'</small></span></button></header>';
-      html+='<div class="lp-feed-passport-paper"><span class="lp-feed-stamp '+statusClass+'">'+statusLabel+'</span><h2>'+esc(d.topic||d.productType)+'</h2>';
+      html+='<div class="lp-feed-passport-paper"><span class="lp-feed-stamp '+statusClass+'">'+statusLabel+'</span><p class="lp-feed-product-type"><span>Product type</span><strong>'+esc(d.productType)+'</strong></p><h2>'+esc(d.topic||d.productType)+'</h2>';
       if(!d.topic)html+='<p class="lp-feed-draft-note">The topic is still taking shape.</p>';
       if(d.planSteps&&d.planSteps.some(function(step){return step&&step.trim();})){
         html+='<section class="lp-feed-plan"><h3>My next steps</h3><ol>';
@@ -1271,37 +1271,58 @@ function groupStats(comments){
 }
 // One collapsible "Overall" row for a group (teacher or classmates), with a per-area breakdown dropdown.
 function fbGroupRow(icon,label,stats,key){
-  if(!stats.count)return '<section class="lp-feedback-waiting"><h3>'+esc(label)+'</h3><p>No feedback yet.</p></section>';
-  var html='<details class="lp-feedback-group" open><summary><span><strong>'+esc(label)+'</strong><small>'+stats.count+' feedback '+(stats.count===1?'note':'notes')+'</small></span>'+(stats.overall===null?'':'<span class="lp-feedback-step">'+scoreTierLabel(stats.overall)+'</span>')+'</summary>';
-  if(stats.overall!==null){
-    html+='<p class="lp-feedback-explainer">Read what each Step means for your work.'+(stats.count>1?' These Steps summarise the ratings received; individual reviews may differ.':'')+'</p><ul class="lp-feedback-areas">';
-    SELF_RUBRIC.forEach(function(item,ai){if(!stats.perArea[ai])return;
-      var score=stats.perArea[ai].reduce(function(x,y){return x+y;},0)/stats.perArea[ai].length+1;
-      var tier=score>=2.5?2:score>=1.5?1:0;
-      html+='<li><h4>'+esc(item.area)+'<span class="rub-pill tier'+tier+'">'+TIER_LABELS[tier]+'</span></h4><p>'+esc(item.levels[tier].label)+'</p></li>';
-    });
-    html+='</ul><details class="lp-feedback-calculation"><summary>View score details</summary><p>These are averages of the Step ratings received. Read each person’s review for their exact choices. Overall: '+scorePercent(stats.overall)+'%.</p><ul>';
-    SELF_RUBRIC.forEach(function(item,ai){if(!stats.perArea[ai])return;var score=stats.perArea[ai].reduce(function(x,y){return x+y;},0)/stats.perArea[ai].length+1;html+='<li>'+esc(item.area)+': '+scoreTierLabel(score)+' ('+scorePercent(score)+'%)</li>';});html+='</ul></details>';
-  }else html+='<p>Written feedback is available below. No Step ratings were given.</p>';
-  return html+'</details>';
+  if(!stats.count){
+    return '<div style="font-size:12px;color:var(--th);margin-bottom:5px">'+icon+' '+label+': not yet</div>';
+  }
+  if(stats.overall===null){
+    return '<div style="font-size:12px;color:var(--tm);margin-bottom:5px">'+icon+' '+label+': feedback given ('+stats.count+')</div>';
+  }
+  var html='<div style="font-size:13px;margin-bottom:4px;cursor:pointer" onclick="toggleCat(\''+key+'\')">'+icon+' '+label+': <strong>'+scoreTierLabel(stats.overall)+'</strong> ('+scorePercent(stats.overall)+'%)'+(stats.count>1?' &middot; '+stats.count:'')+' &#9660;</div>';
+  html+='<div id="'+key+'" style="display:none;margin:0 0 7px 8px">';
+  SELF_RUBRIC.forEach(function(item,ai){
+    if(stats.perArea[ai]){
+      var a=stats.perArea[ai].reduce(function(x,y){return x+y;},0)/stats.perArea[ai].length+1;
+      html+='<div style="font-size:11px;color:var(--tm);margin-bottom:2px">'+esc(item.area)+': '+scoreTierLabel(a)+" ("+scorePercent(a)+"%)"+'</div>';
+    }
+  });
+  html+='</div>';
+  return html;
 }
 function buildCommentSummary(post,comments){
-  if(!comments.length)return '';
-  var teacher=comments.filter(function(c){return c.isTeacher;}),peers=comments.filter(function(c){return !c.isTeacher;});
-  var sources='<section class="lp-feedback-sources" aria-label="Step guides"><h3>My Step guide</h3>'+fbGroupRow('','Teacher',groupStats(teacher),'fb-t-'+post.id)+fbGroupRow('','Classmates',groupStats(peers),'fb-p-'+post.id)+'</section>';
-  var html='<section class="lp-feedback-summary" aria-label="Feedback on this project"><header><p class="lp-eyebrow">Reflect · My next steps</p><h2>Understand my feedback</h2><p>Read what went well. Then choose one suggestion to try in your next version.</p></header><section class="lp-feedback-notes"><h3>What people said</h3>';
-  comments.forEach(function(cm){
-    html+='<article class="lp-feedback-note"><header><strong>'+esc(cm.from||'Student')+'</strong><span>'+(cm.isTeacher?'Teacher':'Classmate')+'</span></header><div class="lp-feedback-written">';
-    if(cm.well)html+='<section><h4>What went well</h4><p>'+esc(cm.well)+'</p></section>';
-    if(cm.improve)html+='<section><h4>Something to improve</h4><p>'+esc(cm.improve)+'</p></section>';
-    if(!cm.well&&!cm.improve)html+='<p>This review includes Step ratings only.</p>';
-    html+='</div>';
-    if(cm.peerRubric&&cm.peerRubric.some(function(v){return v!==null&&v!==undefined;}))html+='<details class="lp-feedback-original"><summary>See this person’s Step choices</summary>'+renderRubricReadonly(PEER_RUBRIC,cm.peerRubric)+'</details>';
-    html+='</article>';
-  });
-  return html+'</section>'+sources+'</section>';
-}
+  if(!comments.length)return "";
+  var postId=post.id;
+  var teacher=comments.filter(function(c){return c.isTeacher;});
+  var peers=comments.filter(function(c){return !c.isTeacher;});
+  var tStats=groupStats(teacher);
+  var pStats=groupStats(peers);
+  var allId="fb-all-"+postId;
 
+  var html='<div style="background:var(--gl);border-radius:var(--rs);padding:10px 11px;margin-bottom:9px">';
+  html+='<div style="font-size:12px;font-weight:700;margin-bottom:7px">&#128202; Feedback Summary</div>';
+  html+=fbGroupRow("&#128105;&#8205;&#127979;","Teacher",tStats,"fb-t-"+postId);
+  html+=fbGroupRow("&#128101;","Classmates",pStats,"fb-p-"+postId);
+
+  // All the written feedback + individual comments, tucked into one dropdown
+  html+='<div style="font-size:12px;font-weight:700;color:var(--p);cursor:pointer;margin-top:8px" onclick="toggleCat(\''+allId+'\')">&#128172; See all feedback ('+comments.length+') &#9660;</div>';
+  html+='<div id="'+allId+'" style="display:none;margin-top:7px">';
+  comments.forEach(function(cm,idx){
+    var isT=!!cm.isTeacher;
+    var score=(cm.peerRubric)?rubricOverallScore(cm.peerRubric):null;
+    var dId="cmdetail-"+postId+"-"+idx;
+    html+='<div style="padding:7px 0;border-top:1px solid var(--gb)">';
+    html+='<div style="font-size:12px;font-weight:700;color:'+(isT?"var(--td)":"var(--pd)")+'">'+esc(cm.from||"Student")+'</div>';
+    if(score!==null){
+      html+='<div style="font-size:11px;color:var(--pd);background:var(--pl);display:inline-block;padding:2px 8px;border-radius:20px;margin:4px 0;cursor:pointer" onclick="toggleCat(\''+dId+'\')">'+scoreTierLabel(score)+" ("+scorePercent(score)+"%) &#9660;"+'</div>';
+      html+='<div id="'+dId+'" style="display:none;margin-bottom:4px">'+renderRubricReadonly(PEER_RUBRIC,cm.peerRubric)+'</div>';
+    }
+    if(cm.well)html+='<div style="font-size:12px;color:var(--tm);line-height:1.5"><strong>Good points:</strong> '+esc(cm.well)+'</div>';
+    if(cm.improve)html+='<div style="font-size:12px;color:var(--tm);line-height:1.5"><strong>To improve:</strong> '+esc(cm.improve)+'</div>';
+    html+='</div>';
+  });
+  html+='</div>';
+  html+='</div>';
+  return html;
+}
 function buildPostHTML(post){
   var comments=post.comments?Object.values(post.comments):[];
   var html='<div class="post lp-gallery-post" id="post-'+post.id+'">';
@@ -1381,13 +1402,14 @@ function buildPostHTML(post){
 }
 
 function renderRubricReadonly(rubric,values){
-  var html='<dl class="lp-rubric-readonly">';
+  var html='<div class="card" style="background:var(--gl);border:none">';
   rubric.forEach(function(item,ai){
     var li=values[ai];
     if(li===null||li===undefined)return;
-    html+='<div><dt>'+esc(item.area)+'</dt><dd><span class="rub-pill tier'+li+'">'+TIER_LABELS[li]+'</span><p>'+esc(item.levels[li].label)+'</p></dd></div>';
+    html+='<div style="margin-bottom:8px"><div style="font-size:11px;font-weight:700;color:var(--th)">'+esc(item.area)+'</div>';
+    html+='<div style="font-size:12px"><span class="rub-pill tier'+li+'">'+TIER_LABELS[li]+'</span> '+esc(item.levels[li].label)+'</div></div>';
   });
-  html+='</dl>';
+  html+='</div>';
   return html;
 }
 
@@ -1395,42 +1417,27 @@ function renderRubricReadonly(rubric,values){
 // ── GENERIC RUBRIC SELECTOR (used for self-reflection, peer comments, teacher evaluation) ──
 window._rubricStores={};
 var TIER_LABELS=["Step 1","Step 2","Step 3"];
-function rubricQuestion(rubric,ai){
-  var self=rubric===SELF_RUBRIC;
-  var questions=self?['How well did I explain my ideas?','How well did I organise my ideas?','How clear is my English?','How well did I choose my words?','What did I do when I got stuck?','How well did my words fit my audience?']:['How well does this person explain their ideas?','How well are the ideas organised?','How clear is the English?','How well do the words fit the topic?','What does this person do when they get stuck?','How well do the words fit the audience?'];
-  return questions[ai]||(rubric[ai]&&rubric[ai].q)||'Which description matches the work?';
-}
 function renderRubricBlock(containerId,rubric,values,storeKey){
   var el=document.getElementById(containerId);if(!el)return;
-  var store=window._rubricStores[storeKey];if(!store)return;
-  var page=Math.max(0,Math.min(store.page||0,Math.ceil(rubric.length/2)-1));store.page=page;
-  var done=values.filter(function(v){return v!==null&&v!==undefined;}).length;
-  var html='<div class="lp-rubric-head" tabindex="-1"><strong>'+(store.review?'Review my choices':'Read two questions at a time')+'</strong><p>Choose the Step description that best matches the work. All three Steps are shown for each question.</p><p class="lp-rubric-progress" role="status">'+done+' of '+rubric.length+' selected'+(store.review?'':' · Questions '+(page*2+1)+'–'+Math.min(page*2+2,rubric.length)+' of '+rubric.length)+'</p></div>';
-  if(store.review){
-    html+='<ol class="lp-rubric-review">';
-    rubric.forEach(function(item,ai){var li=values[ai];html+='<li><div><strong>'+esc(item.area)+'</strong><p>'+(li===null||li===undefined?'Not selected yet':esc(TIER_LABELS[li])+': '+esc(item.levels[li].label))+'</p></div><button type="button" class="btn bts" onclick="rubricGo(\''+storeKey+'\','+Math.floor(ai/2)+')">'+(li===null||li===undefined?'Choose':'Change')+'</button></li>';});
-    html+='</ol>';
-  }else{
-    html+='<div class="lp-rubric-pair">';
-    rubric.forEach(function(item,ai){if(ai<page*2||ai>=page*2+2)return;
-      html+='<fieldset class="rubarea2 lp-rubric-question"><legend><span>'+esc(item.area)+'</span><strong>'+esc(rubricQuestion(rubric,ai))+'</strong></legend>';
-      item.levels.forEach(function(lvl,li){var sel=values[ai]===li,id='rubric-'+storeKey+'-'+ai+'-'+li;
-        html+='<label class="rublevel-row'+(sel?' sel':'')+'" for="'+id+'"><input type="radio" id="'+id+'" name="rubric-'+storeKey+'-'+ai+'" value="'+li+'" '+(sel?'checked ':'')+'onchange="pickRubricLevel(\''+storeKey+'\','+ai+','+li+')"><span class="lp-rubric-option"><span class="rub-pill tier'+li+(sel?' sel':'')+'">'+TIER_LABELS[li]+'</span><span class="rub-sentence">'+esc(lvl.label)+'</span></span></label>';
-      });html+='</fieldset>';
+  var html="";
+  rubric.forEach(function(item,ai){
+    html+='<div class="rubarea2">';
+    html+='<div class="rubarea-name">'+esc(item.area)+'</div>';
+    item.levels.forEach(function(lvl,li){
+      var sel=values[ai]===li;
+      html+='<div class="rublevel-row'+(sel?" sel":"")+'" style="cursor:pointer" onclick="pickRubricLevel(\''+storeKey+'\','+ai+','+li+')">';
+      html+='<span class="rub-pill tier'+li+(sel?" sel":"")+'">'+TIER_LABELS[li]+'</span> <span class="rub-sentence">'+esc(lvl.label)+'</span>';
+      html+='</div>';
     });
-    html+='</div><div class="lp-rubric-navigation"><button type="button" class="btn bts" '+(page===0?'disabled ':'')+'onclick="rubricGo(\''+storeKey+'\','+(page-1)+')">Previous two</button>';
-    html+=page<Math.ceil(rubric.length/2)-1?'<button type="button" class="btn btp" onclick="rubricGo(\''+storeKey+'\','+(page+1)+')">Next two →</button>':'<button type="button" class="btn btp" onclick="rubricReview(\''+storeKey+'\')">Review my choices →</button>';
     html+='</div>';
-  }
+  });
   el.innerHTML=html;
 }
 window.pickRubricLevel=function(storeKey,ai,li){
-  var store=window._rubricStores[storeKey];if(!store)return;
-  store.values[ai]=li;renderRubricBlock(store.containerId,store.rubric,store.values,storeKey);
-  var input=document.getElementById('rubric-'+storeKey+'-'+ai+'-'+li);if(input)input.focus({preventScroll:true});
+  var s=window._rubricStores[storeKey];if(!s)return;
+  s.values[ai]=li;
+  renderRubricBlock(s.containerId,s.rubric,s.values,storeKey);
 };
-window.rubricGo=function(key,page){var store=window._rubricStores[key];if(!store)return;store.page=page;store.review=false;renderRubricBlock(store.containerId,store.rubric,store.values,key);document.querySelector('#'+CSS.escape(store.containerId)+' .lp-rubric-head').focus();};
-window.rubricReview=function(key){var store=window._rubricStores[key];if(!store)return;store.review=true;renderRubricBlock(store.containerId,store.rubric,store.values,key);document.querySelector('#'+CSS.escape(store.containerId)+' .lp-rubric-head').focus();};
 
 window.openNewPost=function(){
   var mc=document.getElementById("mc");

@@ -10,14 +10,10 @@
 | CRUD | Existing Firebase functions in index.html | Existing storage paths and schema | Same save and navigation destinations | Source comparison + mock tests |
 
 ## Behavior ledger
-- The shared self/peer/teacher rubric selector presents pairs with guiding
-  questions, native radio groups, previous/next navigation and a review of all
-  choices. Existing descriptors, ordering, Step labels, nullable answers and
-  stored 0/1/2 values remain unchanged. Navigation never writes or resets values.
-- Feedback uses the existing aggregation functions unchanged. Area descriptions
-  are labelled as Step guides for averaged ratings; original individual reviews
-  and percentages remain accessible. Strengths/suggestions are actual supplied
-  comments, escaped verbatim; no generated claims about a learner's ability.
+- Owner-requested evaluation rollback: the previous `renderRubricBlock`,
+  read-only ratings and feedback summary are restored together. No stored
+  responses, scale values or aggregation changes. Learning-plan paper explicitly
+  names the product type; all collection actions and current passport UI remain.
 - Feed and teacher feed share `LearnPathUI.feedHeader/feedNavigation` and the
   existing `loadProjectsList` data subscription. Learning-plan covers link to
   the same student profiles; native details reveal the same versioned goals.
