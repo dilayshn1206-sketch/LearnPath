@@ -31,7 +31,14 @@ const server=http.createServer((req,res)=>{
  await f.locator('#tool-own').fill('Recorder');await f.locator('#next').click();
  await f.locator('[data-choice="speaking"]').click();await f.locator('#next').click();
  await f.getByRole('button',{name:'Save my project idea',exact:true}).click();
- await page.getByRole('button',{name:'Open my Learning Passport →',exact:true}).waitFor();
+ await page.getByRole('button',{name:'Set my goals and plan →',exact:true}).waitFor();
+ assert.equal(await page.locator('#lp-passport-tab').count(),0);
+ assert.doesNotMatch(await page.locator('.lp-product-launch').innerText(),/Learning Passport/);
+ await page.evaluate(()=>renderStep3Screen(true));
+ await f.locator('[data-goal="unitWords"]').waitFor();
+ assert.equal(await f.locator('.passport-overview-title').count(),0);
+ assert.equal(await page.locator('#lp-passport-tab').count(),0);
+ await page.evaluate(()=>renderQuizDone());
  assert.match(await page.locator('.lp-product-launch').innerText(),/Check some interviews online/);
  assert.match(await page.locator('.lp-launch-examples').getAttribute('href'),/interviews/);
  assert.equal(await page.locator('.lp-launch-examples').getAttribute('target'),'_blank');
@@ -52,7 +59,7 @@ const server=http.createServer((req,res)=>{
  assert.equal(saved.topic,'Sharing safely online');assert.equal(saved.productType,'Interview');assert.equal(saved.status,'draft');assert.equal(saved.plannerVersion,'passport-v1');assert.equal(saved.weaknessTips.length,3);assert.equal(saved.platformsOtherText,'Recorder');
  // No group membership and an expired teacher activity must not gate editing.
  await page.evaluate(()=>{delete __mockDB.users.student.groupId;window._liveSession={active:true,step:'step1',deadline:1};});
- await page.getByRole('button',{name:'Open my Learning Passport →',exact:true}).click();
+ await page.getByRole('button',{name:'Set my goals and plan →',exact:true}).click();
  await f.locator('[data-goal="unitWords"]').waitFor();
  assert.equal(await f.locator('[data-passport-step]').count(),3);
  assert.equal(await f.locator('[data-goal]').count(),11);
@@ -66,10 +73,12 @@ const server=http.createServer((req,res)=>{
  const steps=['I will I will prepare my questions.','practise speaking.','record my interview.'];
  for(let i=0;i<3;i++)await f.locator('#plan-'+i).fill(steps[i]);
  await f.locator('#passport-next').click();
+ assert.equal(await page.locator('#lp-passport-tab').count(),0);
  await f.locator('#teacher-target').fill('85');await f.locator('#peer-target').fill('90');
  assert.equal(await f.locator('.send-teacher').innerText(),'Save and send to the teacher');
  await f.getByRole('button',{name:'Save and send to the teacher',exact:true}).click();
  await f.getByText('Your Learning Passport has been saved. Your teacher can now review it. You can edit and send it again.').waitFor();
+ await page.locator('#lp-passport-tab').waitFor();
  saved=await page.evaluate(()=>__mockDB.contracts.student);
  assert.equal(saved.status,'pending');assert.equal(saved.editUnlocked,true);assert.equal(saved.evalTeacherPct,'85');assert.equal(saved.evalPeerPct,'90');assert.equal(saved.planSteps[0],'I will prepare my questions.');
  assert.equal(await f.locator('[data-passport-edit]').count(),3);
