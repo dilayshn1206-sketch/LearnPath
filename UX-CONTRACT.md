@@ -10,6 +10,22 @@
 | CRUD | Existing Firebase functions in index.html | Existing storage paths and schema | Same save and navigation destinations | Source comparison + mock tests |
 
 ## Behavior ledger
+- Teacher-only personal goal check: Yes/No for each selected project/custom goal,
+  separate from the six rubric values. New posts snapshot goal content at sharing;
+  historical posts use a labelled contract-at-review snapshot. Teacher comments
+  retain the exact goal text/IDs and boolean response. Students see read-only
+  teacher feedback; peer forms have no goal-rating controls. Server comment rules
+  deny `personalGoalReview` for students, including forged teacher flags.
+  Existing teacher-evaluation export captures the full nested review payload.
+- Share composer reads the current learner contract; saved focus tips and selected
+  goal snapshots become prepared questions in `assets/share-guide.js`. Missing/error
+  states remain honest and do not block sharing. This guide never grades or writes.
+- One-criterion rubric navigation is shared by self/peer/teacher forms. Original
+  ordering, Step descriptions and 0/1/2 nullable values remain unchanged. Context
+  help explains the construct without recommending an answer. All choices can
+  be revisited; upload/link/text nodes stay mounted across composer panels.
+- View plan/default passport entry opens the completed overview when the existing
+  saved-completion check passes; incomplete records still open their editable form.
 - Owner-requested evaluation rollback: the previous `renderRubricBlock`,
   read-only ratings and feedback summary are restored together. No stored
   responses, scale values or aggregation changes. Learning-plan paper explicitly

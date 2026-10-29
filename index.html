@@ -254,7 +254,7 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
 .rub-sentence{font-size:13px}
 .rub-chevron{background:none;border:none;color:var(--th);cursor:pointer;font-size:12px;padding:4px 6px;flex-shrink:0}
 </style>
-<link rel="stylesheet" href="assets/learnpath.css?v=20261029-9">
+<link rel="stylesheet" href="assets/learnpath.css?v=20261029-10">
 </head>
 <body>
 
@@ -310,7 +310,8 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
   <div class="modal-card" id="result-popup-card" style="text-align:center;padding:26px 20px"></div>
 </div>
 
-<script src="assets/learnpath-ui.js?v=20261029-9"></script>
+<script src="assets/learnpath-ui.js?v=20261029-10"></script>
+<script src="assets/share-guide.js?v=20261029-10"></script>
 <script type="module">
 import {auth,db,storage,rpc,ref,set,get,push,onValue,update,remove,sref,uploadBytesResumable,getDownloadURL,deleteObject,onAuthStateChanged,signInWithPopup,signOut} from './assets/supabase-backend.js?v=20261027-2';
 const prov={};
@@ -1291,8 +1292,8 @@ function fbGroupRow(icon,label,stats,key){
 function buildCommentSummary(post,comments){
   if(!comments.length)return "";
   var postId=post.id;
-  var teacher=comments.filter(function(c){return c.isTeacher;});
-  var peers=comments.filter(function(c){return !c.isTeacher;});
+  var teacher=comments.filter(function(c){return c.isTeacher===true;});
+  var peers=comments.filter(function(c){return c.isTeacher!==true;});
   var tStats=groupStats(teacher);
   var pStats=groupStats(peers);
   var allId="fb-all-"+postId;
@@ -1306,7 +1307,7 @@ function buildCommentSummary(post,comments){
   html+='<div style="font-size:12px;font-weight:700;color:var(--p);cursor:pointer;margin-top:8px" onclick="toggleCat(\''+allId+'\')">&#128172; See all feedback ('+comments.length+') &#9660;</div>';
   html+='<div id="'+allId+'" style="display:none;margin-top:7px">';
   comments.forEach(function(cm,idx){
-    var isT=!!cm.isTeacher;
+    var isT=cm.isTeacher===true;
     var score=(cm.peerRubric)?rubricOverallScore(cm.peerRubric):null;
     var dId="cmdetail-"+postId+"-"+idx;
     html+='<div style="padding:7px 0;border-top:1px solid var(--gb)">';
@@ -1317,6 +1318,7 @@ function buildCommentSummary(post,comments){
     }
     if(cm.well)html+='<div style="font-size:12px;color:var(--tm);line-height:1.5"><strong>Good points:</strong> '+esc(cm.well)+'</div>';
     if(cm.improve)html+='<div style="font-size:12px;color:var(--tm);line-height:1.5"><strong>To improve:</strong> '+esc(cm.improve)+'</div>';
+    html+=personalGoalFeedback(cm);
     html+='</div>';
   });
   html+='</div>';
@@ -1418,49 +1420,62 @@ function renderRubricReadonly(rubric,values){
 window._rubricStores={};
 var TIER_LABELS=["Step 1","Step 2","Step 3"];
 function renderRubricBlock(containerId,rubric,values,storeKey){
-  var el=document.getElementById(containerId);if(!el)return;
-  var html="";
-  rubric.forEach(function(item,ai){
-    html+='<div class="rubarea2">';
-    html+='<div class="rubarea-name">'+esc(item.area)+'</div>';
-    item.levels.forEach(function(lvl,li){
-      var sel=values[ai]===li;
-      html+='<div class="rublevel-row'+(sel?" sel":"")+'" style="cursor:pointer" onclick="pickRubricLevel(\''+storeKey+'\','+ai+','+li+')">';
-      html+='<span class="rub-pill tier'+li+(sel?" sel":"")+'">'+TIER_LABELS[li]+'</span> <span class="rub-sentence">'+esc(lvl.label)+'</span>';
-      html+='</div>';
-    });
-    html+='</div>';
-  });
-  el.innerHTML=html;
+  var el=document.getElementById(containerId),store=window._rubricStores[storeKey];if(!el||!store)return;
+  var index=Math.max(0,Math.min(store.index||0,rubric.length-1));store.index=index;
+  var inShare=storeKey==='newpost'&&!!window._shareState,done=values.filter(function(v){return v!==null&&v!==undefined;}).length;
+  var html='<div class="lp-single-rubric'+(inShare?' in-share':'')+'"><div class="lp-rubric-main"><div class="lp-rubric-progress"><span>Question '+(index+1)+' of '+rubric.length+'</span><span>'+done+' of '+rubric.length+' selected</span></div><progress max="'+rubric.length+'" value="'+done+'" aria-label="Criteria selected"></progress>';
+  if(store.review){
+    html+='<h3 tabindex="-1" class="lp-rubric-heading">Review your choices</h3><ol class="lp-rubric-review">';
+    rubric.forEach(function(item,ai){var li=values[ai];html+='<li><div><strong>'+esc(item.area)+'</strong><p>'+(li===null||li===undefined?'Not selected yet':esc(TIER_LABELS[li])+': '+esc(item.levels[li].label))+'</p></div><button type="button" class="btn bts" onclick="rubricGo(\''+storeKey+'\','+ai+')">Change</button></li>';});html+='</ol>';
+  }else{
+    var item=rubric[index];html+='<fieldset class="rubarea2 lp-single-question"><legend><span>'+esc(item.area)+'</span><strong tabindex="-1" class="lp-rubric-heading">'+esc(LearnPathShare.question(index,rubric===SELF_RUBRIC))+'</strong></legend>';
+    item.levels.forEach(function(level,li){var sel=values[index]===li,id='rubric-'+storeKey+'-'+index+'-'+li;
+      html+='<label class="rublevel-row'+(sel?' sel':'')+'" for="'+id+'"><input type="radio" id="'+id+'" name="rubric-'+storeKey+'-'+index+'" '+(sel?'checked ':'')+'onchange="pickRubricLevel(\''+storeKey+'\','+index+','+li+')"><span class="rub-pill tier'+li+'">'+TIER_LABELS[li]+'</span><span class="rub-sentence">'+esc(level.label)+'</span></label>';
+    });html+='</fieldset>';
+  }
+  if(!inShare)html+='<div class="lp-rubric-navigation"><button type="button" class="btn bts" '+(index===0&&!store.review?'disabled ':'')+'onclick="rubricGo(\''+storeKey+'\','+Math.max(0,index-1)+')">Back</button>'+(index<rubric.length-1&&!store.review?'<button type="button" class="btn btp" onclick="rubricGo(\''+storeKey+'\','+(index+1)+')">Next →</button>':'<button type="button" class="btn btp" onclick="rubricReview(\''+storeKey+'\')">Review choices</button>')+'</div>';
+  html+='</div>';
+  if(!inShare)html+='<aside class="lp-rubric-compass">'+LearnPathShare.criterion(index,rubric[index].area)+'</aside>';
+  el.innerHTML=html+'</div>';if(inShare)refreshShareCompass();
 }
-window.pickRubricLevel=function(storeKey,ai,li){
-  var s=window._rubricStores[storeKey];if(!s)return;
-  s.values[ai]=li;
-  renderRubricBlock(s.containerId,s.rubric,s.values,storeKey);
-};
+window.pickRubricLevel=function(key,ai,li){var store=window._rubricStores[key];if(!store)return;store.values[ai]=li;renderRubricBlock(store.containerId,store.rubric,store.values,key);var input=document.getElementById('rubric-'+key+'-'+ai+'-'+li);if(input)input.focus({preventScroll:true});};
+window.rubricGo=function(key,index){var store=window._rubricStores[key];if(!store)return;store.index=index;store.review=false;renderRubricBlock(store.containerId,store.rubric,store.values,key);var heading=document.querySelector('#'+CSS.escape(store.containerId)+' .lp-rubric-heading');if(heading)heading.focus();};
+window.rubricReview=function(key){var store=window._rubricStores[key];if(!store)return;store.review=true;renderRubricBlock(store.containerId,store.rubric,store.values,key);};
 
-window.openNewPost=function(){
-  var mc=document.getElementById("mc");
-  window._newPostFile=null;
-  var html='<div class="pt">Share Your Work</div>';
-  html+='<div class="ps">Fill in the title and rate your own work below.</div>';
-  html+='<div class="card">';
-  html+='<div class="fg"><label class="fl">Title of this piece of work</label><input class="fi" id="np-title" placeholder="e.g. My blog post about climate change"></div>';
-  html+='<div class="fg"><label class="fl">Link to your work</label><input class="fi" id="np-link" placeholder="Google Drive / YouTube / Canva..."></div>';
-  html+='<div style="font-size:11px;color:var(--tm);margin-bottom:10px;background:var(--pl);padding:8px;border-radius:var(--rs)">How to copy a link: Google Drive → Share → Copy link &bull; YouTube → Share &bull; Canva → Share → Copy link</div>';
-  html+='<div class="fg"><label class="fl">Or attach a file (photo, video, PDF, audio — up to 100MB)</label><input type="file" class="fi" id="np-file" onchange="attachNewPostFile(this)"><div id="np-file-preview" style="margin-top:8px"></div></div>';
-  html+='<div class="divider"></div>';
-  html+='<div style="font-size:13px;font-weight:700;margin-bottom:10px">Self-Reflection</div>';
-  html+='<div id="np-rub-rows"></div>';
-  html+='<div class="fg" style="margin-top:10px"><label class="fl">One thing I did well... <span style="color:var(--c)">*</span></label><textarea class="fta" id="np-well" style="min-height:50px"></textarea></div>';
-  html+='<div class="fg"><label class="fl">One thing I want to improve... <span style="color:var(--c)">*</span></label><textarea class="fta" id="np-improve" style="min-height:50px"></textarea></div>';
-  html+='<div style="display:flex;gap:9px;margin-top:10px">';
-  html+='<button class="btn btp" id="np-share-btn" style="flex:1" onclick="submitPost()">Share &#128640;</button>';
-  html+='<button class="btn bts" style="flex:1" onclick="go(\'feed\')">Cancel</button>';
-  html+='</div></div>';
-  mc.innerHTML=html;
-  window._rubricStores.newpost={values:new Array(SELF_RUBRIC.length).fill(null),rubric:SELF_RUBRIC,containerId:"np-rub-rows"};
-  renderRubricBlock("np-rub-rows",SELF_RUBRIC,window._rubricStores.newpost.values,"newpost");
+function shareGoalSnapshot(c){var out={};['grade','goalVersion','topic','productType','category','weakness','weaknessTips','goals','goalsOtherText','planSteps','createdAt','submittedAt'].forEach(function(k){if(c[k]!==undefined)out[k]=c[k];});return JSON.parse(JSON.stringify(out));}
+function refreshShareCompass(){
+  var state=window._shareState,el=document.getElementById('lp-share-compass');if(!state||!el)return;
+  var store=window._rubricStores.newpost;
+  el.innerHTML=state.stage===1?LearnPathShare.criterion(store.index||0,SELF_RUBRIC[store.index||0].area):LearnPathShare.goals(state.contract,state.goals,state.goalPage,state.error);
+}
+window.shareGoalPage=function(delta){var state=window._shareState;if(!state)return;state.goalPage=Math.max(0,Math.min(state.goalPage+delta,state.goals.length-1));refreshShareCompass();};
+window.setShareStage=function(stage){
+  var state=window._shareState;if(!state)return;state.stage=Math.max(0,Math.min(stage,2));
+  document.querySelectorAll('[data-share-panel]').forEach(function(panel){panel.hidden=Number(panel.dataset.sharePanel)!==state.stage;});
+  document.querySelectorAll('[data-share-stage]').forEach(function(button){button.setAttribute('aria-current',Number(button.dataset.shareStage)===state.stage?'step':'false');});
+  document.getElementById('np-share-btn').hidden=state.stage!==2;document.getElementById('np-continue').hidden=state.stage===2;
+  document.getElementById('np-back').disabled=state.stage===0;
+  var store=window._rubricStores.newpost;
+  document.getElementById('np-continue').textContent=state.stage===1&&(store.index||0)<SELF_RUBRIC.length-1?'Next question →':'Continue →';
+  document.getElementById('np-work-summary').textContent='Your work: '+(document.getElementById('np-title').value.trim()||'Untitled project');
+  refreshShareCompass();
+};
+window.shareNext=function(){var state=window._shareState,store=window._rubricStores.newpost;if(state.stage===1&&(store.index||0)<SELF_RUBRIC.length-1){store.index=(store.index||0)+1;renderRubricBlock(store.containerId,store.rubric,store.values,'newpost');}else setShareStage(state.stage+1);setShareStage(window._shareState.stage);};
+window.shareBack=function(){var state=window._shareState,store=window._rubricStores.newpost;if(state.stage===1&&(store.index||0)>0){store.index--;renderRubricBlock(store.containerId,store.rubric,store.values,'newpost');}else setShareStage(state.stage-1);};
+window.openNewPost=async function(){
+  var mc=document.getElementById('mc');window._currentScreen='share';mc.innerHTML='<div class="loading">Loading your project goals…</div>';
+  var c=null,error=false;try{var snap=await get(ref(db,'contracts/'+CU.uid));c=snap.exists()?snap.val():null;}catch(e){error=true;}
+  if(window._currentScreen!=='share')return;
+  if(!error)contractData=c;
+  var goals=c?goalItemsFor(c).filter(function(g){return c.goals&&c.goals[g.id];}):[],custom=c&&customGoalText(c);if(custom)goals.push({id:'custom',text:custom});
+  window._shareState={stage:0,goalPage:0,contract:c,goals:goals,error:error};window._newPostFile=null;
+  var html='<header class="lp-share-header"><div><h1>Share your work</h1><p>A quick check with Compass, then share your project.</p></div><button type="button" class="btn bts" onclick="go(\'feed\')">Back to gallery</button></header><nav class="lp-share-stages" aria-label="Sharing steps">';
+  ['Your work','Self-reflection','Share'].forEach(function(label,i){html+='<button type="button" data-share-stage="'+i+'" onclick="setShareStage('+i+')"><span>'+(i+1)+'</span>'+label+'</button>';});html+='</nav>';
+  html+='<div class="lp-share-layout"><section class="card lp-share-paper"><section data-share-panel="0"><h2>What are you sharing?</h2><div class="fg"><label class="fl" for="np-title">Title of this piece of work</label><input class="fi" id="np-title" placeholder="Give your project a title"></div><div class="fg"><label class="fl" for="np-link">Link to your work</label><input class="fi" id="np-link" placeholder="Google Drive / YouTube / Canva…"></div><details class="lp-share-link-help"><summary>How to copy a link</summary><p>Google Drive → Share → Copy link · YouTube → Share · Canva → Share → Copy link</p></details><div class="fg"><label class="fl" for="np-file">Or attach a photo, video, PDF or audio file (up to 100 MB)</label><input type="file" class="fi" id="np-file" onchange="attachNewPostFile(this)"><div id="np-file-preview"></div></div></section>';
+  html+='<section data-share-panel="1" hidden><h2>Self-reflection</h2><div id="np-rub-rows"></div></section><section data-share-panel="2" hidden><h2>One last look</h2><p id="np-work-summary"></p><div class="lp-share-written"><div class="fg"><label class="fl" for="np-well">One thing I did well… *</label><textarea class="fta" id="np-well"></textarea></div><div class="fg"><label class="fl" for="np-improve">One thing I want to improve… *</label><textarea class="fta" id="np-improve"></textarea></div></div></section>';
+  html+='<footer class="lp-share-actions"><button type="button" class="btn bts" id="np-back" onclick="shareBack()">Back</button><button type="button" class="btn btp" id="np-continue" onclick="shareNext()">Continue →</button><button type="button" class="btn btp" id="np-share-btn" onclick="submitPost()" hidden>Share my work</button></footer></section><aside id="lp-share-compass" class="lp-share-compass" aria-label="Compass project guide"></aside></div>';
+  mc.innerHTML=html;window._rubricStores.newpost={values:new Array(SELF_RUBRIC.length).fill(null),rubric:SELF_RUBRIC,containerId:'np-rub-rows',index:0};
+  renderRubricBlock('np-rub-rows',SELF_RUBRIC,window._rubricStores.newpost.values,'newpost');setShareStage(0);window.scrollTo({top:0,behavior:'auto'});
 };
 
 window.attachNewPostFile=function(input){
@@ -1516,14 +1531,15 @@ window.submitPost=async function(){
   var well=((document.getElementById("np-well")||{}).value||"").trim();
   var improve=((document.getElementById("np-improve")||{}).value||"").trim();
   if(window._newPostUploading){toast("Please wait for the file to finish uploading.");return;}
-  if(!title){toast("Please add a title!");return;}
-  if(!well||!improve){toast("Please fill in what you did well and what to improve!");return;}
+  if(!title){setShareStage(0);document.getElementById("np-title").focus();toast("Please add a title!");return;}
+  if(!well||!improve){setShareStage(2);toast("Please fill in what you did well and what to improve!");return;}
   await push(ref(db,"posts"),{
     uid:CU.uid,name:CU.displayName,photo:CU.photoURL||"",
     title:title,link:((document.getElementById("np-link")||{}).value||"").trim(),
     fileUrl:window._newPostFile?window._newPostFile.url:"",fileName:window._newPostFile?window._newPostFile.name:"",fileType:window._newPostFile?window._newPostFile.type:"",filePath:window._newPostFile?window._newPostFile.path:"",
     productType:(contractData&&contractData.productType)||"",
     selfRubric:window._rubricStores.newpost?window._rubricStores.newpost.values:[],
+    goalSnapshot:window._shareState&&window._shareState.contract?shareGoalSnapshot(window._shareState.contract):null,
     well:well,
     improve:improve,
     groupId:myGid||"",
@@ -2159,7 +2175,7 @@ window.renderProfile=async function(uid,isOwn){
     else html+='<span class="sb" style="background:var(--gl);color:var(--tm)">Draft</span>';
     html+='</div>';
     html+='<div style="font-size:13px;margin-bottom:5px"><strong>Project:</strong> '+esc(c.productType)+(c.topic?" — "+esc(c.topic):"")+'</div>';
-    if(isOwn&&c.productType)html+='<button class="btn bts" style="font-size:12px;padding:6px 11px;margin-top:4px" onclick="renderStep3Screen()">View plan &#8594;</button>';
+    if(isOwn&&c.productType)html+='<button class="btn bts" style="font-size:12px;padding:6px 11px;margin-top:4px" onclick="renderStep3Screen(true)">View plan &#8594;</button>';
     if(c.teacherComment)html+='<div class="tip mt8"><strong>Teacher:</strong> '+esc(c.teacherComment)+'</div>';
     html+='</div>';
   }
@@ -2863,23 +2879,59 @@ function renderTFeed(){
   loadFeed();
 }
 
-window.openTeacherComment=function(postId,targetUid){
+window._teacherGoalReviews={};
+function selectedPersonalGoals(c){
+  if(!c)return [];
+  var goals=goalItemsFor(c).filter(function(g){return c.goals&&c.goals[g.id];}).map(function(g){return {id:g.id,text:g.text};});
+  var custom=customGoalText(c);if(custom)goals.push({id:'custom',text:custom});return goals;
+}
+function personalGoalFeedback(cm){
+  var review=cm&&cm.personalGoalReview;if(cm.isTeacher!==true||!review||!Array.isArray(review.goals))return '';
+  var goals=review.goals.filter(function(g){return typeof g.met==='boolean';});if(!goals.length)return '';
+  return '<details class="lp-goal-feedback"><summary>My goals · Teacher feedback ('+goals.length+')</summary><p>Did my project meet the goals I chose?</p><ul>'+goals.map(function(g){return '<li><span>'+esc(g.text)+'</span><strong class="'+(g.met?'goal-yes':'goal-no')+'">'+(g.met?'Yes':'No')+'</strong></li>';}).join('')+'</ul></details>';
+}
+function renderTeacherGoals(postId){
+  var state=window._teacherGoalReviews[postId],el=document.getElementById('tc-goals-'+postId);if(!state||!el)return;
+  if(state.error){el.innerHTML='<p>Could not load the personal goals.</p><button type="button" class="btn bts" onclick="loadTeacherGoals(\''+postId+'\')">Retry goals</button>';return;}
+  if(!state.goals.length){el.innerHTML='<h3>Personal goal check</h3><p>No saved personal goals for this project.</p>';return;}
+  var i=state.index,g=state.goals[i],done=state.goals.filter(function(goal){return typeof goal.met==='boolean';}).length;
+  el.innerHTML='<h3>Personal goal check · teacher only</h3><p>Does this project meet the learner’s chosen goal?</p><div class="lp-rubric-progress"><span>Goal '+(i+1)+' of '+state.goals.length+'</span><span>'+done+' checked</span></div><fieldset><legend>'+esc(g.text)+'</legend><div class="lp-teacher-goal-choices">'+[true,false].map(function(value){return '<label><input type="radio" name="teacher-goal-'+postId+'-'+i+'" '+(g.met===value?'checked ':'')+'onchange="pickTeacherGoal(\''+postId+'\','+i+','+value+')">'+(value?'Yes':'No')+'</label>';}).join('')+'</div></fieldset><div class="lp-share-goal-nav"><button type="button" class="btn bts" '+(i===0?'disabled ':'')+'onclick="teacherGoalPage(\''+postId+'\',-1)">Previous goal</button><button type="button" class="btn bts" '+(i===state.goals.length-1?'disabled ':'')+'onclick="teacherGoalPage(\''+postId+'\',1)">Next goal</button></div>';
+}
+window.pickTeacherGoal=function(id,index,value){if(UP.role!=='teacher')return;var state=_teacherGoalReviews[id];if(!state)return;state.goals[index].met=value;};
+window.teacherGoalPage=function(id,delta){var state=_teacherGoalReviews[id];if(!state)return;state.index=Math.max(0,Math.min(state.index+delta,state.goals.length-1));renderTeacherGoals(id);};
+window.loadTeacherGoals=async function(postId){
+  if(UP.role!=='teacher')return;
+  var form=document.getElementById('tcform-'+postId),el=document.getElementById('tc-goals-'+postId);
+  if(!form)return;if(!el){el=document.createElement('section');el.id='tc-goals-'+postId;el.className='lp-teacher-goals';var rubric=document.getElementById('tc-rub-'+postId);rubric.insertAdjacentElement('afterend',el);}
+  if(_teacherGoalReviews[postId]&&!_teacherGoalReviews[postId].error){renderTeacherGoals(postId);return;}
+  el.innerHTML='<p>Loading personal goals…</p>';
+  try{var post=(await get(ref(db,'posts/'+postId))).val();if(!post)throw new Error('Project missing');var c=post.goalSnapshot||(await get(ref(db,'contracts/'+post.uid))).val();
+    _teacherGoalReviews[postId]={index:0,error:false,studentId:post.uid,source:post.goalSnapshot?'project-submission':'contract-at-review',contractCreatedAt:c&&c.createdAt||null,contractSubmittedAt:c&&c.submittedAt||null,goals:selectedPersonalGoals(c).map(function(g){return {id:g.id,text:g.text,met:null};})};
+  }catch(error){_teacherGoalReviews[postId]={error:true,goals:[]};}renderTeacherGoals(postId);
+};
+
+window.openTeacherComment=async function(postId,targetUid){
+  if(UP.role!=="teacher")return;
   var form=document.getElementById("tcform-"+postId);if(!form)return;
   if(form.style.display!=="none"){form.style.display="none";return;}
   form.style.display="block";
   var storeKey="tceval_"+postId;
   window._rubricStores[storeKey]={values:new Array(PEER_RUBRIC.length).fill(null),rubric:PEER_RUBRIC,containerId:"tc-rub-"+postId};
   renderRubricBlock("tc-rub-"+postId,PEER_RUBRIC,window._rubricStores[storeKey].values,storeKey);
+  await loadTeacherGoals(postId);
 };
 
 window.submitTeacherComment=async function(postId,targetUid){
+  if(UP.role!=="teacher")return;
+  var goalState=_teacherGoalReviews[postId];if(!goalState||goalState.error){toast("Please load the personal goals before saving.");return;}
+  if(goalState.goals.some(function(g){return typeof g.met!=="boolean";})){toast("Choose Yes or No for each personal goal.");var box=document.getElementById("tc-goals-"+postId);if(box)box.scrollIntoView({block:"center"});return;}
   var well=((document.getElementById("tc-well-"+postId)||{}).value||"").trim();
   var improve=((document.getElementById("tc-improve-"+postId)||{}).value||"").trim();
   if(!well||!improve){toast("Please fill in both good points and to improve!");return;}
   var existSnap=await get(ref(db,"posts/"+postId+"/comments"));
   if(existSnap.exists()){var dup=false;existSnap.forEach(function(c){if(c.val().fromId===CU.uid)dup=true;});if(dup){toast("You've already evaluated this post!");return;}}
   var storeKey="tceval_"+postId;
-  await push(ref(db,"posts/"+postId+"/comments"),{from:CU.displayName+" (Teacher)",fromId:CU.uid,well:well,improve:improve,peerRubric:window._rubricStores[storeKey]?window._rubricStores[storeKey].values:[],isTeacher:true,createdAt:Date.now()});
+  await push(ref(db,"posts/"+postId+"/comments"),{from:CU.displayName+" (Teacher)",fromId:CU.uid,well:well,improve:improve,peerRubric:window._rubricStores[storeKey]?window._rubricStores[storeKey].values:[],isTeacher:true,personalGoalReview:{version:1,studentId:goalState.studentId,source:goalState.source,contractCreatedAt:goalState.contractCreatedAt,contractSubmittedAt:goalState.contractSubmittedAt,goals:goalState.goals},createdAt:Date.now()});
   if(targetUid){await push(ref(db,"notifications/"+targetUid),{type:"teacher",message:"Your teacher left feedback on your work!",read:false,createdAt:Date.now()});}
   toast("Evaluation saved!");var f=document.getElementById("tcform-"+postId);if(f)f.style.display="none";
 };
@@ -3121,7 +3173,7 @@ window.renderStep3Screen=async function(overview){
   var snap=await get(ref(db,'contracts/'+CU.uid));contractData=snap.exists()?snap.val():null;
   if(!contractData||!contractData.productType){toast('Choose a project idea first.');go('home');return;}
   if(contractData.grade!==6)return originalRenderPassport();
-  window._currentScreen='step3';await mountPlanner('passport',contractData,overview===true);
+  window._currentScreen='step3';await mountPlanner('passport',contractData,overview===true||(overview!==false&&LearnPathUI.hasPassport(contractData)));
 };
 function refreshPassportTab(){
   var tab=document.getElementById('lp-passport-tab');
