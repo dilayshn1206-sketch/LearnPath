@@ -106,6 +106,9 @@ const server=http.createServer((req,res)=>{
  await page.emulateMedia({reducedMotion:'no-preference'});
  await page.screenshot({path:path.join(root,'verification/passport-production.png'),fullPage:true});
  await f.getByRole('button',{name:'Back to Home',exact:true}).click();
+ await page.evaluate(()=>renderProfile('student',true));await page.getByRole('button',{name:'View plan →',exact:true}).click();
+ await f.locator('.passport-document').waitFor();assert.equal(await f.locator('[data-goal]').count(),0);
+ await f.getByRole('button',{name:'Back to Home',exact:true}).click();
  await page.locator('#lp-passport-tab').click();await f.getByRole('heading',{name:'My Learning Passport',exact:true}).waitFor();
  assert.match(await f.locator('#screen').innerText(),/85%/);
  for(const width of [1024,390]){await page.setViewportSize({width,height:768});const size=await page.evaluate(()=>({width:innerWidth,scroll:document.documentElement.scrollWidth}));assert.ok(size.scroll<=size.width+1);}
