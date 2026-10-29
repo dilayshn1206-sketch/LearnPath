@@ -33,6 +33,12 @@ Pause/resume control, pause in hidden tabs, static first frame for reduced motio
 Sprite timing and sheet metadata: `assets/compass-idle.json`.
 
 ## Content
+Reflection/feedback: the owner approved added guiding questions and two criteria
+per view, while keeping Step 1–2–3 and every original descriptor. Six current
+criteria retain their order and 0/1/2 stored values. Do not collapse the rubric
+to one overall self-rating. Feedback shows each area, its Step guide and original
+descriptor; written strengths and suggestions are prominent. Numerical averages
+and percentages remain in optional score details, with original reviews intact.
 The classroom feed is “Our learning journeys”, with a class-collection book,
 SVG navigation and warm passport plan cards. Use the same teal covers, gold
 binding and paper as the learner's own passport. Goals use native disclosures;
