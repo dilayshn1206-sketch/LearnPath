@@ -254,7 +254,7 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
 .rub-sentence{font-size:13px}
 .rub-chevron{background:none;border:none;color:var(--th);cursor:pointer;font-size:12px;padding:4px 6px;flex-shrink:0}
 </style>
-<link rel="stylesheet" href="assets/learnpath.css?v=20261029-10">
+<link rel="stylesheet" href="assets/learnpath.css?v=20261029-11">
 </head>
 <body>
 
@@ -310,8 +310,8 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
   <div class="modal-card" id="result-popup-card" style="text-align:center;padding:26px 20px"></div>
 </div>
 
-<script src="assets/learnpath-ui.js?v=20261029-10"></script>
-<script src="assets/share-guide.js?v=20261029-10"></script>
+<script src="assets/learnpath-ui.js?v=20261029-11"></script>
+<script src="assets/share-guide.js?v=20261029-11"></script>
 <script type="module">
 import {auth,db,storage,rpc,ref,set,get,push,onValue,update,remove,sref,uploadBytesResumable,getDownloadURL,deleteObject,onAuthStateChanged,signInWithPopup,signOut} from './assets/supabase-backend.js?v=20261027-2';
 const prov={};
@@ -1280,10 +1280,11 @@ function fbGroupRow(icon,label,stats,key){
   }
   var html='<div style="font-size:13px;margin-bottom:4px;cursor:pointer" onclick="toggleCat(\''+key+'\')">'+icon+' '+label+': <strong>'+scoreTierLabel(stats.overall)+'</strong> ('+scorePercent(stats.overall)+'%)'+(stats.count>1?' &middot; '+stats.count:'')+' &#9660;</div>';
   html+='<div id="'+key+'" style="display:none;margin:0 0 7px 8px">';
-  SELF_RUBRIC.forEach(function(item,ai){
+  PEER_RUBRIC.forEach(function(item,ai){
     if(stats.perArea[ai]){
       var a=stats.perArea[ai].reduce(function(x,y){return x+y;},0)/stats.perArea[ai].length+1;
-      html+='<div style="font-size:11px;color:var(--tm);margin-bottom:2px">'+esc(item.area)+': '+scoreTierLabel(a)+" ("+scorePercent(a)+"%)"+'</div>';
+      var level=Math.max(0,Math.min(2,Math.round(a)-1));
+      html+='<p class="lp-feedback-description"><strong>'+esc(item.area)+'</strong><span>'+esc(item.levels[level].label)+'</span>'+(stats.perArea[ai].length>1?'<small>Closest description to the classmate average</small>':'')+'</p>';
     }
   });
   html+='</div>';
@@ -1356,7 +1357,7 @@ function buildPostHTML(post){
   if(post.link)html+='<a href="'+esc(post.link)+'" target="_blank" class="obtn mb8" style="display:inline-block">View work &#8599;</a>';
   var hasSelf=post.well||post.improve||(post.selfRubric&&post.selfRubric.some(function(v){return v!==null&&v!==undefined;}));
   if(hasSelf){
-    html+='<div style="font-size:11px;color:var(--pd);background:var(--pl);display:inline-block;padding:3px 9px;border-radius:20px;margin:2px 0 6px;cursor:pointer" onclick="toggleCat(\'refl-'+post.id+'\')">&#129704; My self-reflection &#9660;</div>';
+    html+='<button type="button" class="lp-reflection-label" onclick="toggleCat(\'refl-'+post.id+'\')">'+esc(post.uid===CU.uid?'My self-reflection':(post.name||'Student')+'’s self-reflection')+' &#9660;</button>';
     html+='<div id="refl-'+post.id+'" style="display:none;margin-bottom:6px">';
     if(post.well)html+='<div class="post-text"><strong>Did well:</strong> '+esc(post.well)+'</div>';
     if(post.improve)html+='<div class="post-text"><strong>To improve:</strong> '+esc(post.improve)+'</div>';
@@ -1394,9 +1395,8 @@ function buildPostHTML(post){
     html+='<div id="cmform-'+post.id+'" style="display:none;padding:10px 13px;border-top:1px solid var(--gb)">';
     html+='<div style="font-size:12px;font-weight:600;margin-bottom:8px;color:var(--tm)">Leave feedback:</div>';
     html+='<div id="cm-rub-'+post.id+'"></div>';
-    html+='<div class="fg"><label class="fl">Good points</label><textarea class="fta" id="cm-well-'+post.id+'" style="min-height:44px"></textarea></div>';
-    html+='<div class="fg"><label class="fl">To improve</label><textarea class="fta" id="cm-improve-'+post.id+'" style="min-height:44px"></textarea></div>';
-    html+='<button class="btn btg" style="font-size:12px;padding:7px 14px" onclick="submitComment(\''+post.id+'\',\''+esc(post.uid)+'\')">Submit Comment</button>';
+    html+='<section id="cm-written-'+post.id+'" class="lp-peer-written" hidden><p class="lp-rubric-progress">Written feedback · final step</p><h3>Help '+esc(post.name||'your classmate')+' take the next step</h3><div class="lp-share-written"><div class="fg"><label class="fl" for="cm-well-'+post.id+'">Good points</label><textarea class="fta" id="cm-well-'+post.id+'" style="min-height:90px"></textarea></div>';
+    html+='<div class="fg"><label class="fl" for="cm-improve-'+post.id+'">To improve</label><textarea class="fta" id="cm-improve-'+post.id+'" style="min-height:90px"></textarea></div></div><div class="lp-rubric-navigation"><button type="button" class="btn bts" onclick="peerFeedbackStage(\''+post.id+'\',false)">Back to my choices</button><button type="button" class="btn btg" onclick="submitComment(\''+post.id+'\',\''+esc(post.uid)+'\')">Submit Comment</button></div></section>';
     html+='</div>';
   }
   html+='</div>';
@@ -1433,7 +1433,7 @@ function renderRubricBlock(containerId,rubric,values,storeKey){
       html+='<label class="rublevel-row'+(sel?' sel':'')+'" for="'+id+'"><input type="radio" id="'+id+'" name="rubric-'+storeKey+'-'+index+'" '+(sel?'checked ':'')+'onchange="pickRubricLevel(\''+storeKey+'\','+index+','+li+')"><span class="rub-pill tier'+li+'">'+TIER_LABELS[li]+'</span><span class="rub-sentence">'+esc(level.label)+'</span></label>';
     });html+='</fieldset>';
   }
-  if(!inShare)html+='<div class="lp-rubric-navigation"><button type="button" class="btn bts" '+(index===0&&!store.review?'disabled ':'')+'onclick="rubricGo(\''+storeKey+'\','+Math.max(0,index-1)+')">Back</button>'+(index<rubric.length-1&&!store.review?'<button type="button" class="btn btp" onclick="rubricGo(\''+storeKey+'\','+(index+1)+')">Next →</button>':'<button type="button" class="btn btp" onclick="rubricReview(\''+storeKey+'\')">Review choices</button>')+'</div>';
+  if(!inShare)html+='<div class="lp-rubric-navigation"><button type="button" class="btn bts" '+(index===0&&!store.review?'disabled ':'')+'onclick="rubricGo(\''+storeKey+'\','+Math.max(0,index-1)+')">Back</button>'+(index<rubric.length-1&&!store.review?'<button type="button" class="btn btp" onclick="rubricGo(\''+storeKey+'\','+(index+1)+')">Next →</button>':store.peerPost?'<button type="button" class="btn btp" onclick="peerFeedbackStage(\''+store.peerPost+'\',true)">Continue to written feedback →</button>':'<button type="button" class="btn btp" onclick="rubricReview(\''+storeKey+'\')">Review choices</button>')+'</div>';
   html+='</div>';
   if(!inShare)html+='<aside class="lp-rubric-compass">'+LearnPathShare.criterion(index,rubric[index].area)+'</aside>';
   el.innerHTML=html+'</div>';if(inShare)refreshShareCompass();
@@ -1448,7 +1448,6 @@ function refreshShareCompass(){
   var store=window._rubricStores.newpost;
   el.innerHTML=state.stage===1?LearnPathShare.criterion(store.index||0,SELF_RUBRIC[store.index||0].area):LearnPathShare.goals(state.contract,state.goals,state.goalPage,state.error);
 }
-window.shareGoalPage=function(delta){var state=window._shareState;if(!state)return;state.goalPage=Math.max(0,Math.min(state.goalPage+delta,state.goals.length-1));refreshShareCompass();};
 window.setShareStage=function(stage){
   var state=window._shareState;if(!state)return;state.stage=Math.max(0,Math.min(stage,2));
   document.querySelectorAll('[data-share-panel]').forEach(function(panel){panel.hidden=Number(panel.dataset.sharePanel)!==state.stage;});
@@ -1556,8 +1555,16 @@ window.openComment=function(postId){
   if(form.style.display!=="none"){form.style.display="none";return;}
   form.style.display="block";
   var storeKey="comment_"+postId;
-  window._rubricStores[storeKey]={values:new Array(PEER_RUBRIC.length).fill(null),rubric:PEER_RUBRIC,containerId:"cm-rub-"+postId};
+  if(!window._rubricStores[storeKey])window._rubricStores[storeKey]={values:new Array(PEER_RUBRIC.length).fill(null),rubric:PEER_RUBRIC,containerId:"cm-rub-"+postId,peerPost:postId};
+  peerFeedbackStage(postId,false);
   renderRubricBlock("cm-rub-"+postId,PEER_RUBRIC,window._rubricStores[storeKey].values,storeKey);
+};
+
+window.peerFeedbackStage=function(postId,written){
+  var rubric=document.getElementById('cm-rub-'+postId),fields=document.getElementById('cm-written-'+postId);
+  if(!rubric||!fields)return;
+  rubric.hidden=written;fields.hidden=!written;
+  if(written){fields.querySelector('textarea').focus({preventScroll:true});fields.scrollIntoView({block:'nearest',behavior:'smooth'});}
 };
 
 window.submitComment=async function(postId,targetUid){
@@ -3127,7 +3134,7 @@ async function mountPlanner(mode,c,overview){
     ['written','spoken','visual'].forEach(function(cat){extra[cat]=(catalog[cat]||[]).filter(function(item){var original=DEFAULT_CATALOG[cat].find(function(pair){return pair[0]===item.id;});return item.active&&(!original||original[1]!==item.name);});});
   }
   var mc=document.getElementById('mc');
-  mc.innerHTML=(isLockedStep(mode==='idea'?'step2':'step3')?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">← Back to Home</button>')+'<iframe id="lp-planner-frame" title="'+(mode==='idea'?'Plan your project':LearnPathUI.hasPassport(c)?'My Learning Passport':'Set goals and plan')+'" src="assets/planner.html?v=20261029-6" style="width:100%;height:900px;border:0;display:block" scrolling="no"></iframe>';
+  mc.innerHTML=(isLockedStep(mode==='idea'?'step2':'step3')?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">← Back to Home</button>')+'<iframe id="lp-planner-frame" title="'+(mode==='idea'?'Plan your project':LearnPathUI.hasPassport(c)?'My Learning Passport':'Set goals and plan')+'" src="assets/planner.html?v=20261029-11" style="width:100%;height:900px;border:0;display:block" scrolling="no"></iframe>';
   window._plannerContext={mode:mode,contract:c,overview:!!overview&&LearnPathUI.hasPassport(c),passportReady:LearnPathUI.hasPassport(c),readOnly:false,extraProducts:extra};
   setNav('home');
 }
@@ -3141,11 +3148,15 @@ window.addEventListener('message',async function(event){
     if(message.action==='load'){respond(window._plannerContext);return;}
     if(UP.role==='teacher')throw new Error('Open a student passport from your teacher panel.');
     if(message.action==='home'){await flushPlannerDraft();respond(true);go('home');return;}
+    if(message.action==='planning'){respond(true);renderStep3Screen();return;}
     if(message.action==='idea'){
       var draft=message.payload;
       if(!draft||!draft.topic||!draft.productType||!['written','spoken','visual'].includes(draft.category)||!SKILL_TIPS[draft.weakness])throw new Error('Complete your topic, product and focus choice.');
-      await set(ref(db,'contracts/'+uid),{grade:6,goalVersion:'grade6-v1',plannerVersion:'passport-v1',productId:draft.productId,productType:draft.productType,category:draft.category,platforms:draft.tools||[],platformsOtherText:draft.toolOther||'',weakness:draft.weakness,weaknessTips:SKILL_TIPS[draft.weakness],status:'draft',editUnlocked:true,topic:draft.topic,goals:{},evalTeacherPct:'',evalPeerPct:'',studentName:CU.displayName,studentEmail:CU.email,studentPhoto:CU.photoURL||'',studentId:uid,createdAt:Date.now()});
-      contractData=(await get(ref(db,'contracts/'+uid))).val();respond(true);celebrate();renderQuizDone();refreshPassportTab();return;
+      var existing=(await get(ref(db,'contracts/'+uid))).val();
+      var ideaFields={plannerVersion:'passport-v1',productId:draft.productId,productType:draft.productType,category:draft.category,platforms:draft.tools||[],platformsOtherText:draft.toolOther||'',weakness:draft.weakness,weaknessTips:SKILL_TIPS[draft.weakness],status:'draft',editUnlocked:true,topic:draft.topic};
+      if(existing&&existing.productType)await update(ref(db,'contracts/'+uid),ideaFields);
+      else await set(ref(db,'contracts/'+uid),Object.assign({grade:6,goalVersion:'grade6-v1',goals:{},evalTeacherPct:'',evalPeerPct:'',studentName:CU.displayName,studentEmail:CU.email,studentPhoto:CU.photoURL||'',studentId:uid,createdAt:Date.now()},ideaFields));
+      contractData=(await get(ref(db,'contracts/'+uid))).val();respond(contractData);if(!existing||!existing.productType){celebrate();renderQuizDone();}refreshPassportTab();return;
     }
     if(window._plannerContext.mode!=='passport')throw new Error('Open your Learning Passport first.');
     if(message.action==='draft'){await plannerDraft(uid,Object.assign({},plannerFields(message.payload),{status:'draft',editUnlocked:true}));respond(true);return;}
@@ -3165,7 +3176,7 @@ window.addEventListener('message',async function(event){
 var originalStartQuiz=startQuiz;
 startQuiz=async function(){
   window._currentScreen='quiz';
-  try{await mountPlanner('idea',null,false);}catch(error){toast('Could not open project planning. Try again.');}
+  try{var snap=await get(ref(db,'contracts/'+CU.uid));contractData=snap.exists()?snap.val():null;await mountPlanner('idea',contractData,false);}catch(error){toast('Could not open project planning. Try again.');}
 };window.startQuiz=startQuiz;
 var originalRenderPassport=window.renderStep3Screen;
 window.renderStep3Screen=async function(overview){

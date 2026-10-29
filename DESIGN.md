@@ -33,6 +33,17 @@ Pause/resume control, pause in hidden tabs, static first frame for reduced motio
 Sprite timing and sheet metadata: `assets/compass-idle.json`.
 
 ## Content
+Latest owner revision (29 October): saved project ideas open their saved review,
+with targeted Edit actions and Cancel edit. Completed planning opens the passport
+overview; edits preserve the existing goals, plan actions and targets. Use a compact
+open passport with a short cover and goals/actions alongside, and smaller class-plan
+papers so one normal three-action plan fits a tablet view. All 23 plans remain browsable.
+Share Compass stays on the right and initially shows all three saved challenge tips
+as questions, with no selected-project-goal section or hidden third tip. Peer feedback
+uses the same single-criterion progression as self-reflection, then written feedback.
+Classmate self-reflections name their author. Expanded feedback shows the original
+criterion description; averaged responses explicitly identify the closest description.
+
 The owner selected binary Yes/No for teacher review of the learner's chosen
 personal/project goals. No third/fourth state and no change to the rubric average.
 Student-facing results pair original goal text with a written Yes/No badge.
@@ -40,8 +51,8 @@ Sharing is a landscape workspace: work → self-reflection → share, with mount
 fields preserved across panels and a right-side Compass. Show one rubric criterion
 at a time, its original Step descriptions, progress, and neutral explanation.
 This supersedes the previous evaluation rollback layout; rubric values/text stay.
-Compass mentally checks the saved challenge/focus tips and selected project goals
-as questions. Do not invent selected goals or record a second self-assessment.
+Compass mentally checks the saved challenge/focus tips as questions. Do not invent
+selected goals or record a second self-assessment.
 Hide the large route map only while composing; its approved art stays elsewhere.
 Completed passports open in overview from View plan and other default entry points.
 The owner reverted the paired-question and expanded-feedback evaluation design
