@@ -254,7 +254,7 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
 .rub-sentence{font-size:13px}
 .rub-chevron{background:none;border:none;color:var(--th);cursor:pointer;font-size:12px;padding:4px 6px;flex-shrink:0}
 </style>
-<link rel="stylesheet" href="assets/learnpath.css?v=20261029-2">
+<link rel="stylesheet" href="assets/learnpath.css?v=20261029-6">
 </head>
 <body>
 
@@ -310,7 +310,7 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
   <div class="modal-card" id="result-popup-card" style="text-align:center;padding:26px 20px"></div>
 </div>
 
-<script src="assets/learnpath-ui.js?v=20261029-3"></script>
+<script src="assets/learnpath-ui.js?v=20261029-6"></script>
 <script type="module">
 import {auth,db,storage,rpc,ref,set,get,push,onValue,update,remove,sref,uploadBytesResumable,getDownloadURL,deleteObject,onAuthStateChanged,signInWithPopup,signOut} from './assets/supabase-backend.js?v=20261027-2';
 const prov={};
@@ -3100,7 +3100,7 @@ async function mountPlanner(mode,c,overview){
     ['written','spoken','visual'].forEach(function(cat){extra[cat]=(catalog[cat]||[]).filter(function(item){var original=DEFAULT_CATALOG[cat].find(function(pair){return pair[0]===item.id;});return item.active&&(!original||original[1]!==item.name);});});
   }
   var mc=document.getElementById('mc');
-  mc.innerHTML=(isLockedStep(mode==='idea'?'step2':'step3')?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">← Back to Home</button>')+'<iframe id="lp-planner-frame" title="'+(mode==='idea'?'Plan your project':LearnPathUI.hasPassport(c)?'My Learning Passport':'Set goals and plan')+'" src="assets/planner.html?v=20261029-5" style="width:100%;height:900px;border:0;display:block" scrolling="no"></iframe>';
+  mc.innerHTML=(isLockedStep(mode==='idea'?'step2':'step3')?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">← Back to Home</button>')+'<iframe id="lp-planner-frame" title="'+(mode==='idea'?'Plan your project':LearnPathUI.hasPassport(c)?'My Learning Passport':'Set goals and plan')+'" src="assets/planner.html?v=20261029-6" style="width:100%;height:900px;border:0;display:block" scrolling="no"></iframe>';
   window._plannerContext={mode:mode,contract:c,overview:!!overview&&LearnPathUI.hasPassport(c),passportReady:LearnPathUI.hasPassport(c),readOnly:false,extraProducts:extra};
   setNav('home');
 }
@@ -3153,7 +3153,7 @@ function refreshPassportTab(){
   var ready=LearnPathUI.hasPassport(contractData);
   LearnPathUI.setPassportReady(ready);
   if(!CU||document.getElementById('app').style.display==='none'||UP.role==='teacher'||!ready){if(tab)tab.remove();return;}
-  if(!tab){tab=document.createElement('button');tab.id='lp-passport-tab';tab.className='btn';tab.type='button';tab.textContent='My Learning Passport';document.body.appendChild(tab);tab.onclick=function(){renderStep3Screen(true);};}
+  if(!tab){tab=document.createElement('button');tab.id='lp-passport-tab';tab.className='btn';tab.type='button';tab.setAttribute('aria-label','My Learning Passport');tab.title='Open my Learning Passport';tab.innerHTML='<svg viewBox="0 0 48 60" aria-hidden="true"><rect x="5" y="3" width="38" height="54" rx="5"/><path d="M11 4v52M17 14h20M17 47h20"/><circle cx="27" cy="30" r="10"/><path d="m27 22 3 5 5 3-5 3-3 5-3-5-5-3 5-3z"/></svg><span>My Learning Passport</span>';document.body.appendChild(tab);tab.onclick=function(){renderStep3Screen(true);};}
 }
 new MutationObserver(refreshPassportTab).observe(document.getElementById('mc'),{childList:true});
 new MutationObserver(refreshPassportTab).observe(document.getElementById('app'),{attributes:true,attributeFilter:['style']});

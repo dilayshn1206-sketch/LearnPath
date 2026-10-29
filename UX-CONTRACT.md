@@ -10,6 +10,12 @@
 | CRUD | Existing Firebase functions in index.html | Existing storage paths and schema | Same save and navigation destinations | Source comparison + mock tests |
 
 ## Behavior ledger
+- Successful teacher submission shows “Sent to the teacher” as both a receipt
+  stamp and the completed send action. It also reveals the persistent passport
+  book tab at the right side. No sent state appears before persistence succeeds.
+  Editing returns the receipt to draft and enables send again after draft save.
+  The tablet reading column reserves space for the book tab; mobile uses the
+  compact bottom variant. Cover/name/seal are presentation only.
 - Completed passport overview: single article, project → goals → plan → target
   scores. Editing actions still use the canonical form sections. Topic editing
   is a labelled disclosure to keep the saved document readable. Compass links
