@@ -172,3 +172,51 @@ body{padding-bottom:84px}
 @media(max-width:850px){.passport-document-layout{grid-template-columns:1fr;gap:14px}.passport-document-guide{position:static;padding:0;display:grid;grid-template-columns:85px minmax(0,1fr);column-gap:14px}.passport-document-guide .lp-clock{--frame-size:85px;grid-row:1/4}.passport-document-guide p{margin:0 0 5px}.passport-document-guide .guide-name{margin:0}.passport-document-guide a{padding:4px 0}.passport-document{padding:28px}.passport-document .passport-overview-title{margin:-28px -28px 24px}}
 @media(max-width:550px){.passport-document{padding:22px 18px;border-left-width:8px}.passport-document .passport-overview-title{padding:25px 20px;margin:-22px -18px 22px}.passport-document .passport-overview-title h1{font-size:28px;max-width:230px}.passport-cover-emblem{position:static;width:54px;height:54px;margin-bottom:12px}.passport-document-goals{grid-template-columns:1fr;gap:22px}.passport-document .score-pair{flex-direction:column;gap:14px}.passport-document .overview-actions .primary{flex:auto}.passport-document-topic{font-size:22px}.passport-document .section-title h2{font-size:21px;gap:8px}}
 @media(prefers-reduced-motion:reduce){.passport-document .lp-doc-reveal{animation:none}}
+
+/* Compact open passport: the same bound paper, with goals and actions alongside. */
+.passport-document-layout{display:block;max-width:1100px}
+.passport-document-guide{position:static;display:flex;align-items:center;gap:12px;padding:0 4px 10px;font-size:14px}
+.passport-document-guide .lp-clock{--frame-size:56px;flex-shrink:0}
+.passport-document-guide .guide-name{font-size:14px;margin:0;white-space:nowrap}
+.passport-document-guide p{margin:0}.passport-document-guide a{margin-left:auto;white-space:nowrap}
+.passport-document{padding:16px 22px;border-radius:9px 20px 20px 9px}
+.passport-document .passport-overview-title{min-height:0;padding:14px 80px 14px 22px;margin:-16px -22px 12px;border-radius:0 18px 0 0}
+.passport-document .passport-overview-title h1{font-size:26px;max-width:none;margin:5px 0}
+.passport-document .passport-overview-title .eyebrow{font-size:10px;margin:0}.passport-document .intro{font-size:14px}
+.passport-cover-emblem{width:52px;height:52px;top:18px;right:18px}
+.passport-holder{margin-top:8px;padding-top:7px;flex-direction:row;align-items:baseline;gap:10px}.passport-holder strong{font-size:16px}
+.passport-document .passport-notice{padding:7px 10px;gap:3px;flex-direction:row;flex-wrap:wrap;margin-bottom:5px;font-size:13px;transform:none}.passport-document .passport-notice strong{font-size:14px}
+.passport-document .passport-overview-grid{display:grid;grid-template-columns:1.15fr 1fr;gap:0 24px}
+.passport-document .passport-overview-card{padding:12px 0}
+.passport-document .passport-project-section{grid-column:1/-1}
+.passport-document .passport-project-section{display:grid;grid-template-columns:1fr 1.4fr;gap:0 20px;align-items:start}
+.passport-document .passport-project-section .section-title{grid-column:1/-1}
+.passport-document .passport-project-section .passport-product{grid-column:1;grid-row:2}
+.passport-document .passport-project-section .passport-document-topic{grid-column:2;grid-row:2}
+.passport-document .passport-project-section .hint{grid-column:1;grid-row:3}
+.passport-document .passport-project-section .passport-topic-edit{grid-column:2;grid-row:3}
+.passport-document .passport-overview-title .intro,.passport-document .reminder-explainer{display:none}
+.passport-document .focus-overview{grid-column:1;grid-row:2/4}
+.passport-document .passport-plan-section,.passport-document .scores-overview{grid-column:2}
+.passport-document .section-title{margin-bottom:8px;gap:10px}.passport-document .section-title h2{font-size:18px;gap:8px}
+.passport-document .section-title h2:before{width:25px;height:25px;font-size:11px}
+.passport-document-topic{font-size:20px;margin:0 0 4px}.passport-document .passport-product{font-size:15px;margin:0 0 4px}
+.passport-document .hint{font-size:13px;margin:4px 0}
+.passport-document-goals{display:block}.passport-document .passport-document-goals h3{font-size:14px;margin:10px 0 5px}
+.passport-document .passport-overview-card ol,.passport-document .passport-overview-card ul{padding-left:21px}
+.passport-document .passport-overview-card li{font-size:15px;line-height:1.4;margin-bottom:6px;padding-left:1px}
+.passport-document .passport-plan-section ol{padding:0}.passport-document .passport-plan-section li{padding:7px 0;gap:8px;margin:0}
+.passport-document .score-pair{gap:14px}.passport-document .score-pair strong{font-size:20px}.passport-document .score-pair span{font-size:14px}
+.passport-document .edit{min-height:38px;padding:7px 10px;font-size:14px}
+.passport-topic-edit{margin:5px 0 0}.passport-topic-edit summary{padding:4px 0;min-height:32px;font-size:14px}
+.passport-document .overview-actions{margin-top:12px;gap:10px}.passport-document .overview-actions button{font-size:14px;min-height:40px;padding:9px 12px}
+.passport-document .overview-actions .send-teacher{flex-basis:auto;margin:0}
+.passport-document .reminder-explainer{margin-top:10px}.passport-page-footer{margin-top:12px;padding-top:7px;font-size:9px}
+.saved-idea-review .heading h1{font-size:28px}.saved-idea-review .heading{margin-bottom:14px}
+.saved-idea-review .focus-goals{padding:16px}.saved-idea-review .focus-goals li{margin-bottom:5px;font-size:16px}
+.saved-idea-review .goals-note,.saved-idea-review .bridge,.saved-idea-review .chat-guide{display:none}
+.saved-idea-review .layout{grid-template-columns:1fr}.saved-idea-review .layout>section{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+.saved-idea-review .passport{margin:0;padding:18px}.saved-idea-review .passport h2{font-size:22px}
+.saved-idea-review .passport-row{padding:8px 0}.saved-idea-review .actions{grid-column:1/-1;margin-top:0}
+.saved-idea-review #error:empty{display:none}
+@media(max-width:600px){.passport-document .passport-overview-grid,.passport-document .passport-project-section{display:block}.passport-document-guide{flex-wrap:wrap}.passport-document-guide .lp-clock{grid-row:auto}.passport-document-guide a{margin-left:0}.passport-document .passport-overview-title h1{font-size:23px}.passport-holder{flex-wrap:wrap}.passport-document .score-pair{flex-direction:row}.saved-idea-review .layout>section{grid-template-columns:1fr}.saved-idea-review .actions{grid-column:auto}}

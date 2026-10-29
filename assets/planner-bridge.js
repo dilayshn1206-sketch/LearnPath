@@ -21,14 +21,21 @@ function receipt(){
 const draftRender=render;
 render=function(){
  draftRender();
+ if(host?.mode==='idea'&&host.contract?.productType&&!passport?.active){
+  document.body.classList.toggle('saved-idea-review',state.step===4);
+  if(state.step===4){$('.heading .eyebrow').textContent='Project idea · Saved';$('.heading .intro').textContent='Your choices are saved. Use Edit to change one part, or continue to your plan.';$('#next').textContent='Continue to my plan →';}
+  else if(state.returnToIdeaReview){$('#next').textContent='Save changes';$('#back').disabled=false;$('#back').textContent='Cancel edit';$('#back').onclick=()=>{hydrateIdea(host.contract);render();};}
+  document.querySelectorAll('[data-edit],[data-step]').forEach(b=>{b.onclick=()=>{state.step=+(b.dataset.edit??b.dataset.step);state.returnToIdeaReview=true;render();};});
+ }
  if(passport?.active&&passport.step===2&&!passport.returnToOverview)$('#passport-next')?.classList.add('send-teacher');
- if(!passport?.active&&state.step===4&&$('#next'))$('#next').textContent='Save my project idea';
+ if(!passport?.active&&state.step===4&&$('#next')&&!host?.contract?.productType)$('#next').textContent='Save my project idea';
  document.querySelectorAll('.demo-label').forEach(el=>el.textContent='Guided help · prepared replies');
  document.querySelectorAll('.chat-footnote').forEach(el=>el.textContent='Your compass offers prepared guidance. Your chat messages are not saved.');
  document.querySelectorAll('.contract-guide .hint').forEach(el=>el.textContent='Your teacher will review your Learning Passport.');
  document.querySelectorAll('.reminder-explainer').forEach(el=>el.textContent='Use the My Learning Passport tab on LearnPath to return to your plan.');
  if(passport?.view==='overview'){
   $('.passport-overview-title .eyebrow').textContent='LearnPath · Learning journey';
+  $('#edit-passport')?.remove();
   receipt();
   $('#overview-back-to-idea').textContent='Back to Home';$('#overview-back-to-idea').onclick=()=>request('home').catch(saveError);
   if(host.readOnly){document.querySelectorAll('[data-passport-edit],#edit-passport').forEach(el=>el.remove());}
@@ -51,7 +58,16 @@ render=function(){
 };
 const originalNext=next;
 next=async function(){
- if(state.step!==4)return originalNext();
+ if(state.step!==4){
+  const editing=state.returnToIdeaReview,step=state.step;
+  originalNext();
+  if(!editing||state.step===step)return;
+  state.step=step;render();const b=$('#next');b.disabled=true;b.textContent='Saving changes…';
+  try{host.contract=await request('idea',contractDraft());hydrateIdea(host.contract);render();$('#save-status').textContent='Changes saved';}
+  catch(error){saveError(error);b.disabled=false;b.textContent='Save changes';}
+  return;
+ }
+ if(host?.contract?.productType){try{await request('planning');}catch(error){saveError(error);}return;}
  const b=$('#next');b.disabled=true;b.textContent='Saving my idea…';
  try{await request('idea',contractDraft());}catch(error){saveError(error);b.disabled=false;b.textContent='Save my project idea';}
 };
@@ -72,6 +88,10 @@ function scheduleSave(){queueMicrotask(()=>{
 });}
 document.addEventListener('input',scheduleSave);document.addEventListener('change',scheduleSave);document.addEventListener('click',scheduleSave);
 let lastHeight=0;
+function hydrateIdea(c){
+ const known=formats.find(f=>f[0]===c.productId);
+ state={...state,step:4,topic:'own',topicOwn:c.topic||'',category:c.category,format:known?c.productId:'own',formatOwn:c.productType||'',tools:c.platforms||['unsure'],toolOwn:c.platformsOtherText||'',weakness:c.weakness||'ideas',saved:false,returnToIdeaReview:false};
+}
 function reportHeight(){requestAnimationFrame(()=>{const h=Math.ceil(document.body.getBoundingClientRect().height);if(h!==lastHeight){lastHeight=h;parent.postMessage({learnpathPlanner:true,action:'height',payload:h},location.origin);}});}
 new ResizeObserver(reportHeight).observe(document.body);
 (async()=>{
@@ -79,13 +99,14 @@ new ResizeObserver(reportHeight).observe(document.body);
   host=await request('load');
   // Keep teacher-added or renamed formats alongside the twelve approved formats.
   for(const category of groups){for(const item of host.extraProducts[category.id]||[]){const exists=category.formats.find(f=>f[0]===item.id);if(exists)exists[1]=item.name;else{const format=[item.id,item.name,'A project format from your teacher.'];category.formats.push(format);formats.push(format);}}}
+  if(host.mode==='idea'&&host.contract?.productType)hydrateIdea(host.contract);
   if(host.mode==='passport'){
    const c=host.contract;
    state={...state,step:4,topic:'own',topicOwn:c.topic,category:c.category,format:'own',formatOwn:c.productType,tools:c.platforms||['unsure'],toolOwn:c.platformsOtherText||'',weakness:c.weakness||'ideas',saved:true};
    passport={...c,focusGoals:c.weaknessTips||[],tools:c.platforms||[],toolOther:c.platformsOtherText||'',goals:c.goals||{},goalsOtherText:c.goalsOtherText||'',planTails:(c.planSteps?.length?c.planSteps:['','','']).map(tailOnly),evalTeacherPct:c.evalTeacherPct??'',evalPeerPct:c.evalPeerPct??'',step:0,active:true,view:host.overview||host.readOnly?'overview':'edit',returnToOverview:false,submitted:c.status==='pending'||c.status==='approved'};
    lastPatch=JSON.stringify(patch());
   }
-  render();if(host.mode==='idea'&&$('#next'))$('#next').textContent='Continue →';
+  render();if(host.mode==='idea'&&!host.contract?.productType&&$('#next'))$('#next').textContent='Continue →';
  }catch(error){$('#screen').innerHTML='<h1>Could not open your plan</h1><p>'+esc(error.message)+'</p>';}
 })();
 
