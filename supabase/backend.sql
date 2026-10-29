@@ -174,7 +174,7 @@ begin
    if val->>'filePath' is not null and val->>'filePath'<>'' and val->>'filePath' not like 'posts/'||uid||'/%' then allowed:=false; end if;
   elsif array_length(p,1)=4 and p[3]='likes' and p[4]=uid then allowed:=d#>p[1:2] is not null and (val='true'::jsonb or p_operation='remove');
   elsif array_length(p,1)=4 and p[3]='comments' and old is null and p_operation='set' then
-   allowed:=d#>p[1:2] is not null and val->>'fromId'=uid and coalesce(val->>'isTeacher','false')='false' and not exists(select 1 from jsonb_each(coalesce(d#>p[1:3],'{}')) where value->>'fromId'=uid);
+   allowed:=d#>p[1:2] is not null and val->>'fromId'=uid and coalesce(val->>'isTeacher','false')='false' and not(val ? 'personalGoalReview') and not exists(select 1 from jsonb_each(coalesce(d#>p[1:3],'{}')) where value->>'fromId'=uid);
   end if;
  elsif root='notifications' and p[2]=uid and array_length(p,1)=3 and p_operation='update' then
   allowed:=old is not null and p_value='{"read":true}'::jsonb;
