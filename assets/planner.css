@@ -114,3 +114,47 @@ body{padding-bottom:84px}
 @media(max-width:700px){.passport-overview-grid{grid-template-columns:1fr}.scores-overview{grid-column:auto}.passport-overview-card{padding:20px}.score-pair{gap:12px}.section-title{gap:10px}.section-title h2{font-size:21px}.overview-actions{flex-direction:column;align-items:stretch}.will-prefix{padding:10px}.passport-tab{font-size:12px;min-height:44px}.passport-quick-view{max-height:65vh}#passport-reminder{right:14px;bottom:12px}}
 
 .send-teacher{background:#edbd60;color:#142d4b;border:2px solid #a46b13;box-shadow:0 4px 0 #a46b13;font-size:18px;min-height:56px}.send-teacher:hover{background:#f4cd80}.contract-paper .contract-focus{border:0;background:#fff7e6;margin-bottom:24px}.contract-paper h3,.focus-overview h3{margin:24px 0 12px}
+
+/* One continuous passport sheet; the companion stays outside the document. */
+.passport-document-layout{display:grid;grid-template-columns:170px minmax(0,1fr);gap:24px;align-items:start;max-width:1100px;margin:auto}
+.passport-document-guide{position:sticky;top:20px;padding-top:36px;color:var(--tm);font-size:16px;line-height:1.55}
+.passport-document-guide .lp-clock{--frame-size:160px}
+.passport-document-guide .guide-name{color:var(--pd);font-size:18px;font-weight:700;margin:10px 0}
+.passport-document-guide a{display:inline-block;color:var(--pd);font-weight:700;padding:10px 0;text-underline-offset:4px}
+.passport-document{min-width:0;background:var(--lp-paper);border:1px solid var(--gb);border-top:6px solid var(--p);border-radius:4px;box-shadow:var(--sh);padding:36px 40px}
+.passport-document .passport-overview-title{border-bottom:1px solid var(--gb);padding-bottom:18px;margin-bottom:16px}
+.passport-document .passport-overview-title h1{font-size:34px;margin:10px 0}
+.passport-document .intro{font-size:17px;margin:0}
+.passport-document .passport-notice{border:0;border-left:3px solid var(--t);border-radius:0;background:var(--tl);padding:10px 14px;font-size:15px;margin:0 0 8px}
+.passport-document .passport-overview-grid{display:block}
+.passport-document .passport-overview-card{border:0;border-bottom:1px solid var(--gb);border-radius:0;box-shadow:none;background:transparent;padding:24px 0;height:auto}
+.passport-document .section-title{margin-bottom:14px;align-items:center}
+.passport-document .section-title h2{font-size:23px}
+.passport-document .passport-product{font-size:17px;color:var(--pd);font-weight:700;margin:0 0 6px}
+.passport-document-topic{font-size:25px;font-weight:700;line-height:1.35;margin:0 0 8px}
+.passport-document .hint{margin:8px 0;font-size:15px}
+.passport-document-goals{display:grid;grid-template-columns:1fr 1.2fr;gap:28px}
+.passport-document .passport-document-goals h3{font-size:16px;color:var(--pd);margin:0 0 12px}
+.passport-document .passport-overview-card li{margin-bottom:12px;font-size:17px;line-height:1.5}
+.passport-document .passport-plan-section ol{list-style:none;counter-reset:plan; padding:0}
+.passport-document .passport-plan-section li{counter-increment:plan;display:flex;gap:14px;align-items:baseline;padding:10px 0;margin:0;border-bottom:1px dotted var(--gb)}
+.passport-document .passport-plan-section li:last-child{border-bottom:0}
+.passport-document .passport-plan-section li:before{content:counter(plan) '.';font-weight:700;color:var(--pd);min-width:22px}
+.passport-plan-section{scroll-margin-top:20px}
+.passport-document .score-pair{gap:26px}
+.passport-document .score-pair p{padding:0;border:0;background:transparent;border-radius:0;display:flex;gap:14px;align-items:baseline;flex-wrap:wrap}
+.passport-document .score-pair strong{font-size:25px;margin:0}
+.passport-document .score-pair span{font-size:16px}
+.passport-topic-edit{margin-top:16px;font-size:15px}
+.passport-topic-edit summary{cursor:pointer;display:list-item;color:var(--pd);font-weight:600;padding:8px 0;min-height:40px}
+.passport-topic-edit .field{margin-top:10px}
+.passport-document .overview-actions{flex-wrap:wrap;margin-top:24px;gap:12px}
+.passport-document .overview-actions .primary{flex:1}
+.passport-document .overview-actions .send-teacher{flex-basis:100%;margin-top:8px}
+.passport-document .reminder-explainer{margin-top:20px}
+.passport-document .lp-doc-reveal{animation:passport-line-in .42s ease-out backwards;animation-delay:calc(var(--reveal-order)*.1s)}
+.passport-document.document-motion-off .lp-doc-reveal{animation:none}
+@keyframes passport-line-in{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:850px){.passport-document-layout{grid-template-columns:1fr;gap:14px}.passport-document-guide{position:static;padding:0;display:grid;grid-template-columns:85px minmax(0,1fr);column-gap:14px}.passport-document-guide .lp-clock{--frame-size:85px;grid-row:1/4}.passport-document-guide p{margin:0 0 5px}.passport-document-guide .guide-name{margin:0}.passport-document-guide a{padding:4px 0}.passport-document{padding:28px}}
+@media(max-width:550px){.passport-document{padding:22px 18px}.passport-document .passport-overview-title h1{font-size:27px}.passport-document-goals{grid-template-columns:1fr;gap:22px}.passport-document .score-pair{flex-direction:column;gap:14px}.passport-document .overview-actions .primary{flex:auto}.passport-document-topic{font-size:22px}}
+@media(prefers-reduced-motion:reduce){.passport-document .lp-doc-reveal{animation:none}}

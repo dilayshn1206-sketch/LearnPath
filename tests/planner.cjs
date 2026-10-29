@@ -85,6 +85,20 @@ const server=http.createServer((req,res)=>{
  assert.equal(saved.status,'pending');assert.equal(saved.editUnlocked,true);assert.equal(saved.evalTeacherPct,'85');assert.equal(saved.evalPeerPct,'90');assert.equal(saved.planSteps[0],'I will prepare my questions.');
  assert.equal(await f.locator('[data-passport-edit]').count(),3);
  assert.match(await f.locator('.focus-overview').innerText(),/Practise your talk|2 minutes/);
+ assert.equal(await f.locator('article.passport-document').count(),1);
+ assert.equal(await f.locator('.passport-document .passport-overview-card').count(),4);
+ assert.ok(await f.locator('.lp-doc-reveal').count()>=11);
+ await f.locator('.passport-document').evaluate(el=>Promise.all(el.getAnimations({subtree:true}).filter(a=>a.effect?.target?.classList.contains('lp-doc-reveal')).map(a=>a.finished)));
+ await f.locator('.passport-document').screenshot({path:path.join(root,'verification/passport-document.png')});
+ await f.locator('#motion').click();
+ assert.equal(await f.locator('.lp-doc-reveal').first().evaluate(el=>getComputedStyle(el).animationName),'none');
+ await f.locator('.passport-topic-edit summary').click();
+ assert.ok(await f.locator('#saved-topic').isVisible());
+ await f.locator('.passport-topic-edit summary').click();
+ for(const width of [390,1024]){await page.setViewportSize({width,height:768});assert.ok(await f.locator('.passport-document').evaluate(el=>el.scrollWidth<=el.clientWidth+1));}
+ await page.emulateMedia({reducedMotion:'reduce'});
+ assert.equal(await f.locator('.lp-doc-reveal').first().evaluate(el=>getComputedStyle(el).animationName),'none');
+ await page.emulateMedia({reducedMotion:'no-preference'});
  await page.screenshot({path:path.join(root,'verification/passport-production.png'),fullPage:true});
  await f.getByRole('button',{name:'Back to Home',exact:true}).click();
  await page.locator('#lp-passport-tab').click();await f.getByRole('heading',{name:'My Learning Passport',exact:true}).waitFor();
