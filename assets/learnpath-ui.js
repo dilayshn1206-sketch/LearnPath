@@ -13,6 +13,38 @@
   function mascot() {
     return '<div class="lp-mascot"><div class="lp-mascot-note"><strong>One step at a time.</strong><br>Your ideas make this project yours.</div><div class="lp-clock'+(paused?' paused':'')+'" role="img" aria-label="Compass learning companion"></div><button type="button" class="lp-motion-toggle" aria-pressed="'+paused+'" onclick="LearnPathUI.toggleMotion()">'+(paused?'Play animation':'Pause animation')+'</button></div>';
   }
+  function productLaunch(product) {
+    var name = String(product || 'Your project');
+    var key = name.toLowerCase();
+    var formats = [
+      ['infographic','infographics','How do short facts and pictures work together?'],
+      ['visual slide','visual slide stories','How does each slide move the story forward?'],
+      ['poster','posters','What catches your eye first? How much text is there?'],
+      ['comic','comics','How do pictures and speech bubbles tell the story?'],
+      ['written interview','written interviews','How are the questions and answers arranged?'],
+      ['interview','interviews','How does the interviewer start and ask follow-up questions?'],
+      ['podcast','podcasts','How does the speaker welcome listeners and introduce the topic?'],
+      ['short talk','short talks','How does the speaker open, explain an idea and finish?'],
+      ['role play','role plays','Who are the characters? What do they say to each other?'],
+      ['how-to','how-to guides','How do the steps help someone follow the instructions?'],
+      ['how to','how-to guides','How do the steps help someone follow the instructions?'],
+      ['blog','blogs','How do the title and short paragraphs help the reader?'],
+      ['story','stories','How does the story begin, develop and end?']
+    ];
+    var match = formats.find(function (format) { return key.indexOf(format[0]) !== -1; });
+    var plural = match ? match[1] : name + ' examples';
+    var prompt = match ? match[2] : 'How is it organised? What helps you understand its message?';
+    var search = 'https://www.google.com/search?q=' + encodeURIComponent(plural + ' examples for students digital citizenship');
+    return '<section class="lp-product-launch" aria-labelledby="lp-launch-title">'
+      + '<div class="lp-launch-guide"><div class="lp-clock'+(paused?' paused':'')+'" role="img" aria-label="Compass learning companion"></div>'
+      + '<button type="button" class="lp-motion-toggle" aria-pressed="'+paused+'" onclick="LearnPathUI.toggleMotion()">'+(paused?'Play animation':'Pause animation')+'</button></div>'
+      + '<div class="lp-launch-paper"><p class="lp-launch-saved">Project idea saved</p><p class="lp-launch-format">'+escapeText(name)+'</p>'
+      + '<h1 id="lp-launch-title">Let’s find a little inspiration.</h1>'
+      + '<p class="lp-launch-invite">Check some '+escapeText(plural)+' online.</p>'
+      + '<div class="lp-launch-notice"><strong>Look with Compass</strong><p>'+escapeText(prompt)+'</p><p>Borrow an idea about the format. Use your own words and ideas about Your Digital Self.</p></div>'
+      + '<a class="btn bts lp-launch-examples" href="'+escapeText(search)+'" target="_blank" rel="noopener noreferrer">Explore examples <span aria-hidden="true">↗</span><small>Opens a search in a new tab</small></a>'
+      + '<div class="lp-launch-next"><p>Ready to plan your own?</p><button type="button" class="btn btp" onclick="renderStep3Screen()">Open my Learning Passport →</button></div></div></section>';
+  }
   function drawMap() {
     var host = document.getElementById('lp-map');
     if (!host || document.body.dataset.role !== 'student') { if (host) host.hidden = true; return; }
@@ -56,6 +88,7 @@
   window.LearnPathUI = {
     escapeText:escapeText,
     mascot:mascot,
+    productLaunch:productLaunch,
     grammarFeedback:function (question, answer) {
       if (answer === question.correct) return '<p class="lp-grammar-correct">✓ Correct</p>';
       var explanation = (question.feedback || [])[answer] || 'Look at the meaning of the sentence and review the correct answer.';
