@@ -10,6 +10,12 @@
 | CRUD | Existing Firebase functions in index.html | Existing storage paths and schema | Same save and navigation destinations | Source comparison + mock tests |
 
 ## Behavior ledger
+- Before the goals/plan flow is completed and sent, use “Set my goals and plan”
+  for entry. Do not show the persistent My Learning Passport tab or open a blank
+  passport overview. `LearnPathUI.hasPassport` owns this presentation check:
+  saved completion/submission plus three goals and complete plan actions. This
+  is a presentation rule, not an editing permission. Saved drafts reopen in the
+  form, while completed passports retain their overview and reminder.
 - Saved project ideas use `LearnPathUI.productLaunch` for Compass guidance.
   The optional search opens a separate tab with only the product format in the
   query; no student identity or personal topic is shared. Looking at examples is
