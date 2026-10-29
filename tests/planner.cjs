@@ -71,6 +71,8 @@ const server=http.createServer((req,res)=>{
  for(const key of ['unitWords','spelling','speakClear'])await f.locator('[data-goal="'+key+'"]').check();
  await f.locator('#passport-next').click();
  const steps=['I will I will prepare my questions.','practise speaking.','record my interview.'];
+ assert.equal(await f.locator('#plan-0').getAttribute('placeholder'),null);
+ assert.equal(await f.locator('.will-prefix').first().innerText(),'I will');
  for(let i=0;i<3;i++)await f.locator('#plan-'+i).fill(steps[i]);
  await f.locator('#passport-next').click();
  assert.equal(await page.locator('#lp-passport-tab').count(),0);
