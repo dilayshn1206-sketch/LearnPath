@@ -31,11 +31,28 @@ const server=http.createServer((req,res)=>{
  await f.locator('#tool-own').fill('Recorder');await f.locator('#next').click();
  await f.locator('[data-choice="speaking"]').click();await f.locator('#next').click();
  await f.getByRole('button',{name:'Save my project idea',exact:true}).click();
- await page.getByText('Now wait for your teacher to group you.').waitFor();
+ await page.getByRole('button',{name:'Open my Learning Passport →',exact:true}).waitFor();
+ assert.match(await page.locator('.lp-product-launch').innerText(),/Check some interviews online/);
+ assert.match(await page.locator('.lp-launch-examples').getAttribute('href'),/interviews/);
+ assert.equal(await page.locator('.lp-launch-examples').getAttribute('target'),'_blank');
+ await page.evaluate(()=>{document.getElementById('mc').innerHTML=LearnPathUI.productLaunch('Infographic');});
+ assert.match(await page.locator('.lp-launch-notice').innerText(),/short facts and pictures/);
+ assert.match(await page.locator('.lp-launch-invite').innerText(),/Check some infographics online/);
+ await page.screenshot({path:path.join(root,'verification/product-inspiration-tablet.png'),fullPage:true});
+ await page.getByRole('button',{name:'Pause animation',exact:true}).click();
+ assert.ok(await page.locator('.lp-launch-guide .lp-clock.paused').count());
+ for(const width of [390,1024]){await page.setViewportSize({width,height:768});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));}
+ await page.emulateMedia({reducedMotion:'reduce'});
+ assert.equal(await page.locator('.lp-launch-guide .lp-clock').evaluate(el=>getComputedStyle(el).animationName),'none');
+ await page.emulateMedia({reducedMotion:'no-preference'});
+ await page.evaluate(()=>{document.getElementById('mc').innerHTML=LearnPathUI.productLaunch('<Custom & format>');});
+ assert.equal(await page.locator('.lp-launch-format').innerText(),'<Custom & format>');
+ await page.evaluate(()=>renderQuizDone());
  let saved=await page.evaluate(()=>__mockDB.contracts.student);
- assert.equal(saved.topic,'Sharing safely online');assert.equal(saved.productType,'Interview');assert.equal(saved.status,'awaiting_grouping');assert.equal(saved.plannerVersion,'passport-v1');assert.equal(saved.weaknessTips.length,3);assert.equal(saved.platformsOtherText,'Recorder');
- // Teacher grouping is server owned; fixture changes only in this isolated test.
- await page.evaluate(()=>{__mockDB.contracts.student.status='draft';return renderStep3Screen();});
+ assert.equal(saved.topic,'Sharing safely online');assert.equal(saved.productType,'Interview');assert.equal(saved.status,'draft');assert.equal(saved.plannerVersion,'passport-v1');assert.equal(saved.weaknessTips.length,3);assert.equal(saved.platformsOtherText,'Recorder');
+ // No group membership and an expired teacher activity must not gate editing.
+ await page.evaluate(()=>{delete __mockDB.users.student.groupId;window._liveSession={active:true,step:'step1',deadline:1};});
+ await page.getByRole('button',{name:'Open my Learning Passport →',exact:true}).click();
  await f.locator('[data-goal="unitWords"]').waitFor();
  assert.equal(await f.locator('[data-passport-step]').count(),3);
  assert.equal(await f.locator('[data-goal]').count(),11);
@@ -52,23 +69,25 @@ const server=http.createServer((req,res)=>{
  await f.locator('#teacher-target').fill('85');await f.locator('#peer-target').fill('90');
  assert.equal(await f.locator('.send-teacher').innerText(),'Save and send to the teacher');
  await f.getByRole('button',{name:'Save and send to the teacher',exact:true}).click();
- await f.getByText('Your Learning Passport has been saved. Your teacher can now review it.').waitFor();
+ await f.getByText('Your Learning Passport has been saved. Your teacher can now review it. You can edit and send it again.').waitFor();
  saved=await page.evaluate(()=>__mockDB.contracts.student);
- assert.equal(saved.status,'pending');assert.equal(saved.editUnlocked,false);assert.equal(saved.evalTeacherPct,'85');assert.equal(saved.evalPeerPct,'90');assert.equal(saved.planSteps[0],'I will prepare my questions.');
- assert.equal(await f.locator('[data-passport-edit]').count(),0);
+ assert.equal(saved.status,'pending');assert.equal(saved.editUnlocked,true);assert.equal(saved.evalTeacherPct,'85');assert.equal(saved.evalPeerPct,'90');assert.equal(saved.planSteps[0],'I will prepare my questions.');
+ assert.equal(await f.locator('[data-passport-edit]').count(),3);
  assert.match(await f.locator('.focus-overview').innerText(),/Practise your talk|2 minutes/);
  await page.screenshot({path:path.join(root,'verification/passport-production.png'),fullPage:true});
  await f.getByRole('button',{name:'Back to Home',exact:true}).click();
  await page.locator('#lp-passport-tab').click();await f.getByRole('heading',{name:'My Learning Passport',exact:true}).waitFor();
  assert.match(await f.locator('#screen').innerText(),/85%/);
  for(const width of [1024,390]){await page.setViewportSize({width,height:768});const size=await page.evaluate(()=>({width:innerWidth,scroll:document.documentElement.scrollWidth}));assert.ok(size.scroll<=size.width+1);}
- // A teacher-unlocked passport can be edited; changes survive replacing its UI.
- await page.evaluate(()=>{__mockDB.contracts.student.editUnlocked=true;return renderStep3Screen(true);});
+ // Historical locked/approved passports also remain editable without teacher action.
+ await page.evaluate(()=>{__mockDB.contracts.student.editUnlocked=false;__mockDB.contracts.student.status='approved';return renderStep3Screen(true);});
  await f.getByRole('button',{name:'Edit my plan',exact:true}).click();await f.locator('#plan-0').fill('revise my questions.');
  await f.getByRole('button',{name:'Save changes and return to passport',exact:true}).click();
  await f.locator('#save-status').filter({hasText:'Draft saved'}).waitFor();
  await page.evaluate(()=>renderStep3Screen(true));await f.getByRole('heading',{name:'My Learning Passport',exact:true}).waitFor();
  assert.match(await f.locator('#screen').innerText(),/I will revise my questions/);
- assert.deepEqual(errors,[]);console.log('PASS: production planner, grouping, combined goals, autosave, send/lock, overview, restore, scores, tablet/mobile, no external calls.');
+ assert.equal(await page.evaluate(()=>__mockDB.contracts.student.status),'draft');
+ await page.evaluate(()=>startQuiz());await f.locator('[data-choice="privacy"]').waitFor();
+ assert.deepEqual(errors,[]);console.log('PASS: no grouping/edit/deadline locks; existing locked records edit; approved edits return to draft; send/reopen/retake; scores, tablet/mobile, no external calls.');
  }finally{await browser.close();await new Promise(r=>server.close(r));}
 })().catch(e=>{console.error(e);process.exitCode=1;});
