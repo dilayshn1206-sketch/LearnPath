@@ -32,7 +32,7 @@ function check(name,fn){fn();results.push(name);}
   const f=fixture();let w=f.w;
   await w.__test.home();await pause();
   check('Home keeps four actual milestone buttons',()=>assert.equal(w.document.querySelectorAll('.step-card').length,4));
-  check('Map matches stored completion and grouping lock',()=>{assert.equal(w.document.querySelectorAll('.lp-station.done').length,1);assert.equal(w.document.querySelector('[data-step="2"]').disabled,true);});
+  check('Map keeps only the choose-a-project prerequisite',()=>{assert.equal(w.document.querySelectorAll('.lp-station.done').length,1);assert.equal(w.document.querySelector('[data-step="2"]').disabled,true);});
   await w.__test.legacyQuiz();await pause();
   const first=w.document.querySelector('.qo');
   first.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Enter',bubbles:true}));
@@ -42,10 +42,10 @@ function check(name,fn){fn();results.push(name);}
   w.document.querySelector('[data-product-id="teacher_custom"]').click();await pause();
   check('Selection state survives render and marks chosen button',()=>assert.equal(w.document.querySelector('[data-product-id="teacher_custom"]').getAttribute('aria-pressed'),'true'));
   w.qGoto(2);w.qPick3('writing');w.qGoto(3);await w.submitQuizChoice();
-  check('New plan preserves original model plus Grade 6 version',()=>{assert.equal(f.data.contracts.student.grade,6);assert.equal(f.data.contracts.student.goalVersion,'grade6-v1');assert.equal(f.data.contracts.student.productId,'teacher_custom');assert.equal(f.data.contracts.student.status,'awaiting_grouping');assert.equal(f.data.contracts.student.platforms.length,1);});
+  check('New plan preserves original model plus Grade 6 version',()=>{assert.equal(f.data.contracts.student.grade,6);assert.equal(f.data.contracts.student.goalVersion,'grade6-v1');assert.equal(f.data.contracts.student.productId,'teacher_custom');assert.equal(f.data.contracts.student.status,'draft');assert.equal(f.data.contracts.student.platforms.length,1);});
   check('Research records untouched by redesign',()=>assert.equal(f.data.research.keep.value,'DO NOT ALTER'));
   await w.__test.home();await pause();
-  check('Map advances to third milestone after idea save',()=>{assert.equal(w.document.querySelectorAll('.lp-station.done').length,2);assert.match(w.document.querySelector('[data-step="2"]').getAttribute('aria-label'),/Current/);assert.equal(w.document.querySelector('[data-step="2"]').disabled,true);});
+  check('Map advances to third milestone after idea save',()=>{assert.equal(w.document.querySelectorAll('.lp-station.done').length,2);assert.match(w.document.querySelector('[data-step="2"]').getAttribute('aria-label'),/Current/);assert.equal(w.document.querySelector('[data-step="2"]').disabled,false);});
   check('Pause control pauses all companion sprites',()=>{w.LearnPathUI.toggleMotion();assert.ok(w.document.querySelector('.lp-clock').classList.contains('paused'));assert.equal(w.document.querySelector('.lp-motion-toggle').getAttribute('aria-pressed'),'true');});
   f.close();
 
@@ -62,7 +62,7 @@ function check(name,fn){fn();results.push(name);}
   w._c3Step=2;await w.__test.legacyPassport();await pause();
   check('Plan values and I will starter hints survive rendering',()=>{assert.equal(w.document.querySelector('input.fi').value,'Read an example');assert.match(w.document.querySelector('input.fi').placeholder,/I will/);});
   await w.submitContract();await pause();
-  check('Valid submit retains original pending-and-lock behavior',()=>{assert.equal(g.data.contracts.student.status,'pending');assert.equal(g.data.contracts.student.editUnlocked,false);assert.ok(g.data.contracts.student.submittedAt);assert.equal(g.data.contracts.student.planSteps.length,3);});
+  check('Valid submit retains original pending review without edit lock',()=>{assert.equal(g.data.contracts.student.status,'pending');assert.equal(g.data.contracts.student.editUnlocked,true);assert.ok(g.data.contracts.student.submittedAt);assert.equal(g.data.contracts.student.planSteps.length,3);});
   const historical={...c};delete historical.grade;
   check('Historical contract criteria are not silently rewritten',()=>assert.match(w.__test.goals(historical).find(x=>x.id==='tenSentences').text,/ten complete/));
   check('Teacher review uses the owning contract goal version',()=>assert.match(html,/goalItemsFor\(c\)\.forEach\(function\(g\)\{\s*var checked=!!window\._reviewGoals/));
@@ -72,7 +72,7 @@ function check(name,fn){fn();results.push(name);}
   const h=fixture(c);w=h.w;await w.__test.home();await pause();
   w._liveSession={active:true,step:'step2'};
   w.LearnPathUI.setProgress([true,false,false,false],[true,true,true,true]);
-  check('Teacher-led sessions cannot be bypassed through map or resources shortcut',()=>{assert.ok([...w.document.querySelectorAll('.lp-station')].every(x=>x.disabled));w._currentScreen='home';w.LearnPathUI.openResources();assert.equal(w._currentScreen,'home');});
+  check('Teacher activity keeps map and resource navigation available',()=>{assert.ok([...w.document.querySelectorAll('.lp-station')].every(x=>!x.disabled));w._currentScreen='home';w.LearnPathUI.openResources();assert.equal(w._currentScreen,'resources');});
   w._liveSession=null;
   await w.renderResourcesScreen();await pause();
   const label=w.document.querySelector('label.fl');

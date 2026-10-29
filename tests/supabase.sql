@@ -37,9 +37,9 @@ select set_config('request.jwt.claim.sub','10000000-0000-4000-8000-000000000001'
 select public.lp_write('contracts/10000000-0000-4000-8000-000000000002','{"status":"draft","editUnlocked":true}','update');
 select set_config('request.jwt.claim.sub','10000000-0000-4000-8000-000000000002',true);
 select public.lp_write('contracts/10000000-0000-4000-8000-000000000002','{"topic":"Test topic","planSteps":["Read","Write","Check"],"goals":{"unitWords":true,"tenSentences":true,"spelling":true},"status":"pending","editUnlocked":false}','update');
-do $$begin
- begin perform public.lp_write('contracts/10000000-0000-4000-8000-000000000002','{"topic":"Bypass"}','update');raise exception 'Locked plan changed';exception when insufficient_privilege then null;end;
-end$$;
+-- Submission remains editable and can be sent again without an unlock.
+select public.lp_write('contracts/10000000-0000-4000-8000-000000000002','{"topic":"Edited after sending"}','update');
+select public.lp_write('contracts/10000000-0000-4000-8000-000000000002','{"status":"pending"}','update');
 select public.lp_write('wordChecks/10000000-0000-4000-8000-000000000002','{"checked":[true],"submittedAt":1}','set');
 select public.lp_write('posts/test-post','{"uid":"10000000-0000-4000-8000-000000000002","title":"Synthetic product"}','set');
 do $$declare balance integer;again integer;begin

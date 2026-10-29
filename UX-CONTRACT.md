@@ -10,6 +10,11 @@
 | CRUD | Existing Firebase functions in index.html | Existing storage paths and schema | Same save and navigation destinations | Source comparison + mock tests |
 
 ## Behavior ledger
+- Saved project ideas use `LearnPathUI.productLaunch` for Compass guidance.
+  The optional search opens a separate tab with only the product format in the
+  query; no student identity or personal topic is shared. Looking at examples is
+  not a prerequisite for opening the passport. Teacher-added formats get a
+  generic observation prompt. Existing answers remain untouched.
 - The approved Grade 6 planner/passport is rendered by `assets/planner.html`.
   Its same-origin bridge only requests actions; the authenticated module in
   `index.html` owns all Supabase reads/writes, student identity and permission
@@ -17,16 +22,18 @@
   session token is sent to the planner frame.
 - Draft changes are coalesced and serialized through the existing contract
   update path. Submit flushes draft writes, validates goals/steps/percentages,
-  sets pending + editing locked, waits for successful persistence, then shows
+  sets pending while keeping editing available, waits for successful persistence, then shows
   the complete summary. Failures remain visible and never show a sent state.
 - The passport starts with Goals; no redundant project confirmation step.
-  Its small persistent tab respects the current teacher-led session. Grouping,
-  approvals, unlocks and server authorization remain unchanged.
+  Its persistent tab remains available during classroom activities. Grouping is
+  for collaboration; pending/approved status and legacy edit flags do not gate
+  the owner's edits. Editing an approved/submitted passport returns it to draft.
 - Existing callbacks and identifiers own persisted behavior. UI helper does not
   import Firebase, issue requests, store answers, or write data.
 - Home map reads the same completion booleans as the existing cards. Resources
-  remain available independently. Contract access still depends on grouping.
-- Live teacher sessions block map navigation to avoid bypassing session locks.
+  remain available independently. Passport access needs a chosen project, not grouping.
+- Classroom step timers do not block navigation or owner saves. Teacher-triggered
+  reflection forms remain available as before.
 - The project catalog keeps every active teacher-defined entry and ID.
 - Screen re-layout never resets responses or research records.
 - New Grade 6 goals are additive/versioned; unversioned contracts keep old goals.
@@ -40,7 +47,7 @@
 - Active runtime now uses Supabase; existing path identifiers and UI form owners remain.
 - Browser role choice no longer grants access. The verified teacher Google account receives the server-owned teacher role; students require approval from Class Overview before accessing class records.
 - New account approvals reuse existing card/form/button/toast styles and remain keyboard-accessible.
-- Client roles have no direct data-table access. Database RPCs enforce ownership, group/approval locks and coin transactions.
+- Client roles have no direct data-table access. Database RPCs enforce ownership, enrollment, teacher-only approval and coin transactions. Project editing does not require a group or unlock.
 - Resetting active records archives the previous revision. Removing a post retains its private research file.
 - Backend acceptance and production limitations are recorded in SUPABASE-SETUP.md. Google OAuth and live upload still require account-level configuration and acceptance.
 The original application uses browser confirmation dialogs for destructive

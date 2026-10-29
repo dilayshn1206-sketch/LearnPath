@@ -23,7 +23,7 @@ render=function(){
  document.querySelectorAll('.reminder-explainer').forEach(el=>el.textContent='Use the My Learning Passport tab on LearnPath to return to your plan.');
  if(passport?.view==='overview'){
   $('.passport-overview-title .eyebrow').textContent=passport.submitted?(host.contract.status==='approved'?'Approved':'Waiting for teacher approval'):'My saved draft';
-  $('.passport-notice').textContent=passport.submitted?'Your Learning Passport has been saved. '+(host.contract.status==='approved'?'Your teacher has approved it.':'Your teacher can now review it.'):'Your Learning Passport draft is saved automatically. Review your goals, plan and scores below.';
+  $('.passport-notice').textContent=passport.submitted?'Your Learning Passport has been saved. '+(host.contract.status==='approved'?'Your teacher has approved it.':'Your teacher can now review it. You can edit and send it again.'):'Your Learning Passport draft is saved automatically. Review your goals, plan and scores below.';
   $('#overview-back-to-idea').textContent='Back to Home';$('#overview-back-to-idea').onclick=()=>request('home').catch(saveError);
   if(host.readOnly){document.querySelectorAll('[data-passport-edit],#edit-passport').forEach(el=>el.remove());}
   else{
@@ -46,7 +46,7 @@ document.addEventListener('click',async event=>{
  event.preventDefault();event.stopImmediatePropagation();
  const error=!passport.topic.trim()?'Write your project topic.':allErrors();if(error){($('#passport-error')||$('#save-status')).textContent=error;return;}
  b.disabled=true;b.textContent='Saving and sending…';
- try{host.contract=await request('submit',patch());host.readOnly=true;passport.submitted=true;showOverview();$('#save-status').textContent='Saved and sent to your teacher.';}
+ try{host.contract=await request('submit',patch());host.readOnly=false;passport.submitted=true;showOverview();$('#save-status').textContent='Saved and sent to your teacher.';}
  catch(e){saveError(e);b.disabled=false;b.textContent='Save and send to the teacher';}
 },true);
 let lastPatch='';
@@ -67,7 +67,7 @@ new ResizeObserver(reportHeight).observe(document.body);
   if(host.mode==='passport'){
    const c=host.contract;
    state={...state,step:4,topic:'own',topicOwn:c.topic,category:c.category,format:'own',formatOwn:c.productType,tools:c.platforms||['unsure'],toolOwn:c.platformsOtherText||'',weakness:c.weakness||'ideas',saved:true};
-   passport={...c,focusGoals:c.weaknessTips||[],tools:c.platforms||[],toolOther:c.platformsOtherText||'',goals:c.goals||{},goalsOtherText:c.goalsOtherText||'',planTails:(c.planSteps?.length?c.planSteps:['','','']).map(tailOnly),evalTeacherPct:c.evalTeacherPct??'',evalPeerPct:c.evalPeerPct??'',step:0,active:true,view:host.overview||host.readOnly?'overview':'edit',returnToOverview:false,submitted:host.readOnly};
+   passport={...c,focusGoals:c.weaknessTips||[],tools:c.platforms||[],toolOther:c.platformsOtherText||'',goals:c.goals||{},goalsOtherText:c.goalsOtherText||'',planTails:(c.planSteps?.length?c.planSteps:['','','']).map(tailOnly),evalTeacherPct:c.evalTeacherPct??'',evalPeerPct:c.evalPeerPct??'',step:0,active:true,view:host.overview||host.readOnly?'overview':'edit',returnToOverview:false,submitted:c.status==='pending'||c.status==='approved'};
    lastPatch=JSON.stringify(patch());
   }
   render();if(host.mode==='idea'&&$('#next'))$('#next').textContent='Continue →';

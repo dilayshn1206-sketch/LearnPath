@@ -254,7 +254,7 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
 .rub-sentence{font-size:13px}
 .rub-chevron{background:none;border:none;color:var(--th);cursor:pointer;font-size:12px;padding:4px 6px;flex-shrink:0}
 </style>
-<link rel="stylesheet" href="assets/learnpath.css?v=20261028-5">
+<link rel="stylesheet" href="assets/learnpath.css?v=20261029-2">
 </head>
 <body>
 
@@ -310,7 +310,7 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
   <div class="modal-card" id="result-popup-card" style="text-align:center;padding:26px 20px"></div>
 </div>
 
-<script src="assets/learnpath-ui.js?v=20261028-1"></script>
+<script src="assets/learnpath-ui.js?v=20261029-2"></script>
 <script type="module">
 import {auth,db,storage,rpc,ref,set,get,push,onValue,update,remove,sref,uploadBytesResumable,getDownloadURL,deleteObject,onAuthStateChanged,signInWithPopup,signOut} from './assets/supabase-backend.js?v=20261027-2';
 const prov={};
@@ -796,7 +796,7 @@ async function loadContractAndStart(){
     contractData=(s.exists()&&s.val().status!=="reset")?s.val():null;
     // if the student is just sitting on Home, refresh it live so grouping/approval shows up instantly
     var ls1=window._liveSession;
-    var hardLocked=ls1&&ls1.active&&(ls1.step==="step1"||ls1.step==="step2"||ls1.step==="step3");
+    var hardLocked=false;
     if(window._currentScreen==="home"&&!hardLocked)renderHome();
   });
 }
@@ -807,7 +807,7 @@ function setNav(id){
 }
 
 // ── TEACHER-LED LOCK MODE ──
-function isLockedStep(step){var ls=window._liveSession;return !!(ls&&ls.active&&ls.step===step);}
+function isLockedStep(step){return false;}
 function lockBarHTML(){
   var ls=window._liveSession;
   var timed=ls.step==="step2"||ls.step==="step3";
@@ -873,21 +873,9 @@ async function applySessionLock(){
     overlay.style.display="none";
     document.getElementById("eval-modal-card").innerHTML="";
   }
-  if(ls.active){
-    if(bnav)bnav.style.display="none";
-    if(ls.step==="step1"){renderStep1Screen();}
-    else if(ls.step==="step2"){
-      if(!window._quizStarted){startQuiz();window._quizStarted=true;}
-      else if(!document.getElementById('lp-planner-frame')||window._plannerContext.mode!=='idea'){if(contractData&&contractData.productType)renderQuizDone();else startQuiz();}
-    }
-    else if(ls.step==="step3"&&(!document.getElementById('lp-planner-frame')||window._plannerContext.mode!=='passport')){renderStep3Screen();}
-    startLockTimerInterval();
-  } else {
-    if(bnav)bnav.style.display="flex";
-    stopLockTimerInterval();
-    window._quizStarted=false;
-    go("home");
-  }
+  if(bnav)bnav.style.display="flex";
+  stopLockTimerInterval();
+  window._quizStarted=false;
 }
 
 // ── TEACHER-PUSHED POPUP: Stage 1, Lesson Reflection ──
@@ -1061,7 +1049,6 @@ window.submitEval2=async function(){
 
 window.go=function(page){
   var ls=window._liveSession;
-  if(ls&&ls.active&&(ls.step==="step1"||ls.step==="step2"||ls.step==="step3"))return;
   setNav(page);
   document.getElementById("mc").innerHTML='<div class="loading">Loading...</div>';
   var pages={home:renderHome,feed:renderFeed,profile:function(){renderProfile(CU.uid,true);}};
@@ -1072,15 +1059,14 @@ window.go=function(page){
 async function renderHome(){
   window._currentScreen="home";
   var ls0=window._liveSession;
-  if(ls0&&ls0.active&&(ls0.step==="step1"||ls0.step==="step2"||ls0.step==="step3")){applySessionLock();return;}
   var mc=document.getElementById("mc");
   var snap=await get(ref(db,"contracts/"+CU.uid));
   contractData=snap.exists()?snap.val():null;
   var firstName=(CU.displayName||"").split(" ")[0];
   var hasProduct=!!(contractData&&contractData.productType);
-  var awaitingGrouping=hasProduct&&contractData.status==="awaiting_grouping";
-  var editUnlocked=!contractData||contractData.editUnlocked!==false;
-  var step3Unlocked=hasProduct&&!awaitingGrouping;
+
+
+  var step3Unlocked=hasProduct;
   var step3Done=contractData&&(contractData.status==="approved"||contractData.status==="pending");
 
   var unitTitle="Tap to see today's unit";
@@ -1118,18 +1104,15 @@ async function renderHome(){
   html+='<div class="step-num">'+(step1Done?"✓":"1")+'</div><div style="flex:1"><div class="step-title">What are we learning?</div>';
   html+='<div class="step-sub">'+esc(unitTitle)+'</div></div></button>';
 
-  var step2Sub,step2Click;
-  if(!hasProduct){step2Sub="Take a short quiz to find your project idea";step2Click="startQuiz()";}
-  else if(awaitingGrouping){step2Sub="Your idea: "+esc(contractData.productType)+" — tap to retake, or wait for your teacher to group you.";step2Click="startQuiz()";}
-  else if(editUnlocked){step2Sub="Your project: "+esc(contractData.productType)+" — tap to retake the quiz";step2Click="startQuiz()";}
-  else{step2Sub="Your project: "+esc(contractData.productType)+" (locked — ask your teacher to unlock editing)";step2Click="toast('Ask your teacher to unlock editing first.')";}
+  var step2Sub=hasProduct?"Your project: "+esc(contractData.productType)+" — tap to change your idea":"Take a short quiz to find your project idea";
+  var step2Click="startQuiz()";
   html+='<button type="button" class="step-card'+(hasProduct?" done":"")+'" onclick="'+step2Click+'">';
   html+='<div class="step-num">'+(hasProduct?"✓":"2")+'</div><div style="flex:1"><div class="step-title">Get Ideas — Find Your Project</div>';
   html+='<div class="step-sub">'+step2Sub+'</div></div></button>';
 
-  html+='<button type="button" class="step-card'+(step3Unlocked?(step3Done?" done":""):" locked")+'" onclick="'+(step3Unlocked?"renderStep3Screen()":"toast('Wait for your teacher to group you first!')")+'">';
+  html+='<button type="button" class="step-card'+(step3Unlocked?(step3Done?" done":""):" locked")+'" onclick="'+(step3Unlocked?"renderStep3Screen()":"toast('Choose a project idea first.')")+'">';
   html+='<div class="step-num">'+(step3Unlocked?(step3Done?"✓":"3"):"−")+'</div><div style="flex:1"><div class="step-title">My Learning Passport</div>';
-  html+='<div class="step-sub">'+(step3Unlocked?"Your project plan for "+esc(contractData.productType):"Unlocks once your teacher groups the class")+'</div></div></button>';
+  html+='<div class="step-sub">'+(step3Unlocked?"Your project plan for "+esc(contractData.productType):"Choose a project idea first")+'</div></div></button>';
 
   html+='<button type="button" class="step-card'+(step4Done?" done":"")+'" onclick="renderResourcesScreen()">';
   html+='<div class="step-num">'+(step4Done?"✓":"4")+'</div><div style="flex:1"><div class="step-title">Choose Resources</div>';
@@ -1762,12 +1745,12 @@ window.renderStep3Screen=async function(){
   var mc=document.getElementById("mc");
   var snap=await get(ref(db,"contracts/"+CU.uid));
   contractData=snap.exists()?snap.val():null;
-  if(!contractData||!contractData.productType||contractData.status==="awaiting_grouping"){toast("Wait for your teacher to group you first!");go("home");return;}
+  if(!contractData||!contractData.productType){toast("Choose a project idea first.");go("home");return;}
   var c=contractData;
   var locked=isLockedStep("step3");
-  var readOnly=c.status!=="draft"&&c.editUnlocked===false;
+  var readOnly=false;
 
-  if(c.status==="draft"&&!readOnly){
+  if(!readOnly){
     if(window._c3Step===undefined||window._c3Step===null)window._c3Step=0;
     var step=window._c3Step;
     var labels=["Project","Goals","Plan","Evaluation"];
@@ -1800,7 +1783,7 @@ window.renderStep3Screen=async function(){
 
   html2+='<div class="card">';
   if(c.teacherComment)html2+='<div style="background:var(--tl);border-radius:var(--rs);padding:8px 10px;font-size:12px;color:var(--td);margin-bottom:10px"><strong>Teacher:</strong> '+esc(c.teacherComment)+'</div>';
-  if(readOnly)html2+='<div class="tip mb8">This is saved. Ask your teacher if you need to change anything.</div>';
+  if(readOnly)html2+='<div class="tip mb8">Your passport is saved. You can edit it and send it again.</div>';
 
   html2+='<div class="contract-cols">';
 
@@ -1973,7 +1956,7 @@ window.submitContract=async function(){
   var checkedCount=GOAL_ITEMS.filter(function(g){return contractData.goals&&contractData.goals[g.id];}).length;
   if(customGoalText(contractData))checkedCount++;
   if(checkedCount<3){toast("Please choose at least 3 goals!");return;}
-  await update(ref(db,"contracts/"+CU.uid),{status:"pending",editUnlocked:false,submittedAt:Date.now()});
+  await update(ref(db,"contracts/"+CU.uid),{status:"pending",editUnlocked:true,submittedAt:Date.now()});
   contractData=(await get(ref(db,"contracts/"+CU.uid))).val();
   window._c3Step=0;
   celebrate();
@@ -1988,7 +1971,6 @@ var qState={i:0,platforms:[],platformsOtherText:"",productId:null,weakness:null,
 
 async function startQuiz(){
   var c=contractData;
-  if(c&&c.productType&&c.editUnlocked===false){toast("Ask your teacher to unlock editing first.");return;}
   qState={i:0,platforms:[],platformsOtherText:"",productId:null,weakness:null,catalog:null,reviewChoice:null};
   setNav("home");
   document.getElementById("mc").innerHTML='<div class="loading">Loading...</div>';
@@ -2138,7 +2120,7 @@ window.chooseProduct=async function(id,name,cat){
   await set(ref(db,"contracts/"+CU.uid),{
     grade:6,goalVersion:"grade6-v1",productId:id,productType:name,category:cat,platforms:qState.platforms.slice(),platformsOtherText:qState.platformsOtherText||"",
     weakness:qState.weakness||"",weaknessTips:qState.weakness?(SKILL_TIPS[qState.weakness]||[]):[],
-    status:"awaiting_grouping",editUnlocked:true,
+    status:"draft",editUnlocked:true,
     topic:"",goals:{},evalTeacherPct:"",evalPeerPct:"",
     studentName:CU.displayName,studentEmail:CU.email,
     studentPhoto:CU.photoURL||"",studentId:CU.uid,createdAt:Date.now()
@@ -2150,13 +2132,7 @@ window.chooseProduct=async function(id,name,cat){
 
 function renderQuizDone(){
   var mc=document.getElementById("mc");
-  var html=isLockedStep("step2")?lockBarHTML():"";
-  html+='<div class="card" style="text-align:center;padding:24px;border-color:var(--t);border-width:1.5px">';
-  html+='<div style="font-size:34px;margin-bottom:8px">&#9989;</div>';
-  html+='<div style="font-size:15px;font-weight:700;margin-bottom:4px">'+esc(contractData.productType)+'</div>';
-  html+='<div style="font-size:14px;color:var(--tm);margin-top:8px">Now wait for your teacher to group you.</div>';
-  html+='</div>';
-  mc.innerHTML=html;
+  mc.innerHTML=LearnPathUI.productLaunch(contractData.productType);
 }
 
 // ── PAGE 4: PROFILE ──
@@ -2204,7 +2180,7 @@ window.renderProfile=async function(uid,isOwn){
     else html+='<span class="sb" style="background:var(--gl);color:var(--tm)">Draft</span>';
     html+='</div>';
     html+='<div style="font-size:13px;margin-bottom:5px"><strong>Project:</strong> '+esc(c.productType)+(c.topic?" — "+esc(c.topic):"")+'</div>';
-    if(isOwn&&c.status!=="awaiting_grouping")html+='<button class="btn bts" style="font-size:12px;padding:6px 11px;margin-top:4px" onclick="renderStep3Screen()">View plan &#8594;</button>';
+    if(isOwn&&c.productType)html+='<button class="btn bts" style="font-size:12px;padding:6px 11px;margin-top:4px" onclick="renderStep3Screen()">View plan &#8594;</button>';
     if(c.teacherComment)html+='<div class="tip mt8"><strong>Teacher:</strong> '+esc(c.teacherComment)+'</div>';
     html+='</div>';
   }
@@ -2317,7 +2293,7 @@ async function renderTSession(){
   html+='</div>';
 
   html+='<div class="card"><div style="font-size:13px;font-weight:700;margin-bottom:2px">Step 3 — Project Plan (timed)</div>';
-  html+='<div style="font-size:11px;color:var(--tm);margin-bottom:8px">Starting this also unlocks Step 3 for every grouped student.</div>';
+  html+='<div style="font-size:11px;color:var(--tm);margin-bottom:8px">Students can open and edit their own passport at any time.</div>';
   html+='<div class="fg"><label class="fl">Minutes</label><input class="fi" type="number" id="session-minutes-3" value="15" min="1" style="max-width:100px"></div>';
   html+='<button class="btn btp btf" onclick="startSessionStep3()">&#9654; Start Project Plan for whole class</button>';
   if(s.active&&s.step==="step3"){
@@ -2373,7 +2349,7 @@ window.startSessionStep3=async function(){
     if(Object.keys(updates).length)await update(ref(db,"contracts"),updates);
   }
   await set(ref(db,"liveSession"),{active:true,step:"step3",deadline:Date.now()+mins*60000,updatedAt:Date.now()});
-  toast("Project Plan started — Step 3 is now unlocked for the class!");
+  toast("Project Plan started. Students can continue editing their passports.");
   renderTSession();
 };
 window.startSessionEval1=async function(){
@@ -2446,14 +2422,13 @@ function renderTOverview(){
     else{
       var sh="";
       all.forEach(function(s){
-        var unlocked=s.editUnlocked===true;
+
         sh+='<div class="srow">';
         if(s.studentPhoto)sh+='<img src="'+esc(s.studentPhoto)+'" class="uav">';
         else sh+='<div style="width:28px;height:28px;border-radius:50%;background:var(--pl);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--p);flex-shrink:0">'+esc((s.studentName||"?")[0])+'</div>';
         sh+='<div style="flex:1;cursor:pointer" onclick="reviewContract(\''+s.id+'\')"><div style="font-size:13px;font-weight:700">'+esc(s.studentName||"Student")+'</div>';
         sh+='<div style="font-size:11px;color:var(--tm)">'+esc(s.productType||"")+'</div></div>';
         sh+='<span class="sb '+(s.status==="approved"?"sa":s.status==="pending"?"sp":"")+'" style="'+(s.status==="approved"||s.status==="pending"?"":"background:var(--gl);color:var(--tm)")+'">'+(s.status==="approved"?"Approved":s.status==="pending"?"Pending":s.status==="awaiting_grouping"?"Awaiting group":s.status==="reset"?"Reset \u21bb":"Draft")+'</span>';
-        sh+='<button class="obtn" style="margin-left:6px" onclick="toggleEditAccess(\''+s.id+'\','+(unlocked?"false":"true")+')">'+(unlocked?"&#128275; Lock":"&#128273; Unlock edit")+'</button>';
         sh+='<button class="obtn" style="margin-left:6px;color:var(--c);border-color:var(--c)" onclick="resetStudent(\''+s.id+'\',\''+esc((s.studentName||"this student").replace(/'/g,""))+'\')">&#128465; Reset</button>';
         sh+='</div>';
       });
@@ -2461,10 +2436,6 @@ function renderTOverview(){
     }
   });
 }
-window.toggleEditAccess=async function(id,unlock){
-  await update(ref(db,"contracts/"+id),{editUnlocked:unlock});
-  toast(unlock?"Editing unlocked for this student":"Editing locked for this student");
-};
 // Wipe ALL progress for one student (uid), keeping their account so they can start fresh.
 window.resetStudent=async function(uid,name){
   var ok=window.confirm("Reset ALL progress for "+name+"?\n\nThis resets the active learning passport, project posts, coins, accessories, reflections, evaluations, checked unit words, quiz answers and notifications. Their account stays so they can start over.\n\nEarlier records and files remain in the research archive.");
@@ -2668,7 +2639,7 @@ window.sendBackForEdits=async function(){
 
 function renderTGroups(){
   var mc=document.getElementById("mc");
-  mc.innerHTML=pageHeaderHTML("&#128101;","Grouping","Pick a group for each student — this immediately assigns them and unlocks their Learning Passport.","var(--p)","var(--pd)")
+  mc.innerHTML=pageHeaderHTML("&#128101;","Grouping","Pick a group for collaboration. Students can edit their own Learning Passport at any time.","var(--p)","var(--pd)")
     +'<div class="card"><div class="ctitle">Create a Group</div>'
     +'<div class="fg"><label class="fl">Group name</label><input class="fi" id="grp-name" placeholder="e.g. Team Speakers"></div>'
     +'<button class="btn btp" onclick="createGroup()">Create</button></div>'
@@ -2734,8 +2705,8 @@ window.assignStudentGroup=async function(uid,name,groupId,groupName){
       await set(ref(db,"groups/"+groupId+"/members/"+uid),name);
       var cSnap=await get(ref(db,"contracts/"+uid));
       if(cSnap.exists()&&cSnap.val().status==="awaiting_grouping"){
-        await update(ref(db,"contracts/"+uid),{status:"draft",editUnlocked:false});
-        toast(name+" grouped and unlocked!");
+        await update(ref(db,"contracts/"+uid),{status:"draft",editUnlocked:true});
+        toast(name+" grouped.");
       } else {
         toast(name+" moved to "+groupName+".");
       }
@@ -3128,8 +3099,8 @@ async function mountPlanner(mode,c,overview){
     ['written','spoken','visual'].forEach(function(cat){extra[cat]=(catalog[cat]||[]).filter(function(item){var original=DEFAULT_CATALOG[cat].find(function(pair){return pair[0]===item.id;});return item.active&&(!original||original[1]!==item.name);});});
   }
   var mc=document.getElementById('mc');
-  mc.innerHTML=(isLockedStep(mode==='idea'?'step2':'step3')?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">← Back to Home</button>')+'<iframe id="lp-planner-frame" title="'+(mode==='idea'?'Plan your project':'My Learning Passport')+'" src="assets/planner.html?v=20261028-7" style="width:100%;height:900px;border:0;display:block" scrolling="no"></iframe>';
-  window._plannerContext={mode:mode,contract:c,overview:!!overview,readOnly:!!(c&&c.status!=='draft'&&c.editUnlocked===false),extraProducts:extra};
+  mc.innerHTML=(isLockedStep(mode==='idea'?'step2':'step3')?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">← Back to Home</button>')+'<iframe id="lp-planner-frame" title="'+(mode==='idea'?'Plan your project':'My Learning Passport')+'" src="assets/planner.html?v=20261029-1" style="width:100%;height:900px;border:0;display:block" scrolling="no"></iframe>';
+  window._plannerContext={mode:mode,contract:c,overview:!!overview,readOnly:false,extraProducts:extra};
   setNav('home');
 }
 window.addEventListener('message',async function(event){
@@ -3145,19 +3116,19 @@ window.addEventListener('message',async function(event){
     if(message.action==='idea'){
       var draft=message.payload;
       if(!draft||!draft.topic||!draft.productType||!['written','spoken','visual'].includes(draft.category)||!SKILL_TIPS[draft.weakness])throw new Error('Complete your topic, product and focus choice.');
-      await set(ref(db,'contracts/'+uid),{grade:6,goalVersion:'grade6-v1',plannerVersion:'passport-v1',productId:draft.productId,productType:draft.productType,category:draft.category,platforms:draft.tools||[],platformsOtherText:draft.toolOther||'',weakness:draft.weakness,weaknessTips:SKILL_TIPS[draft.weakness],status:'awaiting_grouping',editUnlocked:true,topic:draft.topic,goals:{},evalTeacherPct:'',evalPeerPct:'',studentName:CU.displayName,studentEmail:CU.email,studentPhoto:CU.photoURL||'',studentId:uid,createdAt:Date.now()});
+      await set(ref(db,'contracts/'+uid),{grade:6,goalVersion:'grade6-v1',plannerVersion:'passport-v1',productId:draft.productId,productType:draft.productType,category:draft.category,platforms:draft.tools||[],platformsOtherText:draft.toolOther||'',weakness:draft.weakness,weaknessTips:SKILL_TIPS[draft.weakness],status:'draft',editUnlocked:true,topic:draft.topic,goals:{},evalTeacherPct:'',evalPeerPct:'',studentName:CU.displayName,studentEmail:CU.email,studentPhoto:CU.photoURL||'',studentId:uid,createdAt:Date.now()});
       contractData=(await get(ref(db,'contracts/'+uid))).val();respond(true);celebrate();renderQuizDone();refreshPassportTab();return;
     }
-    if(window._plannerContext.mode!=='passport'||window._plannerContext.readOnly)throw new Error('Ask your teacher to unlock editing first.');
-    if(message.action==='draft'){await plannerDraft(uid,plannerFields(message.payload));respond(true);return;}
+    if(window._plannerContext.mode!=='passport')throw new Error('Open your Learning Passport first.');
+    if(message.action==='draft'){await plannerDraft(uid,Object.assign({},plannerFields(message.payload),{status:'draft',editUnlocked:true}));respond(true);return;}
     if(message.action==='submit'){
       var fields=plannerFields(message.payload);
       if(!fields.topic.trim()||fields.planSteps.length<3||fields.planSteps.some(function(s){return !/[\p{L}\p{N}]/u.test(String(s).replace(/^I will\s*/i,''));}))throw new Error('Complete your topic and every plan step.');
       var count=GOAL_ITEMS.filter(function(g){return fields.goals[g.id]===true;}).length+(customGoalText(fields)?1:0);
       if(count<3)throw new Error('Choose at least three project goals.');
       ['evalTeacherPct','evalPeerPct'].forEach(function(key){var v=fields[key];if(v!==''&&(!Number.isFinite(Number(v))||Number(v)<0||Number(v)>100))throw new Error('Target scores must be between 0 and 100 percent.');});
-      await flushPlannerDraft();await queuePlannerSave(uid,Object.assign({},fields,{status:'pending',editUnlocked:false,submittedAt:Date.now()}));
-      contractData=(await get(ref(db,'contracts/'+uid))).val();window._plannerContext.contract=contractData;window._plannerContext.readOnly=true;
+      await flushPlannerDraft();await queuePlannerSave(uid,Object.assign({},fields,{status:'pending',editUnlocked:true,submittedAt:Date.now()}));
+      contractData=(await get(ref(db,'contracts/'+uid))).val();window._plannerContext.contract=contractData;window._plannerContext.readOnly=false;
       respond(contractData);refreshPassportTab();celebrate();return;
     }
     throw new Error('This planning action is not available.');
@@ -3165,7 +3136,6 @@ window.addEventListener('message',async function(event){
 });
 var originalStartQuiz=startQuiz;
 startQuiz=async function(){
-  if(contractData&&contractData.productType&&contractData.editUnlocked===false){toast('Ask your teacher to unlock editing first.');return;}
   window._currentScreen='quiz';
   try{await mountPlanner('idea',null,false);}catch(error){toast('Could not open project planning. Try again.');}
 };window.startQuiz=startQuiz;
@@ -3173,14 +3143,14 @@ var originalRenderPassport=window.renderStep3Screen;
 window.renderStep3Screen=async function(overview){
   if(!CU)return;
   var snap=await get(ref(db,'contracts/'+CU.uid));contractData=snap.exists()?snap.val():null;
-  if(!contractData||!contractData.productType||contractData.status==='awaiting_grouping'){toast('Wait for your teacher to group you first!');go('home');return;}
+  if(!contractData||!contractData.productType){toast('Choose a project idea first.');go('home');return;}
   if(contractData.grade!==6)return originalRenderPassport();
   window._currentScreen='step3';await mountPlanner('passport',contractData,overview===true);
 };
 function refreshPassportTab(){
   var tab=document.getElementById('lp-passport-tab');
-  if(!CU||document.getElementById('app').style.display==='none'||UP.role==='teacher'||!contractData||!contractData.productType||contractData.status==='awaiting_grouping'){if(tab)tab.remove();return;}
-  if(!tab){tab=document.createElement('button');tab.id='lp-passport-tab';tab.className='btn';tab.type='button';tab.textContent='My Learning Passport';document.body.appendChild(tab);tab.onclick=function(){var ls=window._liveSession;if(ls&&ls.active&&ls.step!=='step3'){toast('Follow your teacher’s current step.');return;}renderStep3Screen(true);};}
+  if(!CU||document.getElementById('app').style.display==='none'||UP.role==='teacher'||!contractData||!contractData.productType){if(tab)tab.remove();return;}
+  if(!tab){tab=document.createElement('button');tab.id='lp-passport-tab';tab.className='btn';tab.type='button';tab.textContent='My Learning Passport';document.body.appendChild(tab);tab.onclick=function(){renderStep3Screen(true);};}
 }
 new MutationObserver(refreshPassportTab).observe(document.getElementById('mc'),{childList:true});
 new MutationObserver(refreshPassportTab).observe(document.getElementById('app'),{attributes:true,attributeFilter:['style']});

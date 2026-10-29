@@ -4,7 +4,7 @@
   var states = [false, false, false, false];
   var enabled = [true, true, false, true];
   var paused = false;
-  var labels = ['What are we learning?', 'Get Ideas', 'My Learning Contract', 'Choose Resources'];
+  var labels = ['What are we learning?', 'Get Ideas', 'My Learning Passport', 'Choose Resources'];
   var mapLabels = ['Explore', 'Plan', 'Create', 'Reflect'];
   var actions = ['renderStep1Screen', 'startQuiz', 'renderStep3Screen', 'renderResourcesScreen'];
   function escapeText(value) {
@@ -12,6 +12,38 @@
   }
   function mascot() {
     return '<div class="lp-mascot"><div class="lp-mascot-note"><strong>One step at a time.</strong><br>Your ideas make this project yours.</div><div class="lp-clock'+(paused?' paused':'')+'" role="img" aria-label="Compass learning companion"></div><button type="button" class="lp-motion-toggle" aria-pressed="'+paused+'" onclick="LearnPathUI.toggleMotion()">'+(paused?'Play animation':'Pause animation')+'</button></div>';
+  }
+  function productLaunch(product) {
+    var name = String(product || 'Your project');
+    var key = name.toLowerCase();
+    var formats = [
+      ['infographic','infographics','How do short facts and pictures work together?'],
+      ['visual slide','visual slide stories','How does each slide move the story forward?'],
+      ['poster','posters','What catches your eye first? How much text is there?'],
+      ['comic','comics','How do pictures and speech bubbles tell the story?'],
+      ['written interview','written interviews','How are the questions and answers arranged?'],
+      ['interview','interviews','How does the interviewer start and ask follow-up questions?'],
+      ['podcast','podcasts','How does the speaker welcome listeners and introduce the topic?'],
+      ['short talk','short talks','How does the speaker open, explain an idea and finish?'],
+      ['role play','role plays','Who are the characters? What do they say to each other?'],
+      ['how-to','how-to guides','How do the steps help someone follow the instructions?'],
+      ['how to','how-to guides','How do the steps help someone follow the instructions?'],
+      ['blog','blogs','How do the title and short paragraphs help the reader?'],
+      ['story','stories','How does the story begin, develop and end?']
+    ];
+    var match = formats.find(function (format) { return key.indexOf(format[0]) !== -1; });
+    var plural = match ? match[1] : name + ' examples';
+    var prompt = match ? match[2] : 'How is it organised? What helps you understand its message?';
+    var search = 'https://www.google.com/search?q=' + encodeURIComponent(plural + ' examples for students digital citizenship');
+    return '<section class="lp-product-launch" aria-labelledby="lp-launch-title">'
+      + '<div class="lp-launch-guide"><div class="lp-clock'+(paused?' paused':'')+'" role="img" aria-label="Compass learning companion"></div>'
+      + '<button type="button" class="lp-motion-toggle" aria-pressed="'+paused+'" onclick="LearnPathUI.toggleMotion()">'+(paused?'Play animation':'Pause animation')+'</button></div>'
+      + '<div class="lp-launch-paper"><p class="lp-launch-saved">Project idea saved</p><p class="lp-launch-format">'+escapeText(name)+'</p>'
+      + '<h1 id="lp-launch-title">Let’s find a little inspiration.</h1>'
+      + '<p class="lp-launch-invite">Check some '+escapeText(plural)+' online.</p>'
+      + '<div class="lp-launch-notice"><strong>Look with Compass</strong><p>'+escapeText(prompt)+'</p><p>Borrow an idea about the format. Use your own words and ideas about Your Digital Self.</p></div>'
+      + '<a class="btn bts lp-launch-examples" href="'+escapeText(search)+'" target="_blank" rel="noopener noreferrer">Explore examples <span aria-hidden="true">↗</span><small>Opens a search in a new tab</small></a>'
+      + '<div class="lp-launch-next"><p>Ready to plan your own?</p><button type="button" class="btn btp" onclick="renderStep3Screen()">Open my Learning Passport →</button></div></div></section>';
   }
   function drawMap() {
     var host = document.getElementById('lp-map');
@@ -21,10 +53,10 @@
     var current = screens[window._currentScreen];
     if (current === undefined) current = states.findIndex(function (s) { return !s; });
     var live = window._liveSession;
-    var isSessionLocked = live && live.active && ['step1','step2','step3'].indexOf(live.step) !== -1;
+    var isSessionLocked = false;
     var html = '<svg class="lp-route" viewBox="0 0 1100 130" preserveAspectRatio="none" aria-hidden="true"><path d="M0 62 C130 128 195 -10 365 25 S560 126 730 68 S940 54 1100 100"/></svg><div class="lp-stations">';
     labels.forEach(function (label, i) {
-      var status = states[i] ? 'Completed' : (i === current ? 'Current step' : (enabled[i] ? 'Available' : 'After teacher grouping'));
+      var status = states[i] ? 'Completed' : (i === current ? 'Current step' : (enabled[i] ? 'Available' : 'Choose a project idea first'));
       var blocked = !enabled[i] || isSessionLocked;
       html += '<button type="button" class="lp-station'+(states[i]?' done':'')+(i===current?' current':'')+'" '+(i===current?'aria-current="step" ':'')+(blocked?'disabled ':'')+'data-step="'+i+'" aria-label="'+escapeText(mapLabels[i]+': '+label+'. '+status)+'"><span class="lp-pin">'+(states[i]?'✓':i+1)+'</span><strong>'+mapLabels[i]+'</strong><small>'+status+'</small></button>';
     });
@@ -56,6 +88,7 @@
   window.LearnPathUI = {
     escapeText:escapeText,
     mascot:mascot,
+    productLaunch:productLaunch,
     grammarFeedback:function (question, answer) {
       if (answer === question.correct) return '<p class="lp-grammar-correct">✓ Correct</p>';
       var explanation = (question.feedback || [])[answer] || 'Look at the meaning of the sentence and review the correct answer.';
@@ -64,11 +97,6 @@
     setProgress:function (done, unlocked) { states = done.map(Boolean); enabled = unlocked.map(Boolean); drawMap(); },
     setRole:function (role) { document.body.dataset.role = role; drawMap(); },
     openResources:function () {
-      var live=window._liveSession;
-      if(live&&live.active&&['step1','step2','step3'].indexOf(live.step)!==-1){
-        if(typeof window.toast==='function') window.toast('Your teacher is guiding this part.');
-        return;
-      }
       if(typeof window.renderResourcesScreen==='function') window.renderResourcesScreen();
     },
     toggleMotion:function () {

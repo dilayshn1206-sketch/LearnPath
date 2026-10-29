@@ -142,31 +142,29 @@ begin
   end loop;
  elsif root in ('wordChecks','grammarAnswers','lessonReflections') and p[2]=uid and array_length(p,1)>=2 then
   allowed:=true;
-  session:=d->'liveSession';
-  if coalesce((session->>'active')::boolean,false) then
-   if root in ('wordChecks','grammarAnswers') and session->>'step' not in ('step1','eval2') then allowed:=false; end if;
-   if root='lessonReflections' and session->>'step'<>'eval1' then allowed:=false; end if;
-  end if;
  elsif root='contracts' and array_length(p,1)=2 and p[2]=uid then
-  c:=old; session:=d->'liveSession';
-  if p_operation='remove' then allowed:=coalesce(c->>'editUnlocked','true')<>'false';
+  c:=old;
+  -- Project access is independent of grouping, classroom timers and edit flags.
+  -- The actor is still an enrolled student and may only write their own path.
+  if p_operation='remove' then allowed:=true;
   elsif p_operation='set' then
-   allowed:=coalesce(c->>'editUnlocked','true')<>'false' and val->>'status'='awaiting_grouping' and val->>'studentId'=uid and val->>'grade'='6' and val->>'goalVersion'='grade6-v1';
-   if coalesce((session->>'active')::boolean,false) and session->>'step'<>'step2' then allowed:=false; end if;
+   allowed:=val->>'status' in ('draft','awaiting_grouping') and val->>'studentId'=uid and val->>'grade'='6' and val->>'goalVersion'='grade6-v1';
+   val:=val||jsonb_build_object('status','draft','editUnlocked',true);
   else
    fields:=array['topic','planSteps','goals','goalsOtherText','evalTeacherPct','evalPeerPct','status','editUnlocked','submittedAt'];
    if p_value ? 'projectEval' then
-    allowed:=c->>'status'='approved' and (select count(*) from jsonb_object_keys(p_value))=1;
+    allowed:=nullif(c->>'productType','') is not null and (select count(*) from jsonb_object_keys(p_value))=1;
    else
-    allowed:=coalesce(c->>'status','') not in ('awaiting_grouping','reset') and (c->>'status'='draft' or c->>'editUnlocked'='true') and nullif(d#>>array['users',uid,'groupId'],'') is not null and not exists(select 1 from jsonb_object_keys(p_value) x where not(x=any(fields)));
-    if p_value ? 'status' and val->>'status'<>'pending' then allowed:=false; end if;
-    if p_value ? 'editUnlocked' and (val->>'status'<>'pending' or val->>'editUnlocked'<>'false') then allowed:=false; end if;
+    allowed:=nullif(c->>'productType','') is not null and not exists(select 1 from jsonb_object_keys(p_value) x where not(x=any(fields)));
+    if p_value ? 'status' and coalesce(val->>'status','') not in ('draft','pending') then allowed:=false; end if;
     if p_value->>'status'='pending' then
      if (select count(*) from jsonb_each(coalesce(val->'goals','{}')) where value='true'::jsonb and key=any(array['unitWords','organize','grammar','tenSentences','evidence','spelling','speakClear','easyUnderstand','workAtHome','topicImpact','structure'])) + (case when nullif(trim(val->>'goalsOtherText'),'') is not null then 1 else 0 end) <3 then raise exception 'Please choose at least three goals'; end if;
      if nullif(trim(val->>'topic'),'') is null or jsonb_typeof(val->'planSteps')<>'array' or coalesce(jsonb_array_length(val->'planSteps'),0)<3 or exists(select 1 from jsonb_array_elements_text(val->'planSteps') s where nullif(trim(s),'') is null) then raise exception 'Complete your topic and all plan steps'; end if;
-     if val->>'editUnlocked'<>'false' then allowed:=false; end if;
+    elsif p_value ?| array['topic','planSteps','goals','goalsOtherText','evalTeacherPct','evalPeerPct'] then
+     -- An edited submission needs review again; students cannot retain or grant approval.
+     val:=val||jsonb_build_object('status','draft');
     end if;
-    if coalesce((session->>'active')::boolean,false) and (session->>'step'<>'step3' or coalesce((session->>'deadline')::numeric,9999999999999)<extract(epoch from now())*1000) then allowed:=false; end if;
+    val:=val||jsonb_build_object('editUnlocked',true);
    end if;
   end if;
  elsif root='resourceSuggestions' and array_length(p,1)=2 and old is null and p_operation='set' then allowed:=val->>'suggestedById'=uid;
