@@ -1,4 +1,64 @@
 /* Approved atlas identity. All legacy controls retain their handlers and IDs. */
+.lp-feed-icon{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.6;flex-shrink:0}
+.lp-feed-heading{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:12px 8px 28px}
+.lp-feed-heading h1{font-size:34px;margin:8px 0 12px;letter-spacing:-.5px}
+.lp-feed-heading p{margin:0;color:var(--tm);max-width:650px;font-size:18px}
+.lp-feed-heading .lp-eyebrow{font-size:12px;color:var(--pd);font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.lp-feed-cover{background:var(--pd);border-left:6px solid var(--lp-mustard);border-radius:5px 18px 18px 5px;color:var(--al);width:126px;min-height:146px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;box-shadow:3px 3px 0 #d8c69d;transform:rotate(5deg)}
+.lp-feed-cover .lp-feed-icon{width:44px;height:44px;color:var(--lp-mustard)}
+.lp-feed-cover span{text-align:center;font-size:9px;letter-spacing:.1em;line-height:1.6}
+.lp-feed-tabs{display:flex;gap:10px;border:0!important;border-bottom:1px solid var(--gb)!important;background:transparent!important;border-radius:0!important;padding-bottom:12px;margin:0 0 24px}
+.lp-feed-tabs .toggle-btn{display:flex;align-items:center;justify-content:center;gap:10px;flex:0 1 auto;min-height:52px;padding:12px 20px;border:1px solid var(--gb);border-radius:12px;background:var(--lp-paper);color:var(--tm);font-size:17px;font-weight:600}
+.lp-feed-tabs .toggle-btn.act{background:var(--pd);color:var(--al);border-color:var(--pd);box-shadow:inset 0 -3px 0 var(--lp-mustard)}
+.lp-feed-plans{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;gap:24px}
+.lp-feed-passport.project-card{padding:0;border:1px solid #d9cba9;border-left:7px solid var(--pd);border-radius:8px 24px 24px 8px;overflow:hidden;background:#fffaf0;box-shadow:3px 4px 0 #e6dcc7;margin:0;min-width:0}
+.lp-feed-passport:only-child{grid-column:1/-1;width:min(100%,820px);justify-self:center}
+.lp-feed-passport-cover{background:var(--pd);color:var(--al);padding:17px 22px 22px;border-bottom:2px solid var(--lp-mustard)}
+.lp-feed-passport-kicker{display:flex;align-items:center;gap:8px;color:var(--lp-mustard);font-size:11px;letter-spacing:.11em;text-transform:uppercase;margin-bottom:15px}
+.lp-feed-passport-kicker .lp-feed-icon{width:20px;height:20px}
+.lp-feed-author{display:flex;align-items:center;gap:12px;padding:0;background:none;border:0;color:inherit;text-align:left;min-height:48px;width:100%}
+.lp-feed-author>span:last-child{display:flex;flex-direction:column;gap:3px;min-width:0}
+.lp-feed-author strong{font-size:19px;line-height:1.3;overflow-wrap:anywhere}
+.lp-feed-author small{font-size:15px;color:var(--al)}
+.lp-feed-author .post-avp,.lp-feed-author .post-av{width:44px;height:44px;flex-shrink:0;margin:0;border:1px solid #ffffff66}
+.lp-feed-author .post-avp{background:var(--al);color:var(--pd);display:grid;place-items:center;font-size:21px}
+.lp-feed-passport-paper{padding:24px;overflow-wrap:anywhere}
+.lp-feed-stamp{display:inline-block;border:2px double #b9aa84;border-radius:7px;padding:6px 11px;margin:0 0 18px;font-size:13px;color:var(--tm);font-weight:700;transform:rotate(-2deg)}
+.lp-feed-stamp.sent,.lp-feed-stamp.approved{border:3px double var(--t);color:var(--td)}
+.lp-feed-passport h2{font-size:26px;line-height:1.3;margin:0 0 22px}
+.lp-feed-passport h3{font-family:inherit;font-size:16px;color:var(--pd);margin:0 0 12px}
+.lp-feed-plan ol{margin:0;padding:0;list-style:none;counter-reset:journey-step}
+.lp-feed-plan li{display:flex;gap:12px;padding:9px 0;border-bottom:1px dotted #d9cba9;font-size:17px;line-height:1.5;counter-increment:journey-step}
+.lp-feed-plan li:before{content:counter(journey-step) '.';color:var(--pd);font-weight:700;min-width:20px}
+.lp-feed-plan{margin-bottom:22px}
+.lp-feed-goals{border-top:1px solid #d9cba9;border-bottom:1px solid #d9cba9}
+.lp-feed-goals summary{display:flex;align-items:center;gap:10px;cursor:pointer;min-height:54px;font-size:17px;font-weight:700;color:var(--pd);padding:10px 0;list-style:none}
+.lp-feed-goals summary::-webkit-details-marker{display:none}
+.lp-feed-goals summary:after{content:'+';margin-left:auto;font-size:24px;font-weight:400}
+.lp-feed-goals[open] summary:after{content:'−'}
+.lp-feed-count{border:1px solid #d5c39a;border-radius:50%;width:28px;height:28px;display:grid;place-items:center;font-size:13px;background:#f6ebd1}
+.lp-feed-goals>div{padding:8px 0 20px}
+.lp-feed-goals ul{margin:0 0 18px;padding-left:22px;font-size:17px;line-height:1.6}
+.lp-feed-goals li{padding:4px 0}
+.lp-feed-targets{padding:22px 0 0}
+.lp-feed-targets>div{display:flex;gap:24px;flex-wrap:wrap}
+.lp-feed-targets p{margin:0;display:flex;flex-direction:column;gap:4px;min-width:100px}
+.lp-feed-targets span{font-size:14px;color:var(--tm)}
+.lp-feed-targets strong{font-size:24px;color:var(--pd)}
+.lp-feed-passport-footer{border-top:1px dashed #b9aa84;margin-top:24px;padding-top:12px;font-size:9px;letter-spacing:.1em;color:var(--tm)}
+.lp-feed-teacher-note{margin:22px 0 0;padding:14px;border-left:3px solid var(--p);background:var(--tl);font-size:16px}
+.lp-feed-teacher-note p{margin:6px 0 0}
+.lp-feed-review-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+.lp-feed-draft-note{font-size:16px;color:var(--tm)}
+.lp-collection-empty{grid-column:1/-1;text-align:center;padding:40px 24px;border:1px dashed #b9aa84;border-radius:16px;background:#fffaf0;color:var(--tm)}
+.lp-collection-empty>.lp-feed-icon{width:48px;height:48px;color:var(--pd)}
+.lp-collection-empty h2{font-size:24px;color:var(--tx)}
+[data-screen="feed"] #feed-container{max-width:850px;margin:auto}
+[data-screen="feed"] .lp-gallery-post{border:1px solid #d9cba9;border-top:4px solid var(--lp-mustard);border-radius:8px 20px 20px 8px;box-shadow:3px 4px 0 #e6dcc7;overflow:hidden;background:#fffaf0}
+[data-screen="feed"] .lp-gallery-post .post-hdr{border-bottom:1px solid #d9cba9;background:var(--lp-paper);padding:20px}
+[data-screen="feed"] .lp-gallery-post .post-body{padding:22px}
+@media(max-width:850px){.lp-feed-plans{grid-template-columns:1fr}.lp-feed-heading h1{font-size:29px}.lp-feed-cover{width:98px;min-height:120px}.lp-feed-passport:only-child{width:100%}}
+@media(max-width:550px){.lp-feed-heading{padding:6px 0 20px;gap:12px}.lp-feed-cover{display:none}.lp-feed-heading h1{font-size:28px}.lp-feed-tabs{gap:8px}.lp-feed-tabs .toggle-btn{font-size:15px;padding:10px;gap:6px;flex:1}.lp-feed-passport-paper{padding:20px}.lp-feed-passport h2{font-size:24px}.lp-feed-tabs .lp-feed-icon{width:20px;height:20px}}
 .lp-product-launch{display:grid;grid-template-columns:210px minmax(0,1fr);gap:24px;max-width:1000px;margin:8px auto 0;align-items:center}
 .lp-launch-guide{display:flex;flex-direction:column;align-items:center}
 .lp-launch-guide .lp-clock{--frame-size:210px}

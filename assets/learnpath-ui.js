@@ -13,6 +13,22 @@
   function mascot() {
     return '<div class="lp-mascot"><div class="lp-mascot-note"><strong>One step at a time.</strong><br>Your ideas make this project yours.</div><div class="lp-clock'+(paused?' paused':'')+'" role="img" aria-label="Compass learning companion"></div><button type="button" class="lp-motion-toggle" aria-pressed="'+paused+'" onclick="LearnPathUI.toggleMotion()">'+(paused?'Play animation':'Pause animation')+'</button></div>';
   }
+  function feedIcon(kind) {
+    var paths = {
+      passport:'<rect x="5" y="3" width="15" height="19" rx="2"/><path d="M9 3v19M12 7h5M12 18h5"/><circle cx="14.5" cy="12.5" r="3"/>',
+      gallery:'<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8" cy="9" r="2"/><path d="m4 18 5-5 4 3 4-6 4 8"/>',
+      goals:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="m9 12 2 2 5-5"/>',
+      file:'<path d="M6 2h9l4 4v16H6zM15 2v5h4M9 12h7M9 16h7"/>',
+      comment:'<path d="M3 4h18v13H10l-6 4v-4H3zM7 8h10M7 12h7"/>'
+    };
+    return '<svg class="lp-feed-icon" viewBox="0 0 24 24" aria-hidden="true">'+(paths[kind]||paths.passport)+'</svg>';
+  }
+  function feedHeader(teacher) {
+    return '<header class="lp-feed-heading"><div><p class="lp-eyebrow">Our classroom · Your Digital Self</p><h1>Our learning journeys</h1><p>'+(teacher?'Review our learning plans and give feedback on shared projects.':'See the ideas, plans and projects taking shape in our class.')+'</p></div><div class="lp-feed-cover" aria-hidden="true">'+feedIcon('passport')+'<span>LEARNPATH<br>CLASS COLLECTION</span></div></header>';
+  }
+  function feedNavigation(tab) {
+    return '<nav class="toggle-row lp-feed-tabs" aria-label="Class collection"><button type="button" class="toggle-btn'+(tab==='plans'?' act':'')+'" aria-pressed="'+(tab==='plans')+'" onclick="switchFeedTab(\'plans\')">'+feedIcon('passport')+'<span>Learning plans</span></button><button type="button" class="toggle-btn'+(tab==='posts'?' act':'')+'" aria-pressed="'+(tab==='posts')+'" onclick="switchFeedTab(\'posts\')">'+feedIcon('gallery')+'<span>Project gallery</span></button></nav>';
+  }
   function hasPassport(c) {
     if (!c || !c.productType || !(c.submittedAt || c.status === 'pending' || c.status === 'approved')) return false;
     var goals = Object.keys(c.goals || {}).filter(function (key) { return c.goals[key] === true; }).length;
@@ -96,6 +112,9 @@
   window.LearnPathUI = {
     escapeText:escapeText,
     mascot:mascot,
+    feedIcon:feedIcon,
+    feedHeader:feedHeader,
+    feedNavigation:feedNavigation,
     productLaunch:productLaunch,
     hasPassport:hasPassport,
     setPassportReady:function (ready) {
