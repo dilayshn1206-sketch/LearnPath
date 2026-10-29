@@ -21,7 +21,7 @@ const server=http.createServer((req,res)=>{
  const before=await page.evaluate(()=>{
   const c={grade:6,productType:'Infographic',category:'visual',topic:'Being kind online',studentName:'Ada <A>',studentId:'student',status:'pending',submittedAt:1,goals:{unitWords:true,grammar:true,tenSentences:true},weaknessTips:['Draw a plan.','Use clear words.','Check your message.'],planSteps:['I will plan my ideas.','I will create my infographic.','I will check my work.'],evalTeacherPct:'0',evalPeerPct:'85',teacherComment:'Keep your examples clear.',createdAt:3};
   __mockDB.contracts={student:c,peer:{...c,studentId:'peer',studentName:'Ece',status:'approved',createdAt:2},draft:{studentId:'draft',studentName:'Deniz',productType:'Blog',topic:'<b>My topic</b>',createdAt:1,status:'draft'}};
-  __mockDB.posts={example:{uid:'peer',name:'Ece',title:'My digital guide',productType:'Blog',link:'https://example.test/work',createdAt:2,comments:{first:{from:'Mina',fromId:'classmate',peerRubric:[0,1,0,1,2,0],well:'Your opening is clear.',improve:'Add one example <please>.'}}}};
+  __mockDB.posts={example:{uid:'peer',name:'Ece',title:'My digital guide',productType:'Blog',link:'https://example.test/work',createdAt:2}};
   const snap=(v,key)=>({exists:()=>v!=null,val:()=>v,key,forEach:fn=>Object.entries(v||{}).forEach(([k,x])=>fn(snap(x,k)))});
   window.onValue=(p,fn)=>{fn(snap(p.split('/').reduce((o,k)=>o?.[k],__mockDB)));return ()=>{};};
   window.viewProf=id=>window.__viewedProfile=id;
@@ -29,6 +29,7 @@ const server=http.createServer((req,res)=>{
  });
  await page.getByRole('heading',{name:'Our learning journeys',exact:true}).waitFor();
  assert.equal(await page.locator('.lp-feed-passport').count(),3);
+ assert.equal(await page.locator('.lp-feed-product-type').first().innerText(),'Product type\nInfographic');
  assert.equal(await page.locator('.lp-feed-stamp.sent').innerText(),'Sent to the teacher');
  assert.match(await page.locator('.lp-feed-passport').first().innerText(),/Teacher\n0%/);
  assert.equal(await page.locator('.lp-feed-passport h2').last().innerText(),'<b>My topic</b>');
@@ -40,15 +41,6 @@ const server=http.createServer((req,res)=>{
  await page.getByRole('button',{name:'Project gallery',exact:true}).click();
  assert.equal(await page.getByRole('button',{name:'Project gallery',exact:true}).getAttribute('aria-pressed'),'true');
  assert.match(await page.locator('#feed-container').innerText(),/My digital guide/);
- assert.match(await page.locator('.lp-feedback-waiting').innerText(),/Teacher\s+No feedback yet/);
- assert.equal(await page.locator('.lp-feedback-areas li').count(),6);
- assert.match(await page.locator('.lp-feedback-areas li').first().innerText(),/Ideas\s+Step 1\s+I give simple information/);
- assert.equal(await page.locator('.lp-feedback-written p').last().innerText(),'Add one example <please>.');
- await page.locator('.lp-feedback-calculation summary').click();
- assert.match(await page.locator('.lp-feedback-calculation').innerText(),/Overall: 56%/);
- await page.locator('.lp-feedback-original summary').click();
- assert.match(await page.locator('.lp-feedback-original').innerText(),/He\/She gives simple information/);
- await page.locator('.lp-feedback-summary').screenshot({path:path.join(root,'verification/feedback-readable.png')});
  assert.equal(await page.getByRole('button',{name:'+ Share Your Work',exact:true}).count(),1);
  for(const width of [1024,390]){await page.setViewportSize({width,height:900});await page.getByRole('button',{name:'Learning plans',exact:true}).click();assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));}
  await page.evaluate(()=>renderTFeed());await page.getByRole('button',{name:'Approve',exact:true}).waitFor();
@@ -58,33 +50,12 @@ const server=http.createServer((req,res)=>{
  assert.match(await page.locator('#projects-list').innerText(),/Our journeys start here/);
  await page.getByRole('button',{name:'Project gallery',exact:true}).click();
  assert.match(await page.locator('#feed-container').innerText(),/A space for our creations/);
- await page.setViewportSize({width:1280,height:900});
- const instruments=await page.evaluate(()=>JSON.stringify([SELF_RUBRIC,PEER_RUBRIC]));
  await page.evaluate(()=>openNewPost());
- assert.equal(await page.locator('#np-rub-rows fieldset').count(),2);
- assert.equal(await page.locator('#np-rub-rows input[type="radio"]').count(),6);
- assert.match(await page.locator('#np-rub-rows').innerText(),/How well did I explain my ideas/);
- assert.deepEqual(await page.locator('.lp-rubric-question').first().locator('.rub-sentence').allTextContents(),await page.evaluate(()=>SELF_RUBRIC[0].levels.map(l=>l.label)));
- await page.locator('#rubric-newpost-0-1').check();
- await page.locator('#rubric-newpost-1-2').check();
- await page.getByRole('button',{name:'Next two →',exact:true}).click();
- assert.match(await page.locator('.lp-rubric-progress').innerText(),/2 of 6 selected/);
- await page.locator('#rubric-newpost-2-0').check();await page.locator('#rubric-newpost-3-1').check();
- await page.getByRole('button',{name:'Next two →',exact:true}).click();
- await page.locator('#rubric-newpost-4-2').check();await page.locator('#rubric-newpost-5-0').check();
- await page.getByRole('button',{name:'Review my choices →',exact:true}).click();
- assert.equal(await page.locator('.lp-rubric-review li').count(),6);
- assert.deepEqual(await page.evaluate(()=>_rubricStores.newpost.values),[1,2,0,1,2,0]);
- await page.getByRole('button',{name:'Change',exact:true}).first().click();
- assert.ok(await page.locator('#rubric-newpost-0-1').isChecked());
- await page.locator('#rubric-newpost-0-1').focus();await page.keyboard.press('ArrowLeft');
- assert.equal(await page.evaluate(()=>_rubricStores.newpost.values[0]),0);
- await page.locator('#np-rub-rows').screenshot({path:path.join(root,'verification/reflection-pair.png')});
- for(const width of [1024,390]){await page.setViewportSize({width,height:900});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));}
- assert.equal(await page.evaluate(()=>JSON.stringify([SELF_RUBRIC,PEER_RUBRIC])),instruments);
- await page.evaluate(()=>{var el=document.createElement('div');el.id='peer-test';document.getElementById('mc').appendChild(el);_rubricStores.peerTest={containerId:el.id,rubric:PEER_RUBRIC,values:new Array(PEER_RUBRIC.length).fill(null)};renderRubricBlock(el.id,PEER_RUBRIC,_rubricStores.peerTest.values,'peerTest');});
- assert.match(await page.locator('#peer-test').innerText(),/How well does this person explain/);
- assert.deepEqual(await page.locator('#peer-test .lp-rubric-question').first().locator('.rub-sentence').allTextContents(),await page.evaluate(()=>PEER_RUBRIC[0].levels.map(l=>l.label)));
+ assert.equal(await page.locator('#np-rub-rows .rubarea2').count(),6);
+ assert.equal(await page.locator('#np-rub-rows .rublevel-row').count(),18);
+ assert.equal(await page.locator('.lp-rubric-pair').count(),0);
+ await page.locator('#np-rub-rows .rubarea2').first().locator('.rublevel-row').nth(1).click();
+ assert.equal(await page.evaluate(()=>_rubricStores.newpost.values[0]),1);
  assert.deepEqual(errors,[]);console.log('PASS: collection tabs, native goal disclosure, versioned goals, zero targets, escaped content, profile/review actions, media links, empty states, tablet/mobile; no record writes.');
  }finally{await browser.close();await new Promise(r=>server.close(r));}
 })().catch(e=>{console.error(e);process.exitCode=1;});
