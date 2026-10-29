@@ -28,7 +28,7 @@ render=function(){
   if(host.readOnly){document.querySelectorAll('[data-passport-edit],#edit-passport').forEach(el=>el.remove());}
   else{
    const send=document.createElement('button');send.type='button';send.id='overview-send';send.className='primary send-teacher';send.textContent='Save and send to the teacher';$('.overview-actions').appendChild(send);
-   const project=$('.passport-overview-card');project.insertAdjacentHTML('beforeend',field('saved-topic','My topic','Make your topic more specific if you need to.'));$('#saved-topic').value=passport.topic;$('#saved-topic').oninput=e=>{passport.topic=e.target.value;passport.submitted=false;};
+   const project=$('.passport-overview-card');project.insertAdjacentHTML('beforeend','<details class="passport-topic-edit"><summary>Edit my topic</summary>'+field('saved-topic','My topic','Make your topic more specific if you need to.')+'</details>');$('#saved-topic').value=passport.topic;$('#saved-topic').oninput=e=>{passport.topic=e.target.value;passport.submitted=false;};
   }
  }
  if(passport?.active){
@@ -39,6 +39,7 @@ render=function(){
    $('.heading .intro').textContent='Choose your goals and write your steps. Your Learning Passport will be ready when you finish.';
   }
  }
+ document.querySelector('.passport-document')?.classList.toggle('document-motion-off',paused);
  reportHeight();
 };
 const originalNext=next;
@@ -80,3 +81,5 @@ new ResizeObserver(reportHeight).observe(document.body);
   render();if(host.mode==='idea'&&$('#next'))$('#next').textContent='Continue →';
  }catch(error){$('#screen').innerHTML='<h1>Could not open your plan</h1><p>'+esc(error.message)+'</p>';}
 })();
+
+document.getElementById('motion').addEventListener('click',()=>document.querySelector('.passport-document')?.classList.toggle('document-motion-off',paused));
