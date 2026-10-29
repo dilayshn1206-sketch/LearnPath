@@ -33,6 +33,9 @@ Pause/resume control, pause in hidden tabs, static first frame for reduced motio
 Sprite timing and sheet metadata: `assets/compass-idle.json`.
 
 ## Content
+The owner clarified on 29 October that “My Learning Passport” denotes the
+completed goals-and-plan result. Before completion, use “Set goals and plan”
+and omit its persistent reminder; never present an empty overview as a passport.
 New passports carry `grade:6`, `goalVersion:grade6-v1`. Stored goal IDs remain
 compatible and the minimum-three-project-goals rule is unchanged. New targets
 are five unit words, five sentences and 1.5–2 minutes of speech.

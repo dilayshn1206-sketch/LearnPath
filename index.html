@@ -310,7 +310,7 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
   <div class="modal-card" id="result-popup-card" style="text-align:center;padding:26px 20px"></div>
 </div>
 
-<script src="assets/learnpath-ui.js?v=20261029-2"></script>
+<script src="assets/learnpath-ui.js?v=20261029-3"></script>
 <script type="module">
 import {auth,db,storage,rpc,ref,set,get,push,onValue,update,remove,sref,uploadBytesResumable,getDownloadURL,deleteObject,onAuthStateChanged,signInWithPopup,signOut} from './assets/supabase-backend.js?v=20261027-2';
 const prov={};
@@ -1111,7 +1111,7 @@ async function renderHome(){
   html+='<div class="step-sub">'+step2Sub+'</div></div></button>';
 
   html+='<button type="button" class="step-card'+(step3Unlocked?(step3Done?" done":""):" locked")+'" onclick="'+(step3Unlocked?"renderStep3Screen()":"toast('Choose a project idea first.')")+'">';
-  html+='<div class="step-num">'+(step3Unlocked?(step3Done?"✓":"3"):"−")+'</div><div style="flex:1"><div class="step-title">My Learning Passport</div>';
+  html+='<div class="step-num">'+(step3Unlocked?(step3Done?"✓":"3"):"−")+'</div><div style="flex:1"><div class="step-title">'+(LearnPathUI.hasPassport(contractData)?'My Learning Passport':'Set goals and plan')+'</div>';
   html+='<div class="step-sub">'+(step3Unlocked?"Your project plan for "+esc(contractData.productType):"Choose a project idea first")+'</div></div></button>';
 
   html+='<button type="button" class="step-card'+(step4Done?" done":"")+'" onclick="renderResourcesScreen()">';
@@ -3074,6 +3074,7 @@ function queuePlannerSave(uid,value){
     if(!CU||CU.uid!==uid)throw new Error("Please sign in again before saving.");
     await update(ref(db,"contracts/"+uid),value);
     if(contractData&&contractData.studentId===uid)Object.assign(contractData,value);
+    refreshPassportTab();
   });
   plannerSaveChain=operation;return operation;
 }
@@ -3099,8 +3100,8 @@ async function mountPlanner(mode,c,overview){
     ['written','spoken','visual'].forEach(function(cat){extra[cat]=(catalog[cat]||[]).filter(function(item){var original=DEFAULT_CATALOG[cat].find(function(pair){return pair[0]===item.id;});return item.active&&(!original||original[1]!==item.name);});});
   }
   var mc=document.getElementById('mc');
-  mc.innerHTML=(isLockedStep(mode==='idea'?'step2':'step3')?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">← Back to Home</button>')+'<iframe id="lp-planner-frame" title="'+(mode==='idea'?'Plan your project':'My Learning Passport')+'" src="assets/planner.html?v=20261029-1" style="width:100%;height:900px;border:0;display:block" scrolling="no"></iframe>';
-  window._plannerContext={mode:mode,contract:c,overview:!!overview,readOnly:false,extraProducts:extra};
+  mc.innerHTML=(isLockedStep(mode==='idea'?'step2':'step3')?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">← Back to Home</button>')+'<iframe id="lp-planner-frame" title="'+(mode==='idea'?'Plan your project':LearnPathUI.hasPassport(c)?'My Learning Passport':'Set goals and plan')+'" src="assets/planner.html?v=20261029-3" style="width:100%;height:900px;border:0;display:block" scrolling="no"></iframe>';
+  window._plannerContext={mode:mode,contract:c,overview:!!overview&&LearnPathUI.hasPassport(c),passportReady:LearnPathUI.hasPassport(c),readOnly:false,extraProducts:extra};
   setNav('home');
 }
 window.addEventListener('message',async function(event){
@@ -3149,7 +3150,9 @@ window.renderStep3Screen=async function(overview){
 };
 function refreshPassportTab(){
   var tab=document.getElementById('lp-passport-tab');
-  if(!CU||document.getElementById('app').style.display==='none'||UP.role==='teacher'||!contractData||!contractData.productType){if(tab)tab.remove();return;}
+  var ready=LearnPathUI.hasPassport(contractData);
+  LearnPathUI.setPassportReady(ready);
+  if(!CU||document.getElementById('app').style.display==='none'||UP.role==='teacher'||!ready){if(tab)tab.remove();return;}
   if(!tab){tab=document.createElement('button');tab.id='lp-passport-tab';tab.className='btn';tab.type='button';tab.textContent='My Learning Passport';document.body.appendChild(tab);tab.onclick=function(){renderStep3Screen(true);};}
 }
 new MutationObserver(refreshPassportTab).observe(document.getElementById('mc'),{childList:true});
