@@ -1302,6 +1302,7 @@ function buildCommentSummary(post,comments){
   html+='<div style="font-size:12px;font-weight:700;margin-bottom:7px">&#128202; Feedback Summary</div>';
   html+=fbGroupRow("&#128105;&#8205;&#127979;","Teacher",tStats,"fb-t-"+postId);
   html+=fbGroupRow("&#128101;","Classmates",pStats,"fb-p-"+postId);
+  teacher.forEach(function(cm){html+=personalGoalFeedback(cm);});
 
   // All the written feedback + individual comments, tucked into one dropdown
   html+='<div style="font-size:12px;font-weight:700;color:var(--p);cursor:pointer;margin-top:8px" onclick="toggleCat(\''+allId+'\')">&#128172; See all feedback ('+comments.length+') &#9660;</div>';
@@ -1318,7 +1319,6 @@ function buildCommentSummary(post,comments){
     }
     if(cm.well)html+='<div style="font-size:12px;color:var(--tm);line-height:1.5"><strong>Good points:</strong> '+esc(cm.well)+'</div>';
     if(cm.improve)html+='<div style="font-size:12px;color:var(--tm);line-height:1.5"><strong>To improve:</strong> '+esc(cm.improve)+'</div>';
-    html+=personalGoalFeedback(cm);
     html+='</div>';
   });
   html+='</div>';
