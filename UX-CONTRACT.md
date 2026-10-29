@@ -10,6 +10,21 @@
 | CRUD | Existing Firebase functions in index.html | Existing storage paths and schema | Same save and navigation destinations | Source comparison + mock tests |
 
 ## Behavior ledger
+- Saved project ideas default to a hydrated review; Edit opens one prefilled part,
+  Save changes returns to that review, and Cancel edit restores the saved choices.
+  Existing idea edits update only idea fields; goals, plan actions, targets, creation
+  and submission history stay intact. Opening the review performs no writes.
+  Continue to my plan uses the existing completed-passport presentation check.
+- Personal and class passports use compact paper geometry, with no content clipping.
+  Class-plan goals remain accessible through native disclosure. A normal three-action
+  plan fits one landscape-tablet view; long content grows naturally rather than truncating.
+- A classmate's reflection is labelled with the author's escaped display name.
+  Expanded teacher/classmate feedback uses original peer criterion descriptors.
+  Multiple-response averages are labelled as the closest description; numeric scoring
+  and all stored values remain unchanged.
+- Peer feedback shares one-question progress/Compass guidance, followed by a final
+  written-feedback panel. Back and closing/reopening the form preserve current choices
+  and written text. The original save action and nullable rubric values stay unchanged.
 - Teacher-only personal goal check: Yes/No for each selected project/custom goal,
   separate from the six rubric values. New posts snapshot goal content at sharing;
   historical posts use a labelled contract-at-review snapshot. Teacher comments
@@ -17,8 +32,9 @@
   teacher feedback; peer forms have no goal-rating controls. Server comment rules
   deny `personalGoalReview` for students, including forged teacher flags.
   Existing teacher-evaluation export captures the full nested review payload.
-- Share composer reads the current learner contract; saved focus tips and selected
-  goal snapshots become prepared questions in `assets/share-guide.js`. Missing/error
+- Share composer reads the current learner contract; all three saved focus tips
+  become prepared questions in the right-side `assets/share-guide.js` guide. No
+  project-goal carousel or hidden third tip. Missing/error
   states remain honest and do not block sharing. This guide never grades or writes.
 - One-criterion rubric navigation is shared by self/peer/teacher forms. Original
   ordering, Step descriptions and 0/1/2 nullable values remain unchanged. Context
