@@ -4,7 +4,7 @@
   var states = [false, false, false, false];
   var enabled = [true, true, false, true];
   var paused = false;
-  var labels = ['What are we learning?', 'Get Ideas', 'My Learning Contract', 'Choose Resources'];
+  var labels = ['What are we learning?', 'Get Ideas', 'My Learning Passport', 'Choose Resources'];
   var mapLabels = ['Explore', 'Plan', 'Create', 'Reflect'];
   var actions = ['renderStep1Screen', 'startQuiz', 'renderStep3Screen', 'renderResourcesScreen'];
   function escapeText(value) {
@@ -21,10 +21,10 @@
     var current = screens[window._currentScreen];
     if (current === undefined) current = states.findIndex(function (s) { return !s; });
     var live = window._liveSession;
-    var isSessionLocked = live && live.active && ['step1','step2','step3'].indexOf(live.step) !== -1;
+    var isSessionLocked = false;
     var html = '<svg class="lp-route" viewBox="0 0 1100 130" preserveAspectRatio="none" aria-hidden="true"><path d="M0 62 C130 128 195 -10 365 25 S560 126 730 68 S940 54 1100 100"/></svg><div class="lp-stations">';
     labels.forEach(function (label, i) {
-      var status = states[i] ? 'Completed' : (i === current ? 'Current step' : (enabled[i] ? 'Available' : 'After teacher grouping'));
+      var status = states[i] ? 'Completed' : (i === current ? 'Current step' : (enabled[i] ? 'Available' : 'Choose a project idea first'));
       var blocked = !enabled[i] || isSessionLocked;
       html += '<button type="button" class="lp-station'+(states[i]?' done':'')+(i===current?' current':'')+'" '+(i===current?'aria-current="step" ':'')+(blocked?'disabled ':'')+'data-step="'+i+'" aria-label="'+escapeText(mapLabels[i]+': '+label+'. '+status)+'"><span class="lp-pin">'+(states[i]?'✓':i+1)+'</span><strong>'+mapLabels[i]+'</strong><small>'+status+'</small></button>';
     });
@@ -64,11 +64,6 @@
     setProgress:function (done, unlocked) { states = done.map(Boolean); enabled = unlocked.map(Boolean); drawMap(); },
     setRole:function (role) { document.body.dataset.role = role; drawMap(); },
     openResources:function () {
-      var live=window._liveSession;
-      if(live&&live.active&&['step1','step2','step3'].indexOf(live.step)!==-1){
-        if(typeof window.toast==='function') window.toast('Your teacher is guiding this part.');
-        return;
-      }
       if(typeof window.renderResourcesScreen==='function') window.renderResourcesScreen();
     },
     toggleMotion:function () {
