@@ -9,7 +9,9 @@ the visual identity; existing application code owns workflow and permissions.
 ## North Star
 A calm illustrated learning map leading to the student's own project. Keep
 the actual four milestones, all questions, teacher-defined project catalog,
-teacher grouping and editing locks, uploads, reflections, comments, and records.
+teacher grouping for collaboration, uploads, reflections, comments, and records.
+The owner removed project editing/grouping/timer gates on 29 October 2026;
+teacher review is retained and never prevents the learner from revising their own work.
 The user's approved Explore/Plan/Create/Reflect map labels are retained as visual
 aliases for the four existing workflow actions; the underlying milestones do not change. No social ranking or new mandatory project format.
 
