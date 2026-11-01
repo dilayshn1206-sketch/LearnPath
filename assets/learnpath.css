@@ -365,3 +365,7 @@ body[data-role=teacher] .mc{max-width:1400px}body[data-role=teacher] .lp-grade s
 .lp-written-feedback{display:flex;align-items:baseline;gap:8px;justify-content:space-between;padding:9px 0;border-top:1px solid var(--gb);margin:0;font-size:15px;overflow-wrap:anywhere}
 .lp-written-feedback>span{flex:1;min-width:0}.lp-written-feedback small{font-size:11px;font-weight:400;color:#617584;max-width:30%}.lp-feedback-empty{font-size:13px;color:var(--tm)}
 @media(max-width:500px){.lp-feedback-scores{grid-template-columns:1fr}.lp-written-feedback{flex-wrap:wrap}.lp-written-feedback small{max-width:100%}}
+
+.lp-feedback-tier{display:inline-block;margin-left:8px;padding:3px 9px;border-radius:20px;background:var(--tl);color:var(--pd);font-size:13px;font-weight:700}
+.lp-feedback-details.lp-written-feedback-toggle{display:inline-flex;align-items:center;margin:12px 0 4px;padding:10px 16px;min-height:48px;border:1px solid var(--p);border-radius:10px;background:white;font-size:17px;font-weight:700;text-decoration:none}
+.lp-written-feedback-toggle:focus-visible{outline:3px solid var(--p);outline-offset:3px}
