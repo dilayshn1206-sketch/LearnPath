@@ -92,7 +92,17 @@ const server=http.createServer((req,res)=>{
  assert.match(await f.locator('.focus-overview').innerText(),/Practise your talk|2 minutes/);
  assert.equal(await f.locator('article.passport-document').count(),1);
  assert.equal(await f.locator('.passport-document .passport-overview-card').count(),4);
- assert.ok(await f.locator('.lp-doc-reveal').count()>=11);
+ assert.equal(await f.locator('.passport-leaf').count(),2);
+ assert.match(await f.locator('.passport-holder').innerText(),/Ada Student/);
+ assert.equal(await f.locator('.passport-goal-highlights li').count(),3);
+ assert.equal(await f.locator('.passport-document-guide').locator('..').getAttribute('class'),'passport-goals-top');
+ assert.doesNotMatch(await f.locator('.passport-left').innerText(),/My next step/);
+ assert.match(await f.locator('.passport-left .scores-overview').innerText(),/85%/);
+ await f.locator('.passport-all-goals summary').click();
+ assert.match(await f.locator('.passport-all-goals').innerText(),/I will use at least eight unit words/);
+ assert.match(await f.locator('.passport-all-goals').innerText(),/Practise your talk/);
+ await f.locator('.passport-all-goals summary').click();
+ assert.ok(await f.locator('.lp-doc-reveal').count()>=6);
  await f.locator('.passport-document').evaluate(el=>Promise.all(el.getAnimations({subtree:true}).filter(a=>a.effect?.target?.classList.contains('lp-doc-reveal')).map(a=>a.finished)));
  await f.locator('.passport-document').screenshot({path:path.join(root,'verification/passport-document.png')});
  await f.locator('#motion').click();
@@ -149,6 +159,19 @@ const server=http.createServer((req,res)=>{
  await f.locator('.passport-document').evaluate(el=>Promise.all(el.getAnimations({subtree:true}).filter(a=>a.effect?.target?.classList.contains('lp-doc-reveal')).map(a=>a.finished)));
  await page.evaluate(()=>window.scrollTo(0,0));
  await f.locator('.passport-document').screenshot({path:path.join(root,'verification/compact-passport.png')});
+ // Existing profile photo is presentation-only and falls back on failed loads.
+ await ctx.route('**/synthetic-avatar.svg',r=>r.fulfill({contentType:'image/svg+xml',body:'<svg xmlns="http://www.w3.org/2000/svg" width="120" height="140"><rect width="120" height="140" fill="#b8dce3"/><circle cx="60" cy="52" r="26" fill="#ddb997"/><path d="M20 140v-25a40 40 0 0 1 80 0v25" fill="#16787d"/></svg>'}));
+ await page.evaluate(()=>{UP.avatarUrl=location.origin+'/synthetic-avatar.svg';return renderStep3Screen(true);});
+ await f.locator('.passport-photo img').waitFor();
+ await f.locator('.passport-photo img').evaluate(img=>img.decode());
+ assert.equal(await f.locator('.passport-photo img').evaluate(img=>img.naturalWidth>0),true);
+ await f.locator('#motion').click();
+ const overlayStyle=await page.addStyleTag({content:'.topbar,.bnav{visibility:hidden!important}'});
+ await f.locator('.passport-document').screenshot({path:path.join(root,'verification/passport-spread-tablet.png')});
+ await overlayStyle.evaluate(el=>el.remove());
+ await page.evaluate(()=>{UP.avatarUrl='https://invalid.example.test/avatar.jpg';return renderStep3Screen(true);});
+ await f.locator('.passport-photo img').waitFor({state:'hidden'});
+ assert.equal(await f.locator('.passport-photo-fallback').innerText(),'AS');
  assert.deepEqual(errors,[]);console.log('PASS: no grouping/edit/deadline locks; existing locked records edit; approved edits return to draft; send/reopen/retake; scores, tablet/mobile, no external calls.');
  }finally{await browser.close();await new Promise(r=>server.close(r));}
 })().catch(e=>{console.error(e);process.exitCode=1;});
