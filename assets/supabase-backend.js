@@ -8,7 +8,7 @@ const urls=new Map(),listeners=new Map();
 function snapshot(value,key){return {key,exists:()=>value!==null&&value!==undefined,val:()=>structuredClone(value),forEach:fn=>Object.entries(value||{}).some(([k,v])=>fn(snapshot(v,k))===true)};}
 async function refreshFileUrls(value){
  if(!value||typeof value!=='object')return value;
- if(value.filePath){value.fileUrl=await getDownloadURL({path:value.filePath});}
+ if(value.filePath){try{value.fileUrl=await getDownloadURL({path:value.filePath});delete value.filePreviewError;}catch{value.fileUrl='';value.filePreviewError=true;}}
  await Promise.all(Object.values(value).filter(v=>v&&typeof v==='object').map(refreshFileUrls));return value;
 }
 export async function get(path){let data=await rpc('lp_read',{p_path:path});if(path.split('/')[0]==='posts')data=await refreshFileUrls(data);return snapshot(data,path.split('/').at(-1));}
