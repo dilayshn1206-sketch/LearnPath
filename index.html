@@ -254,7 +254,7 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
 .rub-sentence{font-size:13px}
 .rub-chevron{background:none;border:none;color:var(--th);cursor:pointer;font-size:12px;padding:4px 6px;flex-shrink:0}
 </style>
-<link rel="stylesheet" href="assets/learnpath.css?v=20261101-1">
+<link rel="stylesheet" href="assets/learnpath.css?v=20261101-2">
 </head>
 <body>
 
@@ -310,8 +310,8 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
   <div class="modal-card" id="result-popup-card" style="text-align:center;padding:26px 20px"></div>
 </div>
 
-<script src="assets/learnpath-ui.js?v=20261101-1"></script>
-<script src="assets/share-guide.js?v=20261101-1"></script>
+<script src="assets/learnpath-ui.js?v=20261101-2"></script>
+<script src="assets/share-guide.js?v=20261101-2"></script>
 <script type="module">
 import {auth,db,storage,rpc,ref,set,get,push,onValue,update,remove,sref,uploadBytesResumable,getDownloadURL,deleteObject,onAuthStateChanged,signInWithPopup,signOut} from './assets/supabase-backend.js?v=20261027-2';
 const prov={};
@@ -3129,8 +3129,9 @@ window.deleteGrammarQuestion=async function(idx){
 var plannerSaveChain=Promise.resolve(),plannerDraftTimer=null,plannerDraftPending=null;
 function plannerFields(value){
   if(!value||typeof value!=="object")throw new Error("Your passport could not be read.");
-  var out={};['topic','goals','goalsOtherText','planSteps','evalTeacherPct','evalPeerPct'].forEach(function(k){if(Object.prototype.hasOwnProperty.call(value,k))out[k]=value[k];});
+  var out={};['topic','goals','goalsOtherText','weaknessTips','planSteps','evalTeacherPct','evalPeerPct'].forEach(function(k){if(Object.prototype.hasOwnProperty.call(value,k))out[k]=value[k];});
   if(typeof out.topic!=="string"||!out.goals||typeof out.goals!=="object"||!Array.isArray(out.planSteps))throw new Error("Your passport could not be read.");
+  if(out.weaknessTips!==undefined&&(!Array.isArray(out.weaknessTips)||out.weaknessTips.length!==3||out.weaknessTips.some(function(t){return typeof t!=='string'||t.length>500;})))throw new Error('Check your three focus goals.');
   return out;
 }
 function queuePlannerSave(uid,value){
@@ -3164,7 +3165,7 @@ async function mountPlanner(mode,c,overview){
     ['written','spoken','visual'].forEach(function(cat){extra[cat]=(catalog[cat]||[]).filter(function(item){var original=DEFAULT_CATALOG[cat].find(function(pair){return pair[0]===item.id;});return item.active&&(!original||original[1]!==item.name);});});
   }
   var mc=document.getElementById('mc');
-  mc.innerHTML=(isLockedStep(mode==='idea'?'step2':'step3')?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">← Back to Home</button>')+'<iframe id="lp-planner-frame" title="'+(mode==='idea'?'Plan your project':LearnPathUI.hasPassport(c)?'My Learning Passport':'Set goals and plan')+'" src="assets/planner.html?v=20261101-1" style="width:100%;height:900px;border:0;display:block" scrolling="no"></iframe>';
+  mc.innerHTML=(isLockedStep(mode==='idea'?'step2':'step3')?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">← Back to Home</button>')+'<iframe id="lp-planner-frame" title="'+(mode==='idea'?'Plan your project':LearnPathUI.hasPassport(c)?'My Learning Passport':'Set goals and plan')+'" src="assets/planner.html?v=20261101-2" style="width:100%;height:900px;border:0;display:block" scrolling="no"></iframe>';
   window._plannerContext={mode:mode,contract:c,overview:!!overview&&LearnPathUI.hasPassport(c),passportReady:LearnPathUI.hasPassport(c),readOnly:false,extraProducts:extra,identity:{name:c&&c.studentName||CU.displayName,photo:c&&c.studentId!==CU.uid?c.studentPhoto||'':UP.avatarUrl||CU.photoURL||c&&c.studentPhoto||''}};
   setNav('home');
 }
@@ -3183,7 +3184,7 @@ window.addEventListener('message',async function(event){
       var draft=message.payload;
       if(!draft||!draft.topic||!draft.productType||!['written','spoken','visual'].includes(draft.category)||!SKILL_TIPS[draft.weakness])throw new Error('Complete your topic, product and focus choice.');
       var existing=(await get(ref(db,'contracts/'+uid))).val();
-      var ideaFields={plannerVersion:'passport-v1',productId:draft.productId,productType:draft.productType,category:draft.category,platforms:draft.tools||[],platformsOtherText:draft.toolOther||'',weakness:draft.weakness,weaknessTips:SKILL_TIPS[draft.weakness],status:'draft',editUnlocked:true,topic:draft.topic};
+      var ideaFields={plannerVersion:'passport-v1',productId:draft.productId,productType:draft.productType,category:draft.category,platforms:draft.tools||[],platformsOtherText:draft.toolOther||'',weakness:draft.weakness,weaknessTips:existing&&existing.weakness===draft.weakness?existing.weaknessTips||SKILL_TIPS[draft.weakness]:SKILL_TIPS[draft.weakness],status:'draft',editUnlocked:true,topic:draft.topic};
       if(existing&&existing.productType)await update(ref(db,'contracts/'+uid),ideaFields);
       else await set(ref(db,'contracts/'+uid),Object.assign({grade:6,goalVersion:'grade6-v1',goals:{},evalTeacherPct:'',evalPeerPct:'',studentName:CU.displayName,studentEmail:CU.email,studentPhoto:CU.photoURL||'',studentId:uid,createdAt:Date.now()},ideaFields));
       contractData=(await get(ref(db,'contracts/'+uid))).val();respond(contractData);if(!existing||!existing.productType){celebrate();renderQuizDone();}refreshPassportTab();return;
@@ -3192,6 +3193,7 @@ window.addEventListener('message',async function(event){
     if(message.action==='draft'){await plannerDraft(uid,Object.assign({},plannerFields(message.payload),{status:'draft',editUnlocked:true}));respond(true);return;}
     if(message.action==='submit'){
       var fields=plannerFields(message.payload);
+      if(fields.weaknessTips&&fields.weaknessTips.some(function(t){return !t.trim();}))throw new Error('Complete each focus goal.');
       if(!fields.topic.trim()||fields.planSteps.length<3||fields.planSteps.some(function(s){return !/[\p{L}\p{N}]/u.test(String(s).replace(/^I will\s*/i,''));}))throw new Error('Complete your topic and every plan step.');
       var count=GOAL_ITEMS.filter(function(g){return fields.goals[g.id]===true;}).length+(customGoalText(fields)?1:0);
       if(count<3)throw new Error('Choose at least three project goals.');

@@ -10,7 +10,7 @@ window.addEventListener('message',event=>{
  const item=waiting.get(event.data.id);if(!item)return;clearTimeout(item.timer);waiting.delete(event.data.id);
  event.data.error?item.reject(new Error(event.data.error)):item.resolve(event.data.value);
 });
-function patch(){return {topic:passport.topic,goals:{...passport.goals},goalsOtherText:passport.goalsOtherText,planSteps:passport.planTails.map(fullStep),evalTeacherPct:passport.evalTeacherPct,evalPeerPct:passport.evalPeerPct};}
+function patch(){return {topic:passport.topic,goals:{...passport.goals},goalsOtherText:passport.goalsOtherText,weaknessTips:[...passport.focusGoals],planSteps:passport.planTails.map(fullStep),evalTeacherPct:passport.evalTeacherPct,evalPeerPct:passport.evalPeerPct};}
 function saveError(error){$('#save-status').textContent='Not saved: '+error.message;$('#save-status').style.color='var(--c)';}
 function receipt(){
  const notice=$('.passport-notice');if(!notice)return;
@@ -23,7 +23,7 @@ render=function(){
  draftRender();
  if(host?.mode==='idea'&&host.contract?.productType&&!passport?.active){
   document.body.classList.toggle('saved-idea-review',state.step===4);
-  if(state.step===4){$('.heading .eyebrow').textContent='Project idea · Saved';$('.heading .intro').textContent='Your choices are saved. Use Edit to change one part, or continue to your plan.';$('#next').textContent='Continue to my plan →';}
+  if(state.step===4){$('.heading .eyebrow').textContent='Project idea · Saved';$('.heading .intro').textContent='Your choices are saved. Use Edit to change one part, or continue to your plan.';$('#next').textContent='Continue to my plan →';document.querySelectorAll('.focus-goals li').forEach((li,i)=>{if(host.contract.weaknessTips?.[i])li.textContent=host.contract.weaknessTips[i];});}
   else if(state.returnToIdeaReview){$('#next').textContent='Save changes';$('#back').disabled=false;$('#back').textContent='Cancel edit';$('#back').onclick=()=>{hydrateIdea(host.contract);render();};}
   document.querySelectorAll('[data-edit],[data-step]').forEach(b=>{b.onclick=()=>{state.step=+(b.dataset.edit??b.dataset.step);state.returnToIdeaReview=true;render();};});
  }
