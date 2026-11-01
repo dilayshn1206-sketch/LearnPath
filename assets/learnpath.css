@@ -1,7 +1,14 @@
 /* Approved atlas identity. All legacy controls retain their handlers and IDs. */
 body[data-sharing="true"] #lp-map{display:none!important}
-body[data-sharing="true"] .bnav{display:none}
-body[data-sharing="true"] .mc{padding-top:16px;padding-bottom:20px}
+/* Session callbacks set an inline display:flex on the fixed bar. Keep the
+   composer clear even after those callbacks run; retain safe-area space. */
+body[data-sharing="true"] .bnav{display:none!important}
+body[data-sharing="true"] .mc{padding-top:16px;padding-bottom:calc(32px + env(safe-area-inset-bottom));scroll-padding-bottom:100px}
+body[data-sharing="true"] #lp-passport-tab{display:none}
+.lp-share-actions{scroll-margin-bottom:calc(100px + env(safe-area-inset-bottom))}
+.lp-notification{display:block;width:100%;text-align:left;color:var(--tx);font:inherit;cursor:pointer}
+.lp-notification:hover{background:var(--gl)}
+.lp-notification-target{outline:2px solid var(--p);outline-offset:4px;scroll-margin-top:90px;scroll-margin-bottom:100px}
 .lp-share-paper [data-share-panel="1"]>h2{display:none}
 .lp-share-header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:10px}
 .lp-share-header h1{font-size:28px;margin:0 0 4px}.lp-share-header p{font-size:16px;color:var(--tm);margin:0}
