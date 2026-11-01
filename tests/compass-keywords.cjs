@@ -1,0 +1,14 @@
+const fs=require('node:fs'),assert=require('node:assert/strict');
+const source=fs.readFileSync('assets/compass-prepared.js','utf8');
+const reply=new Function(source+';return preparedReply;')();
+assert.match(reply('topic','I LIKE GAMES and music'),/Games connect.*giving credit/);
+assert.match(reply('topic','I prefer football'),/sports clips/);
+assert.match(reply('topic','screen time'),/sleep, school/);
+assert.match(reply('topic','online identity'),/profile, avatar/);
+assert.match(reply('product','I like speaking and asking questions'),/short talk.*written or spoken interview/);
+assert.match(reply('product','Görsel tasarım'),/infographic/);
+assert.doesNotMatch(reply('topic',"I don't like games but I like music"),/Games connect/);
+assert.match(reply('topic','I have no idea'),/What do you enjoy/);
+assert.match(reply('topic','origami'),/Tell me one thing/);
+assert.match(reply('product','actually I am unsure'),/Tell me how/);
+console.log('PASS: authored keyword replies, mixed interests, follow-up topics, unknown inputs, negation and accent normalization.');
