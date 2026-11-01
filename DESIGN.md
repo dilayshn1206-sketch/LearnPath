@@ -1,6 +1,17 @@
 # LearnPath design
 
+## Guided planning and compact feedback (2026-11-01)
+Retain the approved map and transparent 24-frame/3-second Compass sprite.
+Use existing navy/teal task paper and native checkboxes for prepared guidance.
+Plan steps start immediately, with a brief right-hand guide on landscape tablets.
+Feedback shows two compact score blocks and two written-feedback columns; reviewer
+names are small, muted secondary information. No new emoji decoration.
+
 ## Context
+The separate `development/` teacher review notebook is local-only, Turkish and
+synthetic. Its own DESIGN.md and UX-CONTRACT.md own review controls and evidence
+semantics. It does not change learner UI, auth, production data or approved map art.
+
 Grade 6 English project learning, primarily landscape tablets. Source of requirements:
 the user's supplied `Dilay_7_Sinif_Site_Notlari_19_Ekim_2026(3).txt`, with the later
 explicit landscape preference taking precedence. The approved atlas mockup owns
@@ -87,6 +98,22 @@ mustard final action says “Save and send to the teacher”. A full saved summa
 and a persistent My Learning Passport tab keep the plan visible.
 
 ## Accessibility
+The final 1 November correction moves difficulty-choice tips into the editable
+Step 1/2/3 plan fields, with the existing fixed “I will” prefix. They are not a
+separate goal group or counted as project goals. Any existing written action
+preserves the entire saved plan; only a new/wholly blank plan gets suggestions.
+The later 1 November goals correction removes repeated short goal captions and
+the “View all” duplicate list. Full selected project goals appear first, with
+focus goals below; Compass stays alongside goals. Focus goals are prefilled from
+the difficulty choice and editable through the existing goals editor.
+The 1 November approved passport variant is an open two-page book: existing
+profile photo (initials fallback), holder, topic, product and small target scores
+on the left; three concise goal captions, original Compass and ordered steps on
+the right. Full project and focus goal sentences remain in a native disclosure.
+No “My next step” panel. Existing cream paper, navy, teal and mustard tokens own
+the variant in `assets/passport-spread.css`; the original sprite is unchanged.
+This replaces the single continuous document geometry described below only for
+the personal saved-passport overview; class-plan cards retain their compact form.
 The owner wants a friendly travel-passport identity, not a plain report: teal
 cover, gold compass seal, named holder, warm paper, bound edge and four numbered
 sections. A “Sent to the teacher” stamp is shown only after confirmed submission.

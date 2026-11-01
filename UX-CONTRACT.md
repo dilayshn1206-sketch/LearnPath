@@ -1,5 +1,12 @@
 # LearnPath UI contract
 
+## Guided planning and feedback (2026-11-01)
+- `compass-prepared.js` owns topic/product guidance: native multiple-choice checkboxes, authored replies, deliberate single final topic/product selection, no free-text chatbot or AI requests.
+- `project-previews.js` owns previews across upload/gallery/profile; PPTX is parsed in the browser, PDF/native media use inline viewers, original links and explicit failure states remain. No external private-file viewer.
+- `navigation.js` owns same-document route history; planner-navigation publishes in-memory checkpoints. Back/Forward preserves form values and sharing file objects during the tab session. First-entry browser exit and ordinary logout remain available.
+- Feedback Summary contains teacher/peer aggregate rubric scores and Steps, optional aggregate descriptions, and two columns of written feedback with muted names. Individual comment Step breakdowns are omitted; assessment values stay unchanged.
+- Plan suggestions are editable Step inputs with brief right-side Compass guidance. Pre-share questions are optional native checkboxes saved only with an actual new post.
+
 ## Canonical UI Map
 | Capability | Canonical owner | Source of truth | Allowed variants | Verification |
 |---|---|---|---|---|
@@ -10,6 +17,32 @@
 | CRUD | Existing Firebase functions in index.html | Existing storage paths and schema | Same save and navigation destinations | Source comparison + mock tests |
 
 ## Behavior ledger
+- Superseding correction: What feels hardest tips prefill Step 1/2/3, not a
+  separate My focus goals editor/list. Project-goal choices and counts exclude
+  difficulty tips. Existing plans containing any action are restored exactly,
+  including blank added rows. A new or wholly blank plan gets first-person,
+  editable suggestions and keeps Add another step. No bulk learner-data rewrite.
+- Focus goals prefill from saved weaknessTips and remain editable as three
+  labelled text inputs. The same persisted field owns all downstream class/share
+  reminders, snapshots and exports. No bulk rewrite of existing records. Owner
+  edits return sent passports to draft; original project goal validation remains.
+- The personal overview shows full project goals first and focus goals second,
+  each exactly once. The short-caption highlights and duplicate disclosure are gone.
+- Personal passport overview uses the approved two-page spread. Short goal
+  captions are presentation only; native “View all my goals” shows every full
+  original focus/project/custom sentence. Scores are the student's saved targets,
+  never inferred marks. Existing photo has initials fallback. Confirmed-save receipt,
+  section Edit and the authenticated save owner remain unchanged.
+- Share composer hides the fixed bottom navigation even after inline session
+  display updates; footer buttons and safe-area space stay reachable. The floating
+  passport tab is hidden while composing, then returns on other screens.
+- Notification buttons route to their stored project/feedback or resource screen.
+  Server-generated comment alerts include postId/commentId. Old alerts resolve
+  only a unique matching comment; missing targets get an honest fallback message.
+- The separate development/index.html notebook records local teacher review of
+  synthetic evidence. Approval generates a JSON change request, never a database
+  write, code patch or deployment. See development/UX-CONTRACT.md for its deliberate
+  isolated review-tool variant, validation, persistence and recoverable copies.
 - Saved project ideas default to a hydrated review; Edit opens one prefilled part,
   Save changes returns to that review, and Cancel edit restores the saved choices.
   Existing idea edits update only idea fields; goals, plan actions, targets, creation
