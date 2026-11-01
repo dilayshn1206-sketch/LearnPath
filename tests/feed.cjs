@@ -60,21 +60,38 @@ const server=http.createServer((req,res)=>{
  assert.match(await page.locator('#lp-share-compass').innerText(),/Did you practise your talk/);
  assert.match(await page.locator('#lp-share-compass').innerText(),/record yourself and listen/);
  assert.equal(await page.locator('.lp-share-focus-questions li').count(),3);
+ assert.equal(await page.locator('[data-focus-check]').count(),3);
+ await page.locator('[data-focus-check="0"]').focus();await page.keyboard.press('Space');
+ await page.locator('[data-focus-check="2"]').check();
+ assert.deepEqual(await page.evaluate(()=>_shareState.focusChecks),[true,false,true]);
  assert.match(await page.locator('#lp-share-compass').innerText(),/Did you take a breath and speak slowly/);
  assert.equal(await page.locator('#lp-share-compass details').count(),0);
  assert.doesNotMatch(await page.locator('#lp-share-compass').innerText(),/You also chose|ask a friend for feedback/);
  assert.ok(await page.locator('.lp-share-compass').evaluate(el=>el.getBoundingClientRect().left>document.querySelector('.lp-share-paper').getBoundingClientRect().right));
  await page.locator('#np-title').fill('My interview');await page.locator('#np-link').fill('https://example.test/interview');
+ await page.evaluate(()=>go('feed'));await page.locator('#feed-container').waitFor();
+ await page.goBack();await page.locator('#np-title').waitFor({state:'visible'});
+ assert.equal(await page.locator('#np-title').inputValue(),'My interview');
+ assert.ok(await page.locator('[data-focus-check="0"]').isChecked());
  await page.locator('#np-continue').click();
+ await page.goBack();await page.locator('#np-title').waitFor({state:'visible'});
+ assert.equal(await page.locator('#np-title').inputValue(),'My interview');
+ await page.goForward();await page.locator('#np-rub-rows').waitFor({state:'visible'});
  assert.equal(await page.locator('#np-rub-rows .rubarea2').count(),1);
  assert.equal(await page.locator('#np-rub-rows .rublevel-row').count(),3);
  assert.equal(await page.locator('.lp-rubric-pair').count(),0);
  await page.locator('#rubric-newpost-0-1').check();
  assert.equal(await page.evaluate(()=>_rubricStores.newpost.values[0]),1);
  await page.locator('#np-continue').click();assert.match(await page.locator('#lp-share-compass').innerText(),/Order is how/);
+ await page.goBack();await page.locator('#rubric-newpost-0-1').waitFor();
+ assert.ok(await page.locator('#rubric-newpost-0-1').isChecked());
+ await page.goForward();await page.locator('#rubric-newpost-1-0').waitFor();
  await page.locator('#np-back').click();assert.ok(await page.locator('#rubric-newpost-0-1').isChecked());
  for(let i=0;i<6;i++){await page.locator('#rubric-newpost-'+i+'-'+(i%3)).check();await page.locator('#np-continue').click();}
  assert.ok(await page.locator('#np-well').isVisible());
+ assert.ok(await page.locator('[data-focus-check="0"]').isChecked());
+ assert.equal(await page.locator('[data-focus-check="1"]').isChecked(),false);
+ assert.ok(await page.locator('[data-focus-check="2"]').isChecked());
  assert.equal(await page.locator('#np-title').inputValue(),'My interview');assert.equal(await page.locator('#np-link').inputValue(),'https://example.test/interview');
  // Session callbacks used to bring the fixed bottom bar over share buttons.
  for(const size of [{width:1024,height:768},{width:1024,height:520},{width:390,height:660}]){
@@ -89,9 +106,20 @@ const server=http.createServer((req,res)=>{
  for(const width of [1280,1024]){await page.setViewportSize({width,height:768});await page.locator('[data-share-stage="1"]').click();assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));assert.ok(await page.locator('.lp-share-actions').evaluate(el=>el.getBoundingClientRect().bottom<=innerHeight));}
  await page.screenshot({path:path.join(root,'verification/share-single-criterion.png'),fullPage:true});
  await page.locator('[data-share-stage="0"]').click();await page.screenshot({path:path.join(root,'verification/share-goal-guide.png'),fullPage:true});
+ assert.ok(await page.locator('[data-focus-check="0"]').isChecked());
+ await page.locator('[data-focus-check="2"]').uncheck();
+ await page.locator('#lp-share-compass').screenshot({path:path.join(root,'verification/share-checklist.png')});
  assert.equal(await page.locator('#lp-map').isVisible(),false);
  await page.setViewportSize({width:390,height:844});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
  await page.setViewportSize({width:1280,height:800});
+ // Unchecked optional reminders never block the normal share action.
+ await page.locator('[data-share-stage="2"]').click();
+ await page.locator('#np-well').fill('My message is clear.');await page.locator('#np-improve').fill('Check more words.');
+ await page.locator('#np-share-btn').click();await page.locator('#feed-container').waitFor();
+ const checklist=await page.evaluate(()=>__mockDB.posts.mock.preShareChecklist);
+ assert.deepEqual(checklist.items.map(x=>x.done),[true,false,false]);
+ assert.equal(checklist.items[0].tip,'Practise your talk out loud.');
+ assert.equal(checklist.version,1);
  await page.evaluate(()=>{__mockDB.posts.peerPost={uid:'peer',name:'Ece <A>',productType:'Blog',title:'Kind messages',well:'My ideas',selfRubric:[0,1,2,0,1,2],comments:{one:{from:'Ali',fromId:'ali',well:'Good title',improve:'Add reasons',peerRubric:[0,1,2,0,1,2]}}};go('feed');switchFeedTab('posts');});
  assert.equal(await page.locator('#post-peerPost .lp-reflection-label').innerText(),'Ece <A>’s self-reflection ▼');
  assert.match(await page.locator('#fb-p-peerPost').textContent(),/simple information|explains|information/);
@@ -151,6 +179,6 @@ const server=http.createServer((req,res)=>{
  await page.locator('[data-notification]').click();assert.match(await page.locator('#toast').innerText(),/no longer available/);
  await page.evaluate(()=>{__mockDB.notifications.student={resource:{type:'resource',message:'Resource approved',read:false}};return openNotifs();});
  await page.locator('[data-notification]').click();await page.locator('#res-sugg-title').waitFor();
- assert.deepEqual(errors,[]);console.log('PASS: collection tabs, native goal disclosure, versioned goals, zero targets, escaped content, profile/review actions, media links, empty states, tablet/mobile; no record writes.');
+ assert.deepEqual(errors,[]);console.log('PASS: collection tabs, native goal disclosure, versioned goals, zero targets, escaped content, profile/review actions, media links, empty states, tablet/mobile; no live record writes.');
  }finally{await browser.close();await new Promise(r=>server.close(r));}
 })().catch(e=>{console.error(e);process.exitCode=1;});

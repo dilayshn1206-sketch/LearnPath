@@ -30,7 +30,7 @@ render=function(){
  if(passport?.active&&passport.step===2&&!passport.returnToOverview)$('#passport-next')?.classList.add('send-teacher');
  if(!passport?.active&&state.step===4&&$('#next')&&!host?.contract?.productType)$('#next').textContent='Save my project idea';
  document.querySelectorAll('.demo-label').forEach(el=>el.textContent='Guided help · prepared replies');
- document.querySelectorAll('.chat-footnote').forEach(el=>el.textContent='Your compass offers prepared guidance. Your chat messages are not saved.');
+ document.querySelectorAll('.chat-footnote').forEach(el=>el.textContent='Prepared guidance. You choose your final topic and product.');
  document.querySelectorAll('.contract-guide .hint').forEach(el=>el.textContent='Your teacher will review your Learning Passport.');
  document.querySelectorAll('.reminder-explainer').forEach(el=>el.textContent='Use the My Learning Passport tab on LearnPath to return to your plan.');
  if(passport?.view==='overview'){
@@ -106,6 +106,7 @@ new ResizeObserver(reportHeight).observe(document.body);
    if(host.identity){passport.studentName=host.identity.name;passport.studentPhoto=host.identity.photo;}
    lastPatch=JSON.stringify(patch());
   }
+  if(host.resume&&window.restorePlannerNavigation)restorePlannerNavigation(host.resume);
   render();if(host.mode==='idea'&&!host.contract?.productType&&$('#next'))$('#next').textContent='Continue →';
  }catch(error){$('#screen').innerHTML='<h1>Could not open your plan</h1><p>'+esc(error.message)+'</p>';}
 })();

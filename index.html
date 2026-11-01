@@ -254,7 +254,7 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
 .rub-sentence{font-size:13px}
 .rub-chevron{background:none;border:none;color:var(--th);cursor:pointer;font-size:12px;padding:4px 6px;flex-shrink:0}
 </style>
-<link rel="stylesheet" href="assets/learnpath.css?v=20261101-3">
+<link rel="stylesheet" href="assets/learnpath.css?v=20261101-4">
 </head>
 <body>
 
@@ -310,10 +310,11 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
   <div class="modal-card" id="result-popup-card" style="text-align:center;padding:26px 20px"></div>
 </div>
 
-<script src="assets/learnpath-ui.js?v=20261101-3"></script>
-<script src="assets/share-guide.js?v=20261101-3"></script>
+<script src="assets/learnpath-ui.js?v=20261101-4"></script>
+<script src="assets/share-guide.js?v=20261101-4"></script><script src="assets/vendor/jszip-3.10.1.min.js"></script><script src="assets/project-previews.js?v=20261101-4"></script>
+<script src="assets/navigation.js?v=20261101-4"></script>
 <script type="module">
-import {auth,db,storage,rpc,ref,set,get,push,onValue,update,remove,sref,uploadBytesResumable,getDownloadURL,deleteObject,onAuthStateChanged,signInWithPopup,signOut} from './assets/supabase-backend.js?v=20261027-2';
+import {auth,db,storage,rpc,ref,set,get,push,onValue,update,remove,sref,uploadBytesResumable,getDownloadURL,deleteObject,onAuthStateChanged,signInWithPopup,signOut} from './assets/supabase-backend.js?v=20261101-4';
 const prov={};
 let CU=null,UP=null;
 let myGid=null,myGname=null,userCoins=0;
@@ -629,7 +630,7 @@ document.getElementById("rs").onclick=function(){setRole("student");};
 document.getElementById("rt2").onclick=function(){setRole("teacher");};
 
 onAuthStateChanged(auth,async function(user){
-  if(!user){document.getElementById("auth").style.display="flex";document.getElementById("app").style.display="none";document.getElementById("role").style.display="none";return;}
+  if(!user){LearnPathNavigation.reset();document.getElementById("auth").style.display="flex";document.getElementById("app").style.display="none";document.getElementById("role").style.display="none";return;}
   CU=user;
   document.getElementById("auth").style.display="none";
   setTopbarAvatar({photo:user.photoURL,name:user.displayName});
@@ -1048,6 +1049,7 @@ window.submitEval2=async function(){
 };
 
 window.go=function(page){
+  LearnPathNavigation.enter('go',[page]);
   var ls=window._liveSession;
   setNav(page);
   document.getElementById("mc").innerHTML='<div class="loading">Loading...</div>';
@@ -1124,6 +1126,7 @@ async function renderHome(){
 
 // ── STEP 4: CHOOSE RESOURCES (always unlocked, teacher-curated) ──
 window.renderResourcesScreen=async function(){
+  LearnPathNavigation.enter('resources');
   window._currentScreen="resources";
   var mc=document.getElementById("mc");
   var html='<button class="btn bts mb8" onclick="go(\'home\')">&#8592; Back to Home</button>';
@@ -1298,31 +1301,22 @@ function buildCommentSummary(post,comments){
   var pStats=groupStats(peers);
   var allId="fb-all-"+postId;
 
-  var html='<div style="background:var(--gl);border-radius:var(--rs);padding:10px 11px;margin-bottom:9px">';
-  html+='<div style="font-size:12px;font-weight:700;margin-bottom:7px">&#128202; Feedback Summary</div>';
-  html+=fbGroupRow("&#128105;&#8205;&#127979;","Teacher",tStats,"fb-t-"+postId);
-  html+=fbGroupRow("&#128101;","Classmates",pStats,"fb-p-"+postId);
-  teacher.forEach(function(cm){html+=personalGoalFeedback(cm);});
-
-  // All the written feedback + individual comments, tucked into one dropdown
-  html+='<div style="font-size:12px;font-weight:700;color:var(--p);cursor:pointer;margin-top:8px" onclick="toggleCat(\''+allId+'\')">&#128172; See all feedback ('+comments.length+') &#9660;</div>';
-  html+='<div id="'+allId+'" style="display:none;margin-top:7px">';
-  comments.forEach(function(cm,idx){
-    var isT=cm.isTeacher===true;
-    var score=(cm.peerRubric)?rubricOverallScore(cm.peerRubric):null;
-    var dId="cmdetail-"+postId+"-"+idx;
-    html+='<div style="padding:7px 0;border-top:1px solid var(--gb)">';
-    html+='<div style="font-size:12px;font-weight:700;color:'+(isT?"var(--td)":"var(--pd)")+'">'+esc(cm.from||"Student")+'</div>';
-    if(score!==null){
-      html+='<div style="font-size:11px;color:var(--pd);background:var(--pl);display:inline-block;padding:2px 8px;border-radius:20px;margin:4px 0;cursor:pointer" onclick="toggleCat(\''+dId+'\')">'+scoreTierLabel(score)+" ("+scorePercent(score)+"%) &#9660;"+'</div>';
-      html+='<div id="'+dId+'" style="display:none;margin-bottom:4px">'+renderRubricReadonly(PEER_RUBRIC,cm.peerRubric)+'</div>';
-    }
-    if(cm.well)html+='<div style="font-size:12px;color:var(--tm);line-height:1.5"><strong>Good points:</strong> '+esc(cm.well)+'</div>';
-    if(cm.improve)html+='<div style="font-size:12px;color:var(--tm);line-height:1.5"><strong>To improve:</strong> '+esc(cm.improve)+'</div>';
+  var html='<section class="lp-feedback-summary"><h3>Feedback Summary</h3><div class="lp-feedback-scores">';
+  [{label:'Teacher',stats:tStats,id:'fb-t-'+postId},{label:'Classmates’ average',stats:pStats,id:'fb-p-'+postId}].forEach(function(group){
+    html+='<div class="lp-feedback-score"><span>'+group.label+'</span>';
+    if(group.stats.overall===null)html+='<strong>'+(group.stats.count?'Written feedback only':'Not yet')+'</strong>';
+    else html+='<strong>'+scorePercent(group.stats.overall)+'%</strong><span>'+scoreTierLabel(group.stats.overall)+'</span><button type="button" class="lp-feedback-details" onclick="toggleCat(\''+group.id+'\')">See descriptions</button>';
     html+='</div>';
+  });html+='</div>';
+  [{stats:tStats,id:'fb-t-'+postId,label:'Teacher'},{stats:pStats,id:'fb-p-'+postId,label:'Classmates’ average'}].forEach(function(group){
+    html+='<div id="'+group.id+'" style="display:none"><h4>'+group.label+'</h4>';
+    PEER_RUBRIC.forEach(function(item,ai){var values=group.stats.perArea[ai];if(!values)return;var avg=values.reduce(function(a,b){return a+b;},0)/values.length,level=Math.max(0,Math.min(2,Math.round(avg)));html+='<p class="lp-feedback-description"><strong>'+esc(item.area)+'</strong><span>'+esc(item.levels[level].label)+'</span></p>';});html+='</div>';
   });
-  html+='</div>';
-  html+='</div>';
+  teacher.forEach(function(cm){html+=personalGoalFeedback(cm);});
+  html+='<button type="button" class="lp-feedback-details" onclick="toggleCat(\''+allId+'\')">Read written feedback ('+comments.length+')</button><div id="'+allId+'" style="display:none"><div class="lp-written-feedback-columns">';
+  [['well','Good points'],['improve','To improve']].forEach(function(column){html+='<section><h4>'+column[1]+'</h4>';var written=comments.filter(function(cm){return !!cm[column[0]];});if(!written.length)html+='<p class="lp-feedback-empty">No comments yet.</p>';written.forEach(function(cm){html+='<p class="lp-written-feedback"><span>'+esc(cm[column[0]])+'</span><small>'+esc(cm.isTeacher?'Teacher · '+(cm.from||'Teacher'):cm.from||'Classmate')+'</small></p>';});html+='</section>';});
+  html+='</div></div></section>';
+
   return html;
 }
 function buildPostHTML(post){
@@ -1338,17 +1332,8 @@ function buildPostHTML(post){
   if(post.title)html+='<div style="font-size:14px;font-weight:700;margin-bottom:5px">'+esc(post.title)+'</div>';
   // Uploaded file lives at post.fileUrl (Supabase Storage). Old posts may still have base64 in post.fileData.
   var fileSrc=post.fileUrl||post.fileData||"";
-  var fType=post.fileType||"";
-  if(fileSrc&&fType.startsWith("image/")){
-    html+='<img src="'+esc(fileSrc)+'" style="width:100%;max-height:420px;object-fit:contain;border-radius:10px;display:block;background:var(--gl);margin-bottom:8px" onerror="this.style.display=\'none\';">';
-  }else if(fileSrc&&fType.startsWith("video/")){
-    html+='<video src="'+esc(fileSrc)+'" controls playsinline preload="metadata" style="width:100%;max-height:420px;border-radius:10px;display:block;background:#000;margin-bottom:8px"></video>';
-  }else if(fileSrc&&fType.startsWith("audio/")){
-    html+='<audio src="'+esc(fileSrc)+'" controls style="width:100%;margin-bottom:8px"></audio>';
-  }else if(fileSrc&&fType==="application/pdf"){
-    html+='<a href="'+esc(fileSrc)+'" target="_blank" style="display:flex;align-items:center;gap:10px;padding:12px;border:1.5px solid var(--gb);border-radius:10px;text-decoration:none;color:inherit;margin-bottom:8px"><span style="font-size:28px">&#128196;</span><div style="flex:1"><div style="font-size:13px;font-weight:600">'+esc(post.fileName||"PDF document")+'</div><div style="font-size:11px;color:var(--tm)">Tap to open PDF</div></div><span style="color:var(--th)">&#8599;</span></a>';
-  }else if(fileSrc){
-    html+='<a href="'+esc(fileSrc)+'"'+(post.fileUrl?' target="_blank"':' download="'+esc(post.fileName||"file")+'"')+' style="display:flex;align-items:center;gap:10px;padding:12px;border:1.5px solid var(--gb);border-radius:10px;text-decoration:none;color:inherit;margin-bottom:8px"><span style="font-size:28px">&#128206;</span><div style="flex:1"><div style="font-size:13px;font-weight:600">'+esc(post.fileName||"File")+'</div><div style="font-size:11px;color:var(--tm)">Tap to open</div></div><span style="color:var(--th)">&#8599;</span></a>';
+  if(post.filePreviewError)html+='<p class="lp-preview-note">This attachment could not be loaded. Reopen the project to try again.</p>';
+  if(fileSrc){html+=LearnPathFiles.html(fileSrc,post.fileType,post.fileName);
   }else if(post.link){
     var linkThumb=getLinkThumbnail(post.link);
     if(linkThumb)html+='<img src="'+linkThumb+'" style="width:100%;max-height:280px;object-fit:cover;border-radius:10px;display:block;margin-bottom:8px" onerror="this.style.display=\'none\';">';
@@ -1445,10 +1430,11 @@ function shareGoalSnapshot(c){var out={};['grade','goalVersion','topic','product
 function refreshShareCompass(){
   var state=window._shareState,el=document.getElementById('lp-share-compass');if(!state||!el)return;
   var store=window._rubricStores.newpost;
-  el.innerHTML=state.stage===1?LearnPathShare.criterion(store.index||0,SELF_RUBRIC[store.index||0].area):LearnPathShare.goals(state.contract,state.goals,state.goalPage,state.error);
+  el.innerHTML=state.stage===1?LearnPathShare.criterion(store.index||0,SELF_RUBRIC[store.index||0].area):LearnPathShare.goals(state.contract,state.goals,state.goalPage,state.error,state.focusChecks);
+  el.querySelectorAll('[data-focus-check]').forEach(function(input){input.onchange=function(){state.focusChecks[Number(input.dataset.focusCheck)]=input.checked;};});
 }
 window.setShareStage=function(stage){
-  var state=window._shareState;if(!state)return;state.stage=Math.max(0,Math.min(stage,2));
+  var state=window._shareState;if(!state)return;LearnPathNavigation.share(stage,window._rubricStores.newpost.index||0);state.stage=Math.max(0,Math.min(stage,2));
   document.querySelectorAll('[data-share-panel]').forEach(function(panel){panel.hidden=Number(panel.dataset.sharePanel)!==state.stage;});
   document.querySelectorAll('[data-share-stage]').forEach(function(button){button.setAttribute('aria-current',Number(button.dataset.shareStage)===state.stage?'step':'false');});
   document.getElementById('np-share-btn').hidden=state.stage!==2;document.getElementById('np-continue').hidden=state.stage===2;
@@ -1461,12 +1447,13 @@ window.setShareStage=function(stage){
 window.shareNext=function(){var state=window._shareState,store=window._rubricStores.newpost;if(state.stage===1&&(store.index||0)<SELF_RUBRIC.length-1){store.index=(store.index||0)+1;renderRubricBlock(store.containerId,store.rubric,store.values,'newpost');}else setShareStage(state.stage+1);setShareStage(window._shareState.stage);};
 window.shareBack=function(){var state=window._shareState,store=window._rubricStores.newpost;if(state.stage===1&&(store.index||0)>0){store.index--;renderRubricBlock(store.containerId,store.rubric,store.values,'newpost');}else setShareStage(state.stage-1);};
 window.openNewPost=async function(){
+  LearnPathNavigation.enter('share',[]);
   var mc=document.getElementById('mc');window._currentScreen='share';mc.innerHTML='<div class="loading">Loading your project goals…</div>';
   var c=null,error=false;try{var snap=await get(ref(db,'contracts/'+CU.uid));c=snap.exists()?snap.val():null;}catch(e){error=true;}
   if(window._currentScreen!=='share')return;
   if(!error)contractData=c;
   var goals=c?goalItemsFor(c).filter(function(g){return c.goals&&c.goals[g.id];}):[],custom=c&&customGoalText(c);if(custom)goals.push({id:'custom',text:custom});
-  window._shareState={stage:0,goalPage:0,contract:c,goals:goals,error:error};window._newPostFile=null;
+  window._shareState={stage:0,goalPage:0,contract:c,goals:goals,error:error,focusChecks:(c&&c.weaknessTips||[]).map(function(){return false;})};window._newPostFile=null;
   var html='<header class="lp-share-header"><div><h1>Share your work</h1><p>A quick check with Compass, then share your project.</p></div><button type="button" class="btn bts" onclick="go(\'feed\')">Back to gallery</button></header><nav class="lp-share-stages" aria-label="Sharing steps">';
   ['Your work','Self-reflection','Share'].forEach(function(label,i){html+='<button type="button" data-share-stage="'+i+'" onclick="setShareStage('+i+')"><span>'+(i+1)+'</span>'+label+'</button>';});html+='</nav>';
   html+='<div class="lp-share-layout"><section class="card lp-share-paper"><section data-share-panel="0"><h2>What are you sharing?</h2><div class="fg"><label class="fl" for="np-title">Title of this piece of work</label><input class="fi" id="np-title" placeholder="Give your project a title"></div><div class="fg"><label class="fl" for="np-link">Link to your work</label><input class="fi" id="np-link" placeholder="Google Drive / YouTube / Canva…"></div><details class="lp-share-link-help"><summary>How to copy a link</summary><p>Google Drive → Share → Copy link · YouTube → Share · Canva → Share → Copy link</p></details><div class="fg"><label class="fl" for="np-file">Or attach a photo, video, PDF or audio file (up to 100 MB)</label><input type="file" class="fi" id="np-file" onchange="attachNewPostFile(this)"><div id="np-file-preview"></div></div></section>';
@@ -1516,12 +1503,7 @@ window.attachNewPostFile=function(input){
 };
 // Renders an inline preview for an uploaded file based on its type (image / video / audio / pdf / other).
 function filePreviewHTML(url,type,name){
-  type=type||"";
-  if(type.startsWith("image/"))return '<img src="'+esc(url)+'" style="max-width:100%;border-radius:8px;display:block">';
-  if(type.startsWith("video/"))return '<video src="'+esc(url)+'" controls playsinline style="max-width:100%;border-radius:8px;display:block;background:#000"></video>';
-  if(type.startsWith("audio/"))return '<audio src="'+esc(url)+'" controls style="width:100%"></audio>';
-  if(type==="application/pdf")return '<div style="border:1.5px solid var(--gb);border-radius:8px;padding:12px;display:flex;align-items:center;gap:10px"><span style="font-size:26px">&#128196;</span><span style="font-size:12px;color:var(--tm);flex:1">'+esc(name||"PDF file")+'</span></div>';
-  return '<div style="border:1.5px solid var(--gb);border-radius:8px;padding:12px;display:flex;align-items:center;gap:10px"><span style="font-size:26px">&#128206;</span><span style="font-size:12px;color:var(--tm);flex:1">'+esc(name||"File")+'</span></div>';
+  return LearnPathFiles.html(url,type,name);
 }
 
 window.submitPost=async function(){
@@ -1538,6 +1520,7 @@ window.submitPost=async function(){
     productType:(contractData&&contractData.productType)||"",
     selfRubric:window._rubricStores.newpost?window._rubricStores.newpost.values:[],
     goalSnapshot:window._shareState&&window._shareState.contract?shareGoalSnapshot(window._shareState.contract):null,
+    preShareChecklist:window._shareState&&window._shareState.contract?{version:1,items:(window._shareState.contract.weaknessTips||[]).map(function(t,i){return {tip:t,done:window._shareState.focusChecks[i]===true};})}:null,
     well:well,
     improve:improve,
     groupId:myGid||"",
@@ -1606,11 +1589,12 @@ window.toggleLike=async function(postId){
   }
   // the feed refreshes on its own via the live "posts" listener
 };
-window.viewProf=function(uid){renderProfile(uid,false);setNav("profile");};
+window.viewProf=function(uid){LearnPathNavigation.enter('profile',[uid]);renderProfile(uid,false);setNav("profile");};
 
 // ── PAGE 3: PLAN ──
 // ── STEP 1: WHAT ARE WE LEARNING ──
 window.renderStep1Screen=async function(){
+  LearnPathNavigation.enter('unit',[]);
   window._currentScreen="step1";
   var mc=document.getElementById("mc");
   var snap=await get(ref(db,"unitInfo"));
@@ -2132,6 +2116,7 @@ window.chooseProduct=async function(id,name,cat){
 };
 
 function renderQuizDone(){
+  LearnPathNavigation.enter('savedIdea');
   var mc=document.getElementById("mc");
   mc.innerHTML=LearnPathUI.productLaunch(contractData.productType);
 }
@@ -3163,8 +3148,8 @@ async function mountPlanner(mode,c,overview){
     ['written','spoken','visual'].forEach(function(cat){extra[cat]=(catalog[cat]||[]).filter(function(item){var original=DEFAULT_CATALOG[cat].find(function(pair){return pair[0]===item.id;});return item.active&&(!original||original[1]!==item.name);});});
   }
   var mc=document.getElementById('mc');
-  mc.innerHTML=(isLockedStep(mode==='idea'?'step2':'step3')?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">← Back to Home</button>')+'<iframe id="lp-planner-frame" title="'+(mode==='idea'?'Plan your project':LearnPathUI.hasPassport(c)?'My Learning Passport':'Set goals and plan')+'" src="assets/planner.html?v=20261101-3" style="width:100%;height:900px;border:0;display:block" scrolling="no"></iframe>';
-  window._plannerContext={mode:mode,contract:c,overview:!!overview&&LearnPathUI.hasPassport(c),passportReady:LearnPathUI.hasPassport(c),readOnly:false,extraProducts:extra,identity:{name:c&&c.studentName||CU.displayName,photo:c&&c.studentId!==CU.uid?c.studentPhoto||'':UP.avatarUrl||CU.photoURL||c&&c.studentPhoto||''}};
+  mc.innerHTML=(isLockedStep(mode==='idea'?'step2':'step3')?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">← Back to Home</button>')+'<iframe id="lp-planner-frame" title="'+(mode==='idea'?'Plan your project':LearnPathUI.hasPassport(c)?'My Learning Passport':'Set goals and plan')+'" src="assets/planner.html?v=20261101-4" style="width:100%;height:900px;border:0;display:block" scrolling="no"></iframe>';
+  window._plannerContext={mode:mode,contract:c,overview:!!overview&&LearnPathUI.hasPassport(c),passportReady:LearnPathUI.hasPassport(c),readOnly:false,extraProducts:extra,resume:LearnPathNavigation.resume(),identity:{name:c&&c.studentName||CU.displayName,photo:c&&c.studentId!==CU.uid?c.studentPhoto||'':UP.avatarUrl||CU.photoURL||c&&c.studentPhoto||''}};
   setNav('home');
 }
 window.addEventListener('message',async function(event){
@@ -3204,11 +3189,13 @@ window.addEventListener('message',async function(event){
 });
 var originalStartQuiz=startQuiz;
 startQuiz=async function(){
+  LearnPathNavigation.enter('idea',[]);
   window._currentScreen='quiz';
   try{var snap=await get(ref(db,'contracts/'+CU.uid));contractData=snap.exists()?snap.val():null;await mountPlanner('idea',contractData,false);}catch(error){toast('Could not open project planning. Try again.');}
 };window.startQuiz=startQuiz;
 var originalRenderPassport=window.renderStep3Screen;
 window.renderStep3Screen=async function(overview){
+  LearnPathNavigation.enter('passport',[overview]);
   if(!CU)return;
   var snap=await get(ref(db,'contracts/'+CU.uid));contractData=snap.exists()?snap.val():null;
   if(!contractData||!contractData.productType){toast('Choose a project idea first.');go('home');return;}
@@ -3225,6 +3212,11 @@ function refreshPassportTab(){
 new MutationObserver(refreshPassportTab).observe(document.getElementById('mc'),{childList:true});
 new MutationObserver(refreshPassportTab).observe(document.getElementById('app'),{attributes:true,attributeFilter:['style']});
 
+LearnPathNavigation.install({
+ capture:function(){return {share:window._shareState,stage:window._shareState?.stage,rubricIndex:window._rubricStores.newpost?.index,file:window._newPostFile,rubrics:{...window._rubricStores},screen:window._currentScreen,contract:contractData,nav:document.querySelector('#bnav .ni.active')?.id};},
+ restore:function(d){if(!d)return;window._shareState=d.share;window._newPostFile=d.file;window._rubricStores=d.rubrics;window._currentScreen=d.screen;contractData=d.contract;document.querySelectorAll('#bnav .ni').forEach(function(b){b.classList.toggle('active',b.id===d.nav);});document.body.dataset.sharing=String(d.screen==='share');if(d.screen==='share'){window._rubricStores.newpost.index=d.rubricIndex||0;renderRubricBlock('np-rub-rows',SELF_RUBRIC,window._rubricStores.newpost.values,'newpost');setShareStage(d.stage||0);} refreshPassportTab();},
+ open:function(route,args){return ({go:window.go,share:window.openNewPost,unit:window.renderStep1Screen,idea:window.startQuiz,passport:window.renderStep3Screen,resources:window.renderResourcesScreen,savedIdea:renderQuizDone,profile:window.viewProf}[route]||window.go).apply(null,args||[]);}
+});
 </script>
 </body>
 </html>

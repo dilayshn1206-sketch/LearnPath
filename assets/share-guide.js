@@ -31,10 +31,10 @@
  window.LearnPathShare={
   question:function(index,self){return (self?selfQuestions:peerQuestions)[index]||'Which Step describes the work?';},
   criterion:function(index,area){return companion(area,explanations[index]||'Read the three descriptions and compare them with the work.')+'<p class="lp-share-guide-note">Choose the description that matches the work today. There is no need to choose the highest Step.</p>';},
-  goals:function(c,goals,page,error){
+  goals:function(c,goals,page,error,checks){
    if(error)return companion('Before you share','Your saved goals could not be loaded. You can still share your work.');
    c=c||{};var name=focusNames[c.weakness],tips=c.weaknessTips||[],html=companion('Before you share',name?'You told me you needed help with '+name+'.':'Let’s look at your project before you share it.');
-   if(tips.length)return html+'<ul class="lp-share-focus-questions">'+tips.map(function(t){return '<li>'+e(focusQuestions[t]||'Did you try this: “'+t+'”?')+'</li>';}).join('')+'</ul>';
+   if(tips.length)return html+'<p class="lp-share-check-hint">Tick what you have done.</p><ul class="lp-share-focus-questions">'+tips.map(function(t,i){return '<li><label class="lp-share-focus-check"><input type="checkbox" data-focus-check="'+i+'" '+(checks&&checks[i]===true?'checked':'')+'><span>'+e(focusQuestions[t]||'Did you try this: “'+t+'”?')+'</span></label></li>';}).join('')+'</ul>';
    return html+'<p>No focus goals have been saved yet. Think about what helped you make your project.</p>';
   }
  };
