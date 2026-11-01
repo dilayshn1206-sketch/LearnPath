@@ -2,7 +2,7 @@ const fs=require('node:fs'),assert=require('node:assert/strict');
 const {webcrypto}=require('node:crypto');
 const source=fs.readFileSync('assets/supabase-backend.js','utf8');
 const calls=[];let response=null,error=null,signs=0;
-const mock={rpc:async(name,args)=>{calls.push({name,args});return {data:structuredClone(response),error};},storage:{from:bucket=>({createSignedUrl:async(path,ttl)=>{signs++;assert.equal(bucket,'learnpath-work');assert.equal(ttl,3600);return {data:{signedUrl:'https://example.test/private/'+path},error:null};}})},auth:{}};
+const mock={rpc:async(name,args)=>{calls.push({name,args});return {data:structuredClone(response),error};},storage:{from:bucket=>({createSignedUrl:async(path,ttl)=>{signs++;assert.equal(bucket,'learnpath-work');assert.equal(ttl,3600);return path.includes('missing')?{data:null,error:new Error('Missing file')}:{data:{signedUrl:'https://example.test/private/'+path},error:null};}})},auth:{}};
 let options;
 const moduleBody=source.replace(/^import[^\r\n]+;\r?\n/gm,'').replace(/\bexport /g,'');
 const api=new Function('createClient','document','setInterval','crypto',moduleBody+'\nreturn {get,set,update,remove,push,getDownloadURL};')((_url,key,opts)=>{assert.ok(key.startsWith('sb_publishable_'));options=opts;return mock;},{hidden:false,addEventListener:()=>{}},()=>{},webcrypto);
@@ -17,6 +17,8 @@ const api=new Function('createClient','document','setInterval','crypto',moduleBo
  response={filePath:'posts/student/video.mp4',fileUrl:'expired'};
  const post=(await api.get('posts/item')).val();assert.equal(post.fileUrl,'https://example.test/private/posts/student/video.mp4');
  await api.getDownloadURL({path:'posts/student/video.mp4'});assert.equal(signs,1);
+ response={missing:{filePath:'posts/student/missing.pptx',fileUrl:'expired'},good:{filePath:'posts/student/video.mp4'}};
+ const gallery=(await api.get('posts')).val();assert.equal(gallery.missing.filePreviewError,true);assert.equal(gallery.missing.fileUrl,'');assert.equal(gallery.good.fileUrl,'https://example.test/private/posts/student/video.mp4');
  await api.update('contracts/student',{topic:'I will write'});
  assert.deepEqual(calls.at(-1),{name:'lp_write',args:{p_path:'contracts/student',p_value:{topic:'I will write'},p_operation:'update'}});
  await api.remove('contracts/student');assert.equal(calls.at(-1).args.p_operation,'remove');
