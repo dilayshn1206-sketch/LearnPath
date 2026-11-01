@@ -2,7 +2,8 @@
 
 ## Guided planning and compact feedback (2026-11-01)
 Retain the approved map and transparent 24-frame/3-second Compass sprite.
-Use existing navy/teal task paper and native checkboxes for prepared guidance.
+Use existing navy/teal task paper and a small typed-message form for prepared guidance.
+Authored keyword replies follow the learner's writing without a long option list.
 Plan steps start immediately, with a brief right-hand guide on landscape tablets.
 Feedback shows two compact score blocks and two written-feedback columns; reviewer
 names are small, muted secondary information. No new emoji decoration.

@@ -1,10 +1,10 @@
 # LearnPath UI contract
 
 ## Guided planning and feedback (2026-11-01)
-- `compass-prepared.js` owns topic/product guidance: native multiple-choice checkboxes, authored replies, deliberate single final topic/product selection, no free-text chatbot or AI requests.
+- `compass-prepared.js` owns topic/product guidance: typed learner input matched to authored keyword replies, with a short fallback when no keyword matches. No option checklist, model/API requests or persisted chat transcript. Actual topic/product selection remains deliberate in the main form.
 - `project-previews.js` owns previews across upload/gallery/profile; PPTX is parsed in the browser, PDF/native media use inline viewers, original links and explicit failure states remain. No external private-file viewer.
 - `navigation.js` owns same-document route history; planner-navigation publishes in-memory checkpoints. Back/Forward preserves form values and sharing file objects during the tab session. First-entry browser exit and ordinary logout remain available.
-- Feedback Summary contains teacher/peer aggregate rubric scores and Steps, optional aggregate descriptions, and two columns of written feedback with muted names. Individual comment Step breakdowns are omitted; assessment values stay unchanged.
+- Feedback Summary contains teacher/peer aggregate rubric scores and Steps. Each optional aggregate criterion description shows its corresponding Step, while individual comment Step breakdowns remain omitted. A prominent 17px/48px written-feedback button reveals two columns with muted reviewer names; assessment values stay unchanged.
 - Plan suggestions are editable Step inputs with brief right-side Compass guidance. Pre-share questions are optional native checkboxes saved only with an actual new post.
 
 ## Canonical UI Map

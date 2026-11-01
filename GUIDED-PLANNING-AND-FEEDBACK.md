@@ -1,9 +1,11 @@
 # Guided planning, attachments and feedback — 2026-11-01
 
-The topic/product Compass uses authored option-to-response rules only. Learners
-can check several interests/preferences, ask for ideas, then deliberately choose
-one topic/product. No free-text chatbot, model connection, remote chat request or
-persisted chat transcript. Actual project topic/product inputs remain.
+The topic/product Compass uses authored keyword-to-response rules only. Learners
+write their interests/preferences; recognized keywords select up to two prepared
+replies, and unknown input gets a short guiding question. There is no option list,
+model connection, remote chat request or persisted chat transcript. Up to four
+conversation turns and an unfinished message remain in tab memory. Actual project
+topic/product inputs remain deliberate choices in the main form.
 
 The plan editor starts with editable Step 1–3 from the hardest-choice suggestions.
 The example box is removed; Compass explains this briefly on the right.
@@ -25,7 +27,8 @@ opaque entry numbers, not learner answers. This is not offline/reload persistenc
 Going back past the first app entry retains normal browser behavior.
 
 Feedback Summary shows teacher and classmates' aggregate scores, with the closest
-Step. Scoring remains unchanged. Optional aggregate criterion descriptions remain;
+Step. Scoring remains unchanged. Optional aggregate criterion descriptions show
+their corresponding Step; the written-feedback toggle is a prominent 17px button;
 individual reviewers' Step breakdowns are removed. Written feedback is in Good points
 and To improve columns, with muted names. Teacher Yes/No goal feedback stays separate.
 
