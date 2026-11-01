@@ -1,3 +1,4 @@
+-- Updated: difficulty tips are optional metadata, not extra submission goals.
 -- Synthetic transaction; identities, answers and audit/export events roll back.
 begin;
 insert into auth.users(id,email,email_confirmed_at,raw_app_meta_data,raw_user_meta_data) values
@@ -17,17 +18,16 @@ do $$declare c jsonb;begin
   raise exception 'Invalid focus type accepted';
  exception when raise_exception then if sqlerrm='Invalid focus type accepted' then raise;end if;end;
  begin
-  perform public.lp_write('contracts/40000000-0000-4000-8000-000000000001','{"status":"pending","weaknessTips":["","Two","Three"]}','update');
-  raise exception 'Empty submitted focus accepted';
- exception when raise_exception then if sqlerrm='Empty submitted focus accepted' then raise;end if;end;
+  perform public.lp_write('contracts/40000000-0000-4000-8000-000000000001','{"status":"pending","planSteps":["I will plan.","",""]}','update');
+  raise exception 'Incomplete plan accepted';
+ exception when raise_exception then if sqlerrm='Incomplete plan accepted' then raise;end if;end;
+ begin
+  perform public.lp_write('contracts/40000000-0000-4000-8000-000000000001','{"status":"pending","goals":{"unitWords":true,"grammar":true}}','update');
+  raise exception 'Insufficient project goals accepted';
+ exception when raise_exception then if sqlerrm='Insufficient project goals accepted' then raise;end if;end;
 end$$;
 select public.lp_write('contracts/40000000-0000-4000-8000-000000000001','{"weaknessTips":["","Original two","Original three"]}','update');
-do $$begin
- begin
-  perform public.lp_write('contracts/40000000-0000-4000-8000-000000000001','{"status":"pending"}','update');
-  raise exception 'Status-only submit bypassed focus validation';
- exception when raise_exception then if sqlerrm='Status-only submit bypassed focus validation' then raise;end if;end;
-end$$;
+select public.lp_write('contracts/40000000-0000-4000-8000-000000000001','{"status":"pending"}','update');
 select public.lp_write('contracts/40000000-0000-4000-8000-000000000001','{"status":"pending","weaknessTips":["My revised action","Original two","Original three"]}','update');
 select public.lp_write('contracts/40000000-0000-4000-8000-000000000001','{"weaknessTips":["Changed after sending","Original two","Original three"]}','update');
 do $$begin
@@ -41,4 +41,4 @@ do $$begin
  exception when insufficient_privilege then null;end;
 end$$;
 rollback;
-select 'PASS: own focus edit persists without goal/plan loss; malformed/empty submit rejected; edited submission becomes draft; other student denied; fixtures rolled back' as verification;
+select 'PASS: legacy difficulty metadata remains optional at submission; malformed types rejected, owner scope and draft lifecycle preserved; fixtures rolled back' as verification;
