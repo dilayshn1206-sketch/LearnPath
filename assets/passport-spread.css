@@ -1,0 +1,66 @@
+/* Approved open-book variant. Existing palette, body typography and sprite own
+   the visual tokens; long content and disclosure always grow naturally. */
+.passport-spread.passport-document{padding:0;border:1px solid #d9cba9;border-radius:22px;background:var(--passport-paper);box-shadow:0 4px 0 #d9cba9,0 8px 0 #eee5d1,0 12px 20px #142d4b18;overflow:visible}
+.passport-spread:before{display:none}
+.passport-leaves{display:grid;grid-template-columns:1fr 1.1fr}
+.passport-leaf{position:relative;min-width:0;padding:18px 22px 28px}
+.passport-left{border-radius:22px 0 0 22px;background:linear-gradient(90deg,transparent 96%,#d9cba955)}
+.passport-right{border-left:1px solid #d9cba9;border-radius:0 22px 22px 0;background:linear-gradient(90deg,#d9cba944,transparent 5%)}
+.passport-spread .passport-overview-title{margin:0 0 14px;padding:0 0 12px;background:none;color:var(--tx);border:0;border-bottom:1px solid #d9cba9;min-height:0;border-radius:0}
+.passport-spread .passport-overview-title h1{font-family:'Bricolage Grotesque','Source Sans 3',sans-serif;color:var(--pd);font-size:14px;letter-spacing:.1em;text-transform:uppercase;margin:0 36px 12px 0;line-height:1.4}
+.passport-spread .passport-cover-emblem{width:27px;height:27px;right:0;top:0;color:var(--p)}
+.passport-spread .passport-cover-emblem .icon{width:27px;height:27px}
+.passport-identity{display:flex;align-items:center;gap:20px}
+.passport-photo{position:relative;width:86px;height:96px;flex-shrink:0;padding:5px;border:1px solid #d9cba9;background:white;border-radius:5px;box-shadow:0 2px 5px #142d4b12;isolation:isolate}
+.passport-photo img{position:relative;z-index:1;width:100%;height:100%;object-fit:cover;background:var(--gl);border-radius:2px}
+.passport-photo-fallback{position:absolute;inset:5px;display:grid;place-items:center;background:var(--pl);color:var(--pd);font-size:32px;font-weight:700}
+.passport-spread .passport-holder{border:0;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;min-width:0;align-items:start}
+.passport-spread .passport-holder strong{color:var(--pd);font-size:28px;line-height:1.15;overflow-wrap:anywhere}
+.passport-spread .passport-holder span{color:var(--tm);font-size:16px}
+.passport-spread .passport-overview-card{display:block;padding:0;border:0;height:auto;background:transparent;border-radius:0}
+.passport-spread .section-title{margin:0 0 12px;gap:8px}
+.passport-spread .section-title h2{font-size:26px;line-height:1.2}
+.passport-spread .section-title h2:before{display:none}
+.passport-project-facts{margin:0}
+.passport-project-facts>div{margin-bottom:8px}
+.passport-project-facts dt{font-size:11px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:var(--tm);margin-bottom:4px}
+.passport-project-facts dd{margin:0;font-size:21px!important;font-weight:700;line-height:1.3;overflow-wrap:anywhere}
+.passport-spread .scores-overview{margin-top:12px;border-top:1px solid #d9cba9;padding-top:8px}
+.passport-spread .scores-overview .section-title{margin-bottom:4px}
+.passport-spread .scores-overview h2{font-size:17px}
+.passport-spread .score-pair{display:flex;gap:16px;flex-wrap:wrap}
+.passport-spread .score-pair p{display:flex;gap:6px;margin:0;align-items:baseline}
+.passport-spread .score-pair span{font-size:14px}.passport-spread .score-pair strong{font-size:17px}
+.passport-spread .passport-notice{display:inline-flex;font-size:13px;margin:14px 0 0;padding:8px 12px;max-width:100%;overflow-wrap:anywhere}
+.passport-spread .passport-notice span{display:none}
+.passport-spread .passport-sent{transform:rotate(-4deg);border:3px double var(--p);border-radius:5px;color:var(--p)}
+.passport-spread .passport-sent strong{font-size:14px;text-transform:uppercase;letter-spacing:.08em;color:var(--p)}
+.passport-spread .passport-sent span{display:none}
+.passport-goals-top{display:grid;grid-template-columns:minmax(0,1fr) 112px;gap:12px;align-items:start}
+.passport-spread .passport-goal-highlights{list-style:none;padding:0;margin:0}
+.passport-spread .passport-goal-highlights li{display:flex;align-items:center;gap:10px;margin:0;padding:10px 0;border-bottom:1px solid #d9cba9;font-size:17px;line-height:1.35}
+.passport-goal-symbol{display:grid;place-items:center;width:36px;height:36px;flex-shrink:0;border-radius:50%;background:var(--pl)}
+.passport-goal-symbol svg.icon{width:22px;height:22px}
+.passport-spread .passport-document-guide{display:flex;flex-direction:column;align-items:center;position:static;gap:0;padding:0;font-size:13px}
+.passport-spread .passport-document-guide .lp-clock{--frame-size:100px;order:2;margin:0}
+.passport-spread .passport-document-guide p{position:relative;margin:0;padding:9px;border:1px solid var(--p);border-radius:12px;background:#fffefa;color:var(--pd);font-size:13px;line-height:1.3;text-align:center}
+.passport-all-goals{margin-top:12px}
+.passport-all-goals>summary{display:list-item;cursor:pointer;color:var(--pd);font-weight:700;font-size:14px;min-height:44px;padding:10px 14px;background:var(--lp-mustard);border-radius:12px;width:fit-content;list-style-position:inside}
+.passport-spread .passport-document-goals{display:block;margin-top:12px;border-left:2px solid var(--p);padding-left:12px}
+.passport-spread .passport-document-goals h3{font-size:16px;margin:12px 0 6px}
+.passport-spread .passport-document-goals li{font-size:16px;line-height:1.5}
+.passport-spread .passport-plan-section{margin-top:20px;padding-top:18px;border-top:1px solid #d9cba9}
+.passport-spread .passport-plan-section ol{margin:0;padding:0;list-style:none}
+.passport-spread .passport-plan-section li{font-size:17px;line-height:1.45;padding:7px 0;align-items:center;border:0;overflow-wrap:anywhere;gap:12px}
+.passport-spread .passport-plan-section li:before{content:counter(plan);display:grid;place-items:center;width:29px;height:29px;min-width:29px;border-radius:50%;background:var(--pl);font-size:16px}
+.passport-leaf-number{position:absolute;bottom:12px;font-size:11px;color:var(--tm)}
+.passport-left .passport-leaf-number{left:26px}.passport-right .passport-leaf-number{right:26px}
+.passport-controls{padding:0 20px 16px}
+.passport-spread .overview-actions{margin:0;padding-top:12px;border-top:1px solid #d9cba9}
+.passport-spread .overview-actions button{min-height:44px}
+.passport-spread .overview-actions .primary{flex:0 1 auto}
+.passport-spread .edit{min-height:44px}
+.passport-spread .passport-topic-edit{margin:0}
+.passport-spread .passport-topic-edit summary{min-height:44px;padding:10px 0}
+@media(max-width:700px){.passport-leaves{grid-template-columns:1fr}.passport-leaf{padding:22px 20px 34px}.passport-right{border-left:0;border-top:1px solid #d9cba9;border-radius:0;background:none}.passport-left{background:none}.passport-spread .passport-holder strong{font-size:25px}.passport-spread .section-title h2{font-size:24px}.passport-goals-top{grid-template-columns:minmax(0,1fr) 100px;gap:8px}.passport-spread .passport-goal-highlights li{font-size:16px}.passport-identity{gap:16px}.passport-controls{padding:0 16px 16px}.passport-spread .overview-actions{align-items:stretch}.passport-spread .overview-actions button{width:100%}}
+@media(forced-colors:active){.passport-leaf{background:Canvas}.passport-spread.passport-document{box-shadow:none}.passport-photo-fallback,.passport-goal-symbol{border:1px solid CanvasText}}

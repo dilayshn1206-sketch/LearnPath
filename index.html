@@ -254,7 +254,7 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
 .rub-sentence{font-size:13px}
 .rub-chevron{background:none;border:none;color:var(--th);cursor:pointer;font-size:12px;padding:4px 6px;flex-shrink:0}
 </style>
-<link rel="stylesheet" href="assets/learnpath.css?v=20261029-11">
+<link rel="stylesheet" href="assets/learnpath.css?v=20261101-1">
 </head>
 <body>
 
@@ -310,8 +310,8 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
   <div class="modal-card" id="result-popup-card" style="text-align:center;padding:26px 20px"></div>
 </div>
 
-<script src="assets/learnpath-ui.js?v=20261029-11"></script>
-<script src="assets/share-guide.js?v=20261029-11"></script>
+<script src="assets/learnpath-ui.js?v=20261101-1"></script>
+<script src="assets/share-guide.js?v=20261101-1"></script>
 <script type="module">
 import {auth,db,storage,rpc,ref,set,get,push,onValue,update,remove,sref,uploadBytesResumable,getDownloadURL,deleteObject,onAuthStateChanged,signInWithPopup,signOut} from './assets/supabase-backend.js?v=20261027-2';
 const prov={};
@@ -1236,6 +1236,7 @@ function loadFeed(){
     var html="";
     posts.forEach(function(post){html+=buildPostHTML(post);});
     container.innerHTML=html;
+    if(window._notificationPostId){revealNotificationPost(window._notificationPostId);window._notificationPostId=null;}
   });
 }
 
@@ -1580,7 +1581,7 @@ window.submitComment=async function(postId,targetUid){
     peerRubric:window._rubricStores[storeKey]?window._rubricStores[storeKey].values:[],createdAt:Date.now()
   });
   if(targetUid&&targetUid!==CU.uid){
-    await push(ref(db,"notifications/"+targetUid),{type:"comment",message:CU.displayName+" commented on your work!",read:false,createdAt:Date.now()});
+    await push(ref(db,"notifications/"+targetUid),{type:"comment",postId:postId,message:CU.displayName+" commented on your work!",read:false,createdAt:Date.now()});
     await addCoin(5);
   } else {
     toast("Comment submitted!");
@@ -2218,6 +2219,7 @@ async function loadNotifs(){
   });
 }
 window.openNotifs=async function(){
+  window._currentScreen='notifications';
   var mc=document.getElementById("mc");setNav("profile");
   mc.innerHTML='<div class="loading">Loading...</div>';
   var snap=await get(ref(db,"notifications/"+CU.uid));
@@ -2227,14 +2229,42 @@ window.openNotifs=async function(){
   var dot=document.getElementById("ndot");if(dot)dot.style.display="none";
   var html='<div class="pt">Notifications</div><div class="ps">Your latest activity.</div>';
   if(!items.length)html+='<div class="empty"><div class="ei">&#128276;</div><p>Nothing yet!</p></div>';
-  else items.forEach(function(n){
-    html+='<div class="card" style="border-left:3px solid '+(n.read?"var(--gb)":"var(--p)")+'">';
+  else items.forEach(function(n,i){
+    html+='<button type="button" class="card lp-notification" data-notification="'+i+'" style="border-left:3px solid '+(n.read?"var(--gb)":"var(--p)")+'">';
     html+='<div style="font-size:14px;font-weight:'+(n.read?"400":"700")+'">'+esc(n.message||"")+'</div>';
-    html+='<div style="font-size:11px;color:var(--th);margin-top:3px">'+timeAgo(n.createdAt||Date.now())+'</div></div>';
+    html+='<div style="font-size:11px;color:var(--th);margin-top:3px">'+timeAgo(n.createdAt||Date.now())+' · Open →</div></button>';
   });
   html+='<button class="btn bts btf mt8" onclick="go(\'profile\')">Back to Profile</button>';
   mc.innerHTML=html;
+  mc.querySelectorAll('[data-notification]').forEach(function(b){b.onclick=function(){openNotificationTarget(items[Number(b.dataset.notification)],b);};});
 };
+
+async function openNotificationTarget(n,button){
+  if(button)button.disabled=true;
+  try{
+    if(n.type==='resource'){await renderResourcesScreen();return;}
+    if(n.type==='plan'||n.type==='contract'||n.type==='passport'){await renderStep3Screen(true);return;}
+    if(n.type!=='comment'&&n.type!=='teacher'&&!n.postId){go('profile');return;}
+    var snap=await get(ref(db,'posts')),posts=[];
+    if(snap.exists())snap.forEach(function(p){posts.push({id:p.key,...p.val()});});
+    var target=posts.find(function(p){return p.id===n.postId;});
+    // Resolve old records only when one comment matches; never guess a project.
+    if(!target&&!n.postId){
+      var matches=posts.filter(function(p){return p.uid===CU.uid&&Object.values(p.comments||{}).some(function(c){var near=Math.abs(Number(c.createdAt)-Number(n.createdAt))<15000;var message=n.type==='teacher'?c.isTeacher===true:n.message===c.from+' commented on your work!';return near&&message;});});
+      if(matches.length===1)target=matches[0];
+    }
+    window._feedTab='posts';window._notificationPostId=target&&target.id;go('feed');
+    var container=document.getElementById('feed-container');
+    if(container)container.innerHTML=posts.sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);}).map(buildPostHTML).join('')||'<p>No shared projects yet.</p>';
+    if(!target){toast(n.postId?'This project is no longer available.':'This older notification has no exact project link. Your shared projects are in your profile.');if(!n.postId)go('profile');return;}
+    revealNotificationPost(target.id);
+  }catch(error){toast('Could not open this notification. Please try again.');if(button)button.disabled=false;}
+}
+function revealNotificationPost(id){
+  var post=document.getElementById('post-'+id),feedback=document.getElementById('fb-all-'+id);
+  if(feedback)feedback.style.display='block';
+  if(post){post.tabIndex=-1;post.classList.add('lp-notification-target');post.focus({preventScroll:true});post.scrollIntoView({block:'start',behavior:'instant'});}
+}
 
 // ── TEACHER APP ──
 var TNAV=[
@@ -2939,7 +2969,7 @@ window.submitTeacherComment=async function(postId,targetUid){
   if(existSnap.exists()){var dup=false;existSnap.forEach(function(c){if(c.val().fromId===CU.uid)dup=true;});if(dup){toast("You've already evaluated this post!");return;}}
   var storeKey="tceval_"+postId;
   await push(ref(db,"posts/"+postId+"/comments"),{from:CU.displayName+" (Teacher)",fromId:CU.uid,well:well,improve:improve,peerRubric:window._rubricStores[storeKey]?window._rubricStores[storeKey].values:[],isTeacher:true,personalGoalReview:{version:1,studentId:goalState.studentId,source:goalState.source,contractCreatedAt:goalState.contractCreatedAt,contractSubmittedAt:goalState.contractSubmittedAt,goals:goalState.goals},createdAt:Date.now()});
-  if(targetUid){await push(ref(db,"notifications/"+targetUid),{type:"teacher",message:"Your teacher left feedback on your work!",read:false,createdAt:Date.now()});}
+  if(targetUid){await push(ref(db,"notifications/"+targetUid),{type:"teacher",postId:postId,message:"Your teacher left feedback on your work!",read:false,createdAt:Date.now()});}
   toast("Evaluation saved!");var f=document.getElementById("tcform-"+postId);if(f)f.style.display="none";
 };
 
@@ -3134,8 +3164,8 @@ async function mountPlanner(mode,c,overview){
     ['written','spoken','visual'].forEach(function(cat){extra[cat]=(catalog[cat]||[]).filter(function(item){var original=DEFAULT_CATALOG[cat].find(function(pair){return pair[0]===item.id;});return item.active&&(!original||original[1]!==item.name);});});
   }
   var mc=document.getElementById('mc');
-  mc.innerHTML=(isLockedStep(mode==='idea'?'step2':'step3')?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">← Back to Home</button>')+'<iframe id="lp-planner-frame" title="'+(mode==='idea'?'Plan your project':LearnPathUI.hasPassport(c)?'My Learning Passport':'Set goals and plan')+'" src="assets/planner.html?v=20261029-11" style="width:100%;height:900px;border:0;display:block" scrolling="no"></iframe>';
-  window._plannerContext={mode:mode,contract:c,overview:!!overview&&LearnPathUI.hasPassport(c),passportReady:LearnPathUI.hasPassport(c),readOnly:false,extraProducts:extra};
+  mc.innerHTML=(isLockedStep(mode==='idea'?'step2':'step3')?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">← Back to Home</button>')+'<iframe id="lp-planner-frame" title="'+(mode==='idea'?'Plan your project':LearnPathUI.hasPassport(c)?'My Learning Passport':'Set goals and plan')+'" src="assets/planner.html?v=20261101-1" style="width:100%;height:900px;border:0;display:block" scrolling="no"></iframe>';
+  window._plannerContext={mode:mode,contract:c,overview:!!overview&&LearnPathUI.hasPassport(c),passportReady:LearnPathUI.hasPassport(c),readOnly:false,extraProducts:extra,identity:{name:c&&c.studentName||CU.displayName,photo:c&&c.studentId!==CU.uid?c.studentPhoto||'':UP.avatarUrl||CU.photoURL||c&&c.studentPhoto||''}};
   setNav('home');
 }
 window.addEventListener('message',async function(event){

@@ -74,6 +74,15 @@ const server=http.createServer((req,res)=>{
  for(let i=0;i<6;i++){await page.locator('#rubric-newpost-'+i+'-'+(i%3)).check();await page.locator('#np-continue').click();}
  assert.ok(await page.locator('#np-well').isVisible());
  assert.equal(await page.locator('#np-title').inputValue(),'My interview');assert.equal(await page.locator('#np-link').inputValue(),'https://example.test/interview');
+ // Session callbacks used to bring the fixed bottom bar over share buttons.
+ for(const size of [{width:1024,height:768},{width:1024,height:520},{width:390,height:660}]){
+  await page.setViewportSize(size);await page.evaluate(()=>closeEvalModal());
+  assert.equal(await page.locator('#bnav').evaluate(el=>getComputedStyle(el).display),'none');
+  await page.locator('#np-share-btn').scrollIntoViewIfNeeded();
+  const footerHit=await page.locator('#np-share-btn').evaluate(el=>{const r=el.getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return {bottom:r.bottom,height:innerHeight,hit:hit&&hit.outerHTML.slice(0,200),clear:!!hit&&el.contains(hit)};});
+  assert.ok(footerHit.bottom<=size.height+1&&footerHit.clear,JSON.stringify({size,...footerHit}));
+ }
+ await page.screenshot({path:path.join(root,'verification/share-footer-clear.png'),fullPage:false});
  assert.deepEqual(await page.evaluate(()=>_rubricStores.newpost.values),[0,1,2,0,1,2]);
  for(const width of [1280,1024]){await page.setViewportSize({width,height:768});await page.locator('[data-share-stage="1"]').click();assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));assert.ok(await page.locator('.lp-share-actions').evaluate(el=>el.getBoundingClientRect().bottom<=innerHeight));}
  await page.screenshot({path:path.join(root,'verification/share-single-criterion.png'),fullPage:true});
@@ -123,6 +132,23 @@ const server=http.createServer((req,res)=>{
  await page.evaluate(()=>{document.getElementById('mc').innerHTML=personalGoalFeedback(__mockDB.posts.goalPost.comments.mock);});
  await page.locator('.lp-goal-feedback summary').click();assert.match(await page.locator('.lp-goal-feedback').innerText(),/No/);
  await page.screenshot({path:path.join(root,'verification/teacher-goal-feedback.png'),fullPage:true});
+ // New and legacy alerts reach the right project, preserve text and open feedback.
+ await page.evaluate(()=>{
+  UP.role='student';__mockDB.posts={older:{uid:'student',name:'Ada',title:'Older work',createdAt:10,comments:{c:{from:'Ece',fromId:'peer',well:'Clear ideas',improve:'Add details',createdAt:100000}}},newer:{uid:'student',name:'Ada',title:'Newer work',createdAt:20}};
+  __mockDB.notifications.student={linked:{type:'comment',postId:'older',message:'Ece commented on your work!',createdAt:100001,read:false}};return openNotifs();
+ });
+ await page.locator('[data-notification]').press('Enter');
+ assert.equal(await page.locator('#feed-tab-posts').isVisible(),true);
+ assert.equal(await page.locator('#fb-all-older').isVisible(),true);
+ assert.equal(await page.locator('#post-older').evaluate(el=>document.activeElement===el),true);
+ assert.equal(await page.locator('#post-newer.lp-notification-target').count(),0);
+ assert.notEqual(await page.locator('#bnav').evaluate(el=>getComputedStyle(el).display),'none');
+ await page.evaluate(()=>{__mockDB.notifications.student={legacy:{type:'comment',message:'Ece commented on your work!',createdAt:100001,read:false}};return openNotifs();});
+ await page.locator('[data-notification]').click();assert.equal(await page.locator('#fb-all-older').isVisible(),true);
+ await page.evaluate(()=>{__mockDB.notifications.student={gone:{type:'teacher',postId:'deleted-project',message:'Teacher feedback',createdAt:100001,read:false}};return openNotifs();});
+ await page.locator('[data-notification]').click();assert.match(await page.locator('#toast').innerText(),/no longer available/);
+ await page.evaluate(()=>{__mockDB.notifications.student={resource:{type:'resource',message:'Resource approved',read:false}};return openNotifs();});
+ await page.locator('[data-notification]').click();await page.locator('#res-sugg-title').waitFor();
  assert.deepEqual(errors,[]);console.log('PASS: collection tabs, native goal disclosure, versioned goals, zero targets, escaped content, profile/review actions, media links, empty states, tablet/mobile; no record writes.');
  }finally{await browser.close();await new Promise(r=>server.close(r));}
 })().catch(e=>{console.error(e);process.exitCode=1;});

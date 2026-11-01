@@ -34,14 +34,13 @@ render=function(){
  document.querySelectorAll('.contract-guide .hint').forEach(el=>el.textContent='Your teacher will review your Learning Passport.');
  document.querySelectorAll('.reminder-explainer').forEach(el=>el.textContent='Use the My Learning Passport tab on LearnPath to return to your plan.');
  if(passport?.view==='overview'){
-  $('.passport-overview-title .eyebrow').textContent='LearnPath · Learning journey';
   $('#edit-passport')?.remove();
   receipt();
   $('#overview-back-to-idea').textContent='Back to Home';$('#overview-back-to-idea').onclick=()=>request('home').catch(saveError);
   if(host.readOnly){document.querySelectorAll('[data-passport-edit],#edit-passport').forEach(el=>el.remove());}
   else{
    const send=document.createElement('button');send.type='button';send.id='overview-send';send.className='primary send-teacher';send.textContent='Save and send to the teacher';$('.overview-actions').appendChild(send);
-   const project=$('.passport-overview-card');project.insertAdjacentHTML('beforeend','<details class="passport-topic-edit"><summary>Edit my topic</summary>'+field('saved-topic','My topic','Make your topic more specific if you need to.')+'</details>');$('#saved-topic').value=passport.topic;$('#saved-topic').oninput=e=>{passport.topic=e.target.value;passport.submitted=false;};
+   const project=$('.passport-project-section');project.insertAdjacentHTML('beforeend','<details class="passport-topic-edit"><summary>Edit my topic</summary>'+field('saved-topic','My topic','Make your topic more specific if you need to.')+'</details>');$('#saved-topic').value=passport.topic;$('#saved-topic').oninput=e=>{passport.topic=e.target.value;passport.submitted=false;};
   }
   receipt();
  }
@@ -104,6 +103,7 @@ new ResizeObserver(reportHeight).observe(document.body);
    const c=host.contract;
    state={...state,step:4,topic:'own',topicOwn:c.topic,category:c.category,format:'own',formatOwn:c.productType,tools:c.platforms||['unsure'],toolOwn:c.platformsOtherText||'',weakness:c.weakness||'ideas',saved:true};
    passport={...c,focusGoals:c.weaknessTips||[],tools:c.platforms||[],toolOther:c.platformsOtherText||'',goals:c.goals||{},goalsOtherText:c.goalsOtherText||'',planTails:(c.planSteps?.length?c.planSteps:['','','']).map(tailOnly),evalTeacherPct:c.evalTeacherPct??'',evalPeerPct:c.evalPeerPct??'',step:0,active:true,view:host.overview||host.readOnly?'overview':'edit',returnToOverview:false,submitted:c.status==='pending'||c.status==='approved'};
+   if(host.identity){passport.studentName=host.identity.name;passport.studentPhoto=host.identity.photo;}
    lastPatch=JSON.stringify(patch());
   }
   render();if(host.mode==='idea'&&!host.contract?.productType&&$('#next'))$('#next').textContent='Continue →';
