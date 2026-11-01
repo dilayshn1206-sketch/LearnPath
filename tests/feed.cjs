@@ -37,6 +37,8 @@ const server=http.createServer((req,res)=>{
  await page.locator('.lp-feed-goals summary').first().focus();await page.keyboard.press('Enter');
  assert.ok(await page.locator('.lp-feed-goals').first().getAttribute('open')!==null);
  assert.match(await page.locator('.lp-feed-goals').first().innerText(),/eight unit words/);
+ assert.equal(await page.locator('.lp-feed-goals .lp-feed-count').first().innerText(),'3');
+ assert.doesNotMatch(await page.locator('.lp-feed-goals').first().innerText(),/Focus goals|Draw a plan/);
  await page.screenshot({path:path.join(root,'verification/feed-tablet.png'),fullPage:true});
  await page.getByRole('button',{name:'Project gallery',exact:true}).click();
  assert.equal(await page.getByRole('button',{name:'Project gallery',exact:true}).getAttribute('aria-pressed'),'true');
