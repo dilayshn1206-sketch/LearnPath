@@ -10,7 +10,7 @@ window.addEventListener('message',event=>{
  const item=waiting.get(event.data.id);if(!item)return;clearTimeout(item.timer);waiting.delete(event.data.id);
  event.data.error?item.reject(new Error(event.data.error)):item.resolve(event.data.value);
 });
-function patch(){return {topic:passport.topic,goals:{...passport.goals},goalsOtherText:passport.goalsOtherText,weaknessTips:[...passport.focusGoals],planSteps:passport.planTails.map(fullStep),evalTeacherPct:passport.evalTeacherPct,evalPeerPct:passport.evalPeerPct};}
+function patch(){return {topic:passport.topic,goals:{...passport.goals},goalsOtherText:passport.goalsOtherText,planSteps:passport.planTails.map(fullStep),evalTeacherPct:passport.evalTeacherPct,evalPeerPct:passport.evalPeerPct};}
 function saveError(error){$('#save-status').textContent='Not saved: '+error.message;$('#save-status').style.color='var(--c)';}
 function receipt(){
  const notice=$('.passport-notice');if(!notice)return;
@@ -102,7 +102,7 @@ new ResizeObserver(reportHeight).observe(document.body);
   if(host.mode==='passport'){
    const c=host.contract;
    state={...state,step:4,topic:'own',topicOwn:c.topic,category:c.category,format:'own',formatOwn:c.productType,tools:c.platforms||['unsure'],toolOwn:c.platformsOtherText||'',weakness:c.weakness||'ideas',saved:true};
-   passport={...c,focusGoals:c.weaknessTips||[],tools:c.platforms||[],toolOther:c.platformsOtherText||'',goals:c.goals||{},goalsOtherText:c.goalsOtherText||'',planTails:(c.planSteps?.length?c.planSteps:['','','']).map(tailOnly),evalTeacherPct:c.evalTeacherPct??'',evalPeerPct:c.evalPeerPct??'',step:0,active:true,view:host.overview||host.readOnly?'overview':'edit',returnToOverview:false,submitted:c.status==='pending'||c.status==='approved'};
+   passport={...c,focusGoals:c.weaknessTips||[],tools:c.platforms||[],toolOther:c.platformsOtherText||'',goals:c.goals||{},goalsOtherText:c.goalsOtherText||'',planTails:initialPlanTails(c),evalTeacherPct:c.evalTeacherPct??'',evalPeerPct:c.evalPeerPct??'',step:0,active:true,view:host.overview||host.readOnly?'overview':'edit',returnToOverview:false,submitted:c.status==='pending'||c.status==='approved'};
    if(host.identity){passport.studentName=host.identity.name;passport.studentPhoto=host.identity.photo;}
    lastPatch=JSON.stringify(patch());
   }
