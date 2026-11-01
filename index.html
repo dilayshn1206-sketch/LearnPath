@@ -254,7 +254,7 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
 .rub-sentence{font-size:13px}
 .rub-chevron{background:none;border:none;color:var(--th);cursor:pointer;font-size:12px;padding:4px 6px;flex-shrink:0}
 </style>
-<link rel="stylesheet" href="assets/learnpath.css?v=20261101-2">
+<link rel="stylesheet" href="assets/learnpath.css?v=20261101-3">
 </head>
 <body>
 
@@ -310,8 +310,8 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
   <div class="modal-card" id="result-popup-card" style="text-align:center;padding:26px 20px"></div>
 </div>
 
-<script src="assets/learnpath-ui.js?v=20261101-2"></script>
-<script src="assets/share-guide.js?v=20261101-2"></script>
+<script src="assets/learnpath-ui.js?v=20261101-3"></script>
+<script src="assets/share-guide.js?v=20261101-3"></script>
 <script type="module">
 import {auth,db,storage,rpc,ref,set,get,push,onValue,update,remove,sref,uploadBytesResumable,getDownloadURL,deleteObject,onAuthStateChanged,signInWithPopup,signOut} from './assets/supabase-backend.js?v=20261027-2';
 const prov={};
@@ -987,9 +987,8 @@ async function renderEval2Modal(){
   html+='</div>';
 
   html+='<div class="eval2-item"><div style="font-size:13px;margin-bottom:4px">I achieved my goals.</div>';
-  if((c.weaknessTips&&c.weaknessTips.length)||c.goals||customGoalText(c)){
+  if(c.goals||customGoalText(c)){
     html+='<div style="font-size:11px;color:var(--tm);margin-bottom:6px;line-height:1.6">';
-    (c.weaknessTips||[]).forEach(function(t){html+="&#9989; "+esc(t)+"<br>";});
     goalItemsFor(c).forEach(function(g){if(c.goals&&c.goals[g.id])html+="&#9989; "+esc(g.text)+"<br>";});
     if(customGoalText(c))html+="&#9989; "+esc(customGoalText(c))+"<br>";
     html+='</div>';
@@ -1199,7 +1198,7 @@ function loadProjectsList(teacherMode){
       var statusLabel=approved?"Approved":sent?"Sent to the teacher":"Plan in progress";
       var statusClass=approved?"approved":sent?"sent":"draft";
       var goals=d.goals||{},chosen=goalItemsFor(d).filter(function(g){return goals[g.id];});
-      var otherGoal=customGoalText(d),tips=d.weaknessTips||[],totalGoals=chosen.length+tips.length+(otherGoal?1:0);
+      var otherGoal=customGoalText(d),totalGoals=chosen.length+(otherGoal?1:0);
       html+='<article class="project-card lp-feed-passport"><header class="lp-feed-passport-cover"><div class="lp-feed-passport-kicker">'+LearnPathUI.feedIcon('passport')+'<span>'+(LearnPathUI.hasPassport(d)?'Learning passport':'Project plan')+'</span></div>';
       html+='<button type="button" class="lp-feed-author" onclick="viewProf(\''+esc(d.studentId||'')+'\')">';
       if(d.studentPhoto)html+='<img src="'+esc(d.studentPhoto)+'" alt="" class="post-av">';
@@ -1212,7 +1211,6 @@ function loadProjectsList(teacherMode){
         d.planSteps.forEach(function(step){if(step&&step.trim())html+='<li>'+esc(step)+'</li>';});html+='</ol></section>';
       }
       html+='<details class="lp-feed-goals"><summary>'+LearnPathUI.feedIcon('goals')+'<span>My goals</span><span class="lp-feed-count">'+totalGoals+'</span></summary><div>';
-      if(tips.length)html+='<h3>Focus goals</h3><ul>'+tips.map(function(t){return '<li>'+esc(t)+'</li>';}).join('')+'</ul>';
       if(chosen.length||otherGoal)html+='<h3>Project goals</h3><ul>'+chosen.map(function(g){return '<li>'+esc(g.text)+'</li>';}).join('')+(otherGoal?'<li>'+esc(otherGoal)+'</li>':'')+'</ul>';
       if(!totalGoals)html+='<p>Goals are still being planned.</p>';
       html+='</div></details>';
@@ -3165,7 +3163,7 @@ async function mountPlanner(mode,c,overview){
     ['written','spoken','visual'].forEach(function(cat){extra[cat]=(catalog[cat]||[]).filter(function(item){var original=DEFAULT_CATALOG[cat].find(function(pair){return pair[0]===item.id;});return item.active&&(!original||original[1]!==item.name);});});
   }
   var mc=document.getElementById('mc');
-  mc.innerHTML=(isLockedStep(mode==='idea'?'step2':'step3')?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">← Back to Home</button>')+'<iframe id="lp-planner-frame" title="'+(mode==='idea'?'Plan your project':LearnPathUI.hasPassport(c)?'My Learning Passport':'Set goals and plan')+'" src="assets/planner.html?v=20261101-2" style="width:100%;height:900px;border:0;display:block" scrolling="no"></iframe>';
+  mc.innerHTML=(isLockedStep(mode==='idea'?'step2':'step3')?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">← Back to Home</button>')+'<iframe id="lp-planner-frame" title="'+(mode==='idea'?'Plan your project':LearnPathUI.hasPassport(c)?'My Learning Passport':'Set goals and plan')+'" src="assets/planner.html?v=20261101-3" style="width:100%;height:900px;border:0;display:block" scrolling="no"></iframe>';
   window._plannerContext={mode:mode,contract:c,overview:!!overview&&LearnPathUI.hasPassport(c),passportReady:LearnPathUI.hasPassport(c),readOnly:false,extraProducts:extra,identity:{name:c&&c.studentName||CU.displayName,photo:c&&c.studentId!==CU.uid?c.studentPhoto||'':UP.avatarUrl||CU.photoURL||c&&c.studentPhoto||''}};
   setNav('home');
 }
@@ -3193,7 +3191,6 @@ window.addEventListener('message',async function(event){
     if(message.action==='draft'){await plannerDraft(uid,Object.assign({},plannerFields(message.payload),{status:'draft',editUnlocked:true}));respond(true);return;}
     if(message.action==='submit'){
       var fields=plannerFields(message.payload);
-      if(fields.weaknessTips&&fields.weaknessTips.some(function(t){return !t.trim();}))throw new Error('Complete each focus goal.');
       if(!fields.topic.trim()||fields.planSteps.length<3||fields.planSteps.some(function(s){return !/[\p{L}\p{N}]/u.test(String(s).replace(/^I will\s*/i,''));}))throw new Error('Complete your topic and every plan step.');
       var count=GOAL_ITEMS.filter(function(g){return fields.goals[g.id]===true;}).length+(customGoalText(fields)?1:0);
       if(count<3)throw new Error('Choose at least three project goals.');
