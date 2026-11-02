@@ -1,5 +1,13 @@
 # LearnPath design
 
+## Four-step student evaluation (2026-11-02)
+Keep one category at a time. Show its sentence stem once above four readable radio
+rows, each with Step and performance name. At the self-reflection stage, remove
+the duplicate Share header and put bilingual instructions with Compass to leave
+room for four endings and the navigation buttons on a landscape tablet. Keep all
+choices visible and prevent controls from covering answers. Legacy records retain
+their original instruments; this is not a redesign of historical responses.
+
 ## Guided planning and compact feedback (2026-11-01)
 Retain the approved map and transparent 24-frame/3-second Compass sprite.
 Use existing navy/teal task paper and a small typed-message form for prepared guidance.
