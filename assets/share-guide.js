@@ -29,8 +29,8 @@
  };
  function companion(title,text){return '<div class="lp-share-guide-top">'+LearnPathUI.mascot()+'<div><p class="lp-eyebrow">Compass guide</p><h2>'+e(title)+'</h2></div></div><p class="lp-share-guide-copy">'+e(text)+'</p>';}
  window.LearnPathShare={
-  question:function(index,self){return (self?selfQuestions:peerQuestions)[index]||'Which Step describes the work?';},
-  criterion:function(index,area){return companion(area,explanations[index]||'Read the three descriptions and compare them with the work.')+'<p class="lp-share-guide-note">Choose the description that matches the work today. There is no need to choose the highest Step.</p>';},
+  question:function(index,self,rubric){return rubric&&rubric[index]&&rubric[index].stem?rubric[index].q:(self?selfQuestions:peerQuestions)[index]||'Which Step describes the work?';},
+  criterion:function(index,area,rubric){var current=rubric&&rubric[index]&&rubric[index].stem;return companion(area,(current?LearnPathRubrics.explanations[index]:explanations[index])||'Read the descriptions and compare them with the work.')+(current?'<p class="lp-rubric-instruction">'+e(rubric===LearnPathRubrics.self?LearnPathRubrics.selfInstruction:LearnPathRubrics.instruction)+'</p><p class="lp-rubric-instruction" lang="tr">'+e(rubric===LearnPathRubrics.self?LearnPathRubrics.selfInstructionTR:LearnPathRubrics.instructionTR)+'</p>':'')+'<p class="lp-share-guide-note">Choose the description that matches the work today. There is no need to choose the highest Step.</p>';},
   goals:function(c,goals,page,error,checks){
    if(error)return companion('Before you share','Your saved goals could not be loaded. You can still share your work.');
    c=c||{};var name=focusNames[c.weakness],tips=c.weaknessTips||[],html=companion('Before you share',name?'You told me you needed help with '+name+'.':'Let’s look at your project before you share it.');

@@ -1,5 +1,11 @@
 # LearnPath UI contract
 
+## EK1/EK2 versioned student rubrics (2026-11-02)
+- `assets/rubric-v2.js` owns new self/peer wording: five categories, four ascending Steps, supplied stems/endings and performance labels. One question at a time, native radios, Compass and progress. Five choices required before submission.
+- Record versions determine saved descriptors and scoring; legacy 6×3 and new 5×4 results have separate averages. Teacher rubric/Yes-No goal review stays at its existing version until a teacher instrument is supplied.
+- Research export includes the self/peer rubric version. Server shape checks retain existing actor/ownership rules. No old answer rewriting.
+- Unit questions 4/5 use the new owner-supplied scenarios. Existing submitted question snapshots remain authoritative for their feedback. Full details: `RUBRICS-20261102.md`.
+
 ## Guided planning and feedback (2026-11-01)
 - `compass-prepared.js` owns topic/product guidance: typed learner input matched to authored keyword replies, with a short fallback when no keyword matches. No option checklist, model/API requests or persisted chat transcript. Actual topic/product selection remains deliberate in the main form.
 - `project-previews.js` owns previews across upload/gallery/profile; PPTX is parsed in the browser, PDF/native media use inline viewers, original links and explicit failure states remain. No external private-file viewer.

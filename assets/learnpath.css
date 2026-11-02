@@ -369,3 +369,21 @@ body[data-role=teacher] .mc{max-width:1400px}body[data-role=teacher] .lp-grade s
 .lp-feedback-tier{display:inline-block;margin-left:8px;padding:3px 9px;border-radius:20px;background:var(--tl);color:var(--pd);font-size:13px;font-weight:700}
 .lp-feedback-details.lp-written-feedback-toggle{display:inline-flex;align-items:center;margin:12px 0 4px;padding:10px 16px;min-height:48px;border:1px solid var(--p);border-radius:10px;background:white;font-size:17px;font-weight:700;text-decoration:none}
 .lp-written-feedback-toggle:focus-visible{outline:3px solid var(--p);outline-offset:3px}
+/* Four-step EK1/EK2 forms retain one question at a time on landscape tablets. */
+.lp-four-step .lp-single-question .rublevel-row{grid-template-columns:20px 102px minmax(0,1fr);min-height:68px;padding:10px;margin:8px 0;gap:9px}
+.lp-four-step .lp-single-question .rublevel-row.sel{padding:9px}
+.lp-four-step .lp-single-question .rub-sentence{font-size:17px;line-height:1.4}
+.lp-four-step .rub-pill{white-space:normal;text-align:center}
+.lp-four-step .rub-pill small{display:block;font-size:11px;line-height:1.3;margin-top:3px;white-space:normal}
+.rub-pill.tier3{background:#dceee6;color:#205843}
+.lp-rubric-stem{font-size:20px;font-weight:800;color:var(--pd);margin:6px 0 10px}
+.lp-rubric-instruction{font-size:14px;color:var(--tm);line-height:1.5}
+.lp-rubric-error{color:var(--c);font-size:14px;font-weight:700}
+.lp-rubric-version-note{display:block;flex-basis:100%;font-size:12px;color:var(--tm)}
+@media(max-width:700px){.lp-four-step .lp-single-question .rublevel-row{grid-template-columns:20px minmax(0,1fr)}.lp-four-step .rub-sentence{grid-column:2}}
+body[data-sharing="true"][data-sharing-stage="1"] .lp-share-header{display:none}
+.lp-share-paper [data-share-panel="1"]>.lp-rubric-instruction{display:none}
+.lp-four-step .lp-rubric-main progress{margin:8px 0 12px}
+.lp-four-step .lp-single-question legend{margin-bottom:8px}
+.lp-four-step .rublevel-row{scroll-margin-bottom:100px}
+.lp-unit-question legend{white-space:pre-line}
