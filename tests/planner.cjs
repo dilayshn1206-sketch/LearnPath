@@ -23,12 +23,19 @@ const server=http.createServer((req,res)=>{
  await page.locator('.step-card').first().waitFor();
  await page.evaluate(()=>startQuiz());
  const f=page.frameLocator('#lp-planner-frame');
+ await f.locator('#chat-input').waitFor();
+ assert.equal(await f.locator('.choice small').count(),0);
+ assert.equal(await f.locator('.lp-compass-dancer').evaluate(el=>getComputedStyle(el).animationName),'lp-compass-breakdance');
+ await f.locator('#motion').click();assert.equal(await f.locator('.lp-compass-dancer').evaluate(el=>getComputedStyle(el).animationPlayState),'paused');await f.locator('#motion').click();
+ await page.emulateMedia({reducedMotion:'reduce'});assert.equal(await f.locator('.lp-compass-dancer').evaluate(el=>getComputedStyle(el).animationName),'none');await page.emulateMedia({reducedMotion:'no-preference'});
+ await f.locator('[data-ask-compass]').click();assert.equal(await f.locator('#chat-input').evaluate(el=>document.activeElement===el),true);
  await f.locator('#chat-input').fill('I like games and music');
  await f.locator('#compass-reply').click();
  assert.equal(await f.locator('[data-compass-choice]').count(),0);
  assert.equal(await f.locator('#chat-input').inputValue(),'');
- assert.match(await f.locator('.chat-log').innerText(),/Games connect/);
- assert.match(await f.locator('.chat-log').innerText(),/giving credit/);
+ assert.match(await f.locator('.chat-log').innerText(),/Game chat/);
+ assert.match(await f.locator('.chat-log').innerText(),/Credit/);
+ assert.ok(await f.locator('.bubble.assistant ul li').count()>=6);assert.equal(await f.locator('.lp-compass-dancer.beckoning').count(),0);
  await page.screenshot({path:path.join(root,'verification/prepared-compass.png'),fullPage:true});
  await f.locator('[data-choice="privacy"]').click();await f.locator('#next').click();
  await f.locator('#chat-input').waitFor();
@@ -39,13 +46,13 @@ const server=http.createServer((req,res)=>{
  await page.goForward();await f.locator('#chat-input').waitFor();
  assert.equal(await f.locator('#chat-input').inputValue(),'I like speaking');
  await f.locator('#chat-input').fill('I like speaking and asking questions');await f.locator('#chat-input').press('Enter');
- assert.match(await f.locator('.chat-log').innerText(),/short talk/);
- assert.match(await f.locator('.chat-log').innerText(),/written or spoken interview/);
+ assert.match(await f.locator('.chat-log').innerText(),/Short talk/);
+ assert.match(await f.locator('.chat-log').innerText(),/Written interview/);
  await f.locator('#chat-input').fill('<img src=x onerror=alert(1)>');await f.locator('#compass-reply').click();
  assert.equal(await f.locator('.chat-log img').count(),0);
- assert.match(await f.locator('.chat-log').innerText(),/Tell me how you like sharing ideas/);
- assert.ok(await f.locator('[data-product]').count()>=12);
- await f.locator('[data-product="interview"]').click();await f.locator('#next').click();
+ assert.match(await f.locator('.chat-log').innerText(),/Let’s find a digital connection/);
+ assert.ok(await f.locator('[data-product]').count()>=9);assert.equal(await f.locator('[data-product="howto"],[data-product="interview"],[data-product="slides"]').count(),0);assert.equal(await f.locator('.product-option small').count(),0);
+ await f.locator('[data-product="podcast"]').click();await f.locator('#next').click();
  await f.locator('[data-choice="other"]').click();await f.locator('#next').click();
  assert.match(await f.locator('#error').innerText(),/another tool/);
  await f.locator('#tool-own').fill('Recorder');await f.locator('#next').click();
@@ -59,8 +66,8 @@ const server=http.createServer((req,res)=>{
  assert.equal(await f.locator('.passport-overview-title').count(),0);
  assert.equal(await page.locator('#lp-passport-tab').count(),0);
  await page.evaluate(()=>renderQuizDone());
- assert.match(await page.locator('.lp-product-launch').innerText(),/Check some interviews online/);
- assert.match(await page.locator('.lp-launch-examples').getAttribute('href'),/interviews/);
+ assert.match(await page.locator('.lp-product-launch').innerText(),/Check some podcasts online/);
+ assert.match(await page.locator('.lp-launch-examples').getAttribute('href'),/podcasts/);
  assert.equal(await page.locator('.lp-launch-examples').getAttribute('target'),'_blank');
  await page.evaluate(()=>{document.getElementById('mc').innerHTML=LearnPathUI.productLaunch('Infographic');});
  assert.match(await page.locator('.lp-launch-notice').innerText(),/short facts and pictures/);
@@ -76,7 +83,7 @@ const server=http.createServer((req,res)=>{
  assert.equal(await page.locator('.lp-launch-format').innerText(),'<Custom & format>');
  await page.evaluate(()=>renderQuizDone());
  let saved=await page.evaluate(()=>__mockDB.contracts.student);
- assert.equal(saved.topic,'Sharing safely online');assert.equal(saved.productType,'Interview');assert.equal(saved.status,'draft');assert.equal(saved.plannerVersion,'passport-v1');assert.equal(saved.weaknessTips.length,3);assert.equal(saved.platformsOtherText,'Recorder');
+ assert.equal(saved.topic,'Sharing safely online');assert.equal(saved.productType,'Podcast / audio');assert.equal(saved.status,'draft');assert.equal(saved.plannerVersion,'passport-v1');assert.equal(saved.weaknessTips.length,3);assert.equal(saved.platformsOtherText,'Recorder');
  // No group membership and an expired teacher activity must not gate editing.
  await page.evaluate(()=>{delete __mockDB.users.student.groupId;window._liveSession={active:true,step:'step1',deadline:1};});
  await page.getByRole('button',{name:'Set my goals and plan →',exact:true}).click();
@@ -208,6 +215,7 @@ const server=http.createServer((req,res)=>{
  await page.evaluate(()=>{UP.avatarUrl='https://invalid.example.test/avatar.jpg';return renderStep3Screen(true);});
  await f.locator('.passport-photo img').waitFor({state:'hidden'});
  assert.equal(await f.locator('.passport-photo-fallback').innerText(),'AS');
+ await page.evaluate(()=>{Object.assign(__mockDB.contracts.student,{productId:'interview',productType:'Interview',category:'spoken'});return startQuiz();});await f.getByRole('button',{name:'Edit Product',exact:true}).click();assert.match(await f.locator('.retired-product-note').innerText(),/saved product is Interview/);assert.equal(await f.locator('[data-product="interview"]').count(),0);
  assert.deepEqual(errors,[]);console.log('PASS: no grouping/edit/deadline locks; existing locked records edit; approved edits return to draft; send/reopen/retake; scores, tablet/mobile, no external calls.');
  }finally{await browser.close();await new Promise(r=>server.close(r));}
 })().catch(e=>{console.error(e);process.exitCode=1;});
