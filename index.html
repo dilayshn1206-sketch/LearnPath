@@ -1379,7 +1379,8 @@ function renderRubricBlock(containerId,rubric,values,storeKey){
     rubric.forEach(function(item,ai){var li=values[ai];html+='<li><div><strong>'+esc(item.area)+'</strong><p>'+(li===null||li===undefined?'Not selected yet':esc(TIER_LABELS[li])+': '+esc(LearnPathRubrics.sentence(item,li)))+'</p></div><button type="button" class="btn bts" onclick="rubricGo(\''+storeKey+'\','+ai+')">Change</button></li>';});html+='</ol>';
   }else{
     var item=rubric[index];html+='<fieldset class="rubarea2 lp-single-question"><legend><span>'+esc(item.area)+'</span><strong tabindex="-1" class="lp-rubric-heading">'+esc(LearnPathShare.question(index,rubric===SELF_RUBRIC,rubric))+'</strong></legend>'+(item.stem?'<p class="lp-rubric-stem" id="rubric-stem-'+storeKey+'">'+esc(item.stem)+'</p>':'');
-    item.levels.forEach(function(level,li){var sel=values[index]===li,id='rubric-'+storeKey+'-'+index+'-'+li;
+    var displayLevels=item.levels.map(function(level,li){return {level:level,index:li};});if(item.levels.length===4)displayLevels.reverse();
+    displayLevels.forEach(function(entry){var level=entry.level,li=entry.index,sel=values[index]===li,id='rubric-'+storeKey+'-'+index+'-'+li;
       html+='<label class="rublevel-row'+(sel?' sel':'')+'" for="'+id+'"><input type="radio" id="'+id+'" name="rubric-'+storeKey+'-'+index+'" '+(item.stem?'aria-describedby="rubric-stem-'+storeKey+'" ':'')+(sel?'checked ':'')+'onchange="pickRubricLevel(\''+storeKey+'\','+index+','+li+')"><span class="rub-pill tier'+li+'">'+TIER_LABELS[li]+(item.stem?'<small>'+LearnPathRubrics.performance[li]+'</small>':'')+'</span><span class="rub-sentence">'+esc(level.label)+'</span></label>';
     });html+='</fieldset>';
   }

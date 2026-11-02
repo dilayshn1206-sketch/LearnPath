@@ -6,7 +6,7 @@
 - The “Ask me!” button focuses the typed chat. A separate dance wrapper leaves the approved 24-frame/3-second transparent sprite intact and respects pause, focus, hidden tabs and reduced motion. Further coverage/limits: `COMPASS-WORKSHOP-20261102.md`.
 
 ## EK1/EK2 versioned student rubrics (2026-11-02)
-- `assets/rubric-v2.js` owns new self/peer wording: five categories, four ascending Steps, supplied stems/endings and performance labels. One question at a time, native radios, Compass and progress. Five choices required before submission.
+- `assets/rubric-v2.js` owns new self/peer wording: five categories, four ascending Steps, supplied stems/endings and performance labels. One question at a time, native radios, Compass and progress. Four-level options appear Step 4 first, then 3, 2, 1; stored indices and scoring remain unchanged. Five choices required before submission.
 - Record versions determine saved descriptors and scoring; legacy 6×3 and new 5×4 results have separate averages. Teacher rubric/Yes-No goal review stays at its existing version until a teacher instrument is supplied.
 - Research export includes the self/peer rubric version. Server shape checks retain existing actor/ownership rules. No old answer rewriting.
 - Unit questions 4/5 use the new owner-supplied scenarios. Existing submitted question snapshots remain authoritative for their feedback. Full details: `RUBRICS-20261102.md`.
