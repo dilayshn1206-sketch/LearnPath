@@ -1,5 +1,12 @@
 # LearnPath design
 
+## Compass-led choices (2026-11-02)
+Use compact topic/product label-and-icon cards; explain through short keyword
+bullets in the right-hand conversation. Keep the existing navy/teal paper style.
+The speech-bubble invitation is a real focus button. Breakdance is a bounded
+wrapper transform around the approved sprite and stops for reading/typing; no
+new mascot frames, audio, emoji or map changes. Keep the original motion control.
+
 ## Four-step student evaluation (2026-11-02)
 Keep one category at a time. Show its sentence stem once above four readable radio
 rows, each with Step and performance name. At the self-reflection stage, remove

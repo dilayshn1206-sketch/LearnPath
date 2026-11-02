@@ -1,5 +1,10 @@
 # LearnPath UI contract
 
+## Compass workshop (2026-11-02)
+- The authored topic/format content owner is `compass-library.js`; `compass-prepared.js` owns local routing, short keyword bullets and one follow-up question. Inputs stay in tab memory; no model/API calls or automatic project choices.
+- Topic/product options show labels/icons only. The three retired formats (How-to guide, spoken Interview, Visual slide story) are hidden from new choices, including matching teacher extras; existing saved metadata remains readable/editable. Written interview stays available.
+- The “Ask me!” button focuses the typed chat. A separate dance wrapper leaves the approved 24-frame/3-second transparent sprite intact and respects pause, focus, hidden tabs and reduced motion. Further coverage/limits: `COMPASS-WORKSHOP-20261102.md`.
+
 ## EK1/EK2 versioned student rubrics (2026-11-02)
 - `assets/rubric-v2.js` owns new self/peer wording: five categories, four ascending Steps, supplied stems/endings and performance labels. One question at a time, native radios, Compass and progress. Five choices required before submission.
 - Record versions determine saved descriptors and scoring; legacy 6×3 and new 5×4 results have separate averages. Teacher rubric/Yes-No goal review stays at its existing version until a teacher instrument is supplied.

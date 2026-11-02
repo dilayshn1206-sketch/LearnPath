@@ -30,7 +30,7 @@ render=function(){
  if(passport?.active&&passport.step===2&&!passport.returnToOverview)$('#passport-next')?.classList.add('send-teacher');
  if(!passport?.active&&state.step===4&&$('#next')&&!host?.contract?.productType)$('#next').textContent='Save my project idea';
  document.querySelectorAll('.demo-label').forEach(el=>el.textContent='Guided help · prepared replies');
- document.querySelectorAll('.chat-footnote').forEach(el=>el.textContent='Prepared guidance. You choose your final topic and product.');
+ document.querySelectorAll('.chat-footnote').forEach(el=>el.textContent='Ask a follow-up or tell me what you want to change.');
  document.querySelectorAll('.contract-guide .hint').forEach(el=>el.textContent='Your teacher will review your Learning Passport.');
  document.querySelectorAll('.reminder-explainer').forEach(el=>el.textContent='Use the My Learning Passport tab on LearnPath to return to your plan.');
  if(passport?.view==='overview'){
@@ -97,7 +97,7 @@ new ResizeObserver(reportHeight).observe(document.body);
  try{
   host=await request('load');
   // Keep teacher-added or renamed formats alongside the twelve approved formats.
-  for(const category of groups){for(const item of host.extraProducts[category.id]||[]){const exists=category.formats.find(f=>f[0]===item.id);if(exists)exists[1]=item.name;else{const format=[item.id,item.name,'A project format from your teacher.'];category.formats.push(format);formats.push(format);}}}
+  for(const category of groups){for(const item of host.extraProducts[category.id]||[]){if(retiredProduct(item.id,item.name)){const archived=formats.find(f=>f[0]===item.id);if(archived)archived[1]=item.name;continue;}const exists=category.formats.find(f=>f[0]===item.id);if(exists)exists[1]=item.name;else{const format=[item.id,item.name,'A project format from your teacher.'];category.formats.push(format);formats.push(format);}}}
   if(host.mode==='idea'&&host.contract?.productType)hydrateIdea(host.contract);
   if(host.mode==='passport'){
    const c=host.contract;
