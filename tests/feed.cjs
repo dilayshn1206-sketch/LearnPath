@@ -78,16 +78,16 @@ const server=http.createServer((req,res)=>{
  assert.equal(await page.locator('#np-title').inputValue(),'My interview');
  await page.goForward();await page.locator('#np-rub-rows').waitFor({state:'visible'});
  assert.equal(await page.locator('#np-rub-rows .rubarea2').count(),1);
- assert.equal(await page.locator('#np-rub-rows .rublevel-row').count(),3);
+ assert.equal(await page.locator('#np-rub-rows .rublevel-row').count(),4);
  assert.equal(await page.locator('.lp-rubric-pair').count(),0);
  await page.locator('#rubric-newpost-0-1').check();
  assert.equal(await page.evaluate(()=>_rubricStores.newpost.values[0]),1);
- await page.locator('#np-continue').click();assert.match(await page.locator('#lp-share-compass').innerText(),/Order is how/);
+ await page.locator('#np-continue').click();assert.match(await page.locator('#lp-share-compass').innerText(),/Look for single words/);
  await page.goBack();await page.locator('#rubric-newpost-0-1').waitFor();
  assert.ok(await page.locator('#rubric-newpost-0-1').isChecked());
  await page.goForward();await page.locator('#rubric-newpost-1-0').waitFor();
  await page.locator('#np-back').click();assert.ok(await page.locator('#rubric-newpost-0-1').isChecked());
- for(let i=0;i<6;i++){await page.locator('#rubric-newpost-'+i+'-'+(i%3)).check();await page.locator('#np-continue').click();}
+ for(let i=0;i<5;i++){await page.locator('#rubric-newpost-'+i+'-'+(i%4)).check();await page.locator('#np-continue').click();}
  assert.ok(await page.locator('#np-well').isVisible());
  assert.ok(await page.locator('[data-focus-check="0"]').isChecked());
  assert.equal(await page.locator('[data-focus-check="1"]').isChecked(),false);
@@ -102,7 +102,7 @@ const server=http.createServer((req,res)=>{
   assert.ok(footerHit.bottom<=size.height+1&&footerHit.clear,JSON.stringify({size,...footerHit}));
  }
  await page.screenshot({path:path.join(root,'verification/share-footer-clear.png'),fullPage:false});
- assert.deepEqual(await page.evaluate(()=>_rubricStores.newpost.values),[0,1,2,0,1,2]);
+ assert.deepEqual(await page.evaluate(()=>_rubricStores.newpost.values),[0,1,2,3,0]);
  for(const width of [1280,1024]){await page.setViewportSize({width,height:768});await page.locator('[data-share-stage="1"]').click();assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));assert.ok(await page.locator('.lp-share-actions').evaluate(el=>el.getBoundingClientRect().bottom<=innerHeight));}
  await page.screenshot({path:path.join(root,'verification/share-single-criterion.png'),fullPage:true});
  await page.locator('[data-share-stage="0"]').click();await page.screenshot({path:path.join(root,'verification/share-goal-guide.png'),fullPage:true});
@@ -127,14 +127,14 @@ const server=http.createServer((req,res)=>{
  await page.evaluate(()=>openComment('peerPost'));
  assert.equal(await page.locator('#cm-rub-peerPost fieldset').count(),1);
  assert.equal(await page.locator('#cm-well-peerPost').isVisible(),false);
- for(let i=0;i<6;i++){
-  await page.locator('#rubric-comment_peerPost-'+i+'-'+(i%3)).check();
-  if(i<5)await page.locator('#cm-rub-peerPost').getByRole('button',{name:'Next →',exact:true}).click();
+ for(let i=0;i<5;i++){
+  await page.locator('#rubric-comment_peerPost-'+i+'-'+(i%4)).check();
+  if(i<4)await page.locator('#cm-rub-peerPost').getByRole('button',{name:'Next →',exact:true}).click();
  }
  await page.getByRole('button',{name:'Continue to written feedback →',exact:true}).click();
  await page.locator('#cm-well-peerPost').fill('A clear example.');
  await page.getByRole('button',{name:'Back to my choices',exact:true}).click();
- assert.deepEqual(await page.evaluate(()=>_rubricStores.comment_peerPost.values),[0,1,2,0,1,2]);
+ assert.deepEqual(await page.evaluate(()=>_rubricStores.comment_peerPost.values),[0,1,2,3,0]);
  await page.getByRole('button',{name:'Continue to written feedback →',exact:true}).click();
  assert.equal(await page.locator('#cm-well-peerPost').inputValue(),'A clear example.');
  await page.evaluate(()=>{const c=__mockDB.contracts.student;__mockDB.contracts={};for(let i=0;i<23;i++)__mockDB.contracts['learner'+i]={...c,studentId:'learner'+i,studentName:'Learner '+(i+1),createdAt:i};go('feed');switchFeedTab('plans');});
