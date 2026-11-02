@@ -1262,7 +1262,7 @@ function groupStats(comments,rubric){
  return {count:comments.length,perArea:perArea,maxSteps:maxSteps,overall:allVals.length?allVals.reduce(function(a,b){return a+b+1;},0)/allVals.length:null};
 }
 function feedbackGroups(comments,label,prefix){
- var versions={};comments.forEach(function(cm){var version=cm.peerRubricVersion||LearnPathRubrics.legacyVersion;(versions[version]||(versions[version]=[])).push(cm);});
+ var versions=Object.create(null);comments.forEach(function(cm){var version=cm.peerRubricVersion||LearnPathRubrics.legacyVersion;(versions[version]||(versions[version]=[])).push(cm);});
  if(!comments.length)versions[LearnPathRubrics.version]=[];
  return Object.keys(versions).map(function(version,i){var rubric=recordRubric({peerRubricVersion:version},false);return {label:label,id:prefix+(i?'-'+i:''),rubric:rubric,version:version,stats:groupStats(versions[version],rubric)};});
 }
