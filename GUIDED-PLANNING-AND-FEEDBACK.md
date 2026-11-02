@@ -1,8 +1,8 @@
 # Guided planning, attachments and feedback — 2026-11-01
 
-The topic/product Compass uses authored keyword-to-response rules only. Learners
-write their interests/preferences; recognized keywords select up to two prepared
-replies, and unknown input gets a short guiding question. There is no option list,
+The topic/product Compass uses an authored topic/format/intent library only. Learners
+write their interests/questions; prepared replies use short keyword bullets and a
+follow-up, and unknown input gets a short guiding question. There is no option list,
 model connection, remote chat request or persisted chat transcript. Up to four
 conversation turns and an unfinished message remain in tab memory. Actual project
 topic/product inputs remain deliberate choices in the main form.

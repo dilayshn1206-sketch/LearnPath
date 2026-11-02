@@ -254,7 +254,7 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
 .rub-sentence{font-size:13px}
 .rub-chevron{background:none;border:none;color:var(--th);cursor:pointer;font-size:12px;padding:4px 6px;flex-shrink:0}
 </style>
-<link rel="stylesheet" href="assets/learnpath.css?v=20261102-1">
+<link rel="stylesheet" href="assets/learnpath.css?v=20261102-2">
 </head>
 <body>
 
@@ -310,11 +310,11 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
   <div class="modal-card" id="result-popup-card" style="text-align:center;padding:26px 20px"></div>
 </div>
 
-<script src="assets/learnpath-ui.js?v=20261102-1"></script>
-<script src="assets/rubric-v2.js?v=20261102-1"></script><script src="assets/share-guide.js?v=20261102-1"></script><script src="assets/vendor/jszip-3.10.1.min.js"></script><script src="assets/project-previews.js?v=20261102-1"></script>
-<script src="assets/navigation.js?v=20261102-1"></script>
+<script src="assets/learnpath-ui.js?v=20261102-2"></script>
+<script src="assets/rubric-v2.js?v=20261102-2"></script><script src="assets/share-guide.js?v=20261102-2"></script><script src="assets/vendor/jszip-3.10.1.min.js"></script><script src="assets/project-previews.js?v=20261102-2"></script>
+<script src="assets/navigation.js?v=20261102-2"></script>
 <script type="module">
-import {auth,db,storage,rpc,ref,set,get,push,onValue,update,remove,sref,uploadBytesResumable,getDownloadURL,deleteObject,onAuthStateChanged,signInWithPopup,signOut} from './assets/supabase-backend.js?v=20261102-1';
+import {auth,db,storage,rpc,ref,set,get,push,onValue,update,remove,sref,uploadBytesResumable,getDownloadURL,deleteObject,onAuthStateChanged,signInWithPopup,signOut} from './assets/supabase-backend.js?v=20261102-2';
 const prov={};
 let CU=null,UP=null;
 let myGid=null,myGname=null,userCoins=0;
@@ -3124,7 +3124,7 @@ async function mountPlanner(mode,c,overview){
     ['written','spoken','visual'].forEach(function(cat){extra[cat]=(catalog[cat]||[]).filter(function(item){var original=DEFAULT_CATALOG[cat].find(function(pair){return pair[0]===item.id;});return item.active&&(!original||original[1]!==item.name);});});
   }
   var mc=document.getElementById('mc');
-  mc.innerHTML=(isLockedStep(mode==='idea'?'step2':'step3')?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">← Back to Home</button>')+'<iframe id="lp-planner-frame" title="'+(mode==='idea'?'Plan your project':LearnPathUI.hasPassport(c)?'My Learning Passport':'Set goals and plan')+'" src="assets/planner.html?v=20261102-1" style="width:100%;height:900px;border:0;display:block" scrolling="no"></iframe>';
+  mc.innerHTML=(isLockedStep(mode==='idea'?'step2':'step3')?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">← Back to Home</button>')+'<iframe id="lp-planner-frame" title="'+(mode==='idea'?'Plan your project':LearnPathUI.hasPassport(c)?'My Learning Passport':'Set goals and plan')+'" src="assets/planner.html?v=20261102-2" style="width:100%;height:900px;border:0;display:block" scrolling="no"></iframe>';
   window._plannerContext={mode:mode,contract:c,overview:!!overview&&LearnPathUI.hasPassport(c),passportReady:LearnPathUI.hasPassport(c),readOnly:false,extraProducts:extra,resume:LearnPathNavigation.resume(),identity:{name:c&&c.studentName||CU.displayName,photo:c&&c.studentId!==CU.uid?c.studentPhoto||'':UP.avatarUrl||CU.photoURL||c&&c.studentPhoto||''}};
   setNav('home');
 }
