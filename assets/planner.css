@@ -234,3 +234,27 @@ body{padding-bottom:84px}
 #prepared-guide label{display:block;font-size:14px;font-weight:700;margin:12px 0 6px}
 #prepared-guide .chat-compose input{font-size:16px}
 #prepared-guide #compass-reply{width:auto;padding:9px 12px;min-height:44px;font-size:14px}
+/* Compact choices direct explanations to the conversational Compass. */
+.choice.compact-choice{min-height:78px;padding:14px;align-items:center}
+.choice.compact-choice.selected{padding:13px}
+.choice.compact-choice strong{margin:0}
+.own-topic .choice.compact-choice{min-height:74px}
+.product-category .product-option{min-height:78px;padding:12px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.product-option strong{font-size:17px;line-height:1.35}
+.retired-product-note{font-size:14px;color:var(--tm);border-left:3px solid var(--p);padding:10px 14px;background:var(--gl);margin:0 0 12px}
+.chat-header .lp-compass-dancer{display:block;flex:0 0 96px;width:96px;height:96px;transform-origin:50% 65%}
+.chat-header .lp-compass-dancer .lp-clock{display:block;margin:6px auto;--frame-size:84px}
+.lp-compass-dancer.beckoning{animation:lp-compass-breakdance 3s ease-in-out infinite}
+.lp-compass-dancer:has(.lp-clock.paused),.chat-guide:has(#chat-input:focus) .lp-compass-dancer,body[data-compass-hidden="true"] .lp-compass-dancer{animation-play-state:paused}
+.compass-invite{display:block;width:100%;min-height:44px;border:1px solid var(--p);border-radius:14px;background:var(--al);color:var(--pd);font:inherit;font-size:17px;font-weight:800;cursor:pointer;margin:8px 0 12px;padding:9px;position:relative}
+.compass-invite:before{content:'';position:absolute;top:-7px;left:44px;width:12px;height:12px;background:var(--al);border-top:1px solid var(--p);border-left:1px solid var(--p);transform:rotate(45deg)}
+.compass-invite:focus-visible{outline:3px solid var(--p);outline-offset:3px}
+.chat-log{max-height:min(380px,50dvh)}
+.chat-log .bubble h3{font-size:15px;line-height:1.35;margin:0 0 9px;color:var(--pd)}
+.compass-reply-points{padding-left:18px;margin:0;list-style:disc}
+.compass-reply-points li{margin:8px 0;padding-left:2px;line-height:1.5}
+.compass-reply-points strong{color:var(--pd);margin-right:5px}
+.compass-reply-points strong:after{content:':'}.compass-reply-points span{display:inline}
+.chat-log .compass-next-question{margin:12px 0 0;padding-top:9px;border-top:1px solid var(--gb);font-weight:600;line-height:1.5}
+@keyframes lp-compass-breakdance{0%{transform:translate(0,0) rotate(0)}18%{transform:translate(-4px,-7px) rotate(-15deg)}35%{transform:translate(4px,0) rotate(18deg)}52%{transform:translate(-3px,-4px) rotate(-95deg)}68%{transform:translate(0,0) rotate(-190deg)}84%{transform:translate(3px,-6px) rotate(-325deg)}100%{transform:translate(0,0) rotate(-360deg)}}
+@media(prefers-reduced-motion:reduce){.lp-compass-dancer.beckoning{animation:none!important;transform:none}}
