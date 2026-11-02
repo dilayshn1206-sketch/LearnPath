@@ -1,166 +1,166 @@
-# LearnPath UI contract
-
-## Compass workshop (2026-11-02)
-- The authored topic/format content owner is `compass-library.js`; `compass-prepared.js` owns local routing, short keyword bullets and one follow-up question. Inputs stay in tab memory; no model/API calls or automatic project choices.
-- Topic/product options show labels/icons only. The three retired formats (How-to guide, spoken Interview, Visual slide story) are hidden from new choices, including matching teacher extras; existing saved metadata remains readable/editable. Written interview stays available.
-- The “Ask me!” button focuses the typed chat. A separate dance wrapper leaves the approved 24-frame/3-second transparent sprite intact and respects pause, focus, hidden tabs and reduced motion. Further coverage/limits: `COMPASS-WORKSHOP-20261102.md`.
-
-## EK1/EK2 versioned student rubrics (2026-11-02)
-- `assets/rubric-v2.js` owns new self/peer wording: five categories, four ascending Steps, supplied stems/endings and performance labels. One question at a time, native radios, Compass and progress. Five choices required before submission.
-- Record versions determine saved descriptors and scoring; legacy 6×3 and new 5×4 results have separate averages. Teacher rubric/Yes-No goal review stays at its existing version until a teacher instrument is supplied.
-- Research export includes the self/peer rubric version. Server shape checks retain existing actor/ownership rules. No old answer rewriting.
-- Unit questions 4/5 use the new owner-supplied scenarios. Existing submitted question snapshots remain authoritative for their feedback. Full details: `RUBRICS-20261102.md`.
-
-## Guided planning and feedback (2026-11-01)
-- `compass-prepared.js` owns topic/product guidance: typed learner input matched to authored keyword replies, with a short fallback when no keyword matches. No option checklist, model/API requests or persisted chat transcript. Actual topic/product selection remains deliberate in the main form.
-- `project-previews.js` owns previews across upload/gallery/profile; PPTX is parsed in the browser, PDF/native media use inline viewers, original links and explicit failure states remain. No external private-file viewer.
-- `navigation.js` owns same-document route history; planner-navigation publishes in-memory checkpoints. Back/Forward preserves form values and sharing file objects during the tab session. First-entry browser exit and ordinary logout remain available.
-- Feedback Summary contains teacher/peer aggregate rubric scores and Steps. Each optional aggregate criterion description shows its corresponding Step, while individual comment Step breakdowns remain omitted. A prominent 17px/48px written-feedback button reveals two columns with muted reviewer names; assessment values stay unchanged.
-- Plan suggestions are editable Step inputs with brief right-side Compass guidance. Pre-share questions are optional native checkboxes saved only with an actual new post.
-
-## Canonical UI Map
-| Capability | Canonical owner | Source of truth | Allowed variants | Verification |
-|---|---|---|---|---|
-| Select/Listbox | Existing native select in index.html | Existing forms | Native OS popup | DOM regression |
-| Form | Existing render and save functions in index.html | Original source + user notes | Student / teacher / reflection | Isolated mocked tests |
-| Scrollbar | assets/learnpath.css | DESIGN.md | Forced colors | CSS audit |
-| Toast | Existing toast() in index.html | Existing workflow | Success / guidance / failure | Mocked invalid-submit tests |
-| CRUD | Existing Firebase functions in index.html | Existing storage paths and schema | Same save and navigation destinations | Source comparison + mock tests |
-
-## Behavior ledger
-- Superseding correction: What feels hardest tips prefill Step 1/2/3, not a
-  separate My focus goals editor/list. Project-goal choices and counts exclude
-  difficulty tips. Existing plans containing any action are restored exactly,
-  including blank added rows. A new or wholly blank plan gets first-person,
-  editable suggestions and keeps Add another step. No bulk learner-data rewrite.
-- Focus goals prefill from saved weaknessTips and remain editable as three
-  labelled text inputs. The same persisted field owns all downstream class/share
-  reminders, snapshots and exports. No bulk rewrite of existing records. Owner
-  edits return sent passports to draft; original project goal validation remains.
-- The personal overview shows full project goals first and focus goals second,
-  each exactly once. The short-caption highlights and duplicate disclosure are gone.
-- Personal passport overview uses the approved two-page spread. Short goal
-  captions are presentation only; native “View all my goals” shows every full
-  original focus/project/custom sentence. Scores are the student's saved targets,
-  never inferred marks. Existing photo has initials fallback. Confirmed-save receipt,
-  section Edit and the authenticated save owner remain unchanged.
-- Share composer hides the fixed bottom navigation even after inline session
-  display updates; footer buttons and safe-area space stay reachable. The floating
-  passport tab is hidden while composing, then returns on other screens.
-- Notification buttons route to their stored project/feedback or resource screen.
-  Server-generated comment alerts include postId/commentId. Old alerts resolve
-  only a unique matching comment; missing targets get an honest fallback message.
-- The separate development/index.html notebook records local teacher review of
-  synthetic evidence. Approval generates a JSON change request, never a database
-  write, code patch or deployment. See development/UX-CONTRACT.md for its deliberate
-  isolated review-tool variant, validation, persistence and recoverable copies.
-- Saved project ideas default to a hydrated review; Edit opens one prefilled part,
-  Save changes returns to that review, and Cancel edit restores the saved choices.
-  Existing idea edits update only idea fields; goals, plan actions, targets, creation
-  and submission history stay intact. Opening the review performs no writes.
-  Continue to my plan uses the existing completed-passport presentation check.
-- Personal and class passports use compact paper geometry, with no content clipping.
-  Class-plan goals remain accessible through native disclosure. A normal three-action
-  plan fits one landscape-tablet view; long content grows naturally rather than truncating.
-- A classmate's reflection is labelled with the author's escaped display name.
-  Expanded teacher/classmate feedback uses original peer criterion descriptors.
-  Multiple-response averages are labelled as the closest description; numeric scoring
-  and all stored values remain unchanged.
-- Peer feedback shares one-question progress/Compass guidance, followed by a final
-  written-feedback panel. Back and closing/reopening the form preserve current choices
-  and written text. The original save action and nullable rubric values stay unchanged.
-- Teacher-only personal goal check: Yes/No for each selected project/custom goal,
-  separate from the six rubric values. New posts snapshot goal content at sharing;
-  historical posts use a labelled contract-at-review snapshot. Teacher comments
-  retain the exact goal text/IDs and boolean response. Students see read-only
-  teacher feedback; peer forms have no goal-rating controls. Server comment rules
-  deny `personalGoalReview` for students, including forged teacher flags.
-  Existing teacher-evaluation export captures the full nested review payload.
-- Share composer reads the current learner contract; all three saved focus tips
-  become prepared questions in the right-side `assets/share-guide.js` guide. No
-  project-goal carousel or hidden third tip. Missing/error
-  states remain honest and do not block sharing. This guide never grades or writes.
-- One-criterion rubric navigation is shared by self/peer/teacher forms. Original
-  ordering, Step descriptions and 0/1/2 nullable values remain unchanged. Context
-  help explains the construct without recommending an answer. All choices can
-  be revisited; upload/link/text nodes stay mounted across composer panels.
-- View plan/default passport entry opens the completed overview when the existing
-  saved-completion check passes; incomplete records still open their editable form.
-- Owner-requested evaluation rollback: the previous `renderRubricBlock`,
-  read-only ratings and feedback summary are restored together. No stored
-  responses, scale values or aggregation changes. Learning-plan paper explicitly
-  names the product type; all collection actions and current passport UI remain.
-- Feed and teacher feed share `LearnPathUI.feedHeader/feedNavigation` and the
-  existing `loadProjectsList` data subscription. Learning-plan covers link to
-  the same student profiles; native details reveal the same versioned goals.
-  Teacher approval/review actions retain their original owners. Tabs expose
-  pressed state and keep current selection. Drafts remain explicitly drafts;
-  sent status is display-only. No data writes are introduced by browsing.
-- Successful teacher submission shows “Sent to the teacher” as both a receipt
-  stamp and the completed send action. It also reveals the persistent passport
-  book tab at the right side. No sent state appears before persistence succeeds.
-  Editing returns the receipt to draft and enables send again after draft save.
-  The tablet reading column reserves space for the book tab; mobile uses the
-  compact bottom variant. Cover/name/seal are presentation only.
-- Completed passport overview: single article, project → goals → plan → target
-  scores. Editing actions still use the canonical form sections. Topic editing
-  is a labelled disclosure to keep the saved document readable. Compass links
-  to the plan; line animation never gates controls or saving and respects pause
-  and reduced motion. No new inputs or persistence paths.
-- Before the goals/plan flow is completed and sent, use “Set my goals and plan”
-  for entry. Do not show the persistent My Learning Passport tab or open a blank
-  passport overview. `LearnPathUI.hasPassport` owns this presentation check:
-  saved completion/submission plus three goals and complete plan actions. This
-  is a presentation rule, not an editing permission. Saved drafts reopen in the
-  form, while completed passports retain their overview and reminder.
-- Saved project ideas use `LearnPathUI.productLaunch` for Compass guidance.
-  The optional search opens a separate tab with only the product format in the
-  query; no student identity or personal topic is shared. Looking at examples is
-  not a prerequisite for opening the passport. Teacher-added formats get a
-  generic observation prompt. Existing answers remain untouched.
-- The approved Grade 6 planner/passport is rendered by `assets/planner.html`.
-  Its same-origin bridge only requests actions; the authenticated module in
-  `index.html` owns all Supabase reads/writes, student identity and permission
-  checks. Messages from any other origin/window are ignored. No credential or
-  session token is sent to the planner frame.
-- Draft changes are coalesced and serialized through the existing contract
-  update path. Submit flushes draft writes, validates goals/steps/percentages,
-  sets pending while keeping editing available, waits for successful persistence, then shows
-  the complete summary. Failures remain visible and never show a sent state.
-- The passport starts with Goals; no redundant project confirmation step.
-  Its persistent tab remains available during classroom activities. Grouping is
-  for collaboration; pending/approved status and legacy edit flags do not gate
-  the owner's edits. Editing an approved/submitted passport returns it to draft.
-- Existing callbacks and identifiers own persisted behavior. UI helper does not
-  import Firebase, issue requests, store answers, or write data.
-- Home map reads the same completion booleans as the existing cards. Resources
-  remain available independently. Passport access needs a chosen project, not grouping.
-- Classroom step timers do not block navigation or owner saves. Teacher-triggered
-  reflection forms remain available as before.
-- The project catalog keeps every active teacher-defined entry and ID.
-- Screen re-layout never resets responses or research records.
-- New Grade 6 goals are additive/versioned; unversioned contracts keep old goals.
-- Teacher targets remain percentages as stored. A 1–10 migration is out of scope.
-- Existing sign-in, role selection, upload, comment moderation, and deletion
-  policies stay in the original source. This visual patch does not redefine them.
-
-## Scope of inherited debt
-
-## Supabase transition (2026-10-27)
-- Active runtime now uses Supabase; existing path identifiers and UI form owners remain.
-- Browser role choice no longer grants access. The verified teacher Google account receives the server-owned teacher role; students require approval from Class Overview before accessing class records.
-- New account approvals reuse existing card/form/button/toast styles and remain keyboard-accessible.
-- Client roles have no direct data-table access. Database RPCs enforce ownership, enrollment, teacher-only approval and coin transactions. Project editing does not require a group or unlock.
-- Resetting active records archives the previous revision. Removing a post retains its private research file.
-- Backend acceptance and production limitations are recorded in SUPABASE-SETUP.md. Google OAuth and live upload still require account-level configuration and acceptance.
-The original application uses browser confirmation dialogs for destructive
-actions. This update does not change those actions or their authorization.
-Do not claim the visual patch is a security or end-to-end production audit.
-
-## Unit discovery and record exports (2026-10-28)
-- `renderStep1Screen` and the existing teacher `renderTUnit` own unit discovery. New word inputs are native labelled checkboxes; grammar options are native buttons with visible selection and post-submit disabled state.
-- Word choices save through the existing Supabase paths. Submission shows the unchecked words under “Words to learn” and saves their labels. Resubmission recomputes that list; reopening restores the last submitted list. All words selected produces a clear all-known message.
-- Grammar submission requires an answer to every question. The original selected option and question snapshot are retained; incorrect answers show their supplied option-specific explanation through the shared `LearnPathUI.grammarFeedback` helper. The learner's live answers are never filled by automated UI testing.
-- Teacher JPG processing retains preview-before-save behavior; a JPG up to 10 MB is reduced to at most 1100×1600 pixels before the existing unit save.
-- `sheet_events` captures changed persisted input records transactionally. Google Sheets files are grouped by form type, retain versions and deleted-record payloads, and use a private revocable export capability. Keys remain outside public source and Google credentials remain user-controlled.
-- Class Overview shows the observed Google acknowledgement, with an inactive/setup-needed state before the first successful sync. The local application working does not prove that Google files exist or that the live site has been deployed.
+# LearnPath UI contract
+
+## Compass workshop (2026-11-02)
+- The authored topic/format content owner is `compass-library.js`; `compass-prepared.js` owns local routing, short keyword bullets and one follow-up question. Inputs stay in tab memory; no model/API calls or automatic project choices.
+- Topic/product options show labels/icons only. The three retired formats (How-to guide, spoken Interview, Visual slide story) are hidden from new choices, including matching teacher extras; existing saved metadata remains readable/editable. Written interview stays available.
+- The “Ask me!” button focuses the typed chat. A separate dance wrapper leaves the approved 24-frame/3-second transparent sprite intact and respects pause, focus, hidden tabs and reduced motion. Further coverage/limits: `COMPASS-WORKSHOP-20261102.md`.
+
+## EK1/EK2 versioned student rubrics (2026-11-02)
+- `assets/rubric-v2.js` owns new self/peer wording: five categories, four ascending Steps, supplied stems/endings and performance labels. One question at a time, native radios, Compass and progress. Four-level options appear Step 4 first, then 3, 2, 1; stored indices and scoring remain unchanged. Five choices required before submission.
+- Record versions determine saved descriptors and scoring; legacy 6×3 and new 5×4 results have separate averages. Teacher rubric/Yes-No goal review stays at its existing version until a teacher instrument is supplied.
+- Research export includes the self/peer rubric version. Server shape checks retain existing actor/ownership rules. No old answer rewriting.
+- Unit questions 4/5 use the new owner-supplied scenarios. Existing submitted question snapshots remain authoritative for their feedback. Full details: `RUBRICS-20261102.md`.
+
+## Guided planning and feedback (2026-11-01)
+- `compass-prepared.js` owns topic/product guidance: typed learner input matched to authored keyword replies, with a short fallback when no keyword matches. No option checklist, model/API requests or persisted chat transcript. Actual topic/product selection remains deliberate in the main form.
+- `project-previews.js` owns previews across upload/gallery/profile; PPTX is parsed in the browser, PDF/native media use inline viewers, original links and explicit failure states remain. No external private-file viewer.
+- `navigation.js` owns same-document route history; planner-navigation publishes in-memory checkpoints. Back/Forward preserves form values and sharing file objects during the tab session. First-entry browser exit and ordinary logout remain available.
+- Feedback Summary contains teacher/peer aggregate rubric scores and Steps. Each optional aggregate criterion description shows its corresponding Step, while individual comment Step breakdowns remain omitted. A prominent 17px/48px written-feedback button reveals two columns with muted reviewer names; assessment values stay unchanged.
+- Plan suggestions are editable Step inputs with brief right-side Compass guidance. Pre-share questions are optional native checkboxes saved only with an actual new post.
+
+## Canonical UI Map
+| Capability | Canonical owner | Source of truth | Allowed variants | Verification |
+|---|---|---|---|---|
+| Select/Listbox | Existing native select in index.html | Existing forms | Native OS popup | DOM regression |
+| Form | Existing render and save functions in index.html | Original source + user notes | Student / teacher / reflection | Isolated mocked tests |
+| Scrollbar | assets/learnpath.css | DESIGN.md | Forced colors | CSS audit |
+| Toast | Existing toast() in index.html | Existing workflow | Success / guidance / failure | Mocked invalid-submit tests |
+| CRUD | Existing Firebase functions in index.html | Existing storage paths and schema | Same save and navigation destinations | Source comparison + mock tests |
+
+## Behavior ledger
+- Superseding correction: What feels hardest tips prefill Step 1/2/3, not a
+  separate My focus goals editor/list. Project-goal choices and counts exclude
+  difficulty tips. Existing plans containing any action are restored exactly,
+  including blank added rows. A new or wholly blank plan gets first-person,
+  editable suggestions and keeps Add another step. No bulk learner-data rewrite.
+- Focus goals prefill from saved weaknessTips and remain editable as three
+  labelled text inputs. The same persisted field owns all downstream class/share
+  reminders, snapshots and exports. No bulk rewrite of existing records. Owner
+  edits return sent passports to draft; original project goal validation remains.
+- The personal overview shows full project goals first and focus goals second,
+  each exactly once. The short-caption highlights and duplicate disclosure are gone.
+- Personal passport overview uses the approved two-page spread. Short goal
+  captions are presentation only; native “View all my goals” shows every full
+  original focus/project/custom sentence. Scores are the student's saved targets,
+  never inferred marks. Existing photo has initials fallback. Confirmed-save receipt,
+  section Edit and the authenticated save owner remain unchanged.
+- Share composer hides the fixed bottom navigation even after inline session
+  display updates; footer buttons and safe-area space stay reachable. The floating
+  passport tab is hidden while composing, then returns on other screens.
+- Notification buttons route to their stored project/feedback or resource screen.
+  Server-generated comment alerts include postId/commentId. Old alerts resolve
+  only a unique matching comment; missing targets get an honest fallback message.
+- The separate development/index.html notebook records local teacher review of
+  synthetic evidence. Approval generates a JSON change request, never a database
+  write, code patch or deployment. See development/UX-CONTRACT.md for its deliberate
+  isolated review-tool variant, validation, persistence and recoverable copies.
+- Saved project ideas default to a hydrated review; Edit opens one prefilled part,
+  Save changes returns to that review, and Cancel edit restores the saved choices.
+  Existing idea edits update only idea fields; goals, plan actions, targets, creation
+  and submission history stay intact. Opening the review performs no writes.
+  Continue to my plan uses the existing completed-passport presentation check.
+- Personal and class passports use compact paper geometry, with no content clipping.
+  Class-plan goals remain accessible through native disclosure. A normal three-action
+  plan fits one landscape-tablet view; long content grows naturally rather than truncating.
+- A classmate's reflection is labelled with the author's escaped display name.
+  Expanded teacher/classmate feedback uses original peer criterion descriptors.
+  Multiple-response averages are labelled as the closest description; numeric scoring
+  and all stored values remain unchanged.
+- Peer feedback shares one-question progress/Compass guidance, followed by a final
+  written-feedback panel. Back and closing/reopening the form preserve current choices
+  and written text. The original save action and nullable rubric values stay unchanged.
+- Teacher-only personal goal check: Yes/No for each selected project/custom goal,
+  separate from the six rubric values. New posts snapshot goal content at sharing;
+  historical posts use a labelled contract-at-review snapshot. Teacher comments
+  retain the exact goal text/IDs and boolean response. Students see read-only
+  teacher feedback; peer forms have no goal-rating controls. Server comment rules
+  deny `personalGoalReview` for students, including forged teacher flags.
+  Existing teacher-evaluation export captures the full nested review payload.
+- Share composer reads the current learner contract; all three saved focus tips
+  become prepared questions in the right-side `assets/share-guide.js` guide. No
+  project-goal carousel or hidden third tip. Missing/error
+  states remain honest and do not block sharing. This guide never grades or writes.
+- One-criterion rubric navigation is shared by self/peer/teacher forms. Original
+  ordering, Step descriptions and 0/1/2 nullable values remain unchanged. Context
+  help explains the construct without recommending an answer. All choices can
+  be revisited; upload/link/text nodes stay mounted across composer panels.
+- View plan/default passport entry opens the completed overview when the existing
+  saved-completion check passes; incomplete records still open their editable form.
+- Owner-requested evaluation rollback: the previous `renderRubricBlock`,
+  read-only ratings and feedback summary are restored together. No stored
+  responses, scale values or aggregation changes. Learning-plan paper explicitly
+  names the product type; all collection actions and current passport UI remain.
+- Feed and teacher feed share `LearnPathUI.feedHeader/feedNavigation` and the
+  existing `loadProjectsList` data subscription. Learning-plan covers link to
+  the same student profiles; native details reveal the same versioned goals.
+  Teacher approval/review actions retain their original owners. Tabs expose
+  pressed state and keep current selection. Drafts remain explicitly drafts;
+  sent status is display-only. No data writes are introduced by browsing.
+- Successful teacher submission shows “Sent to the teacher” as both a receipt
+  stamp and the completed send action. It also reveals the persistent passport
+  book tab at the right side. No sent state appears before persistence succeeds.
+  Editing returns the receipt to draft and enables send again after draft save.
+  The tablet reading column reserves space for the book tab; mobile uses the
+  compact bottom variant. Cover/name/seal are presentation only.
+- Completed passport overview: single article, project → goals → plan → target
+  scores. Editing actions still use the canonical form sections. Topic editing
+  is a labelled disclosure to keep the saved document readable. Compass links
+  to the plan; line animation never gates controls or saving and respects pause
+  and reduced motion. No new inputs or persistence paths.
+- Before the goals/plan flow is completed and sent, use “Set my goals and plan”
+  for entry. Do not show the persistent My Learning Passport tab or open a blank
+  passport overview. `LearnPathUI.hasPassport` owns this presentation check:
+  saved completion/submission plus three goals and complete plan actions. This
+  is a presentation rule, not an editing permission. Saved drafts reopen in the
+  form, while completed passports retain their overview and reminder.
+- Saved project ideas use `LearnPathUI.productLaunch` for Compass guidance.
+  The optional search opens a separate tab with only the product format in the
+  query; no student identity or personal topic is shared. Looking at examples is
+  not a prerequisite for opening the passport. Teacher-added formats get a
+  generic observation prompt. Existing answers remain untouched.
+- The approved Grade 6 planner/passport is rendered by `assets/planner.html`.
+  Its same-origin bridge only requests actions; the authenticated module in
+  `index.html` owns all Supabase reads/writes, student identity and permission
+  checks. Messages from any other origin/window are ignored. No credential or
+  session token is sent to the planner frame.
+- Draft changes are coalesced and serialized through the existing contract
+  update path. Submit flushes draft writes, validates goals/steps/percentages,
+  sets pending while keeping editing available, waits for successful persistence, then shows
+  the complete summary. Failures remain visible and never show a sent state.
+- The passport starts with Goals; no redundant project confirmation step.
+  Its persistent tab remains available during classroom activities. Grouping is
+  for collaboration; pending/approved status and legacy edit flags do not gate
+  the owner's edits. Editing an approved/submitted passport returns it to draft.
+- Existing callbacks and identifiers own persisted behavior. UI helper does not
+  import Firebase, issue requests, store answers, or write data.
+- Home map reads the same completion booleans as the existing cards. Resources
+  remain available independently. Passport access needs a chosen project, not grouping.
+- Classroom step timers do not block navigation or owner saves. Teacher-triggered
+  reflection forms remain available as before.
+- The project catalog keeps every active teacher-defined entry and ID.
+- Screen re-layout never resets responses or research records.
+- New Grade 6 goals are additive/versioned; unversioned contracts keep old goals.
+- Teacher targets remain percentages as stored. A 1–10 migration is out of scope.
+- Existing sign-in, role selection, upload, comment moderation, and deletion
+  policies stay in the original source. This visual patch does not redefine them.
+
+## Scope of inherited debt
+
+## Supabase transition (2026-10-27)
+- Active runtime now uses Supabase; existing path identifiers and UI form owners remain.
+- Browser role choice no longer grants access. The verified teacher Google account receives the server-owned teacher role; students require approval from Class Overview before accessing class records.
+- New account approvals reuse existing card/form/button/toast styles and remain keyboard-accessible.
+- Client roles have no direct data-table access. Database RPCs enforce ownership, enrollment, teacher-only approval and coin transactions. Project editing does not require a group or unlock.
+- Resetting active records archives the previous revision. Removing a post retains its private research file.
+- Backend acceptance and production limitations are recorded in SUPABASE-SETUP.md. Google OAuth and live upload still require account-level configuration and acceptance.
+The original application uses browser confirmation dialogs for destructive
+actions. This update does not change those actions or their authorization.
+Do not claim the visual patch is a security or end-to-end production audit.
+
+## Unit discovery and record exports (2026-10-28)
+- `renderStep1Screen` and the existing teacher `renderTUnit` own unit discovery. New word inputs are native labelled checkboxes; grammar options are native buttons with visible selection and post-submit disabled state.
+- Word choices save through the existing Supabase paths. Submission shows the unchecked words under “Words to learn” and saves their labels. Resubmission recomputes that list; reopening restores the last submitted list. All words selected produces a clear all-known message.
+- Grammar submission requires an answer to every question. The original selected option and question snapshot are retained; incorrect answers show their supplied option-specific explanation through the shared `LearnPathUI.grammarFeedback` helper. The learner's live answers are never filled by automated UI testing.
+- Teacher JPG processing retains preview-before-save behavior; a JPG up to 10 MB is reduced to at most 1100×1600 pixels before the existing unit save.
+- `sheet_events` captures changed persisted input records transactionally. Google Sheets files are grouped by form type, retain versions and deleted-record payloads, and use a private revocable export capability. Keys remain outside public source and Google credentials remain user-controlled.
+- Class Overview shows the observed Google acknowledgement, with an inactive/setup-needed state before the first successful sync. The local application working does not prove that Google files exist or that the live site has been deployed.
