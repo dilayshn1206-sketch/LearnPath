@@ -164,3 +164,6 @@ Do not claim the visual patch is a security or end-to-end production audit.
 - Teacher JPG processing retains preview-before-save behavior; a JPG up to 10 MB is reduced to at most 1100×1600 pixels before the existing unit save.
 - `sheet_events` captures changed persisted input records transactionally. Google Sheets files are grouped by form type, retain versions and deleted-record payloads, and use a private revocable export capability. Keys remain outside public source and Google credentials remain user-controlled.
 - Class Overview shows the observed Google acknowledgement, with an inactive/setup-needed state before the first successful sync. The local application working does not prove that Google files exist or that the live site has been deployed.
+
+## Owner review: content-only release (2026-11-05)
+Compact home/resources/profile and grammar question layouts, explicit draft/final gallery stages, two-bullet prepared guidance, sentence-completion goals with multiple selectable custom goals, readable equal Step badges and sparse keyword emphasis. Preserve live animation assets, animation logic, rubric values/version, submitted snapshots, map art and learner records. Animation experiments and local review tooling are excluded. Custom goals remain newline-delimited in goalsOtherText; minimum-three validation counts distinct real goal lines.
