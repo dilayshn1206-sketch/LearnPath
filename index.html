@@ -254,7 +254,7 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
 .rub-sentence{font-size:13px}
 .rub-chevron{background:none;border:none;color:var(--th);cursor:pointer;font-size:12px;padding:4px 6px;flex-shrink:0}
 </style>
-<link rel="stylesheet" href="assets/learnpath.css?v=20261102-2">
+<link rel="stylesheet" href="assets/learnpath.css?v=20261105-1">
 </head>
 <body>
 
@@ -310,11 +310,11 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
   <div class="modal-card" id="result-popup-card" style="text-align:center;padding:26px 20px"></div>
 </div>
 
-<script src="assets/learnpath-ui.js?v=20261102-2"></script>
-<script src="assets/rubric-v2.js?v=20261102-2"></script><script src="assets/share-guide.js?v=20261102-2"></script><script src="assets/vendor/jszip-3.10.1.min.js"></script><script src="assets/project-previews.js?v=20261102-2"></script>
-<script src="assets/navigation.js?v=20261102-2"></script>
+<script src="assets/learnpath-ui.js?v=20261105-1"></script>
+<script src="assets/rubric-v2.js?v=20261105-1"></script><script src="assets/share-guide.js?v=20261105-1"></script><script src="assets/vendor/jszip-3.10.1.min.js"></script><script src="assets/project-previews.js?v=20261105-1"></script>
+<script src="assets/navigation.js?v=20261105-1"></script>
 <script type="module">
-import {auth,db,storage,rpc,ref,set,get,push,onValue,update,remove,sref,uploadBytesResumable,getDownloadURL,deleteObject,onAuthStateChanged,signInWithPopup,signOut} from './assets/supabase-backend.js?v=20261102-2';
+import {auth,db,storage,rpc,ref,set,get,push,onValue,update,remove,sref,uploadBytesResumable,getDownloadURL,deleteObject,onAuthStateChanged,signInWithPopup,signOut} from './assets/supabase-backend.js?v=20261105-1';
 const prov={};
 let CU=null,UP=null;
 let myGid=null,myGname=null,userCoins=0;
@@ -491,6 +491,7 @@ function customGoalText(c){
   var core=t.replace(/^i will/i,"").replace(/[.\u2026\-_\s]/g,"");
   return core.length>0?t:"";
 }
+function customGoalTexts(c){return [...new Set(String(c&&c.goalsOtherText||'').split(/\r?\n/).map(function(t){return t.trim();}).filter(function(t){return /[\p{L}\p{N}]/u.test(t.replace(/^i will/i,'').replace(/[.\u2026\-_\s]/g,''));}))];}
 // which goals are pre-recommended (pre-checked) per category
 const GOAL_RECOMMEND={
   written:["unitWords","organize","grammar","tenSentences","evidence","spelling","easyUnderstand","workAtHome","topicImpact","structure"],
@@ -885,6 +886,7 @@ async function applySessionLock(){
 // ── TEACHER-PUSHED POPUP: Stage 1, Lesson Reflection ──
 async function renderEval1Modal(){
   var card=document.getElementById("eval-modal-card");
+  if(card)card.classList.remove("lp-project-evaluation");
   if(!card)return;
   var sessionKey=window._liveSession.updatedAt;
   var snap=await get(ref(db,"lessonReflections/"+CU.uid));
@@ -925,6 +927,7 @@ window.submitEval1=async function(){
 // ── TEACHER-PUSHED POPUP: Stage 2, Project Evaluation ──
 async function renderEval2Modal(){
   var card=document.getElementById("eval-modal-card");
+  if(card)card.classList.add("lp-project-evaluation");
   if(!card)return;
   var sessionKey=window._liveSession.updatedAt;
   var snap=await get(ref(db,"contracts/"+CU.uid));
@@ -953,7 +956,7 @@ async function renderEval2Modal(){
   }
 
   var html='<div style="font-size:16px;font-weight:700;margin-bottom:2px">&#127942; Project Evaluation</div>';
-  html+='<div style="font-size:12px;color:var(--tm);margin-bottom:14px">Let\'s see how much you remember, then rate your project — 1 (not really) to 3 (yes, definitely).</div>';
+  html+='<div style="font-size:12px;color:var(--tm);margin-bottom:14px">Check what you know, then reflect: 1 No · 2 Maybe · 3 Yes.</div>';
 
   if(wordList.length){
     html+='<div class="eval2-item"><div style="font-size:13px;font-weight:700;margin-bottom:6px">&#128214; Unit Words — tick what you know now</div>';
@@ -993,7 +996,7 @@ async function renderEval2Modal(){
   if(c.goals||customGoalText(c)){
     html+='<div style="font-size:11px;color:var(--tm);margin-bottom:6px;line-height:1.6">';
     goalItemsFor(c).forEach(function(g){if(c.goals&&c.goals[g.id])html+="&#9989; "+esc(g.text)+"<br>";});
-    if(customGoalText(c))html+="&#9989; "+esc(customGoalText(c))+"<br>";
+    customGoalTexts(c).forEach(function(t){html+="&#9989; "+esc(t)+"<br>";});
     html+='</div>';
   }
   html+=eval2ScoreButtons("achievedGoals");
@@ -1003,7 +1006,7 @@ async function renderEval2Modal(){
   html+=eval2ScoreButtons("gotScore");
   html+='</div>';
 
-  html+='<button class="btn btg btf" onclick="submitEval2()">Submit</button>';
+  html+='<button class="btn btg" onclick="submitEval2()">Submit</button>';
   card.innerHTML=html;
 }
 window.toggleEval2Word=function(idx){
@@ -1021,7 +1024,7 @@ function eval2ScoreButtons(key){
   var val=(window._eval2Scores||{})[key];
   var html='<div style="display:flex;gap:6px;margin-bottom:4px">';
   [1,2,3].forEach(function(n){
-    html+='<button type="button" class="btn '+(val===n?"btp":"bts")+'" style="flex:1;padding:8px 0" onclick="setEval2Score(\''+key+'\','+n+')">'+n+'</button>';
+    html+='<button type="button" class="btn '+(val===n?"btp":"bts")+'" style="flex:1;padding:8px 0" onclick="setEval2Score(\''+key+'\','+n+')">'+n+' '+({1:'No',2:'Maybe',3:'Yes'})[n]+'</button>';
   });
   html+='</div>';
   return html;
@@ -1111,7 +1114,7 @@ async function renderHome(){
   var step2Sub=hasProduct?"Your project: "+esc(contractData.productType)+" — tap to change your idea":"Take a short quiz to find your project idea";
   var step2Click="startQuiz()";
   html+='<button type="button" class="step-card'+(hasProduct?" done":"")+'" onclick="'+step2Click+'">';
-  html+='<div class="step-num">'+(hasProduct?"✓":"2")+'</div><div style="flex:1"><div class="step-title">Get Ideas — Find Your Project</div>';
+  html+='<div class="step-num">'+(hasProduct?"✓":"2")+'</div><div style="flex:1"><div class="step-title">Find Your Project</div>';
   html+='<div class="step-sub">'+step2Sub+'</div></div></button>';
 
   html+='<button type="button" class="step-card'+(step3Unlocked?(step3Done?" done":""):" locked")+'" onclick="'+(step3Unlocked?"renderStep3Screen()":"toast('Choose a project idea first.')")+'">';
@@ -1133,11 +1136,11 @@ window.renderResourcesScreen=async function(){
   var mc=document.getElementById("mc");
   var html='<button class="btn bts mb8" onclick="go(\'home\')">&#8592; Back to Home</button>';
   html+=pageHeaderHTML("&#128279;","Choose Resources","Helpful links for your project","var(--a)","#C67800");
-  html+='<div class="card"><div style="font-size:13px;font-weight:700;margin-bottom:4px">&#128161; I have a useful link</div>';
+  html+='<div class="card lp-resource-form"><div style="font-size:13px;font-weight:700;margin-bottom:4px">&#128161; I have a useful link</div>';
   html+='<div style="font-size:12px;color:var(--tm);margin-bottom:8px">If you have a useful website, add it here. Your teacher will approve it before everyone can see it.</div>';
-  html+='<div class="fg"><label class="fl">Title</label><input class="fi" id="res-sugg-title" placeholder="e.g. BBC Bitesize"></div>';
-  html+='<div class="fg"><label class="fl">Link</label><input class="fi" id="res-sugg-url" placeholder="https://..."></div>';
-  html+='<button class="btn btp btf" onclick="suggestResource()">Submit for Approval</button></div>';
+  html+='<div class="fg"><label class="fl" for="res-sugg-title">Title</label><input class="fi" id="res-sugg-title" placeholder="e.g. BBC Bitesize"></div>';
+  html+='<div class="fg"><label class="fl" for="res-sugg-url">Link</label><input class="fi" id="res-sugg-url" placeholder="https://..."></div>';
+  html+='<button class="btn btp" onclick="suggestResource()">Submit for Approval</button></div>';
 
   var snap=await get(ref(db,"resources"));
   var list=[];
@@ -1174,7 +1177,7 @@ function renderFeed(){
   var html=LearnPathUI.feedHeader(false)+LearnPathUI.feedNavigation(window._feedTab);
   html+='<div id="feed-tab-plans" style="display:'+(window._feedTab==="plans"?"block":"none")+'"><div id="projects-list" class="lp-feed-plans"><div class="loading">Loading...</div></div></div>';
   html+='<div id="feed-tab-posts" style="display:'+(window._feedTab==="posts"?"block":"none")+'">';
-  html+='<button class="btn btp btf mb8" onclick="openNewPost()">+ Share Your Work</button>';
+  html+='<div class="lp-gallery-toolbar"><button class="btn btp mb8" onclick="openNewPost()">+ Share Your Work</button>'+galleryStageNavigation()+'</div>';
   html+='<div id="feed-container"><div class="loading">Loading...</div></div></div>';
   mc.innerHTML=html;
   loadProjectsList();
@@ -1190,6 +1193,7 @@ window.switchFeedTab=function(tab){
   btns.forEach(function(b,i){var selected=(i===0&&tab==="plans")||(i===1&&tab==="posts");b.classList.toggle("act",selected);b.setAttribute("aria-pressed",String(selected));});
 };
 
+function galleryStageNavigation(){return `<nav aria-label="Project stage" class="lp-gallery-stages"><button type="button" data-project-stage="draft" onclick="filterProjectStage('draft')">Draft projects</button><button type="button" data-project-stage="final" onclick="filterProjectStage('final')">Final projects</button></nav>`;}
 function loadProjectsList(teacherMode){
   onValue(ref(db,"contracts"),function(snap){
     var el=document.getElementById("projects-list");if(!el)return;
@@ -1203,7 +1207,7 @@ function loadProjectsList(teacherMode){
       var statusLabel=approved?"Approved":sent?"Sent to the teacher":"Plan in progress";
       var statusClass=approved?"approved":sent?"sent":"draft";
       var goals=d.goals||{},chosen=goalItemsFor(d).filter(function(g){return goals[g.id];});
-      var otherGoal=customGoalText(d),totalGoals=chosen.length+(otherGoal?1:0);
+      var otherGoal=customGoalText(d),totalGoals=chosen.length+customGoalTexts(d).length;
       html+='<article class="project-card lp-feed-passport"><header class="lp-feed-passport-cover"><div class="lp-feed-passport-kicker">'+LearnPathUI.feedIcon('passport')+'<span>'+(LearnPathUI.hasPassport(d)?'Learning passport':'Project plan')+'</span></div>';
       html+='<button type="button" class="lp-feed-author" onclick="viewProf(\''+esc(d.studentId||'')+'\')">';
       if(d.studentPhoto)html+='<img src="'+esc(d.studentPhoto)+'" alt="" class="post-av">';
@@ -1216,7 +1220,7 @@ function loadProjectsList(teacherMode){
         d.planSteps.forEach(function(step){if(step&&step.trim())html+='<li>'+esc(step)+'</li>';});html+='</ol></section>';
       }
       html+='<details class="lp-feed-goals"><summary>'+LearnPathUI.feedIcon('goals')+'<span>My goals</span><span class="lp-feed-count">'+totalGoals+'</span></summary><div>';
-      if(chosen.length||otherGoal)html+='<h3>Project goals</h3><ul>'+chosen.map(function(g){return '<li>'+esc(g.text)+'</li>';}).join('')+(otherGoal?'<li>'+esc(otherGoal)+'</li>':'')+'</ul>';
+      if(chosen.length||otherGoal)html+='<h3>Project goals</h3><ul>'+chosen.map(function(g){return '<li>'+esc(g.text)+'</li>';}).join('')+customGoalTexts(d).map(function(g){return '<li>'+esc(g)+'</li>';}).join('')+'</ul>';
       if(!totalGoals)html+='<p>Goals are still being planned.</p>';
       html+='</div></details>';
       var hasTarget=function(v){return v!==undefined&&v!==null&&v!=='';};
@@ -1237,12 +1241,13 @@ function loadFeed(){
     posts.sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);});
     if(!posts.length){container.innerHTML='<section class="lp-collection-empty">'+LearnPathUI.feedIcon('gallery')+'<h2>A space for our creations</h2><p>Shared projects will appear here. Share your work when you are ready.</p></section>';return;}
     var html="";
-    posts.forEach(function(post){html+=buildPostHTML(post);});
-    container.innerHTML=html;
+    ['draft','final'].forEach(function(stage){var group=posts.filter(function(post){return (post.postType==='final'?'final':'draft')===stage;});html+='<section class="lp-gallery-stage" data-gallery-stage="'+stage+'"><h2>'+(stage==='final'?'Final projects':'Draft projects')+' <small>'+group.length+'</small></h2>'+group.map(buildPostHTML).join('')+(!group.length?'<p class="lp-grade-note">No '+stage+' projects yet.</p>':'')+'</section>';});
+    container.innerHTML=html;filterProjectStage(window._galleryStage||'draft');
     if(window._notificationPostId){revealNotificationPost(window._notificationPostId);window._notificationPostId=null;}
   });
 }
 
+window.filterProjectStage=function(stage){window._galleryStage=stage;document.querySelectorAll('[data-gallery-stage]').forEach(function(el){el.hidden=el.dataset.galleryStage!==stage;});document.querySelectorAll('[data-project-stage]').forEach(function(el){el.setAttribute('aria-pressed',String(el.dataset.projectStage===stage));});};
 function recordRubric(record,self){
  var version=record[self?'selfRubricVersion':'peerRubricVersion'];
  if(version===LearnPathRubrics.version)return self?SELF_RUBRIC:PEER_RUBRIC;
@@ -1344,7 +1349,7 @@ function buildPostHTML(post){
     html+='<div style="font-size:12px;font-weight:600;margin-bottom:8px;color:var(--tm)">Leave feedback:</div>';
     html+='<div id="cm-rub-'+post.id+'"></div>';
     html+='<section id="cm-written-'+post.id+'" class="lp-peer-written" hidden><p class="lp-rubric-progress">Written feedback · final step</p><h3>Help '+esc(post.name||'your classmate')+' take the next step</h3><div class="lp-share-written"><div class="fg"><label class="fl" for="cm-well-'+post.id+'">One thing they did well</label><textarea class="fta" id="cm-well-'+post.id+'" placeholder="I …" style="min-height:90px"></textarea></div>';
-    html+='<div class="fg"><label class="fl" for="cm-improve-'+post.id+'">Their next step</label><textarea class="fta" id="cm-improve-'+post.id+'" placeholder="Next time, they can …" style="min-height:90px"></textarea></div></div><div class="lp-rubric-navigation"><button type="button" class="btn bts" onclick="peerFeedbackStage(\''+post.id+'\',false)">Back to my choices</button><button type="button" class="btn btg" onclick="submitComment(\''+post.id+'\',\''+esc(post.uid)+'\')">Submit Comment</button></div></section>';
+    html+='<div class="fg"><label class="fl" for="cm-improve-'+post.id+'">Next time, you could…</label><textarea class="fta" id="cm-improve-'+post.id+'" placeholder="Next time, you could…" style="min-height:90px"></textarea></div></div><div class="lp-rubric-navigation"><button type="button" class="btn bts" onclick="peerFeedbackStage(\''+post.id+'\',false)">Back to my choices</button><button type="button" class="btn btg" onclick="submitComment(\''+post.id+'\',\''+esc(post.uid)+'\')">Submit Comment</button></div></section>';
     html+='</div>';
   }
   html+='</div>';
@@ -1381,7 +1386,7 @@ function renderRubricBlock(containerId,rubric,values,storeKey){
     var item=rubric[index];html+='<fieldset class="rubarea2 lp-single-question"><legend><span>'+esc(item.area)+'</span><strong tabindex="-1" class="lp-rubric-heading">'+esc(LearnPathShare.question(index,rubric===SELF_RUBRIC,rubric))+'</strong></legend>'+(item.stem?'<p class="lp-rubric-stem" id="rubric-stem-'+storeKey+'">'+esc(item.stem)+'</p>':'');
     var displayLevels=item.levels.map(function(level,li){return {level:level,index:li};});if(item.levels.length===4)displayLevels.reverse();
     displayLevels.forEach(function(entry){var level=entry.level,li=entry.index,sel=values[index]===li,id='rubric-'+storeKey+'-'+index+'-'+li;
-      html+='<label class="rublevel-row'+(sel?' sel':'')+'" for="'+id+'"><input type="radio" id="'+id+'" name="rubric-'+storeKey+'-'+index+'" '+(item.stem?'aria-describedby="rubric-stem-'+storeKey+'" ':'')+(sel?'checked ':'')+'onchange="pickRubricLevel(\''+storeKey+'\','+index+','+li+')"><span class="rub-pill tier'+li+'">'+TIER_LABELS[li]+(item.stem?'<small>'+LearnPathRubrics.performance[li]+'</small>':'')+'</span><span class="rub-sentence">'+esc(level.label)+'</span></label>';
+      html+='<label class="rublevel-row'+(sel?' sel':'')+'" for="'+id+'"><input type="radio" id="'+id+'" name="rubric-'+storeKey+'-'+index+'" '+(item.stem?'aria-describedby="rubric-stem-'+storeKey+'" ':'')+(sel?'checked ':'')+'onchange="pickRubricLevel(\''+storeKey+'\','+index+','+li+')"><span class="rub-pill tier'+li+'">'+TIER_LABELS[li]+(item.stem?'<small>'+LearnPathRubrics.performance[li]+'</small>':'')+'</span><span class="rub-sentence">'+LearnPathRubrics.emphasize(level.label,esc)+'</span></label>';
     });html+='</fieldset>';
   }
   if(!inShare)html+='<div class="lp-rubric-navigation"><button type="button" class="btn bts" '+(index===0&&!store.review?'disabled ':'')+'onclick="rubricGo(\''+storeKey+'\','+Math.max(0,index-1)+')">Back</button>'+(index<rubric.length-1&&!store.review?'<button type="button" class="btn btp" onclick="rubricGo(\''+storeKey+'\','+(index+1)+')">Next →</button>':store.peerPost?'<button type="button" class="btn btp" onclick="peerFeedbackStage(\''+store.peerPost+'\',true)">Continue to written feedback →</button>':'<button type="button" class="btn btp" onclick="rubricReview(\''+storeKey+'\')">Review choices</button>')+'</div>';
@@ -1401,10 +1406,11 @@ window.rubricReview=function(key){var store=window._rubricStores[key];if(!store)
 function shareGoalSnapshot(c){var out={};['grade','goalVersion','topic','productType','category','weakness','weaknessTips','goals','goalsOtherText','planSteps','createdAt','submittedAt'].forEach(function(k){if(c[k]!==undefined)out[k]=c[k];});return JSON.parse(JSON.stringify(out));}
 function refreshShareCompass(){
   var state=window._shareState,el=document.getElementById('lp-share-compass');if(!state||!el)return;
-  var store=window._rubricStores.newpost;
-  el.innerHTML=state.stage===1?LearnPathShare.criterion(store.index||0,store.rubric[store.index||0].area,store.rubric):LearnPathShare.goals(state.contract,state.goals,state.goalPage,state.error,state.focusChecks);
-  el.querySelectorAll('[data-focus-check]').forEach(function(input){input.onchange=function(){state.focusChecks[Number(input.dataset.focusCheck)]=input.checked;};});
+  el.innerHTML=LearnPathShare.goals(state.contract,state.goals,state.goalPage,state.error,state.focusChecks);
+  el.querySelectorAll('[data-focus-check]').forEach(function(input){input.onchange=function(){state.focusChecks[Number(input.dataset.focusCheck)]=input.dataset.focusValue==='true';refreshShareCompass();};});
+  var send=document.getElementById('np-share-btn');if(send)send.disabled=!!window._newPostUploading||!shareFocusComplete();
 }
+function shareFocusComplete(){var s=window._shareState;return !!s&&!s.error&&Array.isArray(s.contract?.weaknessTips)&&s.contract.weaknessTips.length===3&&s.focusChecks.length===3&&s.focusChecks.every(function(v){return typeof v==='boolean';});}
 window.setShareStage=function(stage){
   var state=window._shareState;if(!state)return;LearnPathNavigation.share(stage,window._rubricStores.newpost.index||0);state.stage=Math.max(0,Math.min(stage,2));document.body.dataset.sharingStage=String(state.stage);
   document.querySelectorAll('[data-share-panel]').forEach(function(panel){panel.hidden=Number(panel.dataset.sharePanel)!==state.stage;});
@@ -1424,13 +1430,13 @@ window.openNewPost=async function(){
   var c=null,error=false;try{var snap=await get(ref(db,'contracts/'+CU.uid));c=snap.exists()?snap.val():null;}catch(e){error=true;}
   if(window._currentScreen!=='share')return;
   if(!error)contractData=c;
-  var goals=c?goalItemsFor(c).filter(function(g){return c.goals&&c.goals[g.id];}):[],custom=c&&customGoalText(c);if(custom)goals.push({id:'custom',text:custom});
-  window._shareState={stage:0,goalPage:0,contract:c,goals:goals,error:error,focusChecks:(c&&c.weaknessTips||[]).map(function(){return false;})};window._newPostFile=null;
+  var goals=c?goalItemsFor(c).filter(function(g){return c.goals&&c.goals[g.id];}):[],custom=customGoalTexts(c);custom.forEach(function(text,i){goals.push({id:i?'custom-'+i:'custom',text:text});});
+  window._shareState={stage:0,goalPage:0,contract:c,goals:goals,error:error,focusChecks:(c&&c.weaknessTips||[]).map(function(){return null;})};window._newPostFile=null;
   var html='<header class="lp-share-header"><div><h1>Share your work</h1><p>A quick check with Compass, then share your project.</p></div><button type="button" class="btn bts" onclick="go(\'feed\')">Back to gallery</button></header><nav class="lp-share-stages" aria-label="Sharing steps">';
   ['Your work','Self-reflection','Share'].forEach(function(label,i){html+='<button type="button" data-share-stage="'+i+'" onclick="setShareStage('+i+')"><span>'+(i+1)+'</span>'+label+'</button>';});html+='</nav>';
-  html+='<div class="lp-share-layout"><section class="card lp-share-paper"><section data-share-panel="0"><h2>What are you sharing?</h2><div class="fg"><label class="fl" for="np-title">Title of this piece of work</label><input class="fi" id="np-title" placeholder="Give your project a title"></div><div class="fg"><label class="fl" for="np-link">Link to your work</label><input class="fi" id="np-link" placeholder="Google Drive / YouTube / Canva…"></div><details class="lp-share-link-help"><summary>How to copy a link</summary><p>Google Drive → Share → Copy link · YouTube → Share · Canva → Share → Copy link</p></details><div class="fg"><label class="fl" for="np-file">Or attach a photo, video, PDF or audio file (up to 100 MB)</label><input type="file" class="fi" id="np-file" onchange="attachNewPostFile(this)"><div id="np-file-preview"></div></div></section>';
-  html+='<section data-share-panel="1" hidden><h2>Self-reflection</h2><p class="lp-rubric-instruction">'+esc(LearnPathRubrics.selfInstruction)+'</p><div id="np-rub-rows"></div></section><section data-share-panel="2" hidden><h2>One last look</h2><p id="np-work-summary"></p><div class="lp-share-written"><div class="fg"><label class="fl" for="np-well">One thing I did well *</label><textarea class="fta" id="np-well" placeholder="I …"></textarea></div><div class="fg"><label class="fl" for="np-improve">My next step *</label><textarea class="fta" id="np-improve" placeholder="Next time, I will …"></textarea></div></div></section>';
-  html+='<footer class="lp-share-actions"><button type="button" class="btn bts" id="np-back" onclick="shareBack()">Back</button><button type="button" class="btn btp" id="np-continue" onclick="shareNext()">Continue →</button><button type="button" class="btn btp" id="np-share-btn" onclick="submitPost()" hidden>Share my work</button></footer></section><aside id="lp-share-compass" class="lp-share-compass" aria-label="Compass project guide"></aside></div>';
+  html+='<div class="lp-share-layout"><section class="card lp-share-paper"><section data-share-panel="0"><h2>What are you sharing?</h2><div class="fg"><label class="fl" for="np-post-type">Project stage</label><select class="fi" id="np-post-type"><option value="draft">Draft project</option><option value="final">Final project</option></select></div><div class="fg"><label class="fl" for="np-title">Title of this piece of work</label><input class="fi" id="np-title" placeholder="Give your project a title"></div><div class="fg"><label class="fl" for="np-link">Link to your work</label><input class="fi" id="np-link" placeholder="Google Drive / YouTube / Canva…"></div><details class="lp-share-link-help"><summary>How to copy a link</summary><p>Google Drive → Share → Copy link · YouTube → Share · Canva → Share → Copy link</p></details><div class="fg"><label class="fl" for="np-file">Or attach a photo, video, PDF or audio file (up to 100 MB)</label><input type="file" class="fi" id="np-file" onchange="attachNewPostFile(this)"><div id="np-file-preview"></div></div></section>';
+  html+='<section data-share-panel="1" hidden><h2>Self-reflection</h2><div id="np-rub-rows"></div></section><section data-share-panel="2" hidden><h2>One last look</h2><p id="np-work-summary"></p><div class="lp-share-written"><div class="fg"><label class="fl" for="np-well">One thing I did well *</label><textarea class="fta" id="np-well" placeholder="I …"></textarea></div><div class="fg"><label class="fl" for="np-improve">My next step *</label><textarea class="fta" id="np-improve" placeholder="Next time, I will …"></textarea></div></div></section>';
+  html+='<footer class="lp-share-actions"><button type="button" class="btn bts" id="np-back" onclick="shareBack()">Back</button><details class="lp-self-help"><summary>How to answer</summary><div class="lp-self-help-copy"><p>'+esc(LearnPathRubrics.selfInstruction)+'</p><p lang="tr">'+esc(LearnPathRubrics.selfInstructionTR)+'</p></div></details><button type="button" class="btn btp" id="np-continue" onclick="shareNext()">Continue →</button><button type="button" class="btn btp" id="np-share-btn" onclick="submitPost()" hidden>Share my work</button></footer></section><aside id="lp-share-compass" class="lp-share-compass" aria-label="Compass project guide"></aside></div>';
   mc.innerHTML=html;window._rubricStores.newpost={values:new Array(SELF_RUBRIC.length).fill(null),rubric:SELF_RUBRIC,containerId:'np-rub-rows',index:0};
   renderRubricBlock('np-rub-rows',SELF_RUBRIC,window._rubricStores.newpost.values,'newpost');setShareStage(0);window.scrollTo({top:0,behavior:'auto'});
 };
@@ -1455,7 +1461,7 @@ window.attachNewPostFile=function(input){
   },function(err){
     console.error("upload failed:",err);
     window._newPostUploading=false;
-    if(shareBtn)shareBtn.disabled=false;
+    refreshShareCompass();
     var msg=(err&&err.code==="storage/unauthorized")?"Upload blocked — the teacher needs to allow file storage (see storage rules).":"Upload failed. Please try again or use a link instead.";
     if(prev)prev.innerHTML='<div style="font-size:12px;color:var(--c)">'+esc(msg)+'</div>';
     toast(msg);
@@ -1465,10 +1471,10 @@ window.attachNewPostFile=function(input){
       var url=await getDownloadURL(task.snapshot.ref);
       window._newPostFile={url:url,name:file.name,type:file.type,path:path};
       window._newPostUploading=false;
-      if(shareBtn)shareBtn.disabled=false;
+      refreshShareCompass();
       if(prev)prev.innerHTML=filePreviewHTML(url,file.type,file.name)+'<div style="font-size:11px;color:var(--t);margin-top:4px">&#9989; Ready to share</div>';
     }catch(e){
-      console.error(e);window._newPostUploading=false;if(shareBtn)shareBtn.disabled=false;
+      console.error(e);window._newPostUploading=false;refreshShareCompass();
       if(prev)prev.innerHTML='<div style="font-size:12px;color:var(--c)">Could not finish upload.</div>';
     }
   });
@@ -1484,9 +1490,11 @@ window.submitPost=async function(){
   var improve=((document.getElementById("np-improve")||{}).value||"").trim();
   if(window._newPostUploading){toast("Please wait for the file to finish uploading.");return;}
   if(!requireStudentRubric('newpost')){setShareStage(1);return;}
+  if(!shareFocusComplete()){refreshShareCompass();document.querySelector('[data-focus-check]:not(:checked)')?.focus();toast('Answer all three Compass questions: Yes or Not yet.');return;}
   if(!title){setShareStage(0);document.getElementById("np-title").focus();toast("Please add a title!");return;}
   if(!well||!improve){setShareStage(2);toast("Please fill in what you did well and what to improve!");return;}
   await push(ref(db,"posts"),{
+    postType:document.getElementById("np-post-type").value==="final"?"final":"draft",
     uid:CU.uid,name:CU.displayName,photo:CU.photoURL||"",
     title:title,link:((document.getElementById("np-link")||{}).value||"").trim(),
     fileUrl:window._newPostFile?window._newPostFile.url:"",fileName:window._newPostFile?window._newPostFile.name:"",fileType:window._newPostFile?window._newPostFile.type:"",filePath:window._newPostFile?window._newPostFile.path:"",
@@ -1494,7 +1502,7 @@ window.submitPost=async function(){
     selfRubricVersion:LearnPathRubrics.version,
     selfRubric:window._rubricStores.newpost?window._rubricStores.newpost.values:[],
     goalSnapshot:window._shareState&&window._shareState.contract?shareGoalSnapshot(window._shareState.contract):null,
-    preShareChecklist:window._shareState&&window._shareState.contract?{version:1,items:(window._shareState.contract.weaknessTips||[]).map(function(t,i){return {tip:t,done:window._shareState.focusChecks[i]===true};})}:null,
+    preShareChecklist:window._shareState&&window._shareState.contract?{version:2,items:(window._shareState.contract.weaknessTips||[]).map(function(t,i){return {tip:t,done:window._shareState.focusChecks[i]===true};})}:null,
     well:well,
     improve:improve,
     groupId:myGid||"",
@@ -1609,7 +1617,7 @@ window.renderStep1Screen=async function(){
       html+='<label class="lp-word-choice" id="wc-row-'+i+'"><input type="checkbox" id="wc-input-'+i+'" '+(checked?'checked ':'')+'onchange="toggleWordCheck('+i+')"><span>'+esc(w)+'</span></label>';
     });
     html+='</div>';
-    html+='<button class="btn btg btf mt8" onclick="submitWordChecks()">Submit Word Check</button>';
+    html+='<button class="btn btg mt8" onclick="submitWordChecks()">Submit Word Check</button>';
     html+='<div id="words-to-learn" aria-live="polite">'+(wordRecord.submittedAt?wordsToLearnHTML(wordRecord):'')+'</div>';
     html+='</div>';
   }
@@ -1626,7 +1634,7 @@ window.renderStep1Screen=async function(){
       html+='<div class="tip mb8" role="status">You scored '+score+"/"+gQs.length+'. Review the explanations below.</div>';
     }
     gQs.forEach(function(q,qi){
-      html+='<fieldset class="lp-unit-question"><legend>'+(qi+1)+". "+esc(q.q)+'</legend>';
+      html+='<fieldset class="lp-unit-question'+(qi>2?' lp-illustrated-question':'')+'"><legend>'+(qi+1)+". "+esc(q.q)+'</legend>'+(qi>2?'<img class="lp-question-picture" src="assets/grammar-'+(qi+1)+'.svg" alt="'+(qi===3?'An animal-friendly home':'Two classmates at a school gate')+'">':'')+'<div class="lp-question-options">';
       q.options.forEach(function(opt,oi){
         var sel=myGrammarAnswers[qi]===oi;
         var style="";
@@ -1635,6 +1643,7 @@ window.renderStep1Screen=async function(){
         else if(sel)style="border-color:var(--p);background:var(--pl);color:var(--pd)";
         html+='<button type="button" class="qo'+(sel?' sel':'')+'" aria-pressed="'+sel+'" style="'+style+'" '+(myGrammarSubmitted?'disabled':'onclick="pickGrammarAnswer('+qi+','+oi+')"')+'>'+String.fromCharCode(97+oi)+') '+esc(opt)+'</button>';
       });
+      html+='</div>';
       if(myGrammarSubmitted)html+=window.LearnPathUI.grammarFeedback(q,myGrammarAnswers[qi]);
       html+='</fieldset>';
     });
@@ -1811,7 +1820,7 @@ function renderC3StepPlan(c){
 }
 function renderC3StepGoals(c){
   var checkedCount=GOAL_ITEMS.filter(function(g){return c.goals&&c.goals[g.id];}).length;
-  var otherFilled=!!customGoalText(c);
+  var otherFilled=customGoalTexts(c).length;
   var total=checkedCount+(otherFilled?1:0);
   var tipGoals=c.weaknessTips||[];
   var html='<div class="card" style="background:linear-gradient(135deg,var(--t),var(--td));color:#fff;box-shadow:0 4px 0 var(--td)">';
@@ -1831,7 +1840,7 @@ function renderC3StepGoals(c){
     html+='<div class="goal-row'+(checked?" sel":"")+'" onclick="toggleGoal(\''+g.id+'\')">';
     html+='<span class="qchk">'+(checked?"&#10003;":"")+'</span><span style="flex:1">'+g.text+'</span></div>';
   });
-  html+='<div class="fg" style="margin-top:10px"><label class="fl">Something else...</label><input class="fi" id="c-goals-other" value="'+esc(c.goalsOtherText||"")+'" placeholder="Write your own goal" onblur="saveGoalsOther()"></div>';
+  html+='<div class="fg" style="margin-top:10px"><label class="fl">Something else...</label><textarea class="fta" id="c-goals-other" placeholder="Write your own goals, one per line" onblur="saveGoalsOther()">'+esc(c.goalsOtherText||"")+'</textarea></div>';
   html+='</div>';
   html+='<div class="qnav"><button class="btn bts" onclick="c3Back()">&#8592; Back</button><button class="btn btp" onclick="c3Next()">Continue &#8594;</button></div>';
   return html;
@@ -1863,7 +1872,7 @@ window.c3Next=function(){
   if(step===0&&(!contractData.topic||!contractData.topic.trim())){toast("Fill in your topic first!");return;}
   if(step===1){
     var checkedCount=GOAL_ITEMS.filter(function(g){return contractData.goals&&contractData.goals[g.id];}).length;
-    if(customGoalText(contractData))checkedCount++;
+    checkedCount+=customGoalTexts(contractData).length;
     if(checkedCount<3){toast("Please choose at least 3 goals!");return;}
   }
   if(step===2){
@@ -1916,7 +1925,7 @@ window.submitContract=async function(){
   var steps=contractData.planSteps||["","",""];
   if(steps.length<3||steps.some(function(s){return !s||!s.trim();})){toast("Fill in every step of your plan first!");return;}
   var checkedCount=GOAL_ITEMS.filter(function(g){return contractData.goals&&contractData.goals[g.id];}).length;
-  if(customGoalText(contractData))checkedCount++;
+  checkedCount+=customGoalTexts(contractData).length;
   if(checkedCount<3){toast("Please choose at least 3 goals!");return;}
   await update(ref(db,"contracts/"+CU.uid),{status:"pending",editUnlocked:true,submittedAt:Date.now()});
   contractData=(await get(ref(db,"contracts/"+CU.uid))).val();
@@ -2118,15 +2127,15 @@ window.renderProfile=async function(uid,isOwn){
   var html="";
   if(!isOwn)html+='<button class="btn bts mb8" onclick="go(\'feed\')">&#8592; Back</button>';
 
-  html+='<div class="card" style="text-align:center;padding:24px 20px;background:linear-gradient(135deg,#FF6FA8,#C23B7A);color:#fff;box-shadow:0 4px 0 #C23B7A">';
+  html+='<div class="card lp-profile-identity">';
   if(isOwn){
-    html+='<div class="prof-av-wrap" onclick="changeAvatar()">';
+    html+='<button type="button" class="prof-av-wrap" aria-label="Change my avatar" onclick="changeAvatar()">';
     if(hasCharacter(u))html+='<div class="prof-av-plc" style="border-color:#fff;background:#fff;position:relative;overflow:hidden">'+avatarLayersHTML(u)+'</div>';
     else if(u.avatarUrl)html+='<img src="'+esc(u.avatarUrl)+'" class="prof-av-img" style="border-color:#fff;background:#fff">';
     else if(u.photo)html+='<img src="'+esc(u.photo)+'" class="prof-av-img" style="border-color:#fff">';
     else html+='<div class="prof-av-plc" style="border-color:#fff;background:rgba(255,255,255,.25);color:#fff">'+esc((u.name||"?")[0])+'</div>';
     html+='<div class="prof-av-edit">&#9998;</div>';
-    html+='</div>';
+    html+='</button>';
   } else {
     html+='<div style="display:flex;justify-content:center;margin-bottom:10px">'+avatarMarkup(u,70,"#fff")+'</div>';
   }
@@ -2222,6 +2231,7 @@ async function openNotificationTarget(n,button){
 }
 function revealNotificationPost(id){
   var post=document.getElementById('post-'+id),feedback=document.getElementById('fb-all-'+id);
+  var stage=post&&post.closest('[data-gallery-stage]');if(stage)filterProjectStage(stage.dataset.galleryStage);
   if(feedback)feedback.style.display='block';
   if(post){post.tabIndex=-1;post.classList.add('lp-notification-target');post.focus({preventScroll:true});post.scrollIntoView({block:'start',behavior:'instant'});}
 }
@@ -2564,7 +2574,7 @@ window.reviewContract=async function(studentId){
     var text=g.text;
     html+='<div class="goal-row'+(checked?" sel":"")+'" onclick="toggleReviewGoal(\''+g.id+'\')"><span class="qchk">'+(checked?"&#10003;":"")+'</span><span style="flex:1">'+text+'</span></div>';
   });
-  html+='<div class="fg" style="margin-top:10px"><label class="fl">Something else...</label><input class="fi" id="rv-goals-other" value="'+esc(c.goalsOtherText||"")+'"></div>';
+  html+='<div class="fg" style="margin-top:10px"><label class="fl">Something else...</label><textarea class="fta" id="rv-goals-other" aria-label="Custom project goals, one per line">'+esc(c.goalsOtherText||"")+'</textarea></div>';
   html+='</div>';
 
   html+='<div class="contract-col"><div class="cc-title">3. Plan</div>';
@@ -2870,7 +2880,7 @@ function renderTFeed(){
   window._feedTab=window._feedTab||"plans";
   var html=LearnPathUI.feedHeader(true)+LearnPathUI.feedNavigation(window._feedTab);
   html+='<div id="feed-tab-plans" style="display:'+(window._feedTab==="plans"?"block":"none")+'"><div id="projects-list" class="lp-feed-plans"><div class="loading">Loading...</div></div></div>';
-  html+='<div id="feed-tab-posts" style="display:'+(window._feedTab==="posts"?"block":"none")+'"><div id="feed-container"><div class="loading">Loading...</div></div></div>';
+  html+='<div id="feed-tab-posts" style="display:'+(window._feedTab==="posts"?"block":"none")+'">'+galleryStageNavigation()+'<div id="feed-container"><div class="loading">Loading...</div></div></div>';
   mc.innerHTML=html;
   loadProjectsList(true);
   loadFeed();
@@ -2880,7 +2890,7 @@ window._teacherGoalReviews={};
 function selectedPersonalGoals(c){
   if(!c)return [];
   var goals=goalItemsFor(c).filter(function(g){return c.goals&&c.goals[g.id];}).map(function(g){return {id:g.id,text:g.text};});
-  var custom=customGoalText(c);if(custom)goals.push({id:'custom',text:custom});return goals;
+  customGoalTexts(c).forEach(function(text,i){goals.push({id:i?'custom-'+i:'custom',text:text});});return goals;
 }
 function personalGoalFeedback(cm){
   var review=cm&&cm.personalGoalReview;if(cm.isTeacher!==true||!review||!Array.isArray(review.goals))return '';
@@ -3125,7 +3135,7 @@ async function mountPlanner(mode,c,overview){
     ['written','spoken','visual'].forEach(function(cat){extra[cat]=(catalog[cat]||[]).filter(function(item){var original=DEFAULT_CATALOG[cat].find(function(pair){return pair[0]===item.id;});return item.active&&(!original||original[1]!==item.name);});});
   }
   var mc=document.getElementById('mc');
-  mc.innerHTML=(isLockedStep(mode==='idea'?'step2':'step3')?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">← Back to Home</button>')+'<iframe id="lp-planner-frame" title="'+(mode==='idea'?'Plan your project':LearnPathUI.hasPassport(c)?'My Learning Passport':'Set goals and plan')+'" src="assets/planner.html?v=20261102-2" style="width:100%;height:900px;border:0;display:block" scrolling="no"></iframe>';
+  mc.innerHTML=(isLockedStep(mode==='idea'?'step2':'step3')?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">← Back to Home</button>')+'<iframe id="lp-planner-frame" title="'+(mode==='idea'?'Plan your project':LearnPathUI.hasPassport(c)?'My Learning Passport':'Set goals and plan')+'" src="assets/planner.html?v=20261105-1" style="width:100%;height:900px;border:0;display:block" scrolling="no"></iframe>';
   window._plannerContext={mode:mode,contract:c,overview:!!overview&&LearnPathUI.hasPassport(c),passportReady:LearnPathUI.hasPassport(c),readOnly:false,extraProducts:extra,resume:LearnPathNavigation.resume(),identity:{name:c&&c.studentName||CU.displayName,photo:c&&c.studentId!==CU.uid?c.studentPhoto||'':UP.avatarUrl||CU.photoURL||c&&c.studentPhoto||''}};
   setNav('home');
 }
@@ -3154,7 +3164,7 @@ window.addEventListener('message',async function(event){
     if(message.action==='submit'){
       var fields=plannerFields(message.payload);
       if(!fields.topic.trim()||fields.planSteps.length<3||fields.planSteps.some(function(s){return !/[\p{L}\p{N}]/u.test(String(s).replace(/^I will\s*/i,''));}))throw new Error('Complete your topic and every plan step.');
-      var count=GOAL_ITEMS.filter(function(g){return fields.goals[g.id]===true;}).length+(customGoalText(fields)?1:0);
+      var count=GOAL_ITEMS.filter(function(g){return fields.goals[g.id]===true;}).length+customGoalTexts(fields).length;
       if(count<3)throw new Error('Choose at least three project goals.');
       ['evalTeacherPct','evalPeerPct'].forEach(function(key){var v=fields[key];if(v!==''&&(!Number.isFinite(Number(v))||Number(v)<0||Number(v)>100))throw new Error('Target scores must be between 0 and 100 percent.');});
       await flushPlannerDraft();await queuePlannerSave(uid,Object.assign({},fields,{status:'pending',editUnlocked:true,submittedAt:Date.now()}));
@@ -3177,7 +3187,7 @@ window.renderStep3Screen=async function(overview){
   var snap=await get(ref(db,'contracts/'+CU.uid));contractData=snap.exists()?snap.val():null;
   if(!contractData||!contractData.productType){toast('Choose a project idea first.');go('home');return;}
   if(contractData.grade!==6)return originalRenderPassport();
-  window._currentScreen='step3';await mountPlanner('passport',contractData,overview===true||(overview!==false&&LearnPathUI.hasPassport(contractData)));
+  window._currentScreen='step3';await mountPlanner('passport',contractData,(overview!==false&&LearnPathUI.hasPassport(contractData)));
 };
 function refreshPassportTab(){
   var tab=document.getElementById('lp-passport-tab');

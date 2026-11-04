@@ -25,17 +25,19 @@ const server=http.createServer((req,res)=>{
  const f=page.frameLocator('#lp-planner-frame');
  await f.locator('#chat-input').waitFor();
  assert.equal(await f.locator('.choice small').count(),0);
- assert.equal(await f.locator('.lp-compass-dancer').evaluate(el=>getComputedStyle(el).animationName),'lp-compass-breakdance');
- await f.locator('#motion').click();assert.equal(await f.locator('.lp-compass-dancer').evaluate(el=>getComputedStyle(el).animationPlayState),'paused');await f.locator('#motion').click();
- await page.emulateMedia({reducedMotion:'reduce'});assert.equal(await f.locator('.lp-compass-dancer').evaluate(el=>getComputedStyle(el).animationName),'none');await page.emulateMedia({reducedMotion:'no-preference'});
+ assert.equal(await f.locator('.lp-compass-dancer .lp-clock').evaluate(el=>getComputedStyle(el).animationName),'lp-clock-idle');
+ await f.locator('#motion').click();assert.equal(await f.locator('.lp-compass-dancer .lp-clock').evaluate(el=>getComputedStyle(el).animationPlayState),'paused');await f.locator('#motion').click();
+ await page.emulateMedia({reducedMotion:'reduce'});assert.equal(await f.locator('.lp-compass-dancer .lp-clock').evaluate(el=>getComputedStyle(el).animationName),'none');await page.emulateMedia({reducedMotion:'no-preference'});
  await f.locator('[data-ask-compass]').click();assert.equal(await f.locator('#chat-input').evaluate(el=>document.activeElement===el),true);
  await f.locator('#chat-input').fill('I like games and music');
+ assert.equal(await f.locator('.lp-compass-dancer .lp-clock').evaluate(el=>getComputedStyle(el).animationPlayState),'running');
+ assert.equal(await f.locator('[data-ask-compass]').innerText(),'Ask me or ask Google');
  await f.locator('#compass-reply').click();
  assert.equal(await f.locator('[data-compass-choice]').count(),0);
  assert.equal(await f.locator('#chat-input').inputValue(),'');
  assert.match(await f.locator('.chat-log').innerText(),/Game chat/);
- assert.match(await f.locator('.chat-log').innerText(),/Credit/);
- assert.ok(await f.locator('.bubble.assistant ul li').count()>=6);assert.equal(await f.locator('.lp-compass-dancer.beckoning').count(),0);
+ assert.match(await f.locator('.chat-log').innerText(),/Expression/);
+ assert.ok(await f.locator('.bubble.assistant ul li').count()>=4);assert.equal(await f.locator('.lp-compass-dancer.beckoning').count(),0);
  await page.screenshot({path:path.join(root,'verification/prepared-compass.png'),fullPage:true});
  await f.locator('[data-choice="privacy"]').click();await f.locator('#next').click();
  await f.locator('#chat-input').waitFor();
@@ -46,7 +48,7 @@ const server=http.createServer((req,res)=>{
  await page.goForward();await f.locator('#chat-input').waitFor();
  assert.equal(await f.locator('#chat-input').inputValue(),'I like speaking');
  await f.locator('#chat-input').fill('I like speaking and asking questions');await f.locator('#chat-input').press('Enter');
- assert.match(await f.locator('.chat-log').innerText(),/Short talk/);
+ assert.match(await f.locator('.chat-log').innerText(),/Podcast/);
  assert.match(await f.locator('.chat-log').innerText(),/Written interview/);
  await f.locator('#chat-input').fill('<img src=x onerror=alert(1)>');await f.locator('#compass-reply').click();
  assert.equal(await f.locator('.chat-log img').count(),0);
@@ -90,9 +92,9 @@ const server=http.createServer((req,res)=>{
  await f.locator('[data-goal="unitWords"]').waitFor();
  assert.equal(await f.locator('[data-passport-step]').count(),3);
  const pf=page.frames().find(x=>x.url().includes('/assets/planner.html'));
- assert.deepEqual(await pf.evaluate(()=>initialPlanTails({weakness:'writing'})),['write three short ideas before I start.','put one main idea in each paragraph.','read my work aloud and fix confusing sentences.']);
+ assert.deepEqual(await pf.evaluate(()=>initialPlanTails({weakness:'writing'})),['','','']);
  assert.deepEqual(await pf.evaluate(()=>initialPlanTails({weakness:'speaking',planSteps:['I will keep my own action.','','']})),['keep my own action.','','']);
- assert.deepEqual(await pf.evaluate(()=>initialPlanTails({weakness:'speaking',planSteps:['','','']})),['practise my talk out loud.','record myself once and listen.','take a breath and speak slowly.']);
+ assert.deepEqual(await pf.evaluate(()=>initialPlanTails({weakness:'speaking',planSteps:['','','']})),['','','']);
  assert.equal(await f.locator('[data-goal]').count(),11);
  assert.equal(await f.locator('.structure-help').count(),0);
  assert.equal(await f.locator('.contract-paper .contract-focus').count(),0);
@@ -102,10 +104,10 @@ const server=http.createServer((req,res)=>{
  await f.locator('#passport-next').click();assert.match(await f.locator('#passport-error').innerText(),/at least 3/);
  for(const key of ['unitWords','spelling','speakClear'])await f.locator('[data-goal="'+key+'"]').check();
  await f.locator('#passport-next').click();
- assert.deepEqual(await f.locator('[data-plan]').evaluateAll(els=>els.map(el=>el.value)),['practise my talk out loud.','record myself once and listen.','take a breath and speak slowly.']);
+ assert.deepEqual(await f.locator('[data-plan]').evaluateAll(els=>els.map(el=>el.value)),['','','']);
  assert.equal(await f.getByRole('button',{name:'Add another step',exact:true}).count(),1);
- assert.equal(await f.locator('.plan-examples').count(),0);
- assert.match(await f.locator('.passport-plan-layout .contract-guide').innerText(),/These steps come from what you find hard/);
+ assert.equal(await f.locator('.plan-examples').count(),0);assert.equal(await f.locator('.plan-suggestions li').count(),3);await f.locator('#passport-next').click();assert.match(await f.locator('#passport-error').innerText(),/Complete every/);
+ assert.match(await f.locator('.passport-plan-layout .contract-guide').innerText(),/If you want, write these/);
  assert.ok(await f.locator('.passport-plan-layout .contract-guide').evaluate(el=>el.getBoundingClientRect().left>document.querySelector('.passport-plan-layout .contract-paper').getBoundingClientRect().right));
  const planCaptureStyle=await page.addStyleTag({content:'.topbar,.bnav{display:none!important}'});
  await f.locator('.contract-plan').screenshot({path:path.join(root,'verification/prefilled-plan-steps.png')});
@@ -144,7 +146,7 @@ const server=http.createServer((req,res)=>{
  assert.equal(saved.weaknessTips[0],'Practise your talk out loud.');
  assert.doesNotMatch(await f.locator('.passport-left').innerText(),/My next step/);
  assert.match(await f.locator('.passport-left .scores-overview').innerText(),/85%/);
- assert.ok(await f.locator('.lp-doc-reveal').count()>=6);
+ assert.ok(await f.locator('.lp-doc-reveal').count()>=4);
  await f.locator('.passport-document').evaluate(el=>Promise.all(el.getAnimations({subtree:true}).filter(a=>a.effect?.target?.classList.contains('lp-doc-reveal')).map(a=>a.finished)));
  await f.locator('.passport-document').screenshot({path:path.join(root,'verification/passport-document.png')});
  await f.locator('#motion').click();
@@ -216,6 +218,13 @@ const server=http.createServer((req,res)=>{
  await f.locator('.passport-photo img').waitFor({state:'hidden'});
  assert.equal(await f.locator('.passport-photo-fallback').innerText(),'AS');
  await page.evaluate(()=>{Object.assign(__mockDB.contracts.student,{productId:'interview',productType:'Interview',category:'spoken'});return startQuiz();});await f.getByRole('button',{name:'Edit Product',exact:true}).click();assert.match(await f.locator('.retired-product-note').innerText(),/saved product is Interview/);assert.equal(await f.locator('[data-product="interview"]').count(),0);
+ await page.evaluate(()=>renderStep3Screen(false));await f.locator('[data-goal="unitWords"]').waitFor();
+ for(const box of await f.locator('[data-goal]').all())await box.uncheck();
+ for(const text of ['explain my online choice.','check my words.','use my own example.']){await f.locator('#passport-other-goal').fill(text);await f.locator('#add-own-goal').click();assert.equal(await f.locator('#passport-other-goal').inputValue(),'');}
+ assert.equal(await f.locator('[data-custom-goal]:checked').count(),3);
+ await f.locator('#passport-next').click();await f.locator('#passport-next').click();await f.getByRole('button',{name:'Save and send to the teacher',exact:true}).click();await f.locator('.passport-sent').waitFor();
+ assert.equal(await page.evaluate(()=>__mockDB.contracts.student.goalsOtherText.split('\n').length),3);
  assert.deepEqual(errors,[]);console.log('PASS: no grouping/edit/deadline locks; existing locked records edit; approved edits return to draft; send/reopen/retake; scores, tablet/mobile, no external calls.');
  }finally{await browser.close();await new Promise(r=>server.close(r));}
 })().catch(e=>{console.error(e);process.exitCode=1;});
+
