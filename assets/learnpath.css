@@ -402,3 +402,17 @@ body[data-sharing="true"][data-sharing-stage="1"] .lp-share-header{display:none}
 .lp-four-step.in-share .rublevel-row{min-height:72px;padding:10px 12px;margin:7px 0}.lp-four-step.in-share .rublevel-row.sel{padding:9px 11px}.lp-four-step.in-share .rub-pill{min-height:46px}.lp-four-step.in-share .rub-sentence{font-size:17px;line-height:1.35}
 
 .lp-four-step.in-share .lp-single-question legend{margin-bottom:10px}.lp-four-step.in-share .lp-single-question legend>strong{font-size:22px;line-height:1.25}.lp-four-step.in-share .lp-rubric-main progress{margin:6px 0 8px}.lp-four-step.in-share .lp-rubric-stem{margin:4px 0 7px}
+
+/* Required, neutral yes/not-yet goal checks shared by all three sharing stages. */
+.lp-share-focus-item{border:0;border-top:1px solid #d5c39a;padding:10px 0 0;margin:12px 0 0;min-width:0}
+.lp-share-focus-item legend{font-size:15px;line-height:1.4;padding:0 0 5px;width:100%}
+.lp-focus-answers{display:flex;gap:8px}.lp-focus-answer{display:flex;align-items:center;gap:6px;border:1px solid #b5a77e;border-radius:10px;background:white;padding:8px;min-height:44px;flex:1;cursor:pointer;font-size:14px;white-space:nowrap}
+.lp-focus-answer input{width:18px;height:18px;margin:0;accent-color:var(--p)}.lp-focus-answer:has(:checked){border:2px solid var(--p);padding:7px;background:var(--tl)}.lp-focus-answer:has(:focus-visible){outline:3px solid var(--p);outline-offset:2px}
+
+.lp-self-help{font-size:13px;line-height:1.4;margin:0 0 8px;color:var(--tm)}.lp-self-help summary{cursor:pointer;min-height:28px}.lp-self-help p{margin:6px 0}
+
+.lp-self-help{position:relative;align-self:center;margin:0}.lp-self-help-copy{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);width:min(300px,70vw);padding:14px;background:white;border:1px solid var(--gb);border-radius:12px;box-shadow:0 4px 15px #10324b20;z-index:4}body:not([data-sharing-stage="1"]) .lp-self-help{display:none}
+
+
+.lp-share-compass .lp-share-guide-top .lp-mascot{width:68px}.lp-share-compass .lp-share-guide-top .lp-clock{--frame-size:64px}.lp-share-compass .lp-share-guide-top .lp-motion-toggle{font-size:10px;min-width:68px;padding:4px 2px}.lp-share-compass .lp-share-guide-top h2{font-size:18px}.lp-share-compass .lp-share-guide-copy{font-size:15px;line-height:1.4;margin:8px 0}.lp-share-compass .lp-share-check-hint{font-size:13px;margin-bottom:7px}.lp-share-compass .lp-share-focus-item{margin-top:10px;padding-top:6px}
+
