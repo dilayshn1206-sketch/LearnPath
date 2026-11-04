@@ -4,7 +4,7 @@
   var states = [false, false, false, false];
   var enabled = [true, true, false, true];
   var paused = false;
-  var labels = ['What are we learning?', 'Get Ideas', 'Set goals and plan', 'Choose Resources'];
+  var labels = ['What are we learning?', 'Find your project', 'Set goals and plan', 'Choose Resources'];
   var mapLabels = ['Explore', 'Plan', 'Create', 'Reflect'];
   var actions = ['renderStep1Screen', 'startQuiz', 'renderStep3Screen', 'renderResourcesScreen'];
   function escapeText(value) {
@@ -32,7 +32,7 @@
   function hasPassport(c) {
     if (!c || !c.productType || !(c.submittedAt || c.status === 'pending' || c.status === 'approved')) return false;
     var goals = Object.keys(c.goals || {}).filter(function (key) { return c.goals[key] === true; }).length;
-    if (/[\p{L}\p{N}]/u.test(String(c.goalsOtherText || '').replace(/^\s*i\s+will\b/i, ''))) goals++;
+    goals += [...new Set(String(c.goalsOtherText || '').split(/\r?\n/).map(function(t){return t.trim();}).filter(function(t){return /[\p{L}\p{N}]/u.test(t.replace(/^\s*i\s+will\b/i, ''));}))].length;
     return goals >= 3 && Array.isArray(c.planSteps) && c.planSteps.length >= 3 && c.planSteps.every(function (s) {
       return /[\p{L}\p{N}]/u.test(String(s || '').replace(/^(?:\s*i\s+will\b[\s.…]*)+/i, ''));
     });
@@ -67,7 +67,7 @@
       + '<p class="lp-launch-invite">Check some '+escapeText(plural)+' online.</p>'
       + '<div class="lp-launch-notice"><strong>Look with Compass</strong><p>'+escapeText(prompt)+'</p><p>Borrow an idea about the format. Use your own words and ideas about Your Digital Self.</p></div>'
       + '<a class="btn bts lp-launch-examples" href="'+escapeText(search)+'" target="_blank" rel="noopener noreferrer">Explore examples <span aria-hidden="true">↗</span><small>Opens a search in a new tab</small></a>'
-      + '<div class="lp-launch-next"><p>Ready to plan your own?</p><button type="button" class="btn btp" onclick="renderStep3Screen()">Set my goals and plan →</button></div></div></section>';
+      + '<div class="lp-launch-next"><p>While you check examples, your teacher will group you.</p><button type="button" class="btn btp" onclick="renderStep3Screen(false)">Set my goals and plan →</button></div></div></section>';
   }
   function drawMap() {
     var host = document.getElementById('lp-map');

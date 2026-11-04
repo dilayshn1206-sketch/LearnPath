@@ -258,3 +258,7 @@ body{padding-bottom:84px}
 .chat-log .compass-next-question{margin:12px 0 0;padding-top:9px;border-top:1px solid var(--gb);font-weight:600;line-height:1.5}
 @keyframes lp-compass-breakdance{0%{transform:translate(0,0) rotate(0)}18%{transform:translate(-4px,-7px) rotate(-15deg)}35%{transform:translate(4px,0) rotate(18deg)}52%{transform:translate(-3px,-4px) rotate(-95deg)}68%{transform:translate(0,0) rotate(-190deg)}84%{transform:translate(3px,-6px) rotate(-325deg)}100%{transform:translate(0,0) rotate(-360deg)}}
 @media(prefers-reduced-motion:reduce){.lp-compass-dancer.beckoning{animation:none!important;transform:none}}
+
+/* Review revision: stable, centred category labels and compact sentence completion. */
+.category-button{justify-content:center;text-align:center}.category-button strong{font-weight:600;font-size:21px}.product-category .category-button>span{flex:none}.choices .choice[data-choice="unsure"]{grid-column:1/-1;justify-self:center;width:min(100%,350px)}
+.goal-sentence-stem{font-size:29px;font-weight:700;color:var(--pd);margin:16px 0}.contract-goal{align-items:center;min-height:48px;padding:9px 12px}.contract-goal span{font-size:17px;line-height:1.4;font-weight:400}.contract-goal span strong{font-weight:700}#passport-other-goal{min-height:44px}#add-own-goal{min-height:44px;margin-top:8px}
