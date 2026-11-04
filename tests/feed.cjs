@@ -82,7 +82,7 @@ const server=http.createServer((req,res)=>{
  assert.equal(await page.locator('.lp-rubric-pair').count(),0);
  await page.locator('#rubric-newpost-0-1').check();
  assert.equal(await page.evaluate(()=>_rubricStores.newpost.values[0]),1);
- await page.locator('#np-continue').click();assert.match(await page.locator('#lp-share-compass').innerText(),/Look for single words/);
+ await page.locator('#np-continue').click();assert.match(await page.locator('#lp-share-compass').innerText(),/Look for sentences and links/);
  await page.goBack();await page.locator('#rubric-newpost-0-1').waitFor();
  assert.ok(await page.locator('#rubric-newpost-0-1').isChecked());
  await page.goForward();await page.locator('#rubric-newpost-1-0').waitFor();
