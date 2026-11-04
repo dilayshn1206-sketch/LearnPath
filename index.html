@@ -1177,7 +1177,7 @@ function renderFeed(){
   var html=LearnPathUI.feedHeader(false)+LearnPathUI.feedNavigation(window._feedTab);
   html+='<div id="feed-tab-plans" style="display:'+(window._feedTab==="plans"?"block":"none")+'"><div id="projects-list" class="lp-feed-plans"><div class="loading">Loading...</div></div></div>';
   html+='<div id="feed-tab-posts" style="display:'+(window._feedTab==="posts"?"block":"none")+'">';
-  html+='<div class="lp-gallery-toolbar"><button class="btn btp mb8" onclick="openNewPost()">+ Share Your Work</button><nav aria-label="Project stage" class="lp-gallery-stages"><button type="button" data-project-stage="draft" onclick="filterProjectStage(\'draft\')">Draft projects</button><button type="button" data-project-stage="final" onclick="filterProjectStage(\'final\')">Final projects</button></nav></div>';
+  html+='<div class="lp-gallery-toolbar"><button class="btn btp mb8" onclick="openNewPost()">+ Share Your Work</button>'+galleryStageNavigation()+'</div>';
   html+='<div id="feed-container"><div class="loading">Loading...</div></div></div>';
   mc.innerHTML=html;
   loadProjectsList();
@@ -1193,6 +1193,7 @@ window.switchFeedTab=function(tab){
   btns.forEach(function(b,i){var selected=(i===0&&tab==="plans")||(i===1&&tab==="posts");b.classList.toggle("act",selected);b.setAttribute("aria-pressed",String(selected));});
 };
 
+function galleryStageNavigation(){return `<nav aria-label="Project stage" class="lp-gallery-stages"><button type="button" data-project-stage="draft" onclick="filterProjectStage('draft')">Draft projects</button><button type="button" data-project-stage="final" onclick="filterProjectStage('final')">Final projects</button></nav>`;}
 function loadProjectsList(teacherMode){
   onValue(ref(db,"contracts"),function(snap){
     var el=document.getElementById("projects-list");if(!el)return;
@@ -1405,10 +1406,11 @@ window.rubricReview=function(key){var store=window._rubricStores[key];if(!store)
 function shareGoalSnapshot(c){var out={};['grade','goalVersion','topic','productType','category','weakness','weaknessTips','goals','goalsOtherText','planSteps','createdAt','submittedAt'].forEach(function(k){if(c[k]!==undefined)out[k]=c[k];});return JSON.parse(JSON.stringify(out));}
 function refreshShareCompass(){
   var state=window._shareState,el=document.getElementById('lp-share-compass');if(!state||!el)return;
-  var store=window._rubricStores.newpost;
-  el.innerHTML=state.stage===1?LearnPathShare.criterion(store.index||0,store.rubric[store.index||0].area,store.rubric):LearnPathShare.goals(state.contract,state.goals,state.goalPage,state.error,state.focusChecks);
-  el.querySelectorAll('[data-focus-check]').forEach(function(input){input.onchange=function(){state.focusChecks[Number(input.dataset.focusCheck)]=input.checked;};});
+  el.innerHTML=LearnPathShare.goals(state.contract,state.goals,state.goalPage,state.error,state.focusChecks);
+  el.querySelectorAll('[data-focus-check]').forEach(function(input){input.onchange=function(){state.focusChecks[Number(input.dataset.focusCheck)]=input.dataset.focusValue==='true';refreshShareCompass();};});
+  var send=document.getElementById('np-share-btn');if(send)send.disabled=!!window._newPostUploading||!shareFocusComplete();
 }
+function shareFocusComplete(){var s=window._shareState;return !!s&&!s.error&&Array.isArray(s.contract?.weaknessTips)&&s.contract.weaknessTips.length===3&&s.focusChecks.length===3&&s.focusChecks.every(function(v){return typeof v==='boolean';});}
 window.setShareStage=function(stage){
   var state=window._shareState;if(!state)return;LearnPathNavigation.share(stage,window._rubricStores.newpost.index||0);state.stage=Math.max(0,Math.min(stage,2));document.body.dataset.sharingStage=String(state.stage);
   document.querySelectorAll('[data-share-panel]').forEach(function(panel){panel.hidden=Number(panel.dataset.sharePanel)!==state.stage;});
@@ -1429,12 +1431,12 @@ window.openNewPost=async function(){
   if(window._currentScreen!=='share')return;
   if(!error)contractData=c;
   var goals=c?goalItemsFor(c).filter(function(g){return c.goals&&c.goals[g.id];}):[],custom=customGoalTexts(c);custom.forEach(function(text,i){goals.push({id:i?'custom-'+i:'custom',text:text});});
-  window._shareState={stage:0,goalPage:0,contract:c,goals:goals,error:error,focusChecks:(c&&c.weaknessTips||[]).map(function(){return false;})};window._newPostFile=null;
+  window._shareState={stage:0,goalPage:0,contract:c,goals:goals,error:error,focusChecks:(c&&c.weaknessTips||[]).map(function(){return null;})};window._newPostFile=null;
   var html='<header class="lp-share-header"><div><h1>Share your work</h1><p>A quick check with Compass, then share your project.</p></div><button type="button" class="btn bts" onclick="go(\'feed\')">Back to gallery</button></header><nav class="lp-share-stages" aria-label="Sharing steps">';
   ['Your work','Self-reflection','Share'].forEach(function(label,i){html+='<button type="button" data-share-stage="'+i+'" onclick="setShareStage('+i+')"><span>'+(i+1)+'</span>'+label+'</button>';});html+='</nav>';
   html+='<div class="lp-share-layout"><section class="card lp-share-paper"><section data-share-panel="0"><h2>What are you sharing?</h2><div class="fg"><label class="fl" for="np-post-type">Project stage</label><select class="fi" id="np-post-type"><option value="draft">Draft project</option><option value="final">Final project</option></select></div><div class="fg"><label class="fl" for="np-title">Title of this piece of work</label><input class="fi" id="np-title" placeholder="Give your project a title"></div><div class="fg"><label class="fl" for="np-link">Link to your work</label><input class="fi" id="np-link" placeholder="Google Drive / YouTube / Canva…"></div><details class="lp-share-link-help"><summary>How to copy a link</summary><p>Google Drive → Share → Copy link · YouTube → Share · Canva → Share → Copy link</p></details><div class="fg"><label class="fl" for="np-file">Or attach a photo, video, PDF or audio file (up to 100 MB)</label><input type="file" class="fi" id="np-file" onchange="attachNewPostFile(this)"><div id="np-file-preview"></div></div></section>';
-  html+='<section data-share-panel="1" hidden><h2>Self-reflection</h2><p class="lp-rubric-instruction">'+esc(LearnPathRubrics.selfInstruction)+'</p><div id="np-rub-rows"></div></section><section data-share-panel="2" hidden><h2>One last look</h2><p id="np-work-summary"></p><div class="lp-share-written"><div class="fg"><label class="fl" for="np-well">One thing I did well *</label><textarea class="fta" id="np-well" placeholder="I …"></textarea></div><div class="fg"><label class="fl" for="np-improve">My next step *</label><textarea class="fta" id="np-improve" placeholder="Next time, I will …"></textarea></div></div></section>';
-  html+='<footer class="lp-share-actions"><button type="button" class="btn bts" id="np-back" onclick="shareBack()">Back</button><button type="button" class="btn btp" id="np-continue" onclick="shareNext()">Continue →</button><button type="button" class="btn btp" id="np-share-btn" onclick="submitPost()" hidden>Share my work</button></footer></section><aside id="lp-share-compass" class="lp-share-compass" aria-label="Compass project guide"></aside></div>';
+  html+='<section data-share-panel="1" hidden><h2>Self-reflection</h2><div id="np-rub-rows"></div></section><section data-share-panel="2" hidden><h2>One last look</h2><p id="np-work-summary"></p><div class="lp-share-written"><div class="fg"><label class="fl" for="np-well">One thing I did well *</label><textarea class="fta" id="np-well" placeholder="I …"></textarea></div><div class="fg"><label class="fl" for="np-improve">My next step *</label><textarea class="fta" id="np-improve" placeholder="Next time, I will …"></textarea></div></div></section>';
+  html+='<footer class="lp-share-actions"><button type="button" class="btn bts" id="np-back" onclick="shareBack()">Back</button><details class="lp-self-help"><summary>How to answer</summary><div class="lp-self-help-copy"><p>'+esc(LearnPathRubrics.selfInstruction)+'</p><p lang="tr">'+esc(LearnPathRubrics.selfInstructionTR)+'</p></div></details><button type="button" class="btn btp" id="np-continue" onclick="shareNext()">Continue →</button><button type="button" class="btn btp" id="np-share-btn" onclick="submitPost()" hidden>Share my work</button></footer></section><aside id="lp-share-compass" class="lp-share-compass" aria-label="Compass project guide"></aside></div>';
   mc.innerHTML=html;window._rubricStores.newpost={values:new Array(SELF_RUBRIC.length).fill(null),rubric:SELF_RUBRIC,containerId:'np-rub-rows',index:0};
   renderRubricBlock('np-rub-rows',SELF_RUBRIC,window._rubricStores.newpost.values,'newpost');setShareStage(0);window.scrollTo({top:0,behavior:'auto'});
 };
@@ -1459,7 +1461,7 @@ window.attachNewPostFile=function(input){
   },function(err){
     console.error("upload failed:",err);
     window._newPostUploading=false;
-    if(shareBtn)shareBtn.disabled=false;
+    refreshShareCompass();
     var msg=(err&&err.code==="storage/unauthorized")?"Upload blocked — the teacher needs to allow file storage (see storage rules).":"Upload failed. Please try again or use a link instead.";
     if(prev)prev.innerHTML='<div style="font-size:12px;color:var(--c)">'+esc(msg)+'</div>';
     toast(msg);
@@ -1469,10 +1471,10 @@ window.attachNewPostFile=function(input){
       var url=await getDownloadURL(task.snapshot.ref);
       window._newPostFile={url:url,name:file.name,type:file.type,path:path};
       window._newPostUploading=false;
-      if(shareBtn)shareBtn.disabled=false;
+      refreshShareCompass();
       if(prev)prev.innerHTML=filePreviewHTML(url,file.type,file.name)+'<div style="font-size:11px;color:var(--t);margin-top:4px">&#9989; Ready to share</div>';
     }catch(e){
-      console.error(e);window._newPostUploading=false;if(shareBtn)shareBtn.disabled=false;
+      console.error(e);window._newPostUploading=false;refreshShareCompass();
       if(prev)prev.innerHTML='<div style="font-size:12px;color:var(--c)">Could not finish upload.</div>';
     }
   });
@@ -1488,6 +1490,7 @@ window.submitPost=async function(){
   var improve=((document.getElementById("np-improve")||{}).value||"").trim();
   if(window._newPostUploading){toast("Please wait for the file to finish uploading.");return;}
   if(!requireStudentRubric('newpost')){setShareStage(1);return;}
+  if(!shareFocusComplete()){refreshShareCompass();document.querySelector('[data-focus-check]:not(:checked)')?.focus();toast('Answer all three Compass questions: Yes or Not yet.');return;}
   if(!title){setShareStage(0);document.getElementById("np-title").focus();toast("Please add a title!");return;}
   if(!well||!improve){setShareStage(2);toast("Please fill in what you did well and what to improve!");return;}
   await push(ref(db,"posts"),{
@@ -1499,7 +1502,7 @@ window.submitPost=async function(){
     selfRubricVersion:LearnPathRubrics.version,
     selfRubric:window._rubricStores.newpost?window._rubricStores.newpost.values:[],
     goalSnapshot:window._shareState&&window._shareState.contract?shareGoalSnapshot(window._shareState.contract):null,
-    preShareChecklist:window._shareState&&window._shareState.contract?{version:1,items:(window._shareState.contract.weaknessTips||[]).map(function(t,i){return {tip:t,done:window._shareState.focusChecks[i]===true};})}:null,
+    preShareChecklist:window._shareState&&window._shareState.contract?{version:2,items:(window._shareState.contract.weaknessTips||[]).map(function(t,i){return {tip:t,done:window._shareState.focusChecks[i]===true};})}:null,
     well:well,
     improve:improve,
     groupId:myGid||"",
@@ -2877,7 +2880,7 @@ function renderTFeed(){
   window._feedTab=window._feedTab||"plans";
   var html=LearnPathUI.feedHeader(true)+LearnPathUI.feedNavigation(window._feedTab);
   html+='<div id="feed-tab-plans" style="display:'+(window._feedTab==="plans"?"block":"none")+'"><div id="projects-list" class="lp-feed-plans"><div class="loading">Loading...</div></div></div>';
-  html+='<div id="feed-tab-posts" style="display:'+(window._feedTab==="posts"?"block":"none")+'"><div id="feed-container"><div class="loading">Loading...</div></div></div>';
+  html+='<div id="feed-tab-posts" style="display:'+(window._feedTab==="posts"?"block":"none")+'">'+galleryStageNavigation()+'<div id="feed-container"><div class="loading">Loading...</div></div></div>';
   mc.innerHTML=html;
   loadProjectsList(true);
   loadFeed();

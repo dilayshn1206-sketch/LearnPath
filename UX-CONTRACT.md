@@ -167,3 +167,5 @@ Do not claim the visual patch is a security or end-to-end production audit.
 
 ## Owner review: content-only release (2026-11-05)
 Compact home/resources/profile and grammar question layouts, explicit draft/final gallery stages, two-bullet prepared guidance, sentence-completion goals with multiple selectable custom goals, readable equal Step badges and sparse keyword emphasis. Preserve live animation assets, animation logic, rubric values/version, submitted snapshots, map art and learner records. Animation experiments and local review tooling are excluded. Custom goals remain newline-delimited in goalsOtherText; minimum-three validation counts distinct real goal lines.
+
+Reviewed sharing keeps the same three Yes / Not yet focus checks across all sharing panels; each needs an answer, but Not yet is valid. New posts save checklist version 2 and server validation checks exact current tips. New plans show challenge-based suggestions above empty manual I will rows; any existing written plan remains unchanged. The existing idle mascot is retained; new choreography and sheets remain local.
