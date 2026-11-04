@@ -25,11 +25,13 @@ const server=http.createServer((req,res)=>{
  const f=page.frameLocator('#lp-planner-frame');
  await f.locator('#chat-input').waitFor();
  assert.equal(await f.locator('.choice small').count(),0);
- assert.equal(await f.locator('.lp-compass-dancer').evaluate(el=>getComputedStyle(el).animationName),'lp-compass-breakdance');
- await f.locator('#motion').click();assert.equal(await f.locator('.lp-compass-dancer').evaluate(el=>getComputedStyle(el).animationPlayState),'paused');await f.locator('#motion').click();
- await page.emulateMedia({reducedMotion:'reduce'});assert.equal(await f.locator('.lp-compass-dancer').evaluate(el=>getComputedStyle(el).animationName),'none');await page.emulateMedia({reducedMotion:'no-preference'});
+ assert.equal(await f.locator('.lp-compass-dancer .lp-clock').evaluate(el=>getComputedStyle(el).animationName),'lp-clock-idle');
+ await f.locator('#motion').click();assert.equal(await f.locator('.lp-compass-dancer .lp-clock').evaluate(el=>getComputedStyle(el).animationPlayState),'paused');await f.locator('#motion').click();
+ await page.emulateMedia({reducedMotion:'reduce'});assert.equal(await f.locator('.lp-compass-dancer .lp-clock').evaluate(el=>getComputedStyle(el).animationName),'none');await page.emulateMedia({reducedMotion:'no-preference'});
  await f.locator('[data-ask-compass]').click();assert.equal(await f.locator('#chat-input').evaluate(el=>document.activeElement===el),true);
  await f.locator('#chat-input').fill('I like games and music');
+ assert.equal(await f.locator('.lp-compass-dancer .lp-clock').evaluate(el=>getComputedStyle(el).animationPlayState),'running');
+ assert.equal(await f.locator('[data-ask-compass]').innerText(),'Ask me or ask Google');
  await f.locator('#compass-reply').click();
  assert.equal(await f.locator('[data-compass-choice]').count(),0);
  assert.equal(await f.locator('#chat-input').inputValue(),'');
@@ -90,9 +92,9 @@ const server=http.createServer((req,res)=>{
  await f.locator('[data-goal="unitWords"]').waitFor();
  assert.equal(await f.locator('[data-passport-step]').count(),3);
  const pf=page.frames().find(x=>x.url().includes('/assets/planner.html'));
- assert.deepEqual(await pf.evaluate(()=>initialPlanTails({weakness:'writing'})),['write three short ideas before I start.','put one main idea in each paragraph.','read my work aloud and fix confusing sentences.']);
+ assert.deepEqual(await pf.evaluate(()=>initialPlanTails({weakness:'writing'})),['','','']);
  assert.deepEqual(await pf.evaluate(()=>initialPlanTails({weakness:'speaking',planSteps:['I will keep my own action.','','']})),['keep my own action.','','']);
- assert.deepEqual(await pf.evaluate(()=>initialPlanTails({weakness:'speaking',planSteps:['','','']})),['practise my talk out loud.','record myself once and listen.','take a breath and speak slowly.']);
+ assert.deepEqual(await pf.evaluate(()=>initialPlanTails({weakness:'speaking',planSteps:['','','']})),['','','']);
  assert.equal(await f.locator('[data-goal]').count(),11);
  assert.equal(await f.locator('.structure-help').count(),0);
  assert.equal(await f.locator('.contract-paper .contract-focus').count(),0);
@@ -102,10 +104,10 @@ const server=http.createServer((req,res)=>{
  await f.locator('#passport-next').click();assert.match(await f.locator('#passport-error').innerText(),/at least 3/);
  for(const key of ['unitWords','spelling','speakClear'])await f.locator('[data-goal="'+key+'"]').check();
  await f.locator('#passport-next').click();
- assert.deepEqual(await f.locator('[data-plan]').evaluateAll(els=>els.map(el=>el.value)),['practise my talk out loud.','record myself once and listen.','take a breath and speak slowly.']);
+ assert.deepEqual(await f.locator('[data-plan]').evaluateAll(els=>els.map(el=>el.value)),['','','']);
  assert.equal(await f.getByRole('button',{name:'Add another step',exact:true}).count(),1);
- assert.equal(await f.locator('.plan-examples').count(),0);
- assert.match(await f.locator('.passport-plan-layout .contract-guide').innerText(),/These steps come from what you find hard/);
+ assert.equal(await f.locator('.plan-examples').count(),0);assert.equal(await f.locator('.plan-suggestions li').count(),3);await f.locator('#passport-next').click();assert.match(await f.locator('#passport-error').innerText(),/Complete every/);
+ assert.match(await f.locator('.passport-plan-layout .contract-guide').innerText(),/If you want, write these/);
  assert.ok(await f.locator('.passport-plan-layout .contract-guide').evaluate(el=>el.getBoundingClientRect().left>document.querySelector('.passport-plan-layout .contract-paper').getBoundingClientRect().right));
  const planCaptureStyle=await page.addStyleTag({content:'.topbar,.bnav{display:none!important}'});
  await f.locator('.contract-plan').screenshot({path:path.join(root,'verification/prefilled-plan-steps.png')});
@@ -225,3 +227,4 @@ const server=http.createServer((req,res)=>{
  assert.deepEqual(errors,[]);console.log('PASS: no grouping/edit/deadline locks; existing locked records edit; approved edits return to draft; send/reopen/retake; scores, tablet/mobile, no external calls.');
  }finally{await browser.close();await new Promise(r=>server.close(r));}
 })().catch(e=>{console.error(e);process.exitCode=1;});
+

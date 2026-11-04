@@ -54,16 +54,16 @@ const server=http.createServer((req,res)=>{
  assert.match(await page.locator('#feed-container').innerText(),/A space for our creations/);
  await page.setViewportSize({width:1024,height:768});
  await page.evaluate(()=>openNewPost());
- assert.match(await page.locator('#lp-share-compass').innerText(),/No focus goals/);
+ assert.match(await page.locator('#lp-share-compass').innerText(),/Choose what feels hardest/);
  await page.evaluate(()=>{__mockDB.contracts.student={grade:6,studentId:'student',productType:'Interview',category:'spoken',topic:'Digital friendship',status:'pending',submittedAt:1,planSteps:['I will plan.','I will record.','I will check.'],weakness:'speaking',weaknessTips:['Practise your talk out loud.','Record yourself once and listen.','Take a breath and speak slowly.'],goals:{unitWords:true,organize:true,speakClear:true},goalsOtherText:'I will ask a friend for feedback.'};return openNewPost();});
- assert.match(await page.locator('#lp-share-compass').innerText(),/needed help with speaking/);
+ assert.match(await page.locator('#lp-share-compass').innerText(),/My three goal checks/);
  assert.match(await page.locator('#lp-share-compass').innerText(),/Did you practise your talk/);
  assert.match(await page.locator('#lp-share-compass').innerText(),/record yourself and listen/);
- assert.equal(await page.locator('.lp-share-focus-questions li').count(),3);
- assert.equal(await page.locator('[data-focus-check]').count(),3);
- await page.locator('[data-focus-check="0"]').focus();await page.keyboard.press('Space');
- await page.locator('[data-focus-check="2"]').check();
- assert.deepEqual(await page.evaluate(()=>_shareState.focusChecks),[true,false,true]);
+ assert.equal(await page.locator('.lp-share-focus-item').count(),3);assert.ok(await page.locator('.lp-share-focus-item').last().evaluate(e=>e.getBoundingClientRect().bottom<=innerHeight));
+ assert.equal(await page.locator('[data-focus-check][data-focus-value="true"]').count(),3);
+ await page.locator('[data-focus-check="0"][data-focus-value="true"]').focus();await page.keyboard.press('Space');
+ await page.locator('[data-focus-check="2"][data-focus-value="true"]').check();
+ assert.deepEqual(await page.evaluate(()=>_shareState.focusChecks),[true,null,true]);
  assert.match(await page.locator('#lp-share-compass').innerText(),/Did you take a breath and speak slowly/);
  assert.equal(await page.locator('#lp-share-compass details').count(),0);
  assert.doesNotMatch(await page.locator('#lp-share-compass').innerText(),/You also chose|ask a friend for feedback/);
@@ -72,7 +72,7 @@ const server=http.createServer((req,res)=>{
  await page.evaluate(()=>go('feed'));await page.locator('#feed-container').waitFor();
  await page.goBack();await page.locator('#np-title').waitFor({state:'visible'});
  assert.equal(await page.locator('#np-title').inputValue(),'My interview');
- assert.ok(await page.locator('[data-focus-check="0"]').isChecked());
+ assert.ok(await page.locator('[data-focus-check="0"][data-focus-value="true"]').isChecked());
  await page.locator('#np-continue').click();
  await page.goBack();await page.locator('#np-title').waitFor({state:'visible'});
  assert.equal(await page.locator('#np-title').inputValue(),'My interview');
@@ -82,16 +82,16 @@ const server=http.createServer((req,res)=>{
  assert.equal(await page.locator('.lp-rubric-pair').count(),0);
  await page.locator('#rubric-newpost-0-1').check();
  assert.equal(await page.evaluate(()=>_rubricStores.newpost.values[0]),1);
- await page.locator('#np-continue').click();assert.match(await page.locator('#lp-share-compass').innerText(),/Look for sentences and links/);
+ await page.locator('#np-continue').click();assert.match(await page.locator('#lp-share-compass').innerText(),/My three goal checks/);
  await page.goBack();await page.locator('#rubric-newpost-0-1').waitFor();
  assert.ok(await page.locator('#rubric-newpost-0-1').isChecked());
  await page.goForward();await page.locator('#rubric-newpost-1-0').waitFor();
  await page.locator('#np-back').click();assert.ok(await page.locator('#rubric-newpost-0-1').isChecked());
  for(let i=0;i<5;i++){await page.locator('#rubric-newpost-'+i+'-'+(i%4)).check();await page.locator('#np-continue').click();}
  assert.ok(await page.locator('#np-well').isVisible());
- assert.ok(await page.locator('[data-focus-check="0"]').isChecked());
- assert.equal(await page.locator('[data-focus-check="1"]').isChecked(),false);
- assert.ok(await page.locator('[data-focus-check="2"]').isChecked());
+ assert.ok(await page.locator('[data-focus-check="0"][data-focus-value="true"]').isChecked());
+ assert.equal(await page.locator('[data-focus-check="1"][data-focus-value="true"]').isChecked(),false);
+ assert.ok(await page.locator('[data-focus-check="2"][data-focus-value="true"]').isChecked());
  assert.equal(await page.locator('#np-title').inputValue(),'My interview');assert.equal(await page.locator('#np-link').inputValue(),'https://example.test/interview');
  // Session callbacks used to bring the fixed bottom bar over share buttons.
  for(const size of [{width:1024,height:768},{width:1024,height:520},{width:390,height:660}]){
@@ -103,23 +103,23 @@ const server=http.createServer((req,res)=>{
  }
  await page.screenshot({path:path.join(root,'verification/share-footer-clear.png'),fullPage:false});
  assert.deepEqual(await page.evaluate(()=>_rubricStores.newpost.values),[0,1,2,3,0]);
- for(const width of [1280,1024]){await page.setViewportSize({width,height:768});await page.locator('[data-share-stage="1"]').click();assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));assert.ok(await page.locator('.lp-share-actions').evaluate(el=>el.getBoundingClientRect().bottom<=innerHeight));}
+ for(const width of [1280,1024]){await page.setViewportSize({width,height:768});await page.locator('[data-share-stage="1"]').click();assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));assert.ok(await page.locator('.lp-share-actions').evaluate(el=>el.getBoundingClientRect().bottom<=innerHeight),JSON.stringify(await page.locator('.lp-share-actions').evaluate(el=>({bottom:el.getBoundingClientRect().bottom,height:innerHeight,scroll:scrollY}))));}
  await page.screenshot({path:path.join(root,'verification/share-single-criterion.png'),fullPage:true});
  await page.locator('[data-share-stage="0"]').click();await page.screenshot({path:path.join(root,'verification/share-goal-guide.png'),fullPage:true});
- assert.ok(await page.locator('[data-focus-check="0"]').isChecked());
- await page.locator('[data-focus-check="2"]').uncheck();
+ assert.ok(await page.locator('[data-focus-check="0"][data-focus-value="true"]').isChecked());
+ await page.locator('[data-focus-check="2"][data-focus-value="false"]').check();
  await page.locator('#lp-share-compass').screenshot({path:path.join(root,'verification/share-checklist.png')});
  assert.equal(await page.locator('#lp-map').isVisible(),false);
  await page.setViewportSize({width:390,height:844});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
  await page.setViewportSize({width:1280,height:800});
- // Unchecked optional reminders never block the normal share action.
+ // Each reminder requires an explicit yes/not-yet response; false is a valid answer.
  await page.locator('[data-share-stage="2"]').click();
  await page.locator('#np-well').fill('My message is clear.');await page.locator('#np-improve').fill('Check more words.');
- await page.locator('#np-share-btn').click();await page.locator('#feed-container').waitFor();
+ assert.equal(await page.locator('#np-share-btn').isDisabled(),true);await page.evaluate(()=>submitPost());assert.equal(await page.evaluate(()=>Object.keys(__mockDB.posts).length),0);await page.locator('[data-focus-check="1"][data-focus-value="false"]').check();assert.equal(await page.locator('#np-share-btn').isDisabled(),false);await page.locator('#np-share-btn').click();await page.locator('#feed-container').waitFor();
  const checklist=await page.evaluate(()=>__mockDB.posts.mock.preShareChecklist);
  assert.deepEqual(checklist.items.map(x=>x.done),[true,false,false]);
  assert.equal(checklist.items[0].tip,'Practise your talk out loud.');
- assert.equal(checklist.version,1);
+ assert.equal(checklist.version,2);
  await page.evaluate(()=>{__mockDB.posts.peerPost={uid:'peer',name:'Ece <A>',productType:'Blog',title:'Kind messages',well:'My ideas',selfRubric:[0,1,2,0,1,2],comments:{one:{from:'Ali',fromId:'ali',well:'Good title',improve:'Add reasons',peerRubric:[0,1,2,0,1,2]}}};go('feed');switchFeedTab('posts');});
  assert.equal(await page.locator('#post-peerPost .lp-reflection-label').innerText(),'Ece <A>’s self-reflection ▼');
  assert.match(await page.locator('#fb-p-peerPost').textContent(),/simple information|explains|information/);
