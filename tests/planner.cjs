@@ -25,13 +25,13 @@ const server=http.createServer((req,res)=>{
  const f=page.frameLocator('#lp-planner-frame');
  await f.locator('#chat-input').waitFor();
  assert.equal(await f.locator('.choice small').count(),0);
- assert.equal(await f.locator('.lp-compass-dancer .lp-clock').evaluate(el=>getComputedStyle(el).animationName),'lp-clock-idle');
+ await f.locator('.workshop-compass[data-workshop-ready]').waitFor();assert.equal(await f.locator('.workshop-compass').getAttribute('data-variant'),'3');
  assert.equal(await f.locator('#motion').isVisible(),false);
- await page.emulateMedia({reducedMotion:'reduce'});assert.equal(await f.locator('.lp-compass-dancer .lp-clock').evaluate(el=>getComputedStyle(el).animationName),'none');await page.emulateMedia({reducedMotion:'no-preference'});
+ await page.emulateMedia({reducedMotion:'reduce'});assert.equal(await f.locator('.workshop-compass').evaluate(el=>el.getAnimations({subtree:true}).filter(a=>a.playState==='running').length),0);await page.emulateMedia({reducedMotion:'no-preference'});
  await f.locator('[data-ask-compass]').click();assert.equal(await f.locator('#chat-input').evaluate(el=>document.activeElement===el),true);
  await f.locator('#chat-input').fill('I like games and music');
- assert.equal(await f.locator('.lp-compass-dancer .lp-clock').evaluate(el=>getComputedStyle(el).animationPlayState),'running');
- assert.equal(await f.locator('[data-ask-compass]').innerText(),'Ask me or ask Google');
+ await f.locator('.workshop-compass[data-workshop-ready]').waitFor();assert.ok(await f.locator('.workshop-compass').evaluate(el=>el.getAnimations({subtree:true}).some(a=>a.playState==='running')));
+ assert.equal(await f.locator('[data-ask-compass]').innerText(),'Ask me! Ask me!');
  await f.locator('#compass-reply').click();
  assert.equal(await f.locator('[data-compass-choice]').count(),0);
  assert.equal(await f.locator('#chat-input').inputValue(),'');
@@ -79,7 +79,7 @@ const server=http.createServer((req,res)=>{
 
  for(const width of [390,1024]){await page.setViewportSize({width,height:768});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));}
  await page.emulateMedia({reducedMotion:'reduce'});
- assert.equal(await page.locator('.lp-launch-guide .lp-clock').evaluate(el=>getComputedStyle(el).animationName),'none');
+ await page.waitForFunction(()=>{const el=document.querySelector('.point-v1-sprite');return el&&!el.getAnimations().some(a=>a.playState==='running');});
  await page.emulateMedia({reducedMotion:'no-preference'});
  await page.evaluate(()=>{document.getElementById('mc').innerHTML=LearnPathUI.productLaunch('<Custom & format>');});
  assert.equal(await page.locator('.lp-launch-format').innerText(),'<Custom & format>');
@@ -107,7 +107,7 @@ const server=http.createServer((req,res)=>{
  assert.deepEqual(await f.locator('[data-plan]').evaluateAll(els=>els.map(el=>el.value)),['','','']);
  assert.equal(await f.getByRole('button',{name:'Add another step',exact:true}).count(),1);
  assert.equal(await f.locator('.plan-examples').count(),0);assert.equal(await f.locator('.plan-suggestions li').count(),3);await f.locator('#passport-next').click();assert.match(await f.locator('#passport-error').innerText(),/Complete every/);
- assert.match(await f.locator('.passport-plan-layout .contract-guide').innerText(),/If you want, write these/);
+ assert.match(await f.locator('.passport-plan-layout .contract-guide').innerText(),/Use these ideas/);
  assert.ok(await f.locator('.passport-plan-layout .contract-guide').evaluate(el=>el.getBoundingClientRect().left>document.querySelector('.passport-plan-layout .contract-paper').getBoundingClientRect().right));
  const planCaptureStyle=await page.addStyleTag({content:'.topbar,.bnav{display:none!important}'});
  await f.locator('.contract-plan').screenshot({path:path.join(root,'verification/prefilled-plan-steps.png')});
