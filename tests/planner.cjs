@@ -26,7 +26,7 @@ const server=http.createServer((req,res)=>{
  await f.locator('#chat-input').waitFor();
  assert.equal(await f.locator('.choice small').count(),0);
  assert.equal(await f.locator('.lp-compass-dancer .lp-clock').evaluate(el=>getComputedStyle(el).animationName),'lp-clock-idle');
- await f.locator('#motion').click();assert.equal(await f.locator('.lp-compass-dancer .lp-clock').evaluate(el=>getComputedStyle(el).animationPlayState),'paused');await f.locator('#motion').click();
+ assert.equal(await f.locator('#motion').isVisible(),false);
  await page.emulateMedia({reducedMotion:'reduce'});assert.equal(await f.locator('.lp-compass-dancer .lp-clock').evaluate(el=>getComputedStyle(el).animationName),'none');await page.emulateMedia({reducedMotion:'no-preference'});
  await f.locator('[data-ask-compass]').click();assert.equal(await f.locator('#chat-input').evaluate(el=>document.activeElement===el),true);
  await f.locator('#chat-input').fill('I like games and music');
@@ -75,8 +75,8 @@ const server=http.createServer((req,res)=>{
  assert.match(await page.locator('.lp-launch-notice').innerText(),/short facts and pictures/);
  assert.match(await page.locator('.lp-launch-invite').innerText(),/Check some infographics online/);
  await page.screenshot({path:path.join(root,'verification/product-inspiration-tablet.png'),fullPage:true});
- await page.getByRole('button',{name:'Pause animation',exact:true}).click();
- assert.ok(await page.locator('.lp-launch-guide .lp-clock.paused').count());
+ assert.equal(await page.locator('.lp-launch-guide .lp-motion-toggle').isVisible(),false);
+
  for(const width of [390,1024]){await page.setViewportSize({width,height:768});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));}
  await page.emulateMedia({reducedMotion:'reduce'});
  assert.equal(await page.locator('.lp-launch-guide .lp-clock').evaluate(el=>getComputedStyle(el).animationName),'none');
@@ -149,7 +149,7 @@ const server=http.createServer((req,res)=>{
  assert.ok(await f.locator('.lp-doc-reveal').count()>=4);
  await f.locator('.passport-document').evaluate(el=>Promise.all(el.getAnimations({subtree:true}).filter(a=>a.effect?.target?.classList.contains('lp-doc-reveal')).map(a=>a.finished)));
  await f.locator('.passport-document').screenshot({path:path.join(root,'verification/passport-document.png')});
- await f.locator('#motion').click();
+ await page.emulateMedia({reducedMotion:'reduce'});
  assert.equal(await f.locator('.lp-doc-reveal').first().evaluate(el=>getComputedStyle(el).animationName),'none');
  await f.locator('.passport-topic-edit summary').click();
  assert.ok(await f.locator('#saved-topic').isVisible());
@@ -210,7 +210,7 @@ const server=http.createServer((req,res)=>{
  await f.locator('.passport-photo img').waitFor();
  await f.locator('.passport-photo img').evaluate(img=>img.decode());
  assert.equal(await f.locator('.passport-photo img').evaluate(img=>img.naturalWidth>0),true);
- await f.locator('#motion').click();
+ await page.emulateMedia({reducedMotion:'reduce'});
  const overlayStyle=await page.addStyleTag({content:'.topbar,.bnav{visibility:hidden!important}'});
  await f.locator('.passport-document').screenshot({path:path.join(root,'verification/passport-spread-tablet.png')});
  await overlayStyle.evaluate(el=>el.remove());

@@ -40,8 +40,8 @@ const server=http.createServer((req,res)=>{
     await page.getByRole('button',{name:'Continue →',exact:true}).click();
     await page.locator('.lp-project-grid').waitFor();
     assert.equal(await page.locator('[data-product-id]').count(),18);
-    await page.locator('[data-product-id="mini_story"]').click();
-    assert.equal(await page.locator('[data-product-id="mini_story"]').getAttribute('aria-pressed'),'true');
+    await page.locator('[data-product-id="blog"]').click();
+    assert.equal(await page.locator('[data-product-id="blog"]').getAttribute('aria-pressed'),'true');
     await page.evaluate(()=>scrollTo(0,0));
     await page.screenshot({path:path.join(out,'projects-landscape.png'),fullPage:true});
     const animation=await page.locator('.lp-clock').evaluate(el=>{
@@ -52,8 +52,8 @@ const server=http.createServer((req,res)=>{
       return {unique:new Set(positions).size,first:positions[0],loop,duration};
     });
     assert.equal(animation.unique,24);assert.equal(animation.duration,3000);assert.equal(animation.loop,animation.first);
-    await page.getByRole('button',{name:'Pause animation'}).click();
-    assert.equal(await page.locator('.lp-clock').evaluate(el=>getComputedStyle(el).animationPlayState),'paused');
+    assert.equal(await page.locator('.lp-motion-toggle').first().isVisible(),false);
+    assert.equal(await page.locator('.lp-clock').evaluate(el=>getComputedStyle(el).animationPlayState),'running');
     const overflow=[];
     for(const size of [{width:1024,height:768},{width:1366,height:768},{width:390,height:844}]){
       await page.setViewportSize(size);
@@ -90,9 +90,8 @@ const server=http.createServer((req,res)=>{
     await page.locator('.lp-grammar-feedback').first().waitFor();
     assert.equal(await page.locator('.lp-grammar-feedback').count(),5);
     await page.screenshot({path:path.join(out,'grammar-feedback.png'),fullPage:true});
-    await page.locator('.lp-grammar-feedback .lp-motion-toggle').first().click();
-    await page.locator('.lp-grammar-feedback .lp-motion-toggle').first().click();
-    assert.ok(await page.locator('.lp-grammar-feedback .lp-clock').evaluateAll(els=>els.every(el=>el.classList.contains('paused'))));
+    assert.equal(await page.locator('.lp-grammar-feedback .lp-motion-toggle').first().isVisible(),false);
+    await page.emulateMedia({reducedMotion:'reduce'});assert.ok(await page.locator('.lp-grammar-feedback .lp-clock').evaluateAll(els=>els.every(el=>getComputedStyle(el).animationName==='none')));
     for(const size of [{width:1024,height:768},{width:390,height:844}]){
       await page.setViewportSize(size);
       assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
@@ -109,7 +108,7 @@ const server=http.createServer((req,res)=>{
     assert.ok(await page.locator('.lp-unit-image').getAttribute('alt'));
     assert.equal(await page.locator('.lp-unit-image').evaluate(el=>el.complete&&el.naturalWidth>0),true);
     assert.equal(errors.length,0,errors.join('\n'));
-    fs.writeFileSync(path.join(out,'browser.json'),JSON.stringify({checks:['Home milestone routing','Keyboard platform choice','All 18 teacher-defined product options','Choice-state retention','24 distinct CSS sprite frames','Exact 3000ms seamless cycle','Pause control','Reduced motion','1024/1366/390px overflow checks','Resource invalid-submit feedback','29 supplied word checkboxes and 5 supplied grammar questions','Words to learn lists all 27 unchecked words after two synthetic selections','Unanswered grammar blocks submission','Exact explanation for each synthetic wrong answer','Shared feedback animation pause','Unit feedback layout at 1024 and 390px','Teacher JPG processing, save and student display','No JavaScript errors'],animation,overflow,errors,network:'All external requests blocked; mocked persistence; no real student data touched'},null,2)+'\n');
+    fs.writeFileSync(path.join(out,'browser.json'),JSON.stringify({checks:['Home milestone routing','Keyboard platform choice','All 18 teacher-defined product options','Choice-state retention','24 distinct CSS sprite frames','Exact 3000ms seamless cycle','Learner playback buttons hidden','Reduced motion','1024/1366/390px overflow checks','Resource invalid-submit feedback','29 supplied word checkboxes and 5 supplied grammar questions','Words to learn lists all 27 unchecked words after two synthetic selections','Unanswered grammar blocks submission','Exact explanation for each synthetic wrong answer','Shared feedback respects reduced motion','Unit feedback layout at 1024 and 390px','Teacher JPG processing, save and student display','No JavaScript errors'],animation,overflow,errors,network:'All external requests blocked; mocked persistence; no real student data touched'},null,2)+'\n');
     console.log('Browser checks passed. Screenshots: verification/*.png');
   }finally{await browser.close();server.close();}
 })().catch(e=>{console.error(e);server.close();process.exitCode=1;});
