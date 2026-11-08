@@ -254,8 +254,8 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
 .rub-sentence{font-size:13px}
 .rub-chevron{background:none;border:none;color:var(--th);cursor:pointer;font-size:12px;padding:4px 6px;flex-shrink:0}
 </style>
-<link rel="stylesheet" href="assets/learnpath.css?v=20261108-4">
-<link rel="stylesheet" href="assets/compass-scenes.css?v=20261108-4"></head>
+<link rel="stylesheet" href="assets/learnpath.css?v=20261108-5">
+<link rel="stylesheet" href="assets/compass-scenes.css?v=20261108-5"></head>
 <body>
 
 <div id="auth">
@@ -310,12 +310,13 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
   <div class="modal-card" id="result-popup-card" style="text-align:center;padding:26px 20px"></div>
 </div>
 
-<script src="assets/learnpath-ui.js?v=20261108-4"></script>
-<script src="assets/rubric-v2.js?v=20261108-4"></script><script src="assets/share-guide.js?v=20261108-4"></script><script src="assets/vendor/jszip-3.10.1.min.js"></script><script src="assets/project-previews.js?v=20261108-4"></script>
-<script src="assets/navigation.js?v=20261108-4"></script>
-<link rel="stylesheet" href="assets/learning-support.css?v=20261108-4"><script src="assets/learning-support.js?v=20261108-4"></script>
+<script src="assets/learnpath-ui.js?v=20261108-5"></script>
+<script src="assets/rubric-v2.js?v=20261108-5"></script><script src="assets/share-guide.js?v=20261108-5"></script><script src="assets/vendor/jszip-3.10.1.min.js"></script><script src="assets/project-previews.js?v=20261108-5"></script>
+<script src="assets/navigation.js?v=20261108-5"></script>
+<link rel="stylesheet" href="assets/learning-support.css?v=20261108-5"><script src="assets/learning-support.js?v=20261108-5"></script>
+<link rel="stylesheet" href="assets/feedback-summary.css?v=20261108-5">
 <script type="module">
-import {auth,db,storage,rpc,ref,set,get,push,onValue,update,remove,sref,uploadBytesResumable,getDownloadURL,deleteObject,onAuthStateChanged,signInWithPopup,signOut} from './assets/supabase-backend.js?v=20261108-4';
+import {auth,db,storage,rpc,ref,set,get,push,onValue,update,remove,sref,uploadBytesResumable,getDownloadURL,deleteObject,onAuthStateChanged,signInWithPopup,signOut} from './assets/supabase-backend.js?v=20261108-5';
 const prov={};
 let CU=null,UP=null,supportProfile=null;
 function supportedPlan(c){return supportProfile===LearnPathSupport.profile&&(!c||c.goalVersion===LearnPathSupport.goalVersion);}
@@ -355,7 +356,7 @@ function catalogExampleUrl(value){
   var text=String(value||'').trim();if(!text)return '';
   try{var url=new URL(text);return ['https:','http:'].includes(url.protocol)&&!url.username&&!url.password?url.href:'';}catch{return '';}
 }
-function resolvedCatalog(raw){
+function resolvedCatalog(raw,includeLegacy=false){
   raw=raw&&typeof raw==='object'?raw:{};
   var out={written:[],spoken:[],visual:[]};
   for(var cat of Object.keys(out)){
@@ -365,17 +366,17 @@ function resolvedCatalog(raw){
     if(legacy||!Object.hasOwn(raw,cat))DEFAULT_CATALOG[cat].forEach(function(pair){merged.set(pair[0],{id:pair[0],name:pair[1],active:true,exampleUrl:''});});
     for(var id of Object.keys(items)){
       var item=items[id];if(!item||typeof item!=='object')continue;
-      if(LEGACY_CATALOG_DEFAULTS[id]===item.name)continue;
       if(item.deleted===true){merged.delete(id);continue;}
+      if(LEGACY_CATALOG_DEFAULTS[id]===item.name&&!item.updatedAt&&!includeLegacy)continue;
       if(typeof item.name!=='string'||!item.name.trim())continue;
-      merged.set(id,{id:id,name:item.name,active:item.active!==false,exampleUrl:catalogExampleUrl(item.exampleUrl)});
+      merged.set(id,{id:id,name:item.name,active:item.active!==false,legacy:LEGACY_CATALOG_DEFAULTS[id]===item.name&&!item.updatedAt,exampleUrl:catalogExampleUrl(item.exampleUrl)});
     }
     out[cat]=Array.from(merged.values());
   }
   return out;
 }
-async function loadCatalog(){
-  try{var snap=await get(ref(db,'ideaCatalog'));var out=resolvedCatalog(snap.exists()?snap.val():{});window._lastIdeaCatalog=out;return out;}
+async function loadCatalog(includeLegacy=false){
+  try{var snap=await get(ref(db,'ideaCatalog'));var out=resolvedCatalog(snap.exists()?snap.val():{},includeLegacy);if(!includeLegacy)window._lastIdeaCatalog=out;return out;}
   catch(error){console.error('Could not load product options:',error);return resolvedCatalog({});}
 }
 function productById(catalog,id){for(var c in catalog){var f=catalog[c].find(function(p){return p.id===id;});if(f)return f;}return null;}
@@ -959,6 +960,7 @@ async function renderEval2Modal(){
   try{var usnap=await get(ref(db,"unitInfo"));if(usnap.exists())uinfo=usnap.val();}catch(e){}
   var wordList=(uinfo.words||"").split("\n").map(function(w){return w.trim();}).filter(Boolean);
   var gQs=uinfo.grammarQuestions||[];
+  if(supportProfile===LearnPathSupport.profile){wordList=wordList.slice(0,10);gQs=gQs.slice(0,3);}
 
   // fresh working state for this evaluation session — resets to blank the first time this session is seen,
   // but does NOT reset on every re-render (that was wiping out clicks)
@@ -1051,16 +1053,16 @@ window.submitEval2=async function(){
   var s=window._eval2Scores||{};
   if(!s.satisfied||!s.followedPlan||!s.achievedGoals||!s.gotScore){toast("Please rate all four statements!");return;}
   var unitSnap=await get(ref(db,'unitInfo'));var unit=unitSnap.exists()?unitSnap.val():{};
-  var questions=unit.grammarQuestions||[];
+  var questions=unit.grammarQuestions||[];if(supportProfile===LearnPathSupport.profile)questions=questions.slice(0,3);
   if(questions.some(function(q,i){var answer=(window._eval2GrammarAnswers||{})[i];return !Number.isInteger(answer)||answer<0||answer>=q.options.length;})){toast('Please answer all grammar questions before submitting.');return;}
-  var words=(unit.words||'').split('\n').map(function(w){return w.trim();}).filter(Boolean);
+  var words=(unit.words||'').split('\n').map(function(w){return w.trim();}).filter(Boolean);if(supportProfile===LearnPathSupport.profile)words=words.slice(0,10);
   var sessionKey=window._liveSession.updatedAt;
   await update(ref(db,"contracts/"+CU.uid),{projectEval:{satisfied:s.satisfied,followedPlan:s.followedPlan,achievedGoals:s.achievedGoals,gotScore:s.gotScore,sessionKey:sessionKey,submittedAt:Date.now()}});
   if(window._eval2WordState&&window._eval2WordState.length){
-    await set(ref(db,"wordChecks/"+CU.uid),{checked:window._eval2WordState,words:words,selectedWords:words.filter(function(w,i){return !!window._eval2WordState[i];}),contentVersion:unit.contentVersion||null,stage:'after-project',studentName:CU.displayName,submittedAt:Date.now(),sessionKey:sessionKey});
+    await set(ref(db,"wordChecks/"+CU.uid),{checked:window._eval2WordState,words:words,selectedWords:words.filter(function(w,i){return !!window._eval2WordState[i];}),contentVersion:unit.contentVersion||null,assessmentVersion:supportProfile===LearnPathSupport.profile?'guided-unit-10x3-v1':'standard',stage:'after-project',studentName:CU.displayName,submittedAt:Date.now(),sessionKey:sessionKey});
   }
   if(window._eval2GrammarAnswers&&Object.keys(window._eval2GrammarAnswers).length){
-    await set(ref(db,"grammarAnswers/"+CU.uid),{answers:window._eval2GrammarAnswers,questions:questions,contentVersion:unit.contentVersion||null,stage:'after-project',submitted:true,studentName:CU.displayName,submittedAt:Date.now(),sessionKey:sessionKey});
+    await set(ref(db,"grammarAnswers/"+CU.uid),{answers:window._eval2GrammarAnswers,questions:questions,contentVersion:unit.contentVersion||null,assessmentVersion:supportProfile===LearnPathSupport.profile?'guided-unit-10x3-v1':'standard',stage:'after-project',submitted:true,studentName:CU.displayName,submittedAt:Date.now(),sessionKey:sessionKey});
   }
   celebrate();
   await addCoin(5);
@@ -1291,6 +1293,12 @@ function feedbackGroups(comments,label,prefix){
  if(!comments.length)versions[LearnPathRubrics.version]=[];
  return Object.keys(versions).map(function(version,i){var rubric=recordRubric({peerRubricVersion:version},false);return {label:label,id:prefix+(i?'-'+i:''),rubric:rubric,version:version,stats:groupStats(versions[version],rubric)};});
 }
+function averageMatchesHTML(group){
+ var html='<div class="lp-average-criteria">';
+ (group.rubric||[]).forEach(function(item,ai){var values=group.stats.perArea[ai];if(!values?.length)return;var average=values.reduce(function(a,b){return a+b;},0)/values.length,level=Math.max(0,Math.min(item.levels.length-1,Math.round(average))),points=item.support?(level?3:1):level+1,max=item.support?3:item.levels.length;
+ html+='<p class="lp-average-match" data-criterion="'+ai+'" data-matched-level="'+level+'" data-tier="'+(item.support?level?3:0:level)+'"><strong>'+esc(item.area)+(item.support?'':' <span class="lp-feedback-tier">Step '+(level+1)+'</span>')+' '+LearnPathSupport.stars(points,max)+'</strong><span class="lp-average-ending">'+esc(LearnPathRubrics.sentence(item,level))+'</span></p>';});
+ return html+'</div>';
+}
 function buildCommentSummary(post,comments){
  if(!comments.length)return '';
  var teacher=comments.filter(function(c){return c.isTeacher===true;}),peers=comments.filter(function(c){return c.isTeacher!==true;});
@@ -1298,13 +1306,16 @@ function buildCommentSummary(post,comments){
  var html='<section class="lp-feedback-summary"><h3>Feedback Summary</h3><div class="lp-feedback-scores">';
  groups.forEach(function(group){var stats=group.stats;html+='<div class="lp-feedback-score"><span>'+group.label+'</span>';
   if(stats.overall===null)html+='<strong>'+(stats.count?'Written feedback only':'Not yet')+'</strong>';
-  else html+='<strong>'+scorePercent(stats.overall,stats.maxSteps)+'%</strong><span>'+(group.version===LearnPathSupport.rubricVersion?LearnPathSupport.stars(stats.overall>=2?3:1):scoreTierLabel(stats.overall,stats.maxSteps))+'</span><button type="button" class="lp-feedback-details" onclick="toggleCat(\''+group.id+'\')">See descriptions</button>';
+  else html+='<strong>'+scorePercent(stats.overall,stats.maxSteps)+'%</strong><span>'+(group.version===LearnPathSupport.rubricVersion?LearnPathSupport.stars(stats.overall>=2?3:1):scoreTierLabel(stats.overall,stats.maxSteps))+'</span>';
   if(stats.count)html+='<small class="lp-rubric-version-note">'+(group.version===LearnPathSupport.rubricVersion?'5 categories · supported reflection':group.version===LearnPathRubrics.version?'5 categories · 4 Steps':group.rubric?'Earlier rubric · 6 categories · 3 Steps':'Rubric version unavailable')+'</small>';
   html+='</div>';
  });html+='</div>';
- groups.forEach(function(group){html+='<div id="'+group.id+'" style="display:none"><h4>'+group.label+'</h4>';(group.rubric||[]).forEach(function(item,ai){var values=group.stats.perArea[ai];if(!values)return;var avg=values.reduce(function(a,b){return a+b;},0)/values.length,level=Math.max(0,Math.min(item.levels.length-1,Math.round(avg)));html+='<p class="lp-feedback-description"><strong>'+esc(item.area)+' <b class="lp-feedback-tier">'+(item.support?LearnPathSupport.stars(level?3:1):'Step '+(level+1))+'</b></strong><span>'+esc(LearnPathRubrics.sentence(item,level))+'</span></p>';});html+='</div>';});
+ groups.forEach(function(group){if(group.stats.overall===null)return;var peer=group.label!=='Teacher';
+  html+=peer?'<section id="'+group.id+'" class="lp-classmate-matches"><h4>Classmates’ average</h4><p class="lp-average-caption">'+group.stats.count+' classmates · highlighted descriptions match their average.</p>':'<details id="'+group.id+'"><summary>Teacher descriptions</summary>';
+  html+=averageMatchesHTML(group)+(peer?'</section>':'</details>');
+ });
  teacher.forEach(function(cm){html+=personalGoalFeedback(cm);});
- html+='<button type="button" class="lp-feedback-details lp-written-feedback-toggle" onclick="toggleCat(\''+allId+'\')">Read written feedback ('+comments.length+')</button><div id="'+allId+'" style="display:none"><div class="lp-written-feedback-columns">';
+ html+='<button type="button" class="lp-feedback-details lp-written-feedback-toggle" onclick="toggleCat(\''+allId+'\')">See feedback ('+comments.length+')</button><div id="'+allId+'" style="display:none"><div class="lp-written-feedback-columns">';
  [['well','Good points'],['improve','To improve']].forEach(function(column){html+='<section><h4>'+column[1]+'</h4>';var written=comments.filter(function(cm){return !!cm[column[0]];});if(!written.length)html+='<p class="lp-feedback-empty">No comments yet.</p>';written.forEach(function(cm){html+='<p class="lp-written-feedback"><span>'+esc(cm[column[0]])+'</span><small>'+esc(cm.isTeacher?'Teacher · '+(cm.from||'Teacher'):cm.from||'Classmate')+'</small></p>';});html+='</section>';});
  return html+'</div></div></section>';
 }
@@ -1638,12 +1649,14 @@ window.renderStep1Screen=async function(){
 
   // ── Unit Words checklist (index-based, instant feedback) ──
   var wordList=(info.words||"").split("\n").map(function(w){return w.trim();}).filter(Boolean);
+  if(supportProfile===LearnPathSupport.profile&&!wordRecord.submittedAt)wordList=wordList.slice(0,10);
+  if(supportProfile===LearnPathSupport.profile&&wordRecord.assessmentVersion==='guided-unit-10x3-v1')wordList=wordRecord.words||wordList;
   window._unitWordList=wordList;
   window._unitContentVersion=info.contentVersion||null;
   window._wordCheckState=wordList.map(function(w,i){return !!savedChecked[i];});
   if(wordList.length){
     html+='<div class="card"><div style="font-size:13px;font-weight:700;margin-bottom:8px">&#128214; Unit Words</div>';
-    html+='<div style="font-size:12px;color:var(--tm);margin-bottom:8px">Tick every word you already know, then submit.</div>';
+    html+='<div style="font-size:12px;color:var(--tm);margin-bottom:8px">'+(supportProfile===LearnPathSupport.profile?'Look at these 10 words. Tick the words you know.':'Tick every word you already know, then submit.')+'</div>';
     html+='<div id="word-check-list" class="lp-unit-words">';
     wordList.forEach(function(w,i){
       var checked=window._wordCheckState[i];
@@ -1657,6 +1670,7 @@ window.renderStep1Screen=async function(){
 
   // Submission snapshots keep feedback tied to the questions actually answered.
   var gQs=(myGrammarSubmitted&&grammarRecord.questions)||info.grammarQuestions||[];
+  if(supportProfile===LearnPathSupport.profile&&!myGrammarSubmitted)gQs=gQs.slice(0,3);
   window._unitGrammarQuestions=gQs;
   if(gQs.length){
     html+='<div class="card"><h2 class="ctitle mb8">Grammar Practice</h2>';
@@ -1692,7 +1706,7 @@ window.renderStep1Screen=async function(){
 window._myWordChecks=null;
 function unitWordRecord(){
   var words=window._unitWordList||[];
-  return {checked:window._wordCheckState||[],words:words,selectedWords:words.filter(function(w,i){return !!window._wordCheckState[i];}),contentVersion:window._unitContentVersion,studentName:CU.displayName};
+  return {checked:window._wordCheckState||[],words:words,selectedWords:words.filter(function(w,i){return !!window._wordCheckState[i];}),contentVersion:window._unitContentVersion,assessmentVersion:supportProfile===LearnPathSupport.profile?'guided-unit-10x3-v1':'standard',studentName:CU.displayName};
 }
 function wordsToLearnHTML(record){
   var words=record.words||window._unitWordList||[];
@@ -1717,7 +1731,7 @@ window.pickGrammarAnswer=async function(qi,oi){
     if(snap.exists()&&snap.val().submitted)return;
     var answers=(snap.exists()&&snap.val().answers)||{};
     answers[qi]=oi;
-    await set(ref(db,"grammarAnswers/"+CU.uid),{answers:answers,questions:window._unitGrammarQuestions||[],contentVersion:window._unitContentVersion,submitted:false,studentName:CU.displayName});
+    await set(ref(db,"grammarAnswers/"+CU.uid),{answers:answers,questions:window._unitGrammarQuestions||[],assessmentVersion:supportProfile===LearnPathSupport.profile?'guided-unit-10x3-v1':'standard',contentVersion:window._unitContentVersion,submitted:false,studentName:CU.displayName});
     var scrollY=window.scrollY;
     await renderStep1Screen();window.scrollTo(0,scrollY);
     var buttons=document.querySelectorAll('.lp-unit-question');
@@ -1739,7 +1753,7 @@ window.submitGrammarAnswers=async function(){
       var questions=document.querySelectorAll('.lp-unit-question');if(questions[missing])questions[missing].querySelector('button').focus();
       return;
     }
-    await update(ref(db,"grammarAnswers/"+CU.uid),{answers:answers,questions:gQs,contentVersion:window._unitContentVersion,submitted:true,studentName:CU.displayName,submittedAt:Date.now(),stage:'before-project'});
+    await update(ref(db,"grammarAnswers/"+CU.uid),{answers:answers,questions:gQs,assessmentVersion:supportProfile===LearnPathSupport.profile?'guided-unit-10x3-v1':'standard',contentVersion:window._unitContentVersion,submitted:true,studentName:CU.displayName,submittedAt:Date.now(),stage:'before-project'});
     await renderStep1Screen();toast('Answers saved. Read your compass feedback below.');
   }catch(e){var error=document.getElementById('grammar-error');if(error)error.textContent='Could not save your answers. Please try again.';}
   finally{if(button)button.disabled=false;}
@@ -2292,7 +2306,7 @@ function installTeacherWorkspace(){
   let page = 'overview';
   const css = document.createElement('link');
   css.rel = 'stylesheet';
-  css.href = 'assets/teacher-workspace.css?v=20261108-4';
+  css.href = 'assets/teacher-workspace.css?v=20261108-5';
   document.head.append(css);
   document.body.classList.add('teacher-workspace');
 
@@ -2374,7 +2388,7 @@ function installTeacherWorkspace(){
     const mc=document.getElementById('mc');
     mc.innerHTML=header('Project options','The same product types students choose in Written, Spoken and Visual.');
     await ensureCatalogSeeded();
-    const catalog=await loadCatalog();
+    const catalog=await loadCatalog(true);
     if(page!=='ideas')return;
     const columns=document.createElement('div');
     columns.className='teacher-product-options';
@@ -2384,8 +2398,9 @@ function installTeacherWorkspace(){
       const title=document.createElement('h2');
       title.textContent=CAT_LABELS[key];
       card.append(title);
+      const previous=document.createElement('details');previous.className='teacher-previous-products';const previousTitle=document.createElement('summary');previousTitle.textContent='Previous product options';previous.append(previousTitle);
       for(const item of catalog[key]){
-        const wrapper=document.createElement('section');wrapper.className='teacher-product-item';wrapper.dataset.productId=item.id;
+        const wrapper=document.createElement('section');wrapper.className='teacher-product-item';wrapper.dataset.productId=item.id;if(item.legacy)wrapper.dataset.legacy='true';
         const row=document.createElement('div');row.className='teacher-product-row';
         const name=document.createElement('strong');name.textContent=item.name;
         const controls=document.createElement('div');controls.className='teacher-product-actions';
@@ -2408,8 +2423,9 @@ function installTeacherWorkspace(){
         const actions=document.createElement('div');actions.className='teacher-product-actions';actions.append(save,cancel);
         editor.append(hint,visibleLabel,actions);
         editor.onsubmit=async event=>{event.preventDefault();save.disabled=true;removeButton.disabled=true;status.textContent='Saving…';try{await saveCatalogItem(key,item.id,nameInput.value,urlInput.value,visible.checked);await renderTIdeas();toast('Product updated.');}catch(error){status.textContent=error.message||'Could not save. Your changes are still here.';}finally{save.disabled=false;removeButton.disabled=false;}};
-        wrapper.append(row,editor,status);card.append(wrapper);
+        wrapper.append(row,editor,status);(item.legacy?previous:card).append(wrapper);
       }
+      if(previous.querySelector('.teacher-product-item'))card.append(previous);
       const form=document.createElement('form');form.className='teacher-product-add';form.noValidate=true;
       const nameLabel=document.createElement('label');nameLabel.htmlFor='new-idea-'+key;nameLabel.textContent='New product';
       const input=document.createElement('input');input.className='fi';input.id='new-idea-'+key;input.maxLength=120;input.placeholder='Product name';
@@ -3085,7 +3101,7 @@ async function saveCatalogItem(cat,id,name,exampleUrl,active){
   await update(ref(db,'ideaCatalog/'+cat+'/'+id),{name:name.trim(),exampleUrl:catalogExampleUrl(exampleUrl),active:active!==false,deleted:false,updatedAt:Date.now()});
 }
 window.deleteCatalogItem=async function(cat,id){
-  var item=(await loadCatalog())[cat]?.find(function(item){return item.id===id;});if(!item){await renderTIdeas();return;}
+  var item=(await loadCatalog(true))[cat]?.find(function(item){return item.id===id;});if(!item)throw new Error('This product was already removed. Reopen Project options.');
   validateCatalogEdit(cat,id,item.name,item.exampleUrl);
   // Preserve an explicit removal so virtual legacy defaults cannot return.
   await update(ref(db,'ideaCatalog/'+cat+'/'+id),{name:item.name,active:false,deleted:true,exampleUrl:item.exampleUrl||'',updatedAt:Date.now()});
@@ -3506,7 +3522,7 @@ async function mountPlanner(mode,c,overview){
     ['written','spoken','visual'].forEach(function(cat){extra[cat]=(catalog[cat]||[]).filter(function(item){var original=DEFAULT_CATALOG[cat].find(function(pair){return pair[0]===item.id;});return item.active&&(!original||original[1]!==item.name);});});
   }
   var mc=document.getElementById('mc');
-  mc.innerHTML=(isLockedStep(mode==='idea'?'step2':'step3')?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">← Back to Home</button>')+'<iframe id="lp-planner-frame" title="'+(mode==='idea'?'Plan your project':LearnPathUI.hasPassport(c)?'My Learning Passport':'Set goals and plan')+'" src="assets/planner.html?v=20261108-4" style="width:100%;height:900px;border:0;display:block" scrolling="no"></iframe>';
+  mc.innerHTML=(isLockedStep(mode==='idea'?'step2':'step3')?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">← Back to Home</button>')+'<iframe id="lp-planner-frame" title="'+(mode==='idea'?'Plan your project':LearnPathUI.hasPassport(c)?'My Learning Passport':'Set goals and plan')+'" src="assets/planner.html?v=20261108-5" style="width:100%;height:900px;border:0;display:block" scrolling="no"></iframe>';
   window._plannerContext={mode:mode,contract:c,overview:!!overview&&LearnPathUI.hasPassport(c),passportReady:LearnPathUI.hasPassport(c),readOnly:false,supportProfile:supportedPlan(c)?supportProfile:null,extraProducts:extra,resume:LearnPathNavigation.resume(),catalogProducts:mode==='idea'?catalog:null,identity:{name:c&&c.studentName||CU.displayName,photo:c&&c.studentId!==CU.uid?c.studentPhoto||'':UP.avatarUrl||CU.photoURL||c&&c.studentPhoto||''}};
   setNav('home');
 }
@@ -3576,5 +3592,5 @@ LearnPathNavigation.install({
  open:function(route,args){return ({go:window.go,share:window.openNewPost,unit:window.renderStep1Screen,idea:window.startQuiz,passport:window.renderStep3Screen,resources:window.renderResourcesScreen,savedIdea:renderQuizDone,profile:window.viewProf}[route]||window.go).apply(null,args||[]);}
 });
 </script>
-<script src="assets/compass-scenes.js?v=20261108-4"></script></body>
+<script src="assets/compass-scenes.js?v=20261108-5"></script></body>
 </html>
