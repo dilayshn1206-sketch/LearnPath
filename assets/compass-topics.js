@@ -5,7 +5,7 @@ const COMPASS_TOPIC_WORDS={
  photo:'photo photos picture pictures image images',selfie:'selfie selfies',filter:'filter filters appearance',edit:'edit edits edited editing',likes:'likes followers views popular fame famous',
  team:'team teams teammate teammates teamwork',chat:'chat chats chatting voice',message:'message messages messaging text texts texting dm dms',emoji:'emoji emojis',joke:'joke jokes joking meme memes lol misunderstood misunderstanding sarcasm',
  rude:'rude mean toxic insult insults bullying bully nasty unkind',comment:'comment comments commenting',friend:'friend friends friendship classmates',exclude:'excluded ignored blocked kicked',
- scroll:'scroll scrolling reels reel',video:'video videos clip clips shorts',time:'time hours hour bedtime sleep sleeping tired midnight late',screen:'screen screens balance balanced',phone:'phone phones smartphone smartphones',
+ scroll:'scroll scrolling reels reel',video:'video videos clip clips shorts watch watching',time:'time hours hour bedtime sleep sleeping tired midnight late',screen:'screen screens balance balanced',phone:'phone phones smartphone smartphones',
  notice:'notification notifications buzzing distraction distractions distracted',study:'homework study studying focus concentrate exam exams',
  share:'share shared sharing post posted posting upload uploaded uploading forward forwarded',permission:'permission consent asking ask tagged tag screenshot screenshots',
  account:'account accounts login passcode password passwords hacked hacking security private privacy',link:'link links click clicking',stranger:'stranger strangers scam scams phishing suspicious',prize:'prize prizes giveaway giveaways robux gems coins free',
@@ -73,7 +73,7 @@ function compassTopicReply(text,context={}){
  decorate(current);decorate(words);
  const memory={words:[...words].filter(w=>!w.endsWith('Context')).slice(-48),excluded:[...excluded].slice(-24),options:prev.options||[],seen:reset?[]:prev.seen||[]};
  const response=(title,bullets,question,extra={})=>compassAnswer(title,bullets,question,{intent:'topic-suggestions',topicId:null,formatId:null,topicMemory:memory,...extra});
- const finish=option=>response('Your topic',[[option.title,option.own?'Your own topic about digital life.':COMPASS_LIBRARY.topics[option.topicId].meaning],['Choose it',option.own?'Choose “A Topic of My Own” and enter “'+option.title+'”.':'Choose “'+option.title+'” beside the chat.']],'You can change your choice whenever you need to.',{intent:'topic-selection',topicId:option.topicId});
+ const finish=option=>response(option.title,[], 'What would you like to explore about '+option.title+'?',{intent:'topic-selection',topicId:option.topicId,compact:true});
  const exact=(prev.options||[]).find(o=>compassNormal(o.title)===n.trim());
  if(!reset&&exact)return finish(exact);
  if(!reset&&prev.options?.length){
@@ -113,18 +113,19 @@ function compassTopicReply(text,context={}){
   const existing=COMPASS_LIBRARY.topics[pick.topicId];
   memory.options=[{title:existing.name,topicId:pick.topicId,own:false},{title:pick.title,topicId:pick.topicId,own:true}];
   memory.seen=[...memory.seen.filter(t=>t!==pick.title),pick.title].slice(-8);
-  return response('Two topic ideas',[[existing.name,existing.meaning],[pick.title,pick.detail]],'Choose “'+existing.name+'”, or choose “A Topic of My Own” and enter “'+pick.title+'”. Which do you prefer?',{topicId:pick.topicId});
+  return response('Two topic ideas',[[existing.name,existing.meaning],[pick.title,pick.detail]],'Which topic interests you?',{topicId:pick.topicId});
  }
  memory.options=[];
  const broad=current.size?current:words;
- let question='What do you enjoy doing with a phone, computer or online game?';
- let hint='You can name an app, a game or something you do online.';
- if(any(broad,platforms)){question='What do you enjoy there: watching videos, sharing photos, chatting or learning?';hint='Tell me what you do on that app or website.';}
- else if(broad.has('game')){question='Do you enjoy avatars, playing with teammates or building and coding?';hint='Think about what you enjoy inside a game.';}
- else if(any(broad,['music','art','sport','animal','outside'])){question='Would you like to explore learning about it online, sharing it online or checking posts about it?';hint='Let’s connect your interest to technology.';}
- else if(any(broad,['shop','price','review','order'])){question='Are you interested in shopping online? Name a shopping app or website you use or know.';hint='We can explore online shops, ads or reviews.';}
- else if(any(broad,['scroll','video'])){question='What interests you about the videos: what you learn, whether they are real or how long you watch?';hint='Tell me one thing about the videos you watch.';}
- else if(any(broad,['photo','edit'])){question='Are you interested in filters, showing who you are or asking before sharing photos?';hint='Tell me what you would like to explore about photos.';}
- else if(broad.has('friend')){question='Do you want to explore messages, comments or playing games together online?';hint='Think about a digital activity with friends.';}
- return response('Find your digital topic',[['Your interest',hint],['Your choice','We can use a listed topic or find a short topic of your own.']],question,{intent:'topic-clarify'});
+ let key='general',questions=['What do you enjoy doing online?','Which app or game do you enjoy?','What did you last watch or do online?'];
+ if(any(broad,platforms)){key='platform';questions=['What do you do there: watch, share or chat?','What do you enjoy most about that app?','What did you last watch or share there?'];}
+ else if(broad.has('game')){key='game';questions=['Do you prefer avatars, teammates or building?','What do you enjoy most in the game?','What would you like to change about gaming online?'];}
+ else if(any(broad,['music','art','sport','animal','outside'])){key='hobby';questions=['Do you learn about it online or share it online?','How does technology connect to that interest?','What do you watch or read about it online?'];}
+ else if(any(broad,['shop','price','review','order'])){key='shopping';questions=['Are you interested in online shopping?','Which shopping app or website do you know?','Would you like to explore online prices, ads or reviews?'];}
+ else if(any(broad,['scroll','video'])){key='video';questions=['What videos do you like watching?','Are you interested in learning from videos or checking if they are real?','What catches your attention in an online video?'];}
+ else if(any(broad,['photo','edit','share'])){key='photos';questions=['Are you interested in filters or sharing photos?','What do you like to share online?','What would you like people to know about online photos?'];}
+ else if(any(broad,['friend','chat'])){key='friends';questions=['Would you like to explore messages or online game chats?','What interests you about talking online?','What makes an online conversation enjoyable?'];}
+ const round=!reset&&prev.clarifyKey===key?(prev.clarifyRound||0)+1:0;
+ memory.clarifyKey=key;memory.clarifyRound=round;
+ return response('',[],questions[round%questions.length],{intent:'topic-clarify',compact:true});
 }

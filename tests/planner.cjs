@@ -37,12 +37,12 @@ const server=http.createServer((req,res)=>{
  assert.equal(await f.locator('#chat-input').inputValue(),'');
  assert.match(await f.locator('.chat-log').innerText(),/What we see online/);
  assert.match(await f.locator('.chat-log').innerText(),/Ads and Shopping/);
- assert.ok(await f.locator('.bubble.assistant ul li').count()>=4);assert.equal(await f.locator('.lp-compass-dancer.beckoning').count(),0);
+ assert.ok(await f.locator('.bubble.assistant ul li').count()>=2);assert.equal(await f.locator('.lp-compass-dancer.beckoning').count(),0);
  await page.screenshot({path:path.join(root,'verification/prepared-compass.png'),fullPage:true});
  for(const word of ['Instagram','reels','sleep']){await f.locator('#chat-input').fill(word);await f.locator('#compass-reply').click();}
  assert.match(await f.locator('.bubble.assistant').last().innerText(),/Screen Time/);
  await f.locator('#chat-input').fill('2');await f.locator('#compass-reply').click();
- assert.match(await f.locator('.bubble.assistant').last().innerText(),/enter “Screen Time”/);
+ assert.match(await f.locator('.bubble.assistant').last().innerText(),/Screen Time/);
  assert.equal(await f.locator('[data-choice][aria-pressed="true"]').count(),0);
  await f.locator('[data-choice="own"]').click();await f.locator('#topic-own').fill('Screen Time');await f.locator('#next').click();
  assert.match(await f.locator('.context').innerText(),/Screen Time/);
