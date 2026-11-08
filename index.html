@@ -925,7 +925,7 @@ async function renderEval1Modal(){
   html+='<div class="fg"><label class="fl">The most difficult part for me</label><div style="font-size:11px;color:var(--th);margin:-2px 0 5px">e.g. speaking, grammar, new words, understanding a text...</div><textarea class="fta" id="ev1-difficult" style="min-height:50px" placeholder="e.g. speaking, grammar, new words, understanding a text..."></textarea></div>';
   html+='<div class="fg"><label class="fl">My next goal</label><div style="font-size:11px;color:var(--th);margin:-2px 0 5px">e.g. add details, improve the design, fix mistakes, use better English, practise presenting...</div><textarea class="fta" id="ev1-nextgoal" style="min-height:50px" placeholder="e.g. add details, fix mistakes, use better English, practise presenting..."></textarea></div>';
   html+='<button class="btn btg btf" onclick="submitEval1()">Submit</button>';
-  card.innerHTML=html;
+  LearnPathReflection.close(card);card.innerHTML=html;
   LearnPathReflection.mount(card,{kind:'lesson',sessionKey:sessionKey,name:CU.displayName||'Student',date:today,submit:()=>submitEval1()});
 }
 window.submitEval1=async function(){
@@ -1028,7 +1028,7 @@ async function renderEval2Modal(){
   html+='</div>';
 
   html+='<button class="btn btg" onclick="submitEval2()">Submit</button>';
-  card.innerHTML=html;
+  LearnPathReflection.close(card);card.innerHTML=html;
   LearnPathReflection.mount(card,{kind:'project',sessionKey:sessionKey,name:CU.displayName||'Student',date:new Date().toLocaleDateString(),submit:()=>submitEval2()});
 }
 window.toggleEval2Word=function(idx){
