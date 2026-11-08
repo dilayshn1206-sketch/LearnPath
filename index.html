@@ -255,7 +255,7 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
 .rub-sentence{font-size:13px}
 .rub-chevron{background:none;border:none;color:var(--th);cursor:pointer;font-size:12px;padding:4px 6px;flex-shrink:0}
 </style>
-<link rel="stylesheet" href="assets/learnpath.css?v=20261108-8">
+<link rel="stylesheet" href="assets/learnpath.css?v=20261108-feedback-1">
 <link rel="stylesheet" href="assets/compass-scenes.css?v=20261108-8"></head>
 <body>
 
@@ -315,8 +315,9 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
 <script src="assets/rubric-v2.js?v=20261108-8"></script><script src="assets/share-guide.js?v=20261108-8"></script><script src="assets/vendor/jszip-3.10.1.min.js"></script><script src="assets/project-previews.js?v=20261108-8"></script>
 <script src="assets/navigation.js?v=20261108-8"></script>
 <link rel="stylesheet" href="assets/learning-support.css?v=20261108-8"><script src="assets/learning-support.js?v=20261108-8"></script>
-<link rel="stylesheet" href="assets/feedback-summary.css?v=20261108-8">
-<link rel="stylesheet" href="assets/guided-reading.css?v=20261108-8"><script src="assets/guided-reading.js?v=20261108-8"></script>
+<link rel="stylesheet" href="assets/feedback-summary.css?v=20261108-feedback-1">
+<link rel="stylesheet" href="assets/guided-reading.css?v=20261108-8"><script src="assets/guided-reading.js?v=20261108-feedback-1"></script>
+<script src="assets/reflection-journey.js?v=20261108-feedback-1"></script>
 <script type="module">
 import {auth,db,storage,rpc,ref,set,get,push,onValue,update,remove,sref,uploadBytesResumable,getDownloadURL,deleteObject,onAuthStateChanged,signInWithPopup,signOut} from './assets/supabase-backend.js?v=20261108-8';
 const prov={};
@@ -580,7 +581,7 @@ const LEGACY_PEER_RUBRIC=[
   ]}
 ];
 
-const SELF_RUBRIC=LearnPathRubrics.self,PEER_RUBRIC=LearnPathRubrics.peer,TEACHER_RUBRIC=LEGACY_PEER_RUBRIC;
+const SELF_RUBRIC=LearnPathRubrics.self,PEER_RUBRIC=LearnPathRubrics.peer,TEACHER_RUBRIC=LearnPathRubrics.peer;
 
 // ── HELPERS ──
 function toast(m){var t=document.getElementById("toast");t.innerHTML=m;t.classList.add("show");setTimeout(function(){t.classList.remove("show");},3000);}
@@ -874,7 +875,7 @@ async function checkEvalAlreadySubmitted(step,sessionKey){
 function closeEvalModal(){
   var overlay=document.getElementById("eval-modal-overlay");
   var bnav=document.getElementById("bnav");
-  if(overlay){overlay.style.display="none";document.getElementById("eval-modal-card").innerHTML="";}
+  if(overlay){LearnPathReflection.close(document.getElementById("eval-modal-card"));overlay.style.display="none";document.getElementById("eval-modal-card").innerHTML="";}
   if(bnav)bnav.style.display="flex";
 }
 async function applySessionLock(){
@@ -894,7 +895,7 @@ async function applySessionLock(){
     return;
   } else if(overlay){
     overlay.style.display="none";
-    document.getElementById("eval-modal-card").innerHTML="";
+    LearnPathReflection.close(document.getElementById("eval-modal-card"));document.getElementById("eval-modal-card").innerHTML="";
   }
   if(bnav)bnav.style.display="flex";
   stopLockTimerInterval();
@@ -925,6 +926,7 @@ async function renderEval1Modal(){
   html+='<div class="fg"><label class="fl">My next goal</label><div style="font-size:11px;color:var(--th);margin:-2px 0 5px">e.g. add details, improve the design, fix mistakes, use better English, practise presenting...</div><textarea class="fta" id="ev1-nextgoal" style="min-height:50px" placeholder="e.g. add details, fix mistakes, use better English, practise presenting..."></textarea></div>';
   html+='<button class="btn btg btf" onclick="submitEval1()">Submit</button>';
   card.innerHTML=html;
+  LearnPathReflection.mount(card,{kind:'lesson',sessionKey:sessionKey,name:CU.displayName||'Student',date:today,submit:()=>submitEval1()});
 }
 window.submitEval1=async function(){
   var learned=((document.getElementById("ev1-learned")||{}).value||"").trim();
@@ -981,7 +983,7 @@ async function renderEval2Modal(){
     html+='<div class="eval2-item"><div style="font-size:13px;font-weight:700;margin-bottom:6px">&#128214; Unit Words — tick what you know now</div>';
     wordList.forEach(function(w,i){
       var checked=window._eval2WordState[i];
-      html+='<div class="goal-row'+(checked?" sel":"")+'" id="e2-wc-row-'+i+'" onclick="toggleEval2Word('+i+')"><span class="qchk" id="e2-wc-chk-'+i+'">'+(checked?"&#10003;":"")+'</span><span style="flex:1">'+esc(w)+'</span></div>';
+      html+='<button type="button" aria-pressed="'+checked+'" class="goal-row'+(checked?" sel":"")+'" id="e2-wc-row-'+i+'" onclick="toggleEval2Word('+i+')"><span class="qchk" id="e2-wc-chk-'+i+'">'+(checked?"&#10003;":"")+'</span><span style="flex:1">'+esc(w)+'</span></button>';
     });
     html+='</div>';
   }
@@ -991,7 +993,7 @@ async function renderEval2Modal(){
       html+='<div style="margin-bottom:10px"><div style="font-size:12px;font-weight:600;margin-bottom:5px">'+(qi+1)+". "+esc(q.q)+'</div>';
       q.options.forEach(function(opt,oi){
         var sel=window._eval2GrammarAnswers[qi]===oi;
-        html+='<div class="qo" style="'+(sel?"border-color:var(--p);background:var(--pl);color:var(--pd)":"")+'" onclick="pickEval2Grammar('+qi+','+oi+')">'+esc(opt)+'</div>';
+        html+='<button type="button" class="qo" aria-pressed="'+sel+'" style="'+(sel?"border-color:var(--p);background:var(--pl);color:var(--pd)":"")+'" onclick="pickEval2Grammar('+qi+','+oi+')">'+esc(opt)+'</button>';
       });
       html+='</div>';
     });
@@ -1027,12 +1029,13 @@ async function renderEval2Modal(){
 
   html+='<button class="btn btg" onclick="submitEval2()">Submit</button>';
   card.innerHTML=html;
+  LearnPathReflection.mount(card,{kind:'project',sessionKey:sessionKey,name:CU.displayName||'Student',date:new Date().toLocaleDateString(),submit:()=>submitEval2()});
 }
 window.toggleEval2Word=function(idx){
   window._eval2WordState[idx]=!window._eval2WordState[idx];
   var row=document.getElementById("e2-wc-row-"+idx);
   var chk=document.getElementById("e2-wc-chk-"+idx);
-  if(row)row.classList.toggle("sel",window._eval2WordState[idx]);
+  if(row){row.classList.toggle("sel",window._eval2WordState[idx]);row.setAttribute('aria-pressed',String(window._eval2WordState[idx]));}
   if(chk)chk.innerHTML=window._eval2WordState[idx]?"&#10003;":"";
 };
 window.pickEval2Grammar=function(qi,oi){
@@ -1043,7 +1046,7 @@ function eval2ScoreButtons(key){
   var val=(window._eval2Scores||{})[key];
   var html='<div style="display:flex;gap:6px;margin-bottom:4px">';
   [1,2,3].forEach(function(n){
-    html+='<button type="button" class="btn '+(val===n?"btp":"bts")+'" style="flex:1;padding:8px 0" onclick="setEval2Score(\''+key+'\','+n+')">'+n+' '+({1:'No',2:'Maybe',3:'Yes'})[n]+'</button>';
+    html+='<button type="button" data-eval-score="'+key+'" aria-pressed="'+(val===n)+'" class="btn '+(val===n?"btp":"bts")+'" style="flex:1;padding:8px 0" onclick="setEval2Score(\''+key+'\','+n+')">'+n+' '+({1:'No',2:'Maybe',3:'Yes'})[n]+'</button>';
   });
   html+='</div>';
   return html;
@@ -1305,8 +1308,11 @@ function feedbackGroups(comments,label,prefix){
 }
 function averageMatchesHTML(group){
  var html='<div class="lp-average-criteria">';
- (group.rubric||[]).forEach(function(item,ai){var values=group.stats.perArea[ai];if(!values?.length)return;var average=values.reduce(function(a,b){return a+b;},0)/values.length,level=Math.max(0,Math.min(item.levels.length-1,Math.round(average))),points=item.support?(level?3:1):level+1,max=item.support?3:item.levels.length;
- html+='<p class="lp-average-match" data-criterion="'+ai+'" data-matched-level="'+level+'" data-tier="'+(item.support?level?3:0:level)+'"><strong>'+esc(item.area)+(item.support?'':' <span class="lp-feedback-tier">Step '+(level+1)+'</span>')+' '+LearnPathSupport.stars(points,max)+'</strong><span class="lp-average-ending">'+esc(LearnPathRubrics.sentence(item,level))+'</span></p>';});
+ var tips=['Create original sentences to talk about the topic.','Use linking words like and, but, because, first and next.','Add details, examples or a surprise element to make it more interesting.','Make your message clear. One part = one main idea.','Check your words and grammar.'];
+ var matches=(group.rubric||[]).map(function(item,ai){var values=group.stats.perArea[ai];if(!values?.length)return null;var average=values.reduce(function(a,b){return a+b;},0)/values.length,level=Math.max(0,Math.min(item.levels.length-1,Math.round(average)));return {item:item,ai:ai,level:level,points:item.support?(level?3:1):level+1};}).filter(Boolean).sort(function(a,b){return a.points-b.points||a.ai-b.ai;});
+ matches.forEach(function(match){var item=match.item,ai=match.ai,level=match.level,points=match.points,max=item.support?3:item.levels.length,modern=group.version===LearnPathRubrics.version||group.version===LearnPathSupport.rubricVersion;
+ var copy=modern?tips[ai]:LearnPathRubrics.sentence(item,level),lead=modern?(points===max?'Keep it up!':item.support?'Try this next:':'To reach 4 stars:'):'';
+ html+='<p class="lp-average-match" data-criterion="'+ai+'" data-matched-level="'+level+'" data-tier="'+(item.support?level?3:0:level)+'"><strong>'+esc(item.area)+(item.support?'':' <span class="lp-feedback-tier">Step '+(level+1)+'</span>')+' '+LearnPathSupport.stars(points,max)+'</strong><span class="lp-average-ending">'+(lead?'<b>'+esc(lead)+'</b> ':'')+esc(copy)+'</span></p>';});
  return html+'</div>';
 }
 function buildCommentSummary(post,comments){
@@ -1318,17 +1324,18 @@ function buildCommentSummary(post,comments){
   if(stats.overall===null)html+='<strong>'+(stats.count?'Written feedback only':'Not yet')+'</strong>';
   else html+='<strong>'+scorePercent(stats.overall,stats.maxSteps)+'%</strong><span>'+(group.version===LearnPathSupport.rubricVersion?LearnPathSupport.stars(stats.overall>=2?3:1):scoreTierLabel(stats.overall,stats.maxSteps))+'</span>';
   if(stats.count)html+='<small class="lp-rubric-version-note">'+(group.version===LearnPathSupport.rubricVersion?'5 categories · supported reflection':group.version===LearnPathRubrics.version?'5 categories · 4 Steps':group.rubric?'Earlier rubric · 6 categories · 3 Steps':'Rubric version unavailable')+'</small>';
-  html+='</div>';
+  html+='<button type="button" class="lp-score-details" aria-expanded="false" aria-controls="'+(stats.overall===null?allId:group.id)+'" '+(!stats.count?'disabled title="No feedback yet" ':'')+'onclick="toggleFeedbackDetails(this)">See details</button></div>';
  });html+='</div>';
- groups.forEach(function(group){if(group.stats.overall===null)return;var peer=group.label!=='Teacher';
-  html+=peer?'<section id="'+group.id+'" class="lp-classmate-matches"><h4>Classmates’ average</h4><p class="lp-average-caption">'+group.stats.count+' classmates · highlighted descriptions match their average.</p>':'<details id="'+group.id+'"><summary>Teacher descriptions</summary>';
-  html+=averageMatchesHTML(group)+(peer?'</section>':'</details>');
+ groups.forEach(function(group){if(group.stats.overall===null)return;
+  html+='<section id="'+group.id+'" class="lp-classmate-matches" hidden><h4>'+group.label+'</h4><p class="lp-average-caption">Lowest stars first · '+(group.version===LearnPathRubrics.version?'your next steps towards 4 stars':group.version===LearnPathSupport.rubricVersion?'your next steps':'earlier rubric · original descriptions')+'.</p>';
+  html+=averageMatchesHTML(group)+'</section>';
  });
  teacher.forEach(function(cm){html+=personalGoalFeedback(cm);});
  html+='<button type="button" class="lp-feedback-details lp-written-feedback-toggle" onclick="toggleCat(\''+allId+'\')">See feedback ('+comments.length+')</button><div id="'+allId+'" style="display:none"><div class="lp-written-feedback-columns">';
  [['well','Good points'],['improve','To improve']].forEach(function(column){html+='<section><h4>'+column[1]+'</h4>';var written=comments.filter(function(cm){return !!cm[column[0]];});if(!written.length)html+='<p class="lp-feedback-empty">No comments yet.</p>';written.forEach(function(cm){html+='<p class="lp-written-feedback"><span>'+esc(cm[column[0]])+'</span><small>'+esc(cm.isTeacher?'Teacher · '+(cm.from||'Teacher'):cm.from||'Classmate')+'</small></p>';});html+='</section>';});
  return html+'</div></div></section>';
 }
+window.toggleFeedbackDetails=function(button){var target=document.getElementById(button.getAttribute('aria-controls'));if(!target)return;var open=button.getAttribute('aria-expanded')!=='true';if(target.hasAttribute('hidden')||target.classList.contains('lp-classmate-matches'))target.hidden=!open;else target.style.display=open?'block':'none';button.setAttribute('aria-expanded',String(open));};
 function buildPostHTML(post){
   var comments=post.comments?Object.values(post.comments):[];
   var html='<div class="post lp-gallery-post" id="post-'+post.id+'">';
@@ -3302,6 +3309,7 @@ window.openTeacherComment=async function(postId,targetUid){
 
 window.submitTeacherComment=async function(postId,targetUid){
   if(UP.role!=="teacher")return;
+  if(!requireStudentRubric('tceval_'+postId))return;
   var goalState=_teacherGoalReviews[postId];if(!goalState||goalState.error){toast("Please load the personal goals before saving.");return;}
   if(goalState.goals.some(function(g){return typeof g.met!=="boolean";})){toast("Choose Yes or No for each personal goal.");var box=document.getElementById("tc-goals-"+postId);if(box)box.scrollIntoView({block:"center"});return;}
   var well=((document.getElementById("tc-well-"+postId)||{}).value||"").trim();
@@ -3310,7 +3318,7 @@ window.submitTeacherComment=async function(postId,targetUid){
   var existSnap=await get(ref(db,"posts/"+postId+"/comments"));
   if(existSnap.exists()){var dup=false;existSnap.forEach(function(c){if(c.val().fromId===CU.uid)dup=true;});if(dup){toast("You've already evaluated this post!");return;}}
   var storeKey="tceval_"+postId;
-  await push(ref(db,"posts/"+postId+"/comments"),{from:CU.displayName+" (Teacher)",fromId:CU.uid,well:well,improve:improve,peerRubricVersion:LearnPathRubrics.legacyVersion,peerRubric:window._rubricStores[storeKey]?window._rubricStores[storeKey].values:[],isTeacher:true,personalGoalReview:{version:1,studentId:goalState.studentId,source:goalState.source,contractCreatedAt:goalState.contractCreatedAt,contractSubmittedAt:goalState.contractSubmittedAt,goals:goalState.goals},createdAt:Date.now()});
+  await push(ref(db,"posts/"+postId+"/comments"),{from:CU.displayName+" (Teacher)",fromId:CU.uid,well:well,improve:improve,peerRubricVersion:LearnPathRubrics.version,peerRubric:window._rubricStores[storeKey]?window._rubricStores[storeKey].values:[],isTeacher:true,personalGoalReview:{version:1,studentId:goalState.studentId,source:goalState.source,contractCreatedAt:goalState.contractCreatedAt,contractSubmittedAt:goalState.contractSubmittedAt,goals:goalState.goals},createdAt:Date.now()});
   if(targetUid){await push(ref(db,"notifications/"+targetUid),{type:"teacher",postId:postId,message:"Your teacher left feedback on your work!",read:false,createdAt:Date.now()});}
   toast("Evaluation saved!");var f=document.getElementById("tcform-"+postId);if(f)f.style.display="none";
 };
