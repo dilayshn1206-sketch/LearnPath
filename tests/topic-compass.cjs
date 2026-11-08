@@ -1,5 +1,5 @@
 const fs=require('node:fs'),assert=require('node:assert/strict');
-const source=['compass-library','compass-topics','compass-prepared'].map(n=>fs.readFileSync('assets/'+n+'.js','utf8')).join('\n');
+const source=['compass-library','compass-topics','compass-products','compass-prepared'].map(n=>fs.readFileSync('assets/'+n+'.js','utf8')).join('\n');
 const {reply,bank}=new Function(source+';return {reply:preparedReply,bank:COMPASS_TOPIC_BANK};')();
 const plain=r=>[r.title,...r.bullets.flatMap(b=>[b.keyword,b.detail]),r.question].join(' ');
 let checks=0;
