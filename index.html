@@ -198,6 +198,7 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
 .empty{text-align:center;padding:28px 14px;color:var(--tm)}
 .ei{font-size:30px;margin-bottom:7px}
 .toast{position:fixed;bottom:76px;left:50%;transform:translateX(-50%);background:#2C2C2A;color:#fff;padding:9px 18px;border-radius:var(--rs);font-size:13px;font-weight:600;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;max-width:88vw;text-align:center}
+.lp-revision-actions{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
 .modal-overlay{position:fixed;inset:0;background:rgba(20,20,20,.55);z-index:600;display:flex;align-items:center;justify-content:center;padding:16px}
 @keyframes confettiFall{0%{transform:translateY(0) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(360deg);opacity:0}}
 .modal-card{background:#fff;border-radius:16px;padding:20px;max-width:420px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
@@ -1123,6 +1124,13 @@ async function renderHome(){
   html+='<p>'+doneCount+' of 4 milestones completed. '+(waiting?'Your idea is saved. Your teacher will help you with the next step.':'Take your next step. Your work stays here when you return.')+'</p>';
   html+='<button type="button" class="btn btp" '+(waiting?'disabled':'onclick="'+nextAction+'"')+'>'+(waiting?'Waiting for teacher grouping':nextLabel+' →')+'</button></div>'+LearnPathUI.mascot()+'</section>';
 
+  var reopened=revisionSteps(contractData);
+  if(reopened.length){
+    html+='<section class="card" aria-label="Teacher revision request"><h2>Your teacher has reopened '+(reopened.length===2?'steps 2 and 3':'step '+reopened[0])+'.</h2><p>Your saved work is still here. Make your changes, then send your plan again.</p><div class="lp-revision-actions">';
+    if(reopened.includes(2))html+='<button type="button" class="btn btp" onclick="startQuiz()">Edit step 2 · Project idea</button>';
+    if(reopened.includes(3))html+='<button type="button" class="btn bts" onclick="renderStep3Screen(false)">Edit step 3 · Goals and plan</button>';
+    html+='</div></section>';
+  }
   html+='<div class="step-path">';
 
   html+='<button type="button" class="step-card'+(step1Done?" done":"")+'" onclick="renderStep1Screen()">';
@@ -2308,7 +2316,7 @@ function installTeacherWorkspace(){
   let page = 'overview';
   const css = document.createElement('link');
   css.rel = 'stylesheet';
-  css.href = 'assets/teacher-workspace.css?v=20261108-8';
+  css.href = 'assets/teacher-workspace.css?v=20261108-reopen-1';
   document.head.append(css);
   document.body.classList.add('teacher-workspace');
 
@@ -2762,6 +2770,7 @@ function renderTOverview(){
         sh+='<div style="flex:1;cursor:pointer" onclick="reviewContract(\''+s.id+'\')"><div style="font-size:13px;font-weight:700">'+esc(s.studentName||"Student")+'</div>';
         sh+='<div style="font-size:11px;color:var(--tm)">'+esc(s.productType||"")+'</div></div>';
         sh+='<span class="sb '+(s.status==="approved"?"sa":s.status==="pending"?"sp":"")+'" style="'+(s.status==="approved"||s.status==="pending"?"":"background:var(--gl);color:var(--tm)")+'">'+(s.status==="approved"?"Approved":s.status==="pending"?"Pending":s.status==="awaiting_grouping"?"Awaiting group":s.status==="reset"?"Reset \u21bb":"Draft")+'</span>';
+        if(s.productType)sh+=revisionButtonHTML(s.id,s);
         sh+='<button class="obtn" style="margin-left:6px;color:var(--c);border-color:var(--c)" onclick="resetStudent(\''+s.id+'\',\''+esc((s.studentName||"this student").replace(/'/g,""))+'\')">&#128465; Reset</button>';
         sh+='</div>';
       });
@@ -2769,6 +2778,45 @@ function renderTOverview(){
     }
   });
 }
+// A teacher revision request guides re-entry; it never adds a student editing gate.
+function revisionSteps(c){
+  var r=c&&c.revisionRequest;
+  if(!r||c.status==='approved'||!Number.isFinite(r.requestedAt)||r.requestedAt<=0||Number(c.submittedAt||0)>=r.requestedAt)return [];
+  return [2,3].filter(function(step){return Array.isArray(r.steps)&&r.steps.includes(step);});
+}
+function revisionButtonHTML(uid,c){
+  var steps=revisionSteps(c);
+  return '<button type="button" class="btn bts teacher-reopen" data-student="'+esc(uid)+'" onclick="openStepRevision(this.dataset.student)">Reopen steps 2 &amp; 3</button>'+(steps.length?'<small class="teacher-revision-status">Step'+(steps.length>1?'s':'')+' '+steps.join(' &amp; ')+' open for revision</small>':'');
+}
+window.openStepRevision=async function(uid){
+  if(!CU||UP.role!=='teacher')return;
+  var trigger=document.activeElement;
+  try{
+    var snap=await get(ref(db,'contracts/'+uid)),c=snap.val();
+    if(!c||!c.productType){toast('This student has not saved a project idea yet.');return;}
+    var dialog=document.getElementById('teacher-reopen-dialog');
+    if(!dialog){dialog=document.createElement('dialog');dialog.id='teacher-reopen-dialog';dialog.className='modal-card teacher-reopen-dialog';document.body.appendChild(dialog);}
+    if(dialog.open)return;
+    dialog.setAttribute('aria-labelledby','teacher-reopen-title');
+    dialog.innerHTML='<form method="dialog"><h2 id="teacher-reopen-title">Reopen for '+esc(c.studentName||'this student')+'</h2><p>Choose which steps they can do again. Their choices, goals and written plan will stay saved.</p><label class="teacher-reopen-choice"><input type="checkbox" name="step" value="2" checked> Step 2 · Project idea</label><label class="teacher-reopen-choice"><input type="checkbox" name="step" value="3" checked> Step 3 · Goals and plan</label><p id="teacher-reopen-status" role="status"></p><div class="teacher-reopen-actions"><button type="button" class="btn bts" data-cancel>Cancel</button><button type="submit" class="btn btp">Open selected steps</button></div></form>';
+    dialog.onclose=function(){if(trigger&&trigger.isConnected)trigger.focus();};
+    var form=dialog.querySelector('form'),save=form.querySelector('[type=submit]'),cancel=form.querySelector('[data-cancel]'),status=form.querySelector('[role=status]'),saving=false;
+    cancel.onclick=function(){if(!saving)dialog.close();};
+    dialog.oncancel=function(e){if(saving)e.preventDefault();};
+    form.onsubmit=async function(e){
+      e.preventDefault();if(saving)return;
+      var steps=Array.from(form.querySelectorAll('[name=step]:checked')).map(function(el){return Number(el.value);});
+      if(!steps.length){status.textContent='Choose at least one step.';form.querySelector('[name=step]').focus();return;}
+      saving=true;save.disabled=true;cancel.disabled=true;form.querySelectorAll('[name=step]').forEach(function(el){el.disabled=true;});status.textContent='Opening selected steps…';
+      try{
+        await update(ref(db,'contracts/'+uid),{status:'draft',editUnlocked:true,revisionRequest:{steps:steps,requestedAt:Date.now(),requestedBy:CU.uid}});
+        dialog.close();toast('Step'+(steps.length>1?'s ':' ')+steps.join(' and ')+' reopened. Saved work was kept.');
+      }catch(error){status.textContent='Could not open these steps. Your student’s saved work is unchanged. Try again.';}
+      finally{saving=false;save.disabled=false;cancel.disabled=false;form.querySelectorAll('[name=step]').forEach(function(el){el.disabled=false;});}
+    };
+    dialog.showModal();
+  }catch(error){toast('Could not load this student’s plan. Try again.');}
+};
 // Wipe ALL progress for one student (uid), keeping their account so they can start fresh.
 window.resetStudent=async function(uid,name){
   var ok=window.confirm("Reset ALL progress for "+name+"?\n\nThis resets the active learning passport, project posts, coins, accessories, reflections, evaluations, checked unit words, quiz answers and notifications. Their account stays so they can start over.\n\nEarlier records and files remain in the research archive.");
@@ -2930,7 +2978,7 @@ window.reviewContract=async function(studentId){
   html+='<button class="btn btg" style="flex:1" onclick="saveReview(false)">Save Changes</button>';
   html+='<button class="btn btp" style="flex:1" onclick="saveReview(true)">Approve &#9989;</button>';
   html+='</div>';
-  html+='<button class="btn bts btf mt8" style="font-size:12px" onclick="sendBackForEdits()">Send back to student for edits</button>';
+  html+='<div class="lp-revision-actions mt8">'+revisionButtonHTML(studentId,c)+'</div>';
   html+='</div>';
   mc.innerHTML=html;
 };
@@ -2965,9 +3013,7 @@ window.saveReview=async function(approve){
 };
 window.sendBackForEdits=async function(){
   var id=window._reviewingId;if(!id)return;
-  await update(ref(db,"contracts/"+id),{status:"draft",editUnlocked:true});
-  toast("Sent back — student can now edit their plan.");
-  tgo("overview");
+  return openStepRevision(id);
 };
 
 function renderTGroups(){
@@ -3524,8 +3570,9 @@ async function mountPlanner(mode,c,overview){
     ['written','spoken','visual'].forEach(function(cat){extra[cat]=(catalog[cat]||[]).filter(function(item){var original=DEFAULT_CATALOG[cat].find(function(pair){return pair[0]===item.id;});return item.active&&(!original||original[1]!==item.name);});});
   }
   var mc=document.getElementById('mc');
-  mc.innerHTML=(isLockedStep(mode==='idea'?'step2':'step3')?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">← Back to Home</button>')+'<iframe id="lp-planner-frame" title="'+(mode==='idea'?'Plan your project':LearnPathUI.hasPassport(c)?'My Learning Passport':'Set goals and plan')+'" src="assets/planner.html?v=20261108-topics-2" style="width:100%;height:900px;border:0;display:block" scrolling="no"></iframe>';
-  window._plannerContext={mode:mode,contract:c,overview:!!overview&&LearnPathUI.hasPassport(c),passportReady:LearnPathUI.hasPassport(c),readOnly:false,supportProfile:supportedPlan(c)?supportProfile:null,extraProducts:extra,resume:LearnPathNavigation.resume(),catalogProducts:mode==='idea'?catalog:null,identity:{name:c&&c.studentName||CU.displayName,photo:c&&c.studentId!==CU.uid?c.studentPhoto||'':UP.avatarUrl||CU.photoURL||c&&c.studentPhoto||''}};
+  mc.innerHTML=(isLockedStep(mode==='idea'?'step2':'step3')?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">← Back to Home</button>')+'<iframe id="lp-planner-frame" title="'+(mode==='idea'?'Plan your project':LearnPathUI.hasPassport(c)?'My Learning Passport':'Set goals and plan')+'" src="assets/planner.html?v=20261108-reopen-1" style="width:100%;height:900px;border:0;display:block" scrolling="no"></iframe>';
+  var revisionRequested=revisionSteps(c).includes(mode==='idea'?2:3);
+  window._plannerContext={mode:mode,contract:c,overview:!revisionRequested&&!!overview&&LearnPathUI.hasPassport(c),revisionRequested:revisionRequested,passportReady:LearnPathUI.hasPassport(c),readOnly:false,supportProfile:supportedPlan(c)?supportProfile:null,extraProducts:extra,resume:LearnPathNavigation.resume(),catalogProducts:mode==='idea'?catalog:null,identity:{name:c&&c.studentName||CU.displayName,photo:c&&c.studentId!==CU.uid?c.studentPhoto||'':UP.avatarUrl||CU.photoURL||c&&c.studentPhoto||''}};
   setNav('home');
 }
 window.addEventListener('message',async function(event){
