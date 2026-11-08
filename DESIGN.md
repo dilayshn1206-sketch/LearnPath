@@ -175,3 +175,11 @@ Reviewed sharing keeps the same three Yes / Not yet focus checks across all shar
 
 ## Approved animation release (2026-11-08)
 The owner approved publishing the saved animation-panel choices (revision 188). This supersedes earlier content-only release restrictions. assets/compass-scenes.js and assets/compass-scenes.css now own the shared decorative scene lifecycle and reviewed artwork, alongside the unchanged original 24-frame/3-second idle player for other surfaces. Choices are recorded in ANIMATION-RELEASE-20261108.md. No scene changes learner selections, scoring, permissions or persisted records. Honor reduced motion, pause in background tabs, cancel detached scenes and retain a static guide if an image fails.
+
+## Targeted guided variant (2026-11-08)
+The teacher-approved notes (4), revision 11, own this account-scoped variant. Keep
+navy/teal paper, landscape tablet layouts and the approved map. Use three daily
+topics, visual-first formats with other ways available, three tools, two goals
+out of three and checkbox planning. Show one rubric question with two explicit
+endings at a time, three/one SVG stars, no automatic scores and calm motion.
+No learner identities or diagnostic labels in frontend assets.

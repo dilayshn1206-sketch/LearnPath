@@ -172,3 +172,10 @@ Reviewed sharing keeps the same three Yes / Not yet focus checks across all shar
 
 ## Approved animation release (2026-11-08)
 The owner approved publishing the saved animation-panel choices (revision 188). This supersedes earlier content-only release restrictions. assets/compass-scenes.js and assets/compass-scenes.css now own the shared decorative scene lifecycle and reviewed artwork, alongside the unchanged original 24-frame/3-second idle player for other surfaces. Choices are recorded in ANIMATION-RELEASE-20261108.md. No scene changes learner selections, scoring, permissions or persisted records. Honor reduced motion, pause in background tabs, cancel detached scenes and retain a static guide if an image fails.
+
+## Targeted guided variant (2026-11-08)
+- `lp_learning_support` is the sole eligibility owner: private exact-email allowlist, confirmed Google identity and student membership. Display names, metadata and local storage do not grant eligibility. Standard account approval is unchanged.
+- `learning-support.js` owns versioned goals and binary self/peer descriptors; `planner-support.js` adapts the canonical planner with its existing bridge and saves. `index.html` owns authentic submission and rubric selectors.
+- Goal version `grade6-support-goals-20261108-v1`: exactly two of three project goals, at least one selected plan action. Standard/historical requirements remain three goals and three steps.
+- Rubric version `grade6-support-binary-20261108-v1`: five criteria, stored indices 0/1 with points 1/3, presented high option first. Help never assigns an answer. New scores are grouped by version, never averaged with the earlier four/three-step instruments. Written scaffolds offer three prompts per field and remain editable.
+- Real eligibility tests roll back entirely; integration tests use fictional records and block external network. Learner testing with the school accounts still requires their own first Google sign-in.

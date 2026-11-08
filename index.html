@@ -254,8 +254,8 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
 .rub-sentence{font-size:13px}
 .rub-chevron{background:none;border:none;color:var(--th);cursor:pointer;font-size:12px;padding:4px 6px;flex-shrink:0}
 </style>
-<link rel="stylesheet" href="assets/learnpath.css?v=20261108-3">
-<link rel="stylesheet" href="assets/compass-scenes.css?v=20261108-3"></head>
+<link rel="stylesheet" href="assets/learnpath.css?v=20261108-4">
+<link rel="stylesheet" href="assets/compass-scenes.css?v=20261108-4"></head>
 <body>
 
 <div id="auth">
@@ -310,13 +310,17 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
   <div class="modal-card" id="result-popup-card" style="text-align:center;padding:26px 20px"></div>
 </div>
 
-<script src="assets/learnpath-ui.js?v=20261108-3"></script>
-<script src="assets/rubric-v2.js?v=20261108-3"></script><script src="assets/share-guide.js?v=20261108-3"></script><script src="assets/vendor/jszip-3.10.1.min.js"></script><script src="assets/project-previews.js?v=20261108-3"></script>
-<script src="assets/navigation.js?v=20261108-3"></script>
+<script src="assets/learnpath-ui.js?v=20261108-4"></script>
+<script src="assets/rubric-v2.js?v=20261108-4"></script><script src="assets/share-guide.js?v=20261108-4"></script><script src="assets/vendor/jszip-3.10.1.min.js"></script><script src="assets/project-previews.js?v=20261108-4"></script>
+<script src="assets/navigation.js?v=20261108-4"></script>
+<link rel="stylesheet" href="assets/learning-support.css?v=20261108-4"><script src="assets/learning-support.js?v=20261108-4"></script>
 <script type="module">
-import {auth,db,storage,rpc,ref,set,get,push,onValue,update,remove,sref,uploadBytesResumable,getDownloadURL,deleteObject,onAuthStateChanged,signInWithPopup,signOut} from './assets/supabase-backend.js?v=20261108-3';
+import {auth,db,storage,rpc,ref,set,get,push,onValue,update,remove,sref,uploadBytesResumable,getDownloadURL,deleteObject,onAuthStateChanged,signInWithPopup,signOut} from './assets/supabase-backend.js?v=20261108-4';
 const prov={};
-let CU=null,UP=null;
+let CU=null,UP=null,supportProfile=null;
+function supportedPlan(c){return supportProfile===LearnPathSupport.profile&&(!c||c.goalVersion===LearnPathSupport.goalVersion);}
+function activeRubric(self){return supportProfile===LearnPathSupport.profile?(self?LearnPathSupport.self:LearnPathSupport.peer):(self?SELF_RUBRIC:PEER_RUBRIC);}
+function activeRubricVersion(){return supportProfile===LearnPathSupport.profile?LearnPathSupport.rubricVersion:LearnPathRubrics.version;}
 let myGid=null,myGname=null,userCoins=0;
 let contractData=null;
 
@@ -488,6 +492,7 @@ const GRADE6_GOALS = {
   "structure": "I will organise my project with a clear beginning, middle, and ending."
 };
 function goalItemsFor(c){
+  if(c?.goalVersion===LearnPathSupport.goalVersion)return LearnPathSupport.goals;
   return c&&c.grade===6 ? GOAL_ITEMS.map(function(g){return {id:g.id,text:GRADE6_GOALS[g.id]||g.text};}) : GOAL_ITEMS;
 }
 // A student's "Something else" goal counts only if it has real letters/numbers
@@ -577,6 +582,7 @@ const SELF_RUBRIC=LearnPathRubrics.self,PEER_RUBRIC=LearnPathRubrics.peer,TEACHE
 // ── HELPERS ──
 function toast(m){var t=document.getElementById("toast");t.innerHTML=m;t.classList.add("show");setTimeout(function(){t.classList.remove("show");},3000);}
 function celebrate(){
+  if(supportProfile===LearnPathSupport.profile)return;
   var container=document.createElement("div");
   container.style.cssText="position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden";
   document.body.appendChild(container);
@@ -640,8 +646,9 @@ document.getElementById("rs").onclick=function(){setRole("student");};
 document.getElementById("rt2").onclick=function(){setRole("teacher");};
 
 onAuthStateChanged(auth,async function(user){
-  if(!user){LearnPathNavigation.reset();document.getElementById("auth").style.display="flex";document.getElementById("app").style.display="none";document.getElementById("role").style.display="none";return;}
-  CU=user;
+  if(!user){supportProfile=null;document.body.classList.remove('lp-supported');LearnPathNavigation.reset();document.getElementById("auth").style.display="flex";document.getElementById("app").style.display="none";document.getElementById("role").style.display="none";return;}
+  CU=user;supportProfile=null;try{supportProfile=await rpc('lp_learning_support',{});}catch(e){console.warn('Learning support unavailable');}
+  document.body.classList.toggle('lp-supported',supportProfile===LearnPathSupport.profile);
   document.getElementById("auth").style.display="none";
   setTopbarAvatar({photo:user.photoURL,name:user.displayName});
   document.getElementById("uname").textContent=(user.displayName||"").split(" ")[0];
@@ -1262,6 +1269,7 @@ function loadFeed(){
 window.filterProjectStage=function(stage){window._galleryStage=stage;document.querySelectorAll('[data-gallery-stage]').forEach(function(el){el.hidden=el.dataset.galleryStage!==stage;});updateFeedNavigation();};
 function recordRubric(record,self){
  var version=record[self?'selfRubricVersion':'peerRubricVersion'];
+ if(version===LearnPathSupport.rubricVersion)return self?LearnPathSupport.self:LearnPathSupport.peer;
  if(version===LearnPathRubrics.version)return self?SELF_RUBRIC:PEER_RUBRIC;
  if(!version||version===LearnPathRubrics.legacyVersion)return self?LEGACY_SELF_RUBRIC:LEGACY_PEER_RUBRIC;
  return null;
@@ -1276,7 +1284,7 @@ function scorePercent(score,maxSteps){return Math.round(score/(maxSteps||3)*100)
 function groupStats(comments,rubric){
  var perArea={},allVals=[],maxSteps=rubric?rubric[0].levels.length:0;
  comments.forEach(function(cm){if(!rubric||!Array.isArray(cm.peerRubric))return;cm.peerRubric.slice(0,rubric.length).forEach(function(v,ai){if(Number.isInteger(v)&&v>=0&&v<maxSteps){allVals.push(v);(perArea[ai]||(perArea[ai]=[])).push(v);}});});
- return {count:comments.length,perArea:perArea,maxSteps:maxSteps,overall:allVals.length?allVals.reduce(function(a,b){return a+b+1;},0)/allVals.length:null};
+ return {count:comments.length,perArea:perArea,maxSteps:rubric?.[0]?.support?3:maxSteps,overall:allVals.length?allVals.reduce(function(a,b){return a+(rubric[0].support?(b?3:1):b+1);},0)/allVals.length:null};
 }
 function feedbackGroups(comments,label,prefix){
  var versions=Object.create(null);comments.forEach(function(cm){var version=cm.peerRubricVersion||LearnPathRubrics.legacyVersion;(versions[version]||(versions[version]=[])).push(cm);});
@@ -1290,11 +1298,11 @@ function buildCommentSummary(post,comments){
  var html='<section class="lp-feedback-summary"><h3>Feedback Summary</h3><div class="lp-feedback-scores">';
  groups.forEach(function(group){var stats=group.stats;html+='<div class="lp-feedback-score"><span>'+group.label+'</span>';
   if(stats.overall===null)html+='<strong>'+(stats.count?'Written feedback only':'Not yet')+'</strong>';
-  else html+='<strong>'+scorePercent(stats.overall,stats.maxSteps)+'%</strong><span>'+scoreTierLabel(stats.overall,stats.maxSteps)+'</span><button type="button" class="lp-feedback-details" onclick="toggleCat(\''+group.id+'\')">See descriptions</button>';
-  if(stats.count)html+='<small class="lp-rubric-version-note">'+(group.version===LearnPathRubrics.version?'5 categories · 4 Steps':group.rubric?'Earlier rubric · 6 categories · 3 Steps':'Rubric version unavailable')+'</small>';
+  else html+='<strong>'+scorePercent(stats.overall,stats.maxSteps)+'%</strong><span>'+(group.version===LearnPathSupport.rubricVersion?LearnPathSupport.stars(stats.overall>=2?3:1):scoreTierLabel(stats.overall,stats.maxSteps))+'</span><button type="button" class="lp-feedback-details" onclick="toggleCat(\''+group.id+'\')">See descriptions</button>';
+  if(stats.count)html+='<small class="lp-rubric-version-note">'+(group.version===LearnPathSupport.rubricVersion?'5 categories · supported reflection':group.version===LearnPathRubrics.version?'5 categories · 4 Steps':group.rubric?'Earlier rubric · 6 categories · 3 Steps':'Rubric version unavailable')+'</small>';
   html+='</div>';
  });html+='</div>';
- groups.forEach(function(group){html+='<div id="'+group.id+'" style="display:none"><h4>'+group.label+'</h4>';(group.rubric||[]).forEach(function(item,ai){var values=group.stats.perArea[ai];if(!values)return;var avg=values.reduce(function(a,b){return a+b;},0)/values.length,level=Math.max(0,Math.min(item.levels.length-1,Math.round(avg)));html+='<p class="lp-feedback-description"><strong>'+esc(item.area)+' <b class="lp-feedback-tier">Step '+(level+1)+'</b></strong><span>'+esc(LearnPathRubrics.sentence(item,level))+'</span></p>';});html+='</div>';});
+ groups.forEach(function(group){html+='<div id="'+group.id+'" style="display:none"><h4>'+group.label+'</h4>';(group.rubric||[]).forEach(function(item,ai){var values=group.stats.perArea[ai];if(!values)return;var avg=values.reduce(function(a,b){return a+b;},0)/values.length,level=Math.max(0,Math.min(item.levels.length-1,Math.round(avg)));html+='<p class="lp-feedback-description"><strong>'+esc(item.area)+' <b class="lp-feedback-tier">'+(item.support?LearnPathSupport.stars(level?3:1):'Step '+(level+1))+'</b></strong><span>'+esc(LearnPathRubrics.sentence(item,level))+'</span></p>';});html+='</div>';});
  teacher.forEach(function(cm){html+=personalGoalFeedback(cm);});
  html+='<button type="button" class="lp-feedback-details lp-written-feedback-toggle" onclick="toggleCat(\''+allId+'\')">Read written feedback ('+comments.length+')</button><div id="'+allId+'" style="display:none"><div class="lp-written-feedback-columns">';
  [['well','Good points'],['improve','To improve']].forEach(function(column){html+='<section><h4>'+column[1]+'</h4>';var written=comments.filter(function(cm){return !!cm[column[0]];});if(!written.length)html+='<p class="lp-feedback-empty">No comments yet.</p>';written.forEach(function(cm){html+='<p class="lp-written-feedback"><span>'+esc(cm[column[0]])+'</span><small>'+esc(cm.isTeacher?'Teacher · '+(cm.from||'Teacher'):cm.from||'Classmate')+'</small></p>';});html+='</section>';});
@@ -1375,17 +1383,29 @@ function renderRubricReadonly(rubric,values){
     var li=values[ai];
     if(!Number.isInteger(li)||li<0||li>=item.levels.length)return;
     html+='<div style="margin-bottom:8px"><div style="font-size:11px;font-weight:700;color:var(--th)">'+esc(item.area)+'</div>';
-    html+='<div style="font-size:12px"><span class="rub-pill tier'+li+'">'+TIER_LABELS[li]+'</span> '+esc(LearnPathRubrics.sentence(item,li))+'</div></div>';
+    html+='<div style="font-size:12px"><span class="rub-pill tier'+li+'">'+(item.support?LearnPathSupport.stars(li?3:1):TIER_LABELS[li])+'</span> '+esc(LearnPathRubrics.sentence(item,li))+'</div></div>';
   });
   html+='</div>';
   return html;
 }
 
 
+function renderSupportedRubric(containerId,rubric,values,key){
+ var el=document.getElementById(containerId),store=window._rubricStores[key];if(!el||!store)return;
+ var index=Math.max(0,Math.min(store.index||0,4)),item=rubric[index],inShare=key==='newpost'&&!!window._shareState,done=values.filter(Number.isInteger).length;
+ var html='<div class="lp-single-rubric'+(inShare?' in-share':'')+'"><div class="lp-rubric-main"><div class="lp-rubric-progress"><span>Question '+(index+1)+' of 5</span><span>'+done+' of 5 selected</span></div><progress max="5" value="'+done+'" aria-label="Questions answered"></progress><fieldset class="rubarea2 lp-single-question"><legend><span>'+esc(item.area)+'</span><strong tabindex="-1" class="lp-rubric-heading">'+esc(item.q)+'</strong></legend>';
+ [1,0].forEach(function(li){var id='rubric-'+key+'-'+index+'-'+li;html+='<label class="rublevel-row '+(values[index]===li?'sel':'')+'" for="'+id+'"><input type="radio" id="'+id+'" name="rubric-'+key+'-'+index+'" '+(values[index]===li?'checked ':'')+'onchange="pickRubricLevel(\''+key+'\','+index+','+li+')"><span>'+LearnPathSupport.stars(li?3:1)+'</span><span class="rub-sentence">'+LearnPathSupport.emphasize(item.levels[li].label,esc)+'</span></label>';});
+ html+='</fieldset><details class="lp-support-question-help"><summary>I’m not sure. Help me.</summary><p>Look at the work. Find an example of this. You can ask your teacher to look with you. Your answer has not changed.</p></details>';
+ if(store.error)html+='<p role="alert">'+esc(store.error)+'</p>';
+ if(!inShare)html+='<div class="lp-rubric-navigation"><button type="button" class="btn bts" '+(index===0?'disabled ':'')+'onclick="rubricGo(\''+key+'\','+Math.max(0,index-1)+')">Back</button>'+(index<4?'<button type="button" class="btn btp" onclick="rubricGo(\''+key+'\','+(index+1)+')">Next question →</button>':'<button type="button" class="btn btp" onclick="peerFeedbackStage(\''+store.peerPost+'\',true)">Write my feedback →</button>')+'</div>';
+ el.innerHTML=html+'</div>'+(inShare?'':'<aside class="lp-rubric-compass">'+LearnPathUI.mascot()+'<p>Look at the work. Choose the sentence that fits.</p></aside>')+'</div>';if(inShare)refreshShareCompass();
+}
+
 // ── GENERIC RUBRIC SELECTOR (used for self-reflection, peer comments, teacher evaluation) ──
 window._rubricStores={};
 var TIER_LABELS=["Step 1","Step 2","Step 3","Step 4"];
 function renderRubricBlock(containerId,rubric,values,storeKey){
+  if(rubric?.[0]?.support){renderSupportedRubric(containerId,rubric,values,storeKey);return;}
   var el=document.getElementById(containerId),store=window._rubricStores[storeKey];if(!el||!store)return;
   var index=Math.max(0,Math.min(store.index||0,rubric.length-1));store.index=index;
   var inShare=storeKey==='newpost'&&!!window._shareState,done=values.filter(function(v){return v!==null&&v!==undefined;}).length;
@@ -1412,7 +1432,7 @@ function requireStudentRubric(key){
  toast('Choose one ending in each of the five categories.');return false;
 }
 window.pickRubricLevel=function(key,ai,li){var store=window._rubricStores[key];if(!store)return;if(!Number.isInteger(li)||!store.rubric[ai]||li<0||li>=store.rubric[ai].levels.length)return;store.error='';store.values[ai]=li;renderRubricBlock(store.containerId,store.rubric,store.values,key);var input=document.getElementById('rubric-'+key+'-'+ai+'-'+li);if(input)input.focus({preventScroll:true});};
-window.rubricGo=function(key,index){var store=window._rubricStores[key];if(!store)return;store.index=index;store.review=false;renderRubricBlock(store.containerId,store.rubric,store.values,key);var heading=document.querySelector('#'+CSS.escape(store.containerId)+' .lp-rubric-heading');if(heading)heading.focus();};
+window.rubricGo=function(key,index){var store=window._rubricStores[key];if(!store)return;if(store.rubric[0]?.support&&index>store.index&&!Number.isInteger(store.values[store.index])){store.error='Choose one answer first.';renderRubricBlock(store.containerId,store.rubric,store.values,key);return;}store.index=index;store.review=false;renderRubricBlock(store.containerId,store.rubric,store.values,key);var heading=document.querySelector('#'+CSS.escape(store.containerId)+' .lp-rubric-heading');if(heading)heading.focus();};
 window.rubricReview=function(key){var store=window._rubricStores[key];if(!store)return;store.review=true;renderRubricBlock(store.containerId,store.rubric,store.values,key);};
 
 function shareGoalSnapshot(c){var out={};['grade','goalVersion','topic','productType','category','weakness','weaknessTips','goals','goalsOtherText','planSteps','createdAt','submittedAt'].forEach(function(k){if(c[k]!==undefined)out[k]=c[k];});return JSON.parse(JSON.stringify(out));}
@@ -1434,7 +1454,7 @@ window.setShareStage=function(stage){
   document.getElementById('np-work-summary').textContent='Your work: '+(document.getElementById('np-title').value.trim()||'Untitled project');
   refreshShareCompass();
 };
-window.shareNext=function(){var state=window._shareState,store=window._rubricStores.newpost;if(state.stage===1&&(store.index||0)<SELF_RUBRIC.length-1){store.index=(store.index||0)+1;renderRubricBlock(store.containerId,store.rubric,store.values,'newpost');}else setShareStage(state.stage+1);setShareStage(window._shareState.stage);};
+window.shareNext=function(){var state=window._shareState,store=window._rubricStores.newpost;if(state.stage===1&&store.rubric[0]?.support&&!Number.isInteger(store.values[store.index||0])){store.error='Choose one answer first.';renderRubricBlock(store.containerId,store.rubric,store.values,'newpost');return;}if(state.stage===1&&(store.index||0)<SELF_RUBRIC.length-1){store.index=(store.index||0)+1;renderRubricBlock(store.containerId,store.rubric,store.values,'newpost');}else setShareStage(state.stage+1);setShareStage(window._shareState.stage);};
 window.shareBack=function(){var state=window._shareState,store=window._rubricStores.newpost;if(state.stage===1&&(store.index||0)>0){store.index--;renderRubricBlock(store.containerId,store.rubric,store.values,'newpost');}else setShareStage(state.stage-1);};
 window.openNewPost=async function(){
   LearnPathNavigation.enter('share',[]);
@@ -1449,8 +1469,8 @@ window.openNewPost=async function(){
   html+='<div class="lp-share-layout"><section class="card lp-share-paper"><section data-share-panel="0"><h2>What are you sharing?</h2><div class="fg"><label class="fl" for="np-post-type">Project stage</label><select class="fi" id="np-post-type"><option value="draft">Draft project</option><option value="final">Final project</option></select></div><div class="fg"><label class="fl" for="np-title">Title of this piece of work</label><input class="fi" id="np-title" placeholder="Give your project a title"></div><div class="fg"><label class="fl" for="np-link">Link to your work</label><input class="fi" id="np-link" placeholder="Google Drive / YouTube / Canva…"></div><details class="lp-share-link-help"><summary>How to copy a link</summary><p>Google Drive → Share → Copy link · YouTube → Share · Canva → Share → Copy link</p></details><div class="fg"><label class="fl" for="np-file">Or attach a photo, video, PDF or audio file (up to 100 MB)</label><input type="file" class="fi" id="np-file" onchange="attachNewPostFile(this)"><div id="np-file-preview"></div></div></section>';
   html+='<section data-share-panel="1" hidden><h2>Self-reflection</h2><div id="np-rub-rows"></div></section><section data-share-panel="2" hidden><h2>One last look</h2><p id="np-work-summary"></p><div class="lp-share-written"><div class="fg"><label class="fl" for="np-well">One thing I did well *</label><textarea class="fta" id="np-well" placeholder="I …"></textarea></div><div class="fg"><label class="fl" for="np-improve">My next step *</label><textarea class="fta" id="np-improve" placeholder="Next time, I will …"></textarea></div></div></section>';
   html+='<footer class="lp-share-actions"><button type="button" class="btn bts" id="np-back" onclick="shareBack()">Back</button><details class="lp-self-help"><summary>How to answer</summary><div class="lp-self-help-copy"><p>'+esc(LearnPathRubrics.selfInstruction)+'</p><p lang="tr">'+esc(LearnPathRubrics.selfInstructionTR)+'</p></div></details><button type="button" class="btn btp" id="np-continue" onclick="shareNext()">Continue →</button><button type="button" class="btn btp" id="np-share-btn" onclick="submitPost()" hidden>Share my work</button></footer></section><aside id="lp-share-compass" class="lp-share-compass" aria-label="Compass project guide"></aside></div>';
-  mc.innerHTML=html;window._rubricStores.newpost={values:new Array(SELF_RUBRIC.length).fill(null),rubric:SELF_RUBRIC,containerId:'np-rub-rows',index:0};
-  renderRubricBlock('np-rub-rows',SELF_RUBRIC,window._rubricStores.newpost.values,'newpost');setShareStage(0);window.scrollTo({top:0,behavior:'auto'});
+  mc.innerHTML=html;window._rubricStores.newpost={values:new Array(SELF_RUBRIC.length).fill(null),rubric:activeRubric(true),containerId:'np-rub-rows',index:0};
+  renderRubricBlock('np-rub-rows',activeRubric(true),window._rubricStores.newpost.values,'newpost');setShareStage(0);if(supportProfile===LearnPathSupport.profile)LearnPathSupport.written('np-well','np-improve',true);window.scrollTo({top:0,behavior:'auto'});
 };
 
 window.attachNewPostFile=function(input){
@@ -1511,7 +1531,7 @@ window.submitPost=async function(){
     title:title,link:((document.getElementById("np-link")||{}).value||"").trim(),
     fileUrl:window._newPostFile?window._newPostFile.url:"",fileName:window._newPostFile?window._newPostFile.name:"",fileType:window._newPostFile?window._newPostFile.type:"",filePath:window._newPostFile?window._newPostFile.path:"",
     productType:(contractData&&contractData.productType)||"",
-    selfRubricVersion:LearnPathRubrics.version,
+    selfRubricVersion:activeRubricVersion(),
     selfRubric:window._rubricStores.newpost?window._rubricStores.newpost.values:[],
     goalSnapshot:window._shareState&&window._shareState.contract?shareGoalSnapshot(window._shareState.contract):null,
     preShareChecklist:window._shareState&&window._shareState.contract?{version:2,items:(window._shareState.contract.weaknessTips||[]).map(function(t,i){return {tip:t,done:window._shareState.focusChecks[i]===true};})}:null,
@@ -1532,9 +1552,10 @@ window.openComment=function(postId){
   form.style.display="block";
   var instruction=document.createElement('p');instruction.className='lp-rubric-instruction';instruction.textContent=LearnPathRubrics.instruction;if(!form.querySelector('.lp-rubric-instruction'))form.prepend(instruction);
   var storeKey="comment_"+postId;
-  if(!window._rubricStores[storeKey])window._rubricStores[storeKey]={values:new Array(PEER_RUBRIC.length).fill(null),rubric:PEER_RUBRIC,containerId:"cm-rub-"+postId,peerPost:postId};
+  if(!window._rubricStores[storeKey])window._rubricStores[storeKey]={values:new Array(PEER_RUBRIC.length).fill(null),rubric:activeRubric(false),containerId:"cm-rub-"+postId,peerPost:postId};
+  if(supportProfile===LearnPathSupport.profile)LearnPathSupport.written('cm-well-'+postId,'cm-improve-'+postId,false);
   peerFeedbackStage(postId,false);
-  renderRubricBlock("cm-rub-"+postId,PEER_RUBRIC,window._rubricStores[storeKey].values,storeKey);
+  renderRubricBlock("cm-rub-"+postId,activeRubric(false),window._rubricStores[storeKey].values,storeKey);
 };
 
 window.peerFeedbackStage=function(postId,written){
@@ -1556,7 +1577,7 @@ window.submitComment=async function(postId,targetUid){
   await push(ref(db,"posts/"+postId+"/comments"),{
     from:CU.displayName,fromId:CU.uid,
     well:well,improve:improve,
-    peerRubricVersion:LearnPathRubrics.version,peerRubric:window._rubricStores[storeKey]?window._rubricStores[storeKey].values:[],createdAt:Date.now()
+    peerRubricVersion:activeRubricVersion(),peerRubric:window._rubricStores[storeKey]?window._rubricStores[storeKey].values:[],createdAt:Date.now()
   });
   if(targetUid&&targetUid!==CU.uid){
     await push(ref(db,"notifications/"+targetUid),{type:"comment",postId:postId,message:CU.displayName+" commented on your work!",read:false,createdAt:Date.now()});
@@ -2271,7 +2292,7 @@ function installTeacherWorkspace(){
   let page = 'overview';
   const css = document.createElement('link');
   css.rel = 'stylesheet';
-  css.href = 'assets/teacher-workspace.css?v=20261108-3';
+  css.href = 'assets/teacher-workspace.css?v=20261108-4';
   document.head.append(css);
   document.body.classList.add('teacher-workspace');
 
@@ -3485,8 +3506,8 @@ async function mountPlanner(mode,c,overview){
     ['written','spoken','visual'].forEach(function(cat){extra[cat]=(catalog[cat]||[]).filter(function(item){var original=DEFAULT_CATALOG[cat].find(function(pair){return pair[0]===item.id;});return item.active&&(!original||original[1]!==item.name);});});
   }
   var mc=document.getElementById('mc');
-  mc.innerHTML=(isLockedStep(mode==='idea'?'step2':'step3')?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">← Back to Home</button>')+'<iframe id="lp-planner-frame" title="'+(mode==='idea'?'Plan your project':LearnPathUI.hasPassport(c)?'My Learning Passport':'Set goals and plan')+'" src="assets/planner.html?v=20261108-3" style="width:100%;height:900px;border:0;display:block" scrolling="no"></iframe>';
-  window._plannerContext={mode:mode,contract:c,overview:!!overview&&LearnPathUI.hasPassport(c),passportReady:LearnPathUI.hasPassport(c),readOnly:false,extraProducts:extra,resume:LearnPathNavigation.resume(),catalogProducts:mode==='idea'?catalog:null,identity:{name:c&&c.studentName||CU.displayName,photo:c&&c.studentId!==CU.uid?c.studentPhoto||'':UP.avatarUrl||CU.photoURL||c&&c.studentPhoto||''}};
+  mc.innerHTML=(isLockedStep(mode==='idea'?'step2':'step3')?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">← Back to Home</button>')+'<iframe id="lp-planner-frame" title="'+(mode==='idea'?'Plan your project':LearnPathUI.hasPassport(c)?'My Learning Passport':'Set goals and plan')+'" src="assets/planner.html?v=20261108-4" style="width:100%;height:900px;border:0;display:block" scrolling="no"></iframe>';
+  window._plannerContext={mode:mode,contract:c,overview:!!overview&&LearnPathUI.hasPassport(c),passportReady:LearnPathUI.hasPassport(c),readOnly:false,supportProfile:supportedPlan(c)?supportProfile:null,extraProducts:extra,resume:LearnPathNavigation.resume(),catalogProducts:mode==='idea'?catalog:null,identity:{name:c&&c.studentName||CU.displayName,photo:c&&c.studentId!==CU.uid?c.studentPhoto||'':UP.avatarUrl||CU.photoURL||c&&c.studentPhoto||''}};
   setNav('home');
 }
 window.addEventListener('message',async function(event){
@@ -3506,16 +3527,16 @@ window.addEventListener('message',async function(event){
       var existing=(await get(ref(db,'contracts/'+uid))).val();
       var ideaFields={plannerVersion:'passport-v1',productId:draft.productId,productType:draft.productType,category:draft.category,platforms:draft.tools||[],platformsOtherText:draft.toolOther||'',weakness:draft.weakness,weaknessTips:existing&&existing.weakness===draft.weakness?existing.weaknessTips||SKILL_TIPS[draft.weakness]:SKILL_TIPS[draft.weakness],status:'draft',editUnlocked:true,topic:draft.topic};
       if(existing&&existing.productType)await update(ref(db,'contracts/'+uid),ideaFields);
-      else await set(ref(db,'contracts/'+uid),Object.assign({grade:6,goalVersion:'grade6-v1',goals:{},evalTeacherPct:'',evalPeerPct:'',studentName:CU.displayName,studentEmail:CU.email,studentPhoto:CU.photoURL||'',studentId:uid,createdAt:Date.now()},ideaFields));
+      else await set(ref(db,'contracts/'+uid),Object.assign({grade:6,goalVersion:supportProfile===LearnPathSupport.profile?LearnPathSupport.goalVersion:'grade6-v1',goals:{},evalTeacherPct:'',evalPeerPct:'',studentName:CU.displayName,studentEmail:CU.email,studentPhoto:CU.photoURL||'',studentId:uid,createdAt:Date.now()},ideaFields));
       contractData=(await get(ref(db,'contracts/'+uid))).val();respond(contractData);if(!existing||!existing.productType){celebrate();renderQuizDone();}refreshPassportTab();return;
     }
     if(window._plannerContext.mode!=='passport')throw new Error('Open your Learning Passport first.');
     if(message.action==='draft'){await plannerDraft(uid,Object.assign({},plannerFields(message.payload),{status:'draft',editUnlocked:true}));respond(true);return;}
     if(message.action==='submit'){
       var fields=plannerFields(message.payload);
-      if(!fields.topic.trim()||fields.planSteps.length<3||fields.planSteps.some(function(s){return !/[\p{L}\p{N}]/u.test(String(s).replace(/^I will\s*/i,''));}))throw new Error('Complete your topic and every plan step.');
+      if(!fields.topic.trim()||fields.planSteps.length<(supportedPlan(contractData)?1:3)||fields.planSteps.some(function(s){return !/[\p{L}\p{N}]/u.test(String(s).replace(/^I will\s*/i,''));}))throw new Error('Complete your topic and every plan step.');
       var count=GOAL_ITEMS.filter(function(g){return fields.goals[g.id]===true;}).length+customGoalTexts(fields).length;
-      if(count<3)throw new Error('Choose at least three project goals.');
+      if(supportedPlan(contractData)){if(count!==2)throw new Error('Choose two goals.');}else if(count<3)throw new Error('Choose at least three project goals.');
       ['evalTeacherPct','evalPeerPct'].forEach(function(key){var v=fields[key];if(v!==''&&(!Number.isFinite(Number(v))||Number(v)<0||Number(v)>100))throw new Error('Target scores must be between 0 and 100 percent.');});
       await flushPlannerDraft();await queuePlannerSave(uid,Object.assign({},fields,{status:'pending',editUnlocked:true,submittedAt:Date.now()}));
       contractData=(await get(ref(db,'contracts/'+uid))).val();window._plannerContext.contract=contractData;window._plannerContext.readOnly=false;
@@ -3551,9 +3572,9 @@ new MutationObserver(refreshPassportTab).observe(document.getElementById('app'),
 
 LearnPathNavigation.install({
  capture:function(){return {share:window._shareState,stage:window._shareState?.stage,rubricIndex:window._rubricStores.newpost?.index,file:window._newPostFile,rubrics:{...window._rubricStores},screen:window._currentScreen,contract:contractData,nav:document.querySelector('#bnav .ni.active')?.id};},
- restore:function(d){if(!d)return;window._shareState=d.share;window._newPostFile=d.file;window._rubricStores=d.rubrics;window._currentScreen=d.screen;contractData=d.contract;document.querySelectorAll('#bnav .ni').forEach(function(b){b.classList.toggle('active',b.id===d.nav);});document.body.dataset.sharing=String(d.screen==='share');if(d.screen==='share'){window._rubricStores.newpost.index=d.rubricIndex||0;renderRubricBlock('np-rub-rows',SELF_RUBRIC,window._rubricStores.newpost.values,'newpost');setShareStage(d.stage||0);} refreshPassportTab();},
+ restore:function(d){if(!d)return;window._shareState=d.share;window._newPostFile=d.file;window._rubricStores=d.rubrics;window._currentScreen=d.screen;contractData=d.contract;document.querySelectorAll('#bnav .ni').forEach(function(b){b.classList.toggle('active',b.id===d.nav);});document.body.dataset.sharing=String(d.screen==='share');if(d.screen==='share'){window._rubricStores.newpost.index=d.rubricIndex||0;renderRubricBlock('np-rub-rows',activeRubric(true),window._rubricStores.newpost.values,'newpost');setShareStage(d.stage||0);} refreshPassportTab();},
  open:function(route,args){return ({go:window.go,share:window.openNewPost,unit:window.renderStep1Screen,idea:window.startQuiz,passport:window.renderStep3Screen,resources:window.renderResourcesScreen,savedIdea:renderQuizDone,profile:window.viewProf}[route]||window.go).apply(null,args||[]);}
 });
 </script>
-<script src="assets/compass-scenes.js?v=20261108-3"></script></body>
+<script src="assets/compass-scenes.js?v=20261108-4"></script></body>
 </html>
