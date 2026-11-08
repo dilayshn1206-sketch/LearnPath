@@ -40,7 +40,7 @@ function check(name,fn){fn();results.push(name);}
   first.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Enter',bubbles:true}));
   check('Keyboard choice executes original platform handler',()=>assert.equal(w.__test.getState().platforms.length,1));
   w.qGoto(1);await pause();
-  check('Teacher-defined active catalog is retained',()=>{assert.equal(w.document.querySelectorAll('[data-product-id]').length,4);assert.match(w.document.getElementById('mc').textContent,/teacher’s custom idea/);assert.doesNotMatch(w.document.getElementById('mc').textContent,/Hidden/);});
+  check('Teacher-defined active catalog is retained',()=>{assert.equal(w.document.querySelectorAll('[data-product-id]').length,10);for(const id of ['blog','story','written_interview','podcast','talk','roleplay','poster','comic','infographic'])assert.ok(w.document.querySelector('[data-product-id="'+id+'"]'));assert.match(w.document.getElementById('mc').textContent,/teacher’s custom idea/);assert.doesNotMatch(w.document.getElementById('mc').textContent,/Hidden/);});
   w.document.querySelector('[data-product-id="teacher_custom"]').click();await pause();
   check('Selection state survives render and marks chosen button',()=>assert.equal(w.document.querySelector('[data-product-id="teacher_custom"]').getAttribute('aria-pressed'),'true'));
   w.qGoto(2);w.qPick3('writing');w.qGoto(3);await w.submitQuizChoice();

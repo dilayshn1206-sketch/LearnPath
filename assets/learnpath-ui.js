@@ -26,8 +26,12 @@
   function feedHeader(teacher) {
     return '<header class="lp-feed-heading"><div><p class="lp-eyebrow">Our classroom · Your Digital Self</p><h1>Our learning journeys</h1><p>'+(teacher?'Review our learning plans and give feedback on shared projects.':'See the ideas, plans and projects taking shape in our class.')+'</p></div><div class="lp-feed-cover" aria-hidden="true">'+feedIcon('passport')+'<span>LEARNPATH<br>CLASS COLLECTION</span></div></header>';
   }
-  function feedNavigation(tab) {
-    return '<nav class="toggle-row lp-feed-tabs" aria-label="Class collection"><button type="button" class="toggle-btn'+(tab==='plans'?' act':'')+'" aria-pressed="'+(tab==='plans')+'" onclick="switchFeedTab(\'plans\')">'+feedIcon('passport')+'<span>Learning plans</span></button><button type="button" class="toggle-btn'+(tab==='posts'?' act':'')+'" aria-pressed="'+(tab==='posts')+'" onclick="switchFeedTab(\'posts\')">'+feedIcon('gallery')+'<span>Project gallery</span></button></nav>';
+  function feedNavigation(tab, stage) {
+    var active=tab==='posts'?(stage||'draft'):'plans';
+    return '<nav class="toggle-row lp-feed-tabs" aria-label="Class collection">'+[['plans','Learning plans','passport'],['draft','Draft projects','file'],['final','Final projects','gallery']].map(function(item){
+      var selected=active===item[0];
+      return `<button type="button" class="toggle-btn${selected?' act':''}" data-feed-section="${item[0]}" aria-pressed="${selected}" onclick="switchFeedTab('${item[0]}')">${feedIcon(item[2])}<span>${item[1]}</span></button>`;
+    }).join('')+'</nav>';
   }
   function hasPassport(c) {
     if (!c || !c.productType || !(c.submittedAt || c.status === 'pending' || c.status === 'approved')) return false;

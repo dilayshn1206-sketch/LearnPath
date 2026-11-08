@@ -254,7 +254,7 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
 .rub-sentence{font-size:13px}
 .rub-chevron{background:none;border:none;color:var(--th);cursor:pointer;font-size:12px;padding:4px 6px;flex-shrink:0}
 </style>
-<link rel="stylesheet" href="assets/learnpath.css?v=20261105-1">
+<link rel="stylesheet" href="assets/learnpath.css?v=20261108-1">
 </head>
 <body>
 
@@ -310,11 +310,11 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
   <div class="modal-card" id="result-popup-card" style="text-align:center;padding:26px 20px"></div>
 </div>
 
-<script src="assets/learnpath-ui.js?v=20261105-1"></script>
-<script src="assets/rubric-v2.js?v=20261105-1"></script><script src="assets/share-guide.js?v=20261105-1"></script><script src="assets/vendor/jszip-3.10.1.min.js"></script><script src="assets/project-previews.js?v=20261105-1"></script>
-<script src="assets/navigation.js?v=20261105-1"></script>
+<script src="assets/learnpath-ui.js?v=20261108-1"></script>
+<script src="assets/rubric-v2.js?v=20261108-1"></script><script src="assets/share-guide.js?v=20261108-1"></script><script src="assets/vendor/jszip-3.10.1.min.js"></script><script src="assets/project-previews.js?v=20261108-1"></script>
+<script src="assets/navigation.js?v=20261108-1"></script>
 <script type="module">
-import {auth,db,storage,rpc,ref,set,get,push,onValue,update,remove,sref,uploadBytesResumable,getDownloadURL,deleteObject,onAuthStateChanged,signInWithPopup,signOut} from './assets/supabase-backend.js?v=20261105-1';
+import {auth,db,storage,rpc,ref,set,get,push,onValue,update,remove,sref,uploadBytesResumable,getDownloadURL,deleteObject,onAuthStateChanged,signInWithPopup,signOut} from './assets/supabase-backend.js?v=20261108-1';
 const prov={};
 let CU=null,UP=null;
 let myGid=null,myGname=null,userCoins=0;
@@ -324,9 +324,14 @@ let contractData=null;
 const CAT_LABELS={written:"Written",spoken:"Spoken",visual:"Visual"};
 const CAT_EMOJI={written:"✍️",spoken:"🗣️",visual:"🎨"};
 const DEFAULT_CATALOG={
-  written:[["mini_story","Mini Story"],["profile_article","Profile Article"],["howto","How-to Guide"],["comparison_article","Comparison Article"],["mini_report","Mini Report"],["proposal_letter","Proposal Letter"]],
-  spoken:[["char_voice_diary","Character Voice Diary"],["audio_tour","Audio Tour"],["audio_tutorial","Audio Tutorial"],["audio_review","Audio Review"],["news_bulletin","News Bulletin"],["one_min_pitch","One-Minute Pitch"]],
-  visual:[["comic_story","Comic Story"],["visual_exhibit","Visual Exhibit"],["process_infographic","Process Infographic"],["comparison_infographic","Comparison Infographic"],["fact_file","Fact File"],["campaign_poster","Campaign Poster"]]
+  written:[["blog","Blog"],["story","Story / diary"],["written_interview","Written interview"]],
+  spoken:[["podcast","Podcast / audio"],["talk","Short talk"],["roleplay","Role-play"]],
+  visual:[["poster","Poster"],["comic","Comic"],["infographic","Infographic"]]
+};
+const LEGACY_CATALOG_DEFAULTS={
+  mini_story:"Mini Story",profile_article:"Profile Article",howto:"How-to Guide",comparison_article:"Comparison Article",mini_report:"Mini Report",proposal_letter:"Proposal Letter",
+  char_voice_diary:"Character Voice Diary",audio_tour:"Audio Tour",audio_tutorial:"Audio Tutorial",audio_review:"Audio Review",news_bulletin:"News Bulletin",one_min_pitch:"One-Minute Pitch",
+  comic_story:"Comic Story",visual_exhibit:"Visual Exhibit",process_infographic:"Process Infographic",comparison_infographic:"Comparison Infographic",fact_file:"Fact File",campaign_poster:"Campaign Poster"
 };
 async function ensureCatalogSeeded(){
   try{
@@ -349,7 +354,14 @@ async function loadCatalog(){
     var out={written:[],spoken:[],visual:[]};
     ["written","spoken","visual"].forEach(function(cat){
       var items=raw[cat]||{};
-      Object.keys(items).forEach(function(id){out[cat].push({id:id,name:items[id].name,active:items[id].active!==false});});
+      var legacy=false;
+      Object.keys(items).forEach(function(id){
+        if(LEGACY_CATALOG_DEFAULTS[id]===items[id].name){legacy=true;return;}
+        out[cat].push({id:id,name:items[id].name,active:items[id].active!==false});
+      });
+      if(legacy&&!DEFAULT_CATALOG[cat].some(function(pair){return Object.hasOwn(items,pair[0]);})){
+        out[cat]=DEFAULT_CATALOG[cat].map(function(pair){return {id:pair[0],name:pair[1],active:true};}).concat(out[cat]);
+      }
     });
     // if nothing came back from the DB (e.g. permission issue), fall back to built-in defaults so the quiz still works
     if(!out.written.length&&!out.spoken.length&&!out.visual.length){
@@ -1174,26 +1186,31 @@ function renderFeed(){
   window._currentScreen="feed";
   var mc=document.getElementById("mc");
   window._feedTab=window._feedTab||"plans";
-  var html=LearnPathUI.feedHeader(false)+LearnPathUI.feedNavigation(window._feedTab);
+  var html=LearnPathUI.feedHeader(false)+LearnPathUI.feedNavigation(window._feedTab,window._galleryStage);
   html+='<div id="feed-tab-plans" style="display:'+(window._feedTab==="plans"?"block":"none")+'"><div id="projects-list" class="lp-feed-plans"><div class="loading">Loading...</div></div></div>';
   html+='<div id="feed-tab-posts" style="display:'+(window._feedTab==="posts"?"block":"none")+'">';
-  html+='<div class="lp-gallery-toolbar"><button class="btn btp mb8" onclick="openNewPost()">+ Share Your Work</button>'+galleryStageNavigation()+'</div>';
+  html+='<div class="lp-gallery-toolbar"><button class="btn btp mb8" onclick="openNewPost()">+ Share Your Work</button></div>';
   html+='<div id="feed-container"><div class="loading">Loading...</div></div></div>';
   mc.innerHTML=html;
   loadProjectsList();
   loadFeed();
 }
+function updateFeedNavigation(){
+  var active=window._feedTab==='posts'?(window._galleryStage||'draft'):'plans';
+  document.querySelectorAll('.lp-feed-tabs [data-feed-section]').forEach(function(button){
+    var selected=button.dataset.feedSection===active;
+    button.classList.toggle('act',selected);button.setAttribute('aria-pressed',String(selected));
+  });
+}
 window.switchFeedTab=function(tab){
-  window._feedTab=tab;
-  var p=document.getElementById("feed-tab-plans");
-  var s=document.getElementById("feed-tab-posts");
-  if(p)p.style.display=tab==="plans"?"block":"none";
-  if(s)s.style.display=tab==="posts"?"block":"none";
-  var btns=document.querySelectorAll(".toggle-row .toggle-btn");
-  btns.forEach(function(b,i){var selected=(i===0&&tab==="plans")||(i===1&&tab==="posts");b.classList.toggle("act",selected);b.setAttribute("aria-pressed",String(selected));});
+  var stage=tab==='draft'||tab==='final'?tab:null;
+  window._feedTab=stage?'posts':tab;
+  var plans=document.getElementById('feed-tab-plans'),posts=document.getElementById('feed-tab-posts');
+  if(plans)plans.style.display=window._feedTab==='plans'?'block':'none';
+  if(posts)posts.style.display=window._feedTab==='posts'?'block':'none';
+  filterProjectStage(stage||window._galleryStage||'draft');
 };
 
-function galleryStageNavigation(){return `<nav aria-label="Project stage" class="lp-gallery-stages"><button type="button" data-project-stage="draft" onclick="filterProjectStage('draft')">Draft projects</button><button type="button" data-project-stage="final" onclick="filterProjectStage('final')">Final projects</button></nav>`;}
 function loadProjectsList(teacherMode){
   onValue(ref(db,"contracts"),function(snap){
     var el=document.getElementById("projects-list");if(!el)return;
@@ -1247,7 +1264,7 @@ function loadFeed(){
   });
 }
 
-window.filterProjectStage=function(stage){window._galleryStage=stage;document.querySelectorAll('[data-gallery-stage]').forEach(function(el){el.hidden=el.dataset.galleryStage!==stage;});document.querySelectorAll('[data-project-stage]').forEach(function(el){el.setAttribute('aria-pressed',String(el.dataset.projectStage===stage));});};
+window.filterProjectStage=function(stage){window._galleryStage=stage;document.querySelectorAll('[data-gallery-stage]').forEach(function(el){el.hidden=el.dataset.galleryStage!==stage;});updateFeedNavigation();};
 function recordRubric(record,self){
  var version=record[self?'selfRubricVersion':'peerRubricVersion'];
  if(version===LearnPathRubrics.version)return self?SELF_RUBRIC:PEER_RUBRIC;
@@ -1634,7 +1651,8 @@ window.renderStep1Screen=async function(){
       html+='<div class="tip mb8" role="status">You scored '+score+"/"+gQs.length+'. Review the explanations below.</div>';
     }
     gQs.forEach(function(q,qi){
-      html+='<fieldset class="lp-unit-question'+(qi>2?' lp-illustrated-question':'')+'"><legend>'+(qi+1)+". "+esc(q.q)+'</legend>'+(qi>2?'<img class="lp-question-picture" src="assets/grammar-'+(qi+1)+'.svg" alt="'+(qi===3?'An animal-friendly home':'Two classmates at a school gate')+'">':'')+'<div class="lp-question-options">';
+      var questionPhoto=grammarImageSource(q);
+      html+='<fieldset class="lp-unit-question'+(questionPhoto?' lp-illustrated-question':'')+'"><legend>'+(qi+1)+". "+esc(q.q)+'</legend>'+(questionPhoto?'<img class="lp-question-picture" src="'+esc(questionPhoto)+'" alt="Photo for question '+(qi+1)+'">':'')+'<div class="lp-question-options">';
       q.options.forEach(function(opt,oi){
         var sel=myGrammarAnswers[qi]===oi;
         var style="";
@@ -2247,7 +2265,262 @@ var TNAV=[
   {id:"unit",l:"Unit",i:'<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>'}
 ];
 
+function installTeacherWorkspace(){
+  const originalOverview = renderTOverview;
+  const originalTgo = window.tgo;
+  const originalSession = renderTSession;
+  let moving = false;
+  let chosenStudent = '';
+  let boardVersion = 0;
+  let page = 'overview';
+  const css = document.createElement('link');
+  css.rel = 'stylesheet';
+  css.href = 'assets/teacher-workspace.css?v=20261108-1';
+  document.head.append(css);
+  document.body.classList.add('teacher-workspace');
+
+  function nav() {
+    const items = [['overview','Class'],['grouping','Groups'],['feed','Projects'],['session','Lesson controls'],['more','More']];
+    const target = document.getElementById('bnav');
+    target.replaceChildren();
+    items.forEach(([key,label]) => {
+      const button = document.createElement('button');
+      button.className = 'ni' + (key===page?' active':'');
+      button.id = 'tnav-'+key;
+      button.textContent = label;
+      button.onclick = () => window.tgo(key);
+      target.append(button);
+    });
+  }
+  function header(title, description) {
+    return '<header class="teacher-heading"><div><p class="teacher-eyebrow">Teacher workspace</p><h1>'+esc(title)+'</h1><p>'+esc(description)+'</p></div></header>';
+  }
+  function button(label, action, className='bts') {
+    const el = document.createElement('button');
+    el.type='button';
+    el.className='btn '+className;
+    el.textContent=label;
+    el.onclick=action;
+    return el;
+  }
+  window.tgo = function (key) {
+    page=key;
+    if(key!=='session') clearInterval(window._tsessionInterval);
+    if(key==='more') more();
+    else originalTgo(key);
+    nav();
+  };
+  renderTOverview = function () {
+    originalOverview();
+    const mc=document.getElementById('mc');
+    const oldHeader=mc.firstElementChild;
+    const fresh=document.createElement('div');
+    fresh.innerHTML=header('Your class','Review learning plans, organise groups and guide the lesson.');
+    oldHeader.replaceWith(fresh.firstElementChild);
+    const quick=document.createElement('div');
+    quick.className='teacher-shortcuts';
+    quick.append(button('Organise groups',()=>tgo('grouping'),'btp'),button('Lesson controls',()=>tgo('session')),button('Review projects',()=>tgo('feed')));
+    mc.querySelector('.teacher-heading').after(quick);
+    const secondary=[
+      ['stud-list','All students'],
+      ['account-requests','Account requests'],
+      ['reflections-list','Lesson reflections'],
+      ['projeval-list','Project evaluations'],
+      ['sheet-export-status','Google Sheets connection']
+    ];
+    secondary.forEach(([id,title])=>{
+      const card=document.getElementById(id)?.closest('.card');
+      if(!card)return;
+      const details=document.createElement('details');
+      details.className='teacher-details';
+      const summary=document.createElement('summary');
+      summary.textContent=title;
+      details.append(summary);
+      card.before(details);
+      details.append(card);
+      mc.append(details);
+    });
+    const pending=document.getElementById('pend-list')?.closest('.card');
+    if(pending)pending.classList.add('teacher-pending');
+  };
+  function more(){
+    const mc=document.getElementById('mc');
+    mc.innerHTML=header('Materials and settings','Open these when you need to update the lesson.');
+    const grid=document.createElement('div');grid.className='teacher-settings';
+    [['Unit and grammar','unit'],['Project options','ideas'],['Resources','resources']].forEach(([title,key])=>{
+      grid.append(button(title,()=>tgo(key)));
+    });
+    grid.append(button('Google Sheets',()=>renderSheetsSetup()));
+    mc.append(grid);
+  }
+  renderTIdeas = async function () {
+    const mc=document.getElementById('mc');
+    mc.innerHTML=header('Project options','The same product types students choose in Written, Spoken and Visual.');
+    await ensureCatalogSeeded();
+    const catalog=await loadCatalog();
+    if(page!=='ideas')return;
+    const columns=document.createElement('div');
+    columns.className='teacher-product-options';
+    for(const key of ['written','spoken','visual']){
+      const card=document.createElement('section');
+      card.className='card';
+      const title=document.createElement('h2');
+      title.textContent=CAT_LABELS[key];
+      card.append(title);
+      for(const item of catalog[key]){
+        const row=document.createElement('div');row.className='teacher-product-row';
+        const name=document.createElement('span');name.textContent=item.name;
+        row.append(name,button('Remove',()=>deleteCatalogItem(key,item.id)));
+        card.append(row);
+      }
+      const form=document.createElement('form');form.className='teacher-product-add';
+      const input=document.createElement('input');input.className='fi';input.id='new-idea-'+key;
+      input.setAttribute('aria-label','New '+CAT_LABELS[key]+' option');input.placeholder='Another product';
+      const add=document.createElement('button');add.className='btn btp';add.type='submit';add.textContent='Add';
+      form.onsubmit=async event=>{event.preventDefault();add.disabled=true;try{await addCatalogItem(key);}finally{add.disabled=false;}};
+      form.append(input,add);card.append(form);columns.append(card);
+    }
+    mc.append(columns);
+  };
+
+  renderTSession = async function () {
+    const mc=document.getElementById('mc');
+    await originalSession();
+    if(page!=='session')return;
+    const cards=[...mc.querySelectorAll('.card')].filter(card=>card!==mc.firstElementChild);
+    mc.firstElementChild.outerHTML=header('Lesson controls','Choose what the class opens, set a timer or send a reflection.');
+    const status=cards.shift();
+    if(status)status.classList.add('teacher-session-status');
+    const grid=document.createElement('div');grid.className='teacher-session-grid';
+    cards.forEach(card=>grid.append(card));
+    if(status)status.after(grid);else mc.append(grid);
+    const endButton=[...mc.children].find(el=>el.tagName==='BUTTON'&&el.textContent.includes('End Session'));
+    if(status&&endButton)status.append(endButton);
+    const headings=['Open unit page','Project ideas timer','Planning timer','Lesson reflection','Project evaluation'];
+    grid.querySelectorAll('.card').forEach((card,i)=>{
+      const title=card.firstElementChild;
+      if(title)title.textContent=headings[i]||title.textContent;
+      card.querySelectorAll('[style*="font-size:11px"]').forEach(el=>el.classList.add('teacher-secondary-copy'));
+    });
+  };
+  renderTGroups = function () {
+    page='grouping';
+    const mc=document.getElementById('mc');
+    mc.innerHTML=header('Groups','Drag a student to a group, or select a student and use Move here.')
+      +'<form id="teacher-create-group" class="teacher-group-create"><label for="grp-name">New group</label><input class="fi" id="grp-name" maxlength="100" placeholder="Group name"><button class="btn btp" type="submit">Create group</button></form>'
+      +'<p id="teacher-group-status" role="status" aria-live="polite"></p><div id="teacher-group-board" class="teacher-group-board"></div>';
+    document.getElementById('teacher-create-group').onsubmit=async event=>{
+      event.preventDefault();
+      const submit=event.submitter;submit.disabled=true;
+      try{await createGroup();}catch(e){toast(e.message);}finally{submit.disabled=false;}
+    };
+    renderGroupingTab();
+  };
+  renderGroupingTab = async function () {
+    const version=++boardVersion;
+    const board=document.getElementById('teacher-group-board');
+    if(!board)return;
+    const [gs,us,cs]=await Promise.all([get(ref(db,'groups')),get(ref(db,'users')),get(ref(db,'contracts'))]);
+    if(version!==boardVersion||!board.isConnected)return;
+    const users=us.val()||{},contracts=cs.val()||{},groups=gs.val()||{};
+    const students=Object.entries(users).filter(([,u])=>u.role==='student'&&u.enrolled!==false);
+    const known=new Set(Object.keys(groups));
+    const buckets=[['','Ungrouped'],...Object.entries(groups).map(([id,g])=>[id,g.name||'Group'])];
+    board.replaceChildren();
+    buckets.forEach(([gid,name])=>{
+      const members=students.filter(([,u])=>(known.has(u.groupId)?u.groupId:'')===gid);
+      const column=document.createElement('section');column.className='teacher-group';
+      column.dataset.group=gid;
+      const heading=document.createElement('h2');heading.textContent=name+' · '+members.length;
+      column.append(heading);
+      const drop=button('Move here',()=>move(chosenStudent,gid,name));
+      drop.classList.add('teacher-move-here');drop.disabled=moving||!chosenStudent;
+      drop.setAttribute('aria-label','Move selected student to '+name);column.append(drop);
+      column.addEventListener('dragover',event=>{if(moving)return;event.preventDefault();event.dataTransfer.dropEffect='move';column.classList.add('teacher-drop-target');});
+      column.addEventListener('dragleave',event=>{if(!column.contains(event.relatedTarget))column.classList.remove('teacher-drop-target');});
+      column.addEventListener('drop',event=>{
+        event.preventDefault();column.classList.remove('teacher-drop-target');
+        const uid=event.dataTransfer.getData('application/x-learnpath-student');
+        if(users[uid])move(uid,gid,name);
+      });
+      members.forEach(([uid,u])=>{
+        const card=document.createElement('button');card.type='button';card.className='teacher-student';
+        card.draggable=!moving;card.disabled=moving;card.dataset.student=uid;
+        card.setAttribute('aria-pressed',String(chosenStudent===uid));
+        const label=document.createElement('strong');label.textContent=u.name||'Student';
+        const product=document.createElement('small');product.textContent=contracts[uid]?.productType||'Project not chosen';
+        card.append(label,product);
+        const handle=document.createElement('span');handle.className='teacher-drag-handle';
+        handle.textContent='⠿';handle.setAttribute('aria-hidden','true');card.append(handle);
+        bindTouchMove(handle,card,uid,board);
+        card.onclick=()=>{chosenStudent=chosenStudent===uid?'':uid;renderGroupingTab();};
+        card.addEventListener('dragstart',event=>{
+          chosenStudent=uid;event.dataTransfer.setData('application/x-learnpath-student',uid);event.dataTransfer.effectAllowed='move';
+        });
+        card.addEventListener('dragend',()=>board.querySelectorAll('.teacher-drop-target').forEach(el=>el.classList.remove('teacher-drop-target')));
+        column.append(card);
+      });
+      if(!members.length){const empty=document.createElement('p');empty.className='teacher-empty';empty.textContent='Drop a student here';column.append(empty);}
+      if(gid){
+        const tools=document.createElement('details');tools.className='teacher-group-tools';
+        const summary=document.createElement('summary');summary.textContent='Group options';
+        tools.append(summary,button('Rename',()=>renameGroup(gid,name)),button('Remove group',()=>terminateGroup(gid,name)));
+        column.append(tools);
+      }
+      board.append(column);
+    });
+    const status=document.getElementById('teacher-group-status');
+    if(status)status.textContent=moving?'Saving group…':chosenStudent?'Choose a destination for '+(users[chosenStudent]?.name||'student')+'.':students.length+' students · '+Object.keys(groups).length+' groups';
+  };
+  function bindTouchMove(handle,card,uid,board){
+    let active=null,ghost=null,destination=null,suppressClick=false;
+    handle.addEventListener('pointerdown',event=>{
+      if(event.pointerType==='mouse'||moving)return;
+      active={id:event.pointerId,x:event.clientX,y:event.clientY};
+      handle.setPointerCapture(event.pointerId);
+    });
+    handle.addEventListener('pointermove',event=>{
+      if(!active||event.pointerId!==active.id)return;
+      if(!ghost&&Math.hypot(event.clientX-active.x,event.clientY-active.y)<8)return;
+      event.preventDefault();suppressClick=true;
+      if(!ghost){
+        ghost=card.cloneNode(true);ghost.className='teacher-student teacher-drag-ghost';
+        ghost.removeAttribute('data-student');ghost.setAttribute('aria-hidden','true');document.body.append(ghost);
+      }
+      ghost.style.left=event.clientX+12+'px';ghost.style.top=event.clientY-20+'px';
+      destination=document.elementFromPoint(event.clientX,event.clientY)?.closest('.teacher-group');
+      board.querySelectorAll('.teacher-group').forEach(el=>el.classList.toggle('teacher-drop-target',el===destination));
+    });
+    function finish(event){
+      if(!active||event.pointerId!==active.id)return;
+      const target=destination;
+      active=null;ghost?.remove();ghost=null;destination=null;
+      board.querySelectorAll('.teacher-drop-target').forEach(el=>el.classList.remove('teacher-drop-target'));
+      if(event.type==='pointerup'&&suppressClick&&target)move(uid,target.dataset.group,target.querySelector('h2').textContent.replace(/ · \d+$/,''));
+    }
+    handle.addEventListener('pointerup',finish);
+    handle.addEventListener('pointercancel',finish);
+    card.addEventListener('click',event=>{if(suppressClick){event.preventDefault();event.stopImmediatePropagation();suppressClick=false;}},true);
+  }
+  async function move(uid,gid,name) {
+    if(!uid||moving)return;
+    moving=true;
+    try{
+      const student=await get(ref(db,'users/'+uid));
+      if(!student.exists())throw Error('Student no longer available');
+      if((student.val().groupId||'')===gid)return;
+      await renderGroupingTab();
+      // Reuse the application's existing assignment operation and its save feedback.
+      await assignStudentGroup(uid,student.val().name||'Student',gid,name);
+      const saved=await get(ref(db,'users/'+uid));
+      if((saved.val()?.groupId||'')===gid)chosenStudent='';
+    }catch(e){toast('Could not move student. '+e.message);}
+    finally{moving=false;await renderGroupingTab();}
+  }
+
+}
 function renderTeacher(){
+  if(!window._teacherWorkspaceReady){installTeacherWorkspace();window._teacherWorkspaceReady=true;}
   document.getElementById("bnav").innerHTML=TNAV.map(function(n,i){
     return '<button class="ni'+(i===0?" active":"")+'" id="tnav-'+n.id+'" onclick="tgo(\''+n.id+'\')">'
       +'<svg viewBox="0 0 24 24">'+n.i+'</svg>'+n.l+'</button>';
@@ -2699,30 +2972,15 @@ async function renderGroupingTab(){
 
 window.assignStudentGroup=async function(uid,name,groupId,groupName){
   try{
-    var uSnap=await get(ref(db,"users/"+uid));
-    var oldGroupId=(uSnap.exists()&&uSnap.val().groupId)||null;
-    if(oldGroupId&&oldGroupId!==groupId){await remove(ref(db,"groups/"+oldGroupId+"/members/"+uid));}
-    if(groupId){
-      await update(ref(db,"users/"+uid),{groupId:groupId,groupName:groupName});
-      await set(ref(db,"groups/"+groupId+"/members/"+uid),name);
-      var cSnap=await get(ref(db,"contracts/"+uid));
-      if(cSnap.exists()&&cSnap.val().status==="awaiting_grouping"){
-        await update(ref(db,"contracts/"+uid),{status:"draft",editUnlocked:true});
-        toast(name+" grouped.");
-      } else {
-        toast(name+" moved to "+groupName+".");
-      }
-    } else {
-      await update(ref(db,"users/"+uid),{groupId:null,groupName:null});
-      toast(name+" removed from group.");
-    }
-    renderGroupingTab();
+    await rpc("lp_assign_group",{p_student:uid,p_group:groupId||null});
+    toast(groupId?name+" moved to "+groupName+".":name+" removed from group.");
+    await renderGroupingTab();
   }catch(e){
     console.error("assignStudentGroup failed:",e);
-    toast("Couldn't save — "+(e&&e.message?e.message:"unknown error"));
+    toast("Could not save the group. Please try again.");
+    throw e;
   }
 };
-
 window.createGroup=async function(){
   var name=((document.getElementById("grp-name")||{}).value||"").trim();
   if(!name){toast("Enter a name!");return;}
@@ -2878,9 +3136,9 @@ function renderTFeed(){
   window._currentScreen="feed";
   var mc=document.getElementById("mc");
   window._feedTab=window._feedTab||"plans";
-  var html=LearnPathUI.feedHeader(true)+LearnPathUI.feedNavigation(window._feedTab);
+  var html=LearnPathUI.feedHeader(true)+LearnPathUI.feedNavigation(window._feedTab,window._galleryStage);
   html+='<div id="feed-tab-plans" style="display:'+(window._feedTab==="plans"?"block":"none")+'"><div id="projects-list" class="lp-feed-plans"><div class="loading">Loading...</div></div></div>';
-  html+='<div id="feed-tab-posts" style="display:'+(window._feedTab==="posts"?"block":"none")+'">'+galleryStageNavigation()+'<div id="feed-container"><div class="loading">Loading...</div></div></div>';
+  html+='<div id="feed-tab-posts" style="display:'+(window._feedTab==="posts"?"block":"none")+'"><div id="feed-container"><div class="loading">Loading...</div></div></div>';
   mc.innerHTML=html;
   loadProjectsList(true);
   loadFeed();
@@ -2943,6 +3201,66 @@ window.submitTeacherComment=async function(postId,targetUid){
   toast("Evaluation saved!");var f=document.getElementById("tcform-"+postId);if(f)f.style.display="none";
 };
 
+function grammarImageSource(question){
+  var value=String(question.imageUrl||"");
+  return /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(value)||/^https:\/\//.test(value)?value:"";
+}
+function grammarImageEditorHTML(question,index){
+  var key=index===null?"new":String(index),image=grammarImageSource(question);
+  var fingerprint=JSON.stringify([question.q||"",question.options||[]]);
+  return '<section class="grammar-image-editor"><label class="fl" for="gq-image-'+key+'">Question photo (optional)</label>'
+    +'<input type="file" id="gq-image-'+key+'" accept="image/jpeg,image/png,image/webp" data-question="'+esc(fingerprint)+'" onchange="uploadGrammarQuestionImage(this,'+(index===null?"null":index)+')">'
+    +'<div id="gq-image-preview-'+key+'">'+(image?'<img src="'+esc(image)+'" alt="Question photo preview">':"")+'</div>'
+    +'<button type="button" class="btn bts" id="gq-image-remove-'+key+'" '+(!image?"hidden ":"")+' onclick="removeGrammarQuestionImage('+(index===null?"null":index)+')">Remove photo</button>'
+    +'<p class="hint" id="gq-image-status-'+key+'" role="status">JPG, PNG or WebP · up to 10 MB · shown on the left of the question</p></section>';
+}
+async function prepareGrammarPhoto(file){
+  if(!["image/jpeg","image/png","image/webp"].includes(file.type)||file.size>10*1024*1024)throw Error("Choose a JPG, PNG or WebP photo up to 10 MB.");
+  var image=await createImageBitmap(file);
+  try{
+    var ratio=Math.min(1,720/image.width,720/image.height),canvas=document.createElement("canvas");
+    canvas.width=Math.max(1,Math.round(image.width*ratio));canvas.height=Math.max(1,Math.round(image.height*ratio));
+    var ctx=canvas.getContext("2d");ctx.fillStyle="#fff";ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(image,0,0,canvas.width,canvas.height);
+    for(var quality=.8;quality>=.35;quality-=.15){var encoded=canvas.toDataURL("image/jpeg",quality);if(encoded.length<=160000)return encoded;}
+    throw Error("This photo is too detailed to save. Choose a smaller image.");
+  }finally{image.close();}
+}
+window.uploadGrammarQuestionImage=async function(input,index){
+  var file=input.files[0];if(!file)return;
+  var key=index===null?"new":String(index),status=document.getElementById("gq-image-status-"+key);
+  input.disabled=true;if(status)status.textContent="Preparing photo…";
+  try{
+    var photo=await prepareGrammarPhoto(file);
+    if(index===null){window._newGrammarImageUrl=photo;}
+    else{
+      var snap=await get(ref(db,"unitInfo")),info=snap.val()||{},questions=info.grammarQuestions||[],current=questions[index];
+      if(!current||JSON.stringify([current.q||"",current.options||[]])!==input.dataset.question)throw Error("The question changed. Reopen Unit and try again.");
+      questions[index]={...current,imageUrl:photo};
+      if(JSON.stringify(questions).length>1800000)throw Error("There are too many large question photos. Remove an unused photo first.");
+      await update(ref(db,"unitInfo"),{grammarQuestions:questions,updatedAt:Date.now()});
+    }
+    var preview=document.getElementById("gq-image-preview-"+key);
+    if(preview){preview.replaceChildren();var img=document.createElement("img");img.src=photo;img.alt="Question photo preview";preview.append(img);}
+    var remove=document.getElementById("gq-image-remove-"+key);if(remove)remove.hidden=false;
+    if(status)status.textContent=index===null?"Photo ready. Add Question to save it.":"Photo saved. Students will see it with this question.";
+  }catch(e){if(status)status.textContent=e.message;toast(e.message);}
+  finally{input.disabled=false;input.value="";}
+};
+window.removeGrammarQuestionImage=async function(index){
+  var key=index===null?"new":String(index),status=document.getElementById("gq-image-status-"+key);
+  try{
+    if(index===null)window._newGrammarImageUrl="";
+    else{
+      var snap=await get(ref(db,"unitInfo")),info=snap.val()||{},questions=info.grammarQuestions||[];
+      if(!questions[index])throw Error("Question no longer available.");
+      questions[index]={...questions[index],imageUrl:""};
+      await update(ref(db,"unitInfo"),{grammarQuestions:questions,updatedAt:Date.now()});
+    }
+    document.getElementById("gq-image-preview-"+key)?.replaceChildren();
+    var button=document.getElementById("gq-image-remove-"+key);if(button)button.hidden=true;
+    if(status)status.textContent="Photo removed.";
+  }catch(e){if(status)status.textContent=e.message;toast(e.message);}
+};
 function renderTUnit(){
   var mc=document.getElementById("mc");
   var header=pageHeaderHTML("&#127979;","Unit Info","This is Step 1 on the student Home page.","var(--p)","var(--pd)");
@@ -2950,6 +3268,7 @@ function renderTUnit(){
   get(ref(db,"unitInfo")).then(function(snap){
     var info=snap.exists()?snap.val():{title:"",description:"",theme:"",words:"",imageUrl:"",grammarQuestions:[]};
     window._unitImageUrl=info.imageUrl||"";
+    window._newGrammarImageUrl="";
     var html='<div class="card">';
     html+='<div class="fg"><label class="fl">Unit Title</label><input class="fi" id="unit-title" value="'+esc(info.title||"")+'" placeholder="e.g. Our Community"></div>';
     html+='<div class="fg"><label class="fl">Theme</label><input class="fi" id="unit-theme" value="'+esc(info.theme||"")+'" placeholder="e.g. Identity & Belonging"></div>';
@@ -2968,14 +3287,16 @@ function renderTUnit(){
     if(!qs.length)html+='<div style="font-size:12px;color:var(--th);margin-bottom:10px">No questions yet.</div>';
     qs.forEach(function(q,qi){
       html+='<div style="border:1px solid var(--gb);border-radius:var(--rs);padding:9px;margin-bottom:8px">';
+      html+=grammarImageEditorHTML(q,qi);
       html+='<div style="display:flex;justify-content:space-between;gap:6px"><div style="font-size:13px;font-weight:600;flex:1">'+(qi+1)+". "+esc(q.q)+'</div>';
       html+='<button class="obtn" onclick="deleteGrammarQuestion('+qi+')">&#128465;</button></div>';
       q.options.forEach(function(opt,oi){html+='<div style="font-size:12px;color:'+(oi===q.correct?"var(--t)":"var(--tm)")+';margin-top:3px">'+(oi===q.correct?"&#9989; ":"&#11036; ")+esc(opt)+'</div>';});
       q.options.forEach(function(opt,oi){if(oi!==q.correct)html+='<div class="fg"><label class="fl" for="gq-feedback-'+qi+'-'+oi+'">Explanation for '+esc(opt)+'</label><textarea class="fta" id="gq-feedback-'+qi+'-'+oi+'">'+esc((q.feedback||[])[oi]||'')+'</textarea></div>';});
-      html+='<button type="button" class="btn bts" onclick="saveGrammarFeedback('+qi+')">Save explanations</button></div>';
+      html+='<button type="button" class="btn bts" onclick="saveGrammarFeedback('+qi+')">Save explanations</button></div></div>';
     });
     html+='<div class="divider"></div>';
     html+='<div class="fg"><label class="fl">New question</label><input class="fi" id="gq-text" placeholder="e.g. Which sentence uses past simple correctly?"></div>';
+    html+=grammarImageEditorHTML({},null);
     for(var i=0;i<4;i++){
       html+='<div class="fg" style="display:flex;align-items:center;gap:8px">';
       html+='<input type="radio" name="gq-correct" value="'+i+'" '+(i===0?"checked":"")+' style="width:16px;height:16px">';
@@ -3044,10 +3365,10 @@ window.addGrammarQuestion=async function(){
   var snap=await get(ref(db,"unitInfo"));
   var info=(snap.exists()&&snap.val())||{};
   var qs=info.grammarQuestions||[];
-  qs.push({q:qText,options:opts,correct:correct});
-  await update(ref(db,"unitInfo"),{grammarQuestions:qs});
-  toast("Question added!");
-  renderTUnit();
+  qs.push({q:qText,options:opts,correct:correct,imageUrl:window._newGrammarImageUrl||""});
+  if(new TextEncoder().encode(JSON.stringify(qs)).length>1900000){toast("Question photos are too large. Remove an unused photo first.");return;}
+  try{await update(ref(db,"unitInfo"),{grammarQuestions:qs});toast("Question added!");renderTUnit();}
+  catch(e){toast("Could not save the question. Your new question is still here.");}
 };
 async function loadSheetsStatus(){
   var el=document.getElementById('sheet-export-status');if(!el)return;
@@ -3135,7 +3456,7 @@ async function mountPlanner(mode,c,overview){
     ['written','spoken','visual'].forEach(function(cat){extra[cat]=(catalog[cat]||[]).filter(function(item){var original=DEFAULT_CATALOG[cat].find(function(pair){return pair[0]===item.id;});return item.active&&(!original||original[1]!==item.name);});});
   }
   var mc=document.getElementById('mc');
-  mc.innerHTML=(isLockedStep(mode==='idea'?'step2':'step3')?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">← Back to Home</button>')+'<iframe id="lp-planner-frame" title="'+(mode==='idea'?'Plan your project':LearnPathUI.hasPassport(c)?'My Learning Passport':'Set goals and plan')+'" src="assets/planner.html?v=20261105-1" style="width:100%;height:900px;border:0;display:block" scrolling="no"></iframe>';
+  mc.innerHTML=(isLockedStep(mode==='idea'?'step2':'step3')?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">← Back to Home</button>')+'<iframe id="lp-planner-frame" title="'+(mode==='idea'?'Plan your project':LearnPathUI.hasPassport(c)?'My Learning Passport':'Set goals and plan')+'" src="assets/planner.html?v=20261108-1" style="width:100%;height:900px;border:0;display:block" scrolling="no"></iframe>';
   window._plannerContext={mode:mode,contract:c,overview:!!overview&&LearnPathUI.hasPassport(c),passportReady:LearnPathUI.hasPassport(c),readOnly:false,extraProducts:extra,resume:LearnPathNavigation.resume(),identity:{name:c&&c.studentName||CU.displayName,photo:c&&c.studentId!==CU.uid?c.studentPhoto||'':UP.avatarUrl||CU.photoURL||c&&c.studentPhoto||''}};
   setNav('home');
 }

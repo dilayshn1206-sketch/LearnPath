@@ -40,8 +40,12 @@ const server=http.createServer((req,res)=>{
  assert.equal(await page.locator('.lp-feed-goals .lp-feed-count').first().innerText(),'3');
  assert.doesNotMatch(await page.locator('.lp-feed-goals').first().innerText(),/Focus goals|Draw a plan/);
  await page.screenshot({path:path.join(root,'verification/feed-tablet.png'),fullPage:true});
- await page.getByRole('button',{name:'Project gallery',exact:true}).click();
- assert.equal(await page.getByRole('button',{name:'Project gallery',exact:true}).getAttribute('aria-pressed'),'true');
+ await page.getByRole('button',{name:'Draft projects',exact:true}).click();
+ assert.equal(await page.getByRole('button',{name:'Draft projects',exact:true}).getAttribute('aria-pressed'),'true');
+ await page.getByRole('button',{name:'Final projects',exact:true}).click();
+ assert.equal(await page.getByRole('button',{name:'Final projects',exact:true}).getAttribute('aria-pressed'),'true');
+ await page.getByRole('button',{name:'Draft projects',exact:true}).click();
+
  assert.match(await page.locator('#feed-container').innerText(),/My digital guide/);
  assert.equal(await page.getByRole('button',{name:'+ Share Your Work',exact:true}).count(),1);
  for(const width of [1024,390]){await page.setViewportSize({width,height:900});await page.getByRole('button',{name:'Learning plans',exact:true}).click();assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));}
@@ -50,7 +54,7 @@ const server=http.createServer((req,res)=>{
  assert.equal(await page.evaluate(()=>JSON.stringify({contracts:__mockDB.contracts,posts:__mockDB.posts})),before);
  await page.evaluate(()=>{__mockDB.contracts={};__mockDB.posts={};renderTFeed();});
  assert.match(await page.locator('#projects-list').innerText(),/Our journeys start here/);
- await page.getByRole('button',{name:'Project gallery',exact:true}).click();
+ await page.getByRole('button',{name:'Draft projects',exact:true}).click();
  assert.match(await page.locator('#feed-container').innerText(),/A space for our creations/);
  await page.setViewportSize({width:1024,height:768});
  await page.evaluate(()=>openNewPost());
