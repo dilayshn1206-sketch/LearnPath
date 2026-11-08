@@ -1,13 +1,5 @@
 # LearnPath UI contract
 
-## Topic word families (2026-11-08)
-- `compass-topics.js` owns topic-stage word families, short titles and bounded
-  in-tab context. The learner chooses an existing category or enters a suggested
-  title under A Topic of My Own. Recommendations do not select or save a choice.
-- Online shopping stays a custom-topic suggestion. Broad platform names ask a
-  follow-up; general offline interests need a digital connection. Product routing
-  and the existing student-data permissions remain unchanged.
-
 ## Compass workshop (2026-11-02)
 - The authored topic/format content owner is `compass-library.js`; `compass-prepared.js` owns local routing, short keyword bullets and one follow-up question. Inputs stay in tab memory; no model/API calls or automatic project choices.
 - Topic/product options show labels/icons only. The three retired formats (How-to guide, spoken Interview, Visual slide story) are hidden from new choices, including matching teacher extras; existing saved metadata remains readable/editable. Written interview stays available.
@@ -195,3 +187,6 @@ The owner approved publishing the saved animation-panel choices (revision 188). 
 
 ## Guided reading help (2026-11-08)
 Only two reading tools: Turkish instructions and larger main text. Preferences persist locally and synchronize to the same-origin planner frame; they never grant eligibility. Turkish help translates task instructions only, not rubric questions, answers, examples or assessed content. Main headings, questions, options, goal/action labels and unit choices enlarge by 25%; sample/reference panels, artwork, metadata and tool labels retain their size. Font resizing does not change answers, saves or rubric versions.
+
+## Peer/self support parity (2026-11-08)
+Guided peer evaluation uses the same paced selector, required answers, progress, reading tools and editable three-prompt written scaffolds as self-reflection. Peer instructions refer to the classmate and change at the written-feedback stage; questions and options stay English. Missing first answers cannot be skipped. Descriptor versions and teacher/standard rubrics remain unchanged.

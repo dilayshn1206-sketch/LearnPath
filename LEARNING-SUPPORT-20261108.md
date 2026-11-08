@@ -66,3 +66,11 @@ used by the host, planner and local comparison. New DOM content is marked for
 main-text scaling after render; reference/example panels are excluded. Local
 preferences synchronize across same-origin frames and remain distinct from
 Supabase account eligibility. No speech API or text-to-speech controls are used.
+
+## Peer support and local feedback review
+The guided peer flow now explicitly mirrors self-reflection pacing, required
+answers, reading help, short written prompts and save behaviour. Turkish task
+instructions refer to the classmate and follow the written-feedback stage.
+A separate local review panel offers eight fictional real-component scenarios,
+full-size framing, anchored comments, export and revision backups. Review notes
+never deploy changes or write to production student records.
