@@ -1,5 +1,13 @@
 # LearnPath UI contract
 
+## Topic word families (2026-11-08)
+- `compass-topics.js` owns topic-stage word families, short titles and bounded
+  in-tab context. The learner chooses an existing category or enters a suggested
+  title under A Topic of My Own. Recommendations do not select or save a choice.
+- Online shopping stays a custom-topic suggestion. Broad platform names ask a
+  follow-up; general offline interests need a digital connection. Product routing
+  and the existing student-data permissions remain unchanged.
+
 ## Compass workshop (2026-11-02)
 - The authored topic/format content owner is `compass-library.js`; `compass-prepared.js` owns local routing, short keyword bullets and one follow-up question. Inputs stay in tab memory; no model/API calls or automatic project choices.
 - Topic/product options show labels/icons only. The three retired formats (How-to guide, spoken Interview, Visual slide story) are hidden from new choices, including matching teacher extras; existing saved metadata remains readable/editable. Written interview stays available.
