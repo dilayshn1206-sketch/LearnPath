@@ -2,7 +2,8 @@
 function enableLearningSupport(){
  if(host?.supportProfile!==LearnPathSupport.profile)return;
  document.body.classList.add('lp-supported');paused=true;
- const motion=document.getElementById('motion');motion.textContent='Play animation';motion.setAttribute('aria-pressed','true');
+ LearnPathReading.mount({variant:'frame',scope:'main',context:()=>passport?.active?(passport.view==='overview'?'Projen, hedeflerin ve adımların burada. Değiştirmek istediğin bölümde Edit düğmesini kullan.':['Üç hedeften ikisini seç. Seçimlerini değiştirebilirsin.','Yapmak istediğin adımları işaretle. En az bir adım seç; yeniden yazmana gerek yok.','İstersen hedef puanlarını belirle. Sonra pasaportunu öğretmenine gönder.'][passport.step]):['Günlük dijital yaşamından bir konu seç. İstersen kendi konunu yaz.','Hazırlamak istediğin ürün türünü seç. Başka seçenekler için Other ways bölümünü aç.','Kullanmak istediğin aracı seç. Tek bir araç yeterli olabilir.','Bugün hangi alanda destek istediğini seç.','Seçimlerini kontrol et. İstersen Edit ile değiştir, sonra planına devam et.'][state.step]});
+ const motion=document.getElementById('motion');motion.hidden=true;motion.textContent='Play animation';motion.setAttribute('aria-pressed','true');
  topics.splice(0,topics.length,['care','Being kind online',''],['learning','Learning with technology',''],['balance','My screen break','']);
  tools.splice(0,tools.length,['own','Paper',''],['poster','Colours',''],['video','Tablet','']);
  PASSPORT_GOALS.splice(0,PASSPORT_GOALS.length,...LearnPathSupport.goals.map(g=>[g.id,g.text]));
