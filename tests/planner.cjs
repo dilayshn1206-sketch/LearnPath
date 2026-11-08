@@ -57,7 +57,7 @@ const server=http.createServer((req,res)=>{
  assert.equal(await f.locator('#chat-input').inputValue(),'I like speaking');
  await f.locator('#chat-input').fill('I like speaking and asking questions');await f.locator('#chat-input').press('Enter');
  assert.match(await f.locator('.chat-log').innerText(),/Podcast/);
- assert.match(await f.locator('.chat-log').innerText(),/Written interview/);
+ assert.match(await f.locator('.chat-log').innerText(),/Survey Report/);
  await f.locator('#chat-input').fill('<img src=x onerror=alert(1)>');await f.locator('#compass-reply').click();
  assert.equal(await f.locator('.chat-log img').count(),0);
  assert.match(await f.locator('.chat-log').innerText(),/Let’s find a digital connection/);
