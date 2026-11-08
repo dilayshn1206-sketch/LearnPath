@@ -59,12 +59,13 @@ function preparedReply(key,text,context={}){
  return response('Let’s find a digital connection',[['Your interest','Tell me one thing you enjoy: games, music, sport or making things.'],['Digital moment','Think about a message, photo, game chat or online post.'],['Your question','Ask about a topic, a product, an example or how to start.']],'What would you like your project to help someone think about?',{intent:'clarify'});
 }
 function preparedAnswerHTML(reply){
+ if(reply?.compact||reply?.intent==='topic-clarify')return '<p>'+esc(reply.question)+'</p>';
  if(typeof reply==='string')return '<ul class="compass-reply-points"><li>'+esc(reply)+'</li></ul>';
  return '<h3>'+esc(reply.title)+'</h3><ul class="compass-reply-points">'+reply.bullets.map(b=>'<li><strong>'+esc(b.keyword)+'</strong><span>'+esc(b.detail)+'</span></li>').join('')+'</ul><p class="compass-next-question">'+esc(reply.question)+'</p>';
 }
 function preparedGuideHTML(key){
  if(!['topic','product'].includes(key))return '<p class="bubble assistant">'+esc(opening())+'</p>';
- const turns=state.chat[key]?.turns||[],openingReply=compassAnswer(key==='topic'?'Let’s find your direction':'Choose a way to share',key==='topic'?[['Your interest','Tell me what you enjoy.'],['Your digital self','We can connect it to online choices.']]:[['Your topic',topic()],['Your product','Ask about a format or tell me how you like working.']],key==='topic'?'What do you like doing?':'Would you like help comparing products?');
+ const turns=state.chat[key]?.turns||[],openingReply=key==='topic'?{compact:true,question:'What do you enjoy doing online?'}:compassAnswer(key==='topic'?'Let’s find your direction':'Choose a way to share',key==='topic'?[['Your interest','Tell me what you enjoy.'],['Your digital self','We can connect it to online choices.']]:[['Your topic',topic()],['Your product','Ask about a format or tell me how you like working.']],key==='topic'?'What do you like doing?':'Would you like help comparing products?');
  return '<div class="chat-log" role="log" aria-label="Compass conversation" aria-live="polite"><div class="bubble assistant">'+preparedAnswerHTML(openingReply)+'</div>'+turns.map(turn=>'<p class="bubble user"><span class="sr-only">You: </span>'+esc(turn.text)+'</p><div class="bubble assistant"><span class="sr-only">Compass: </span>'+preparedAnswerHTML(turn.reply)+'</div>').join('')+'</div><form id="prepared-guide" novalidate><label for="chat-input">Ask Compass</label><div class="chat-compose"><input id="chat-input" maxlength="300" autocomplete="off" placeholder="'+(key==='topic'?'I like games. What could I explore?':'How could I start a comic?')+'"><button class="primary" id="compass-reply" type="submit">Send</button></div></form>';
 }
 function bindPreparedGuide(){
