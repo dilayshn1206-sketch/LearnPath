@@ -1,0 +1,192 @@
+.workshop-compass {
+  display: block;
+  position: relative;
+  z-index: 4;
+  flex: none;
+  width: clamp(86px, 13vw, 148px);
+  aspect-ratio: 1;
+  background: url('compass-idle-frame.png') no-repeat center / contain;
+  pointer-events: none;
+}
+.workshop-compass[data-workshop-ready] {
+  background-size: 400% 400%;
+}
+.chat-header .workshop-compass { width: clamp(62px, 9vw, 104px); }
+.passport-document-guide .workshop-compass { width: min(100%, 104px); }
+.lp-welcome .workshop-compass { align-self: center; }
+.workshop-speech {
+  color: #135662;
+  font-weight: 700;
+  align-self: center;
+}
+.workshop-cue {
+  outline: 3px solid transparent;
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .workshop-compass { transform: none !important; }
+}
+.focus-goals:has(> .workshop-compass) {
+  position: relative;
+  padding-right: clamp(110px, 16vw, 170px);
+}
+.focus-goals > .workshop-compass {
+  position: absolute;
+  right: 10px;
+  bottom: 12px;
+}
+/* Revision from the owner's 8 November review. */
+.workshop-compass {background:none;}
+.workshop-pose {
+  display:block;
+  width:100%;height:100%;
+  background-repeat:no-repeat;
+  background-size:400% 400%;
+  transform-origin:50% 55%;
+}
+.focus-goals.workshop-recap {padding-left:160px;padding-right:22px;}
+.focus-goals.workshop-recap>.workshop-compass {left:8px;right:auto;top:0;bottom:auto;width:140px;}
+.workshop-stamp-layout {position:relative;}
+.workshop-stamp-layout>.workshop-compass {position:absolute;right:18px;top:70px;width:130px;z-index:6;}
+.contract-guide .compass-speech {
+  font:600 16px/1.45 'Source Sans 3',sans-serif;
+  color:#135662;background:#fffdf5;border:1px solid #c2d8da;
+  padding:12px 14px;border-radius:14px;max-width:250px;margin:0 auto 18px;
+  text-align:center;text-wrap:balance;
+}
+.contract-guide .compass-speech::after {border-color:#c2d8da;background:#fffdf5;}
+.contract-guide:has(.workshop-tree) .workshop-compass {width:min(100%,300px);margin:auto;}
+.workshop-tree .workshop-pose {background-size:contain!important;background-position:center!important;}
+body:has(.workshop-compass) .lp-motion-toggle,
+body:has(.workshop-compass) #motion,
+.point-v1 .lp-motion-toggle {display:none!important;}
+@media(max-width:600px) {
+ .focus-goals.workshop-recap {padding-left:112px;}
+ .focus-goals.workshop-recap>.workshop-compass {width:100px;left:0;}
+}
+.contract-guide .compass-speech {white-space:pre-line;}
+.workshop-leaf {position:absolute;top:20%;left:25%;width:9px;height:14px;border-radius:10px 0 10px 0;background:#91a957;pointer-events:none;}
+.focus-goals.workshop-recap .goals-heading,
+.focus-goals.workshop-recap .goals-note {margin-left:-140px;}
+.focus-goals.workshop-recap .goals-heading h2 {font-size:24px;line-height:1.2;}
+.focus-goals.workshop-recap .goals-heading {margin-bottom:12px;}
+.focus-goals.workshop-recap li {min-height:64px;padding:12px 12px;font-size:15px;line-height:1.35;}
+@media(max-width:600px){
+ .focus-goals.workshop-recap .goals-heading,
+ .focus-goals.workshop-recap .goals-note {margin-left:-92px;}
+}
+.workshop-stamp-layout .passport-leaf {padding:14px 16px 22px;}
+.workshop-stamp-layout .passport-photo {width:62px;height:72px;}
+.workshop-stamp-layout .passport-photo-fallback {font-size:25px;}
+.workshop-stamp-layout .passport-holder strong {font-size:23px;}
+.workshop-stamp-layout .section-title {margin-bottom:8px;}
+.workshop-stamp-layout .section-title h2 {font-size:21px;}
+.workshop-stamp-layout .passport-document-goals h3 {font-size:15px;}
+.workshop-stamp-layout .passport-project-goals li,
+.workshop-stamp-layout .passport-plan-section li {font-size:15px;line-height:1.35;padding-block:6px;}
+.workshop-stamp-layout .passport-document-guide p {font-size:13px;line-height:1.35;}
+
+.point-v1 {
+  grid-template-columns: clamp(168px, 23vw, 232px) minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+.point-v1 .lp-launch-guide {
+  padding-top: var(--point-guide-top, 0px);
+}
+.point-v1 .point-v1-sprite {
+  flex: none;
+  width: 100%;
+  aspect-ratio: 1;
+  background: url('compass-point-v1.png') no-repeat 0 0 / 400% 400%;
+}
+.point-v1 .point-v1-fallback {
+  background: url('compass-idle-frame.png') no-repeat center / contain;
+}
+.point-v1 .lp-launch-guide button {
+  margin-top: -4%;
+}
+.point-v1 .lp-launch-paper {
+  padding: 19px 24px;
+}
+.point-v1 .lp-launch-paper::before {
+  display: none;
+}
+.point-v1 .lp-launch-saved,
+.point-v1 .lp-launch-format,
+.point-v1 .lp-launch-paper h1,
+.point-v1 .lp-launch-invite,
+.point-v1 .lp-launch-notice {
+  margin-bottom: 8px;
+}
+.point-v1 .lp-launch-next {
+  margin-top: 14px;
+  padding-top: 12px;
+}
+.point-v1 .lp-launch-examples {
+  outline: 3px solid transparent;
+  outline-offset: 3px;
+}
+.point-v1 .lp-launch-examples.point-v1-cued,
+.point-v1 .lp-launch-examples:focus-visible {
+  outline-color: #b57b15;
+}
+@media (max-width: 700px) {
+  .point-v1 {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+  .point-v1 .lp-launch-guide {
+    padding-top: 0;
+  }
+  .point-v1 .point-v1-sprite {
+    width: 112px;
+  }
+}
+.point-v1 .lp-launch-guide button[hidden] {
+  display: none;
+}
+@media (min-width: 701px) and (max-height: 800px) {
+  .point-v1 .lp-launch-paper {
+    padding-block: 15px;
+  }
+  .point-v1 .lp-launch-next {
+    gap: 8px;
+  }
+  .point-v1 .lp-launch-next p {
+    max-width: 30ch;
+    font-size: 15px;
+    line-height: 1.25;
+  }
+}
+.point-v1 .lp-launch-examples {
+  margin-bottom: 10px;
+}
+@media (min-width: 701px) and (max-height: 800px) {
+  .point-v1 .lp-launch-saved,
+  .point-v1 .lp-launch-format,
+  .point-v1 .lp-launch-paper h1,
+  .point-v1 .lp-launch-invite,
+  .point-v1 .lp-launch-notice,
+  .point-v1 .lp-launch-examples {
+    margin-bottom: 5px;
+  }
+  .point-v1 .lp-launch-format {
+    padding-block: 2px;
+  }
+  .point-v1 .lp-launch-notice p {
+    margin-block: 2px;
+    font-size: 16px;
+    line-height: 1.3;
+  }
+  .point-v1 .lp-launch-next {
+    margin-top: 8px;
+    padding-top: 8px;
+  }
+}
+
+.passport-plan-layout .contract-guide:has(.workshop-compass){animation:compass-guide-in .35s ease-out both}
+@keyframes compass-guide-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.passport-plan-layout .contract-guide:has(.workshop-compass){animation:none}}
+
+.passport-document-guide .workshop-compass{order:2}
