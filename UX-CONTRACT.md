@@ -195,3 +195,6 @@ The owner approved publishing the saved animation-panel choices (revision 188). 
 
 ## Guided reading help (2026-11-08)
 Only two reading tools: Turkish instructions and larger main text. Preferences persist locally and synchronize to the same-origin planner frame; they never grant eligibility. Turkish help translates task instructions only, not rubric questions, answers, examples or assessed content. Main headings, questions, options, goal/action labels and unit choices enlarge by 25%; sample/reference panels, artwork, metadata and tool labels retain their size. Font resizing does not change answers, saves or rubric versions.
+
+## Peer/self support parity (2026-11-08)
+Guided peer evaluation uses the same paced selector, required answers, progress, reading tools and editable three-prompt written scaffolds as self-reflection. Peer instructions refer to the classmate and change at the written-feedback stage; questions and options stay English. Missing first answers cannot be skipped. Descriptor versions and teacher/standard rubrics remain unchanged.

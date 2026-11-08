@@ -254,8 +254,8 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
 .rub-sentence{font-size:13px}
 .rub-chevron{background:none;border:none;color:var(--th);cursor:pointer;font-size:12px;padding:4px 6px;flex-shrink:0}
 </style>
-<link rel="stylesheet" href="assets/learnpath.css?v=20261108-6">
-<link rel="stylesheet" href="assets/compass-scenes.css?v=20261108-6"></head>
+<link rel="stylesheet" href="assets/learnpath.css?v=20261108-8">
+<link rel="stylesheet" href="assets/compass-scenes.css?v=20261108-8"></head>
 <body>
 
 <div id="auth">
@@ -310,14 +310,14 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
   <div class="modal-card" id="result-popup-card" style="text-align:center;padding:26px 20px"></div>
 </div>
 
-<script src="assets/learnpath-ui.js?v=20261108-6"></script>
-<script src="assets/rubric-v2.js?v=20261108-6"></script><script src="assets/share-guide.js?v=20261108-6"></script><script src="assets/vendor/jszip-3.10.1.min.js"></script><script src="assets/project-previews.js?v=20261108-6"></script>
-<script src="assets/navigation.js?v=20261108-6"></script>
-<link rel="stylesheet" href="assets/learning-support.css?v=20261108-6"><script src="assets/learning-support.js?v=20261108-6"></script>
-<link rel="stylesheet" href="assets/feedback-summary.css?v=20261108-6">
-<link rel="stylesheet" href="assets/guided-reading.css?v=20261108-6"><script src="assets/guided-reading.js?v=20261108-6"></script>
+<script src="assets/learnpath-ui.js?v=20261108-8"></script>
+<script src="assets/rubric-v2.js?v=20261108-8"></script><script src="assets/share-guide.js?v=20261108-8"></script><script src="assets/vendor/jszip-3.10.1.min.js"></script><script src="assets/project-previews.js?v=20261108-8"></script>
+<script src="assets/navigation.js?v=20261108-8"></script>
+<link rel="stylesheet" href="assets/learning-support.css?v=20261108-8"><script src="assets/learning-support.js?v=20261108-8"></script>
+<link rel="stylesheet" href="assets/feedback-summary.css?v=20261108-8">
+<link rel="stylesheet" href="assets/guided-reading.css?v=20261108-8"><script src="assets/guided-reading.js?v=20261108-8"></script>
 <script type="module">
-import {auth,db,storage,rpc,ref,set,get,push,onValue,update,remove,sref,uploadBytesResumable,getDownloadURL,deleteObject,onAuthStateChanged,signInWithPopup,signOut} from './assets/supabase-backend.js?v=20261108-6';
+import {auth,db,storage,rpc,ref,set,get,push,onValue,update,remove,sref,uploadBytesResumable,getDownloadURL,deleteObject,onAuthStateChanged,signInWithPopup,signOut} from './assets/supabase-backend.js?v=20261108-8';
 const prov={};
 let CU=null,UP=null,supportProfile=null;
 function supportedPlan(c){return supportProfile===LearnPathSupport.profile&&(!c||c.goalVersion===LearnPathSupport.goalVersion);}
@@ -663,7 +663,7 @@ async function setRole(){toast('Your account role is assigned securely by the sc
 
 function launchApp(role){
   LearnPathUI.setRole(role);
-  if(role==='student'&&supportProfile===LearnPathSupport.profile)LearnPathReading.mount({variant:'host',scope:'#mc',context:function(){if(window._currentScreen==='share')return window._shareState?.stage===1?'Çalışmana bak. Her soru için çalışmana uyan bir seçeneği işaretle.':window._shareState?.stage===2?'Bir güçlü yan ve sonraki çalışman için bir öneri seç veya yaz. Sonra ürününü paylaş.':'Ürününe bir başlık ver. Bağlantı ekle veya dosyanı yükle. Pusulanın sorularını yanıtla.';if(window._currentScreen==='step1')return 'Bu listedeki bildiğin kelimeleri işaretle. Her dil bilgisi sorusu için bir yanıt seç ve yanıtlarını kontrol et.';return 'Çalışmak istediğin adımı seç. Her seferinde bir bölümü tamamla.';}});else LearnPathReading.unmount();
+  if(role==='student'&&supportProfile===LearnPathSupport.profile)LearnPathReading.mount({variant:'host',scope:'#mc',context:function(){var peer=document.querySelector('[data-reading-peer="true"]');if(peer&&peer.getClientRects().length)return peer.querySelector('.lp-peer-written:not([hidden])')?'Arkadaşının çalışması için bir güçlü yan ve bir öneri seç veya yaz. Göndermeden önce mesajını kontrol et.':'Arkadaşının ürününe bak. Her soru için onun çalışmasına uyan bir açıklama seç. Her seferinde bir soruyu tamamla.';if(window._currentScreen==='share')return window._shareState?.stage===1?'Çalışmana bak. Her soru için çalışmana uyan bir seçeneği işaretle.':window._shareState?.stage===2?'Bir güçlü yan ve sonraki çalışman için bir öneri seç veya yaz. Sonra ürününü paylaş.':'Ürününe bir başlık ver. Bağlantı ekle veya dosyanı yükle. Pusulanın sorularını yanıtla.';if(window._currentScreen==='step1')return 'Bu listedeki bildiğin kelimeleri işaretle. Her dil bilgisi sorusu için bir yanıt seç ve yanıtlarını kontrol et.';return 'Çalışmak istediğin adımı seç. Her seferinde bir bölümü tamamla.';}});else LearnPathReading.unmount();
   document.getElementById("lp-resources").hidden=role==="teacher";
   var app=document.getElementById("app");app.style.display="flex";app.style.flexDirection="column";
   var ov=document.getElementById("eval-modal-overlay");if(ov)ov.style.display="none";
@@ -1405,7 +1405,7 @@ function renderRubricReadonly(rubric,values){
 
 function renderSupportedRubric(containerId,rubric,values,key){
  var el=document.getElementById(containerId),store=window._rubricStores[key];if(!el||!store)return;
- var index=Math.max(0,Math.min(store.index||0,4)),item=rubric[index],inShare=key==='newpost'&&!!window._shareState,done=values.filter(Number.isInteger).length;
+ var index=Math.max(0,Math.min(store.index||0,4));store.index=index;var item=rubric[index],inShare=key==='newpost'&&!!window._shareState,done=values.filter(Number.isInteger).length;
  var html='<div class="lp-single-rubric'+(inShare?' in-share':'')+'"><div class="lp-rubric-main"><div class="lp-rubric-progress"><span>Question '+(index+1)+' of 5</span><span>'+done+' of 5 selected</span></div><progress max="5" value="'+done+'" aria-label="Questions answered"></progress><fieldset class="rubarea2 lp-single-question"><legend><span>'+esc(item.area)+'</span><strong tabindex="-1" class="lp-rubric-heading">'+esc(item.q)+'</strong></legend>';
  [1,0].forEach(function(li){var id='rubric-'+key+'-'+index+'-'+li;html+='<label class="rublevel-row '+(values[index]===li?'sel':'')+'" for="'+id+'"><input type="radio" id="'+id+'" name="rubric-'+key+'-'+index+'" '+(values[index]===li?'checked ':'')+'onchange="pickRubricLevel(\''+key+'\','+index+','+li+')"><span>'+LearnPathSupport.stars(li?3:1)+'</span><span class="rub-sentence">'+LearnPathSupport.emphasize(item.levels[li].label,esc)+'</span></label>';});
  html+='</fieldset><details class="lp-support-question-help"><summary>I’m not sure. Help me.</summary><p>Look at the work. Find an example of this. You can ask your teacher to look with you. Your answer has not changed.</p></details>';
@@ -1481,7 +1481,7 @@ window.openNewPost=async function(){
   ['Your work','Self-reflection','Share'].forEach(function(label,i){html+='<button type="button" data-share-stage="'+i+'" onclick="setShareStage('+i+')"><span>'+(i+1)+'</span>'+label+'</button>';});html+='</nav>';
   html+='<div class="lp-share-layout"><section class="card lp-share-paper"><section data-share-panel="0"><h2>What are you sharing?</h2><div class="fg"><label class="fl" for="np-post-type">Project stage</label><select class="fi" id="np-post-type"><option value="draft">Draft project</option><option value="final">Final project</option></select></div><div class="fg"><label class="fl" for="np-title">Title of this piece of work</label><input class="fi" id="np-title" placeholder="Give your project a title"></div><div class="fg"><label class="fl" for="np-link">Link to your work</label><input class="fi" id="np-link" placeholder="Google Drive / YouTube / Canva…"></div><details class="lp-share-link-help"><summary>How to copy a link</summary><p>Google Drive → Share → Copy link · YouTube → Share · Canva → Share → Copy link</p></details><div class="fg"><label class="fl" for="np-file">Or attach a photo, video, PDF or audio file (up to 100 MB)</label><input type="file" class="fi" id="np-file" onchange="attachNewPostFile(this)"><div id="np-file-preview"></div></div></section>';
   html+='<section data-share-panel="1" hidden><h2>Self-reflection</h2><div id="np-rub-rows"></div></section><section data-share-panel="2" hidden><h2>One last look</h2><p id="np-work-summary"></p><div class="lp-share-written"><div class="fg"><label class="fl" for="np-well">One thing I did well *</label><textarea class="fta" id="np-well" placeholder="I …"></textarea></div><div class="fg"><label class="fl" for="np-improve">My next step *</label><textarea class="fta" id="np-improve" placeholder="Next time, I will …"></textarea></div></div></section>';
-  html+='<footer class="lp-share-actions"><button type="button" class="btn bts" id="np-back" onclick="shareBack()">Back</button><details class="lp-self-help"><summary>How to answer</summary><div class="lp-self-help-copy"><p>'+esc(LearnPathRubrics.selfInstruction)+'</p><p lang="tr">'+esc(LearnPathRubrics.selfInstructionTR)+'</p></div></details><button type="button" class="btn btp" id="np-continue" onclick="shareNext()">Continue →</button><button type="button" class="btn btp" id="np-share-btn" onclick="submitPost()" hidden>Share my work</button></footer></section><aside id="lp-share-compass" class="lp-share-compass" aria-label="Compass project guide"></aside></div>';
+  html+='<footer class="lp-share-actions"><button type="button" class="btn bts" id="np-back" onclick="shareBack()">Back</button><details class="lp-self-help"><summary>How to answer</summary><div class="lp-self-help-copy"><p>'+esc(supportProfile===LearnPathSupport.profile?'Look at your work. Choose the description that fits each question.':LearnPathRubrics.selfInstruction)+'</p><p lang="tr">'+esc(LearnPathRubrics.selfInstructionTR)+'</p></div></details><button type="button" class="btn btp" id="np-continue" onclick="shareNext()">Continue →</button><button type="button" class="btn btp" id="np-share-btn" onclick="submitPost()" hidden>Share my work</button></footer></section><aside id="lp-share-compass" class="lp-share-compass" aria-label="Compass project guide"></aside></div>';
   mc.innerHTML=html;window._rubricStores.newpost={values:new Array(SELF_RUBRIC.length).fill(null),rubric:activeRubric(true),containerId:'np-rub-rows',index:0};
   renderRubricBlock('np-rub-rows',activeRubric(true),window._rubricStores.newpost.values,'newpost');setShareStage(0);if(supportProfile===LearnPathSupport.profile)LearnPathSupport.written('np-well','np-improve',true);window.scrollTo({top:0,behavior:'auto'});
 };
@@ -1561,9 +1561,9 @@ window.submitPost=async function(){
 
 window.openComment=function(postId){
   var form=document.getElementById("cmform-"+postId);if(!form)return;
-  if(form.style.display!=="none"){form.style.display="none";return;}
-  form.style.display="block";
-  var instruction=document.createElement('p');instruction.className='lp-rubric-instruction';instruction.textContent=LearnPathRubrics.instruction;if(!form.querySelector('.lp-rubric-instruction'))form.prepend(instruction);
+  if(form.style.display!=="none"){form.style.display="none";form.dataset.readingPeer='false';LearnPathReading.refresh();return;}
+  document.querySelectorAll('[data-reading-peer]').forEach(function(el){el.dataset.readingPeer='false';});form.dataset.readingPeer='true';form.style.display="block";
+  var instruction=document.createElement('p');instruction.className='lp-rubric-instruction';instruction.textContent=supportProfile===LearnPathSupport.profile?'Look at your classmate’s work. Choose one description for each question.':LearnPathRubrics.instruction;if(!form.querySelector('.lp-rubric-instruction'))form.prepend(instruction);
   var storeKey="comment_"+postId;
   if(!window._rubricStores[storeKey])window._rubricStores[storeKey]={values:new Array(PEER_RUBRIC.length).fill(null),rubric:activeRubric(false),containerId:"cm-rub-"+postId,peerPost:postId};
   if(supportProfile===LearnPathSupport.profile)LearnPathSupport.written('cm-well-'+postId,'cm-improve-'+postId,false);
@@ -1575,7 +1575,7 @@ window.peerFeedbackStage=function(postId,written){
   var rubric=document.getElementById('cm-rub-'+postId),fields=document.getElementById('cm-written-'+postId);
   if(!rubric||!fields)return;
   if(written&&!requireStudentRubric('comment_'+postId))written=false;
-  rubric.hidden=written;fields.hidden=!written;
+  rubric.hidden=written;fields.hidden=!written;LearnPathReading.refresh();
   if(written){fields.querySelector('textarea').focus({preventScroll:true});fields.scrollIntoView({block:'nearest',behavior:'smooth'});}
 };
 
@@ -2308,7 +2308,7 @@ function installTeacherWorkspace(){
   let page = 'overview';
   const css = document.createElement('link');
   css.rel = 'stylesheet';
-  css.href = 'assets/teacher-workspace.css?v=20261108-6';
+  css.href = 'assets/teacher-workspace.css?v=20261108-8';
   document.head.append(css);
   document.body.classList.add('teacher-workspace');
 
@@ -3594,5 +3594,5 @@ LearnPathNavigation.install({
  open:function(route,args){return ({go:window.go,share:window.openNewPost,unit:window.renderStep1Screen,idea:window.startQuiz,passport:window.renderStep3Screen,resources:window.renderResourcesScreen,savedIdea:renderQuizDone,profile:window.viewProf}[route]||window.go).apply(null,args||[]);}
 });
 </script>
-<script src="assets/compass-scenes.js?v=20261108-6"></script></body>
+<script src="assets/compass-scenes.js?v=20261108-8"></script></body>
 </html>
