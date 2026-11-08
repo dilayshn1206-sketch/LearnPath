@@ -254,8 +254,8 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
 .rub-sentence{font-size:13px}
 .rub-chevron{background:none;border:none;color:var(--th);cursor:pointer;font-size:12px;padding:4px 6px;flex-shrink:0}
 </style>
-<link rel="stylesheet" href="assets/learnpath.css?v=20261108-5">
-<link rel="stylesheet" href="assets/compass-scenes.css?v=20261108-5"></head>
+<link rel="stylesheet" href="assets/learnpath.css?v=20261108-6">
+<link rel="stylesheet" href="assets/compass-scenes.css?v=20261108-6"></head>
 <body>
 
 <div id="auth">
@@ -310,13 +310,14 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
   <div class="modal-card" id="result-popup-card" style="text-align:center;padding:26px 20px"></div>
 </div>
 
-<script src="assets/learnpath-ui.js?v=20261108-5"></script>
-<script src="assets/rubric-v2.js?v=20261108-5"></script><script src="assets/share-guide.js?v=20261108-5"></script><script src="assets/vendor/jszip-3.10.1.min.js"></script><script src="assets/project-previews.js?v=20261108-5"></script>
-<script src="assets/navigation.js?v=20261108-5"></script>
-<link rel="stylesheet" href="assets/learning-support.css?v=20261108-5"><script src="assets/learning-support.js?v=20261108-5"></script>
-<link rel="stylesheet" href="assets/feedback-summary.css?v=20261108-5">
+<script src="assets/learnpath-ui.js?v=20261108-6"></script>
+<script src="assets/rubric-v2.js?v=20261108-6"></script><script src="assets/share-guide.js?v=20261108-6"></script><script src="assets/vendor/jszip-3.10.1.min.js"></script><script src="assets/project-previews.js?v=20261108-6"></script>
+<script src="assets/navigation.js?v=20261108-6"></script>
+<link rel="stylesheet" href="assets/learning-support.css?v=20261108-6"><script src="assets/learning-support.js?v=20261108-6"></script>
+<link rel="stylesheet" href="assets/feedback-summary.css?v=20261108-6">
+<link rel="stylesheet" href="assets/guided-reading.css?v=20261108-6"><script src="assets/guided-reading.js?v=20261108-6"></script>
 <script type="module">
-import {auth,db,storage,rpc,ref,set,get,push,onValue,update,remove,sref,uploadBytesResumable,getDownloadURL,deleteObject,onAuthStateChanged,signInWithPopup,signOut} from './assets/supabase-backend.js?v=20261108-5';
+import {auth,db,storage,rpc,ref,set,get,push,onValue,update,remove,sref,uploadBytesResumable,getDownloadURL,deleteObject,onAuthStateChanged,signInWithPopup,signOut} from './assets/supabase-backend.js?v=20261108-6';
 const prov={};
 let CU=null,UP=null,supportProfile=null;
 function supportedPlan(c){return supportProfile===LearnPathSupport.profile&&(!c||c.goalVersion===LearnPathSupport.goalVersion);}
@@ -647,7 +648,7 @@ document.getElementById("rs").onclick=function(){setRole("student");};
 document.getElementById("rt2").onclick=function(){setRole("teacher");};
 
 onAuthStateChanged(auth,async function(user){
-  if(!user){supportProfile=null;document.body.classList.remove('lp-supported');LearnPathNavigation.reset();document.getElementById("auth").style.display="flex";document.getElementById("app").style.display="none";document.getElementById("role").style.display="none";return;}
+  if(!user){LearnPathReading.unmount();supportProfile=null;document.body.classList.remove('lp-supported');LearnPathNavigation.reset();document.getElementById("auth").style.display="flex";document.getElementById("app").style.display="none";document.getElementById("role").style.display="none";return;}
   CU=user;supportProfile=null;try{supportProfile=await rpc('lp_learning_support',{});}catch(e){console.warn('Learning support unavailable');}
   document.body.classList.toggle('lp-supported',supportProfile===LearnPathSupport.profile);
   document.getElementById("auth").style.display="none";
@@ -662,6 +663,7 @@ async function setRole(){toast('Your account role is assigned securely by the sc
 
 function launchApp(role){
   LearnPathUI.setRole(role);
+  if(role==='student'&&supportProfile===LearnPathSupport.profile)LearnPathReading.mount({variant:'host',scope:'#mc',context:function(){if(window._currentScreen==='share')return window._shareState?.stage===1?'Çalışmana bak. Her soru için çalışmana uyan bir seçeneği işaretle.':window._shareState?.stage===2?'Bir güçlü yan ve sonraki çalışman için bir öneri seç veya yaz. Sonra ürününü paylaş.':'Ürününe bir başlık ver. Bağlantı ekle veya dosyanı yükle. Pusulanın sorularını yanıtla.';if(window._currentScreen==='step1')return 'Bu listedeki bildiğin kelimeleri işaretle. Her dil bilgisi sorusu için bir yanıt seç ve yanıtlarını kontrol et.';return 'Çalışmak istediğin adımı seç. Her seferinde bir bölümü tamamla.';}});else LearnPathReading.unmount();
   document.getElementById("lp-resources").hidden=role==="teacher";
   var app=document.getElementById("app");app.style.display="flex";app.style.flexDirection="column";
   var ov=document.getElementById("eval-modal-overlay");if(ov)ov.style.display="none";
@@ -2306,7 +2308,7 @@ function installTeacherWorkspace(){
   let page = 'overview';
   const css = document.createElement('link');
   css.rel = 'stylesheet';
-  css.href = 'assets/teacher-workspace.css?v=20261108-5';
+  css.href = 'assets/teacher-workspace.css?v=20261108-6';
   document.head.append(css);
   document.body.classList.add('teacher-workspace');
 
@@ -3522,7 +3524,7 @@ async function mountPlanner(mode,c,overview){
     ['written','spoken','visual'].forEach(function(cat){extra[cat]=(catalog[cat]||[]).filter(function(item){var original=DEFAULT_CATALOG[cat].find(function(pair){return pair[0]===item.id;});return item.active&&(!original||original[1]!==item.name);});});
   }
   var mc=document.getElementById('mc');
-  mc.innerHTML=(isLockedStep(mode==='idea'?'step2':'step3')?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">← Back to Home</button>')+'<iframe id="lp-planner-frame" title="'+(mode==='idea'?'Plan your project':LearnPathUI.hasPassport(c)?'My Learning Passport':'Set goals and plan')+'" src="assets/planner.html?v=20261108-5" style="width:100%;height:900px;border:0;display:block" scrolling="no"></iframe>';
+  mc.innerHTML=(isLockedStep(mode==='idea'?'step2':'step3')?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">← Back to Home</button>')+'<iframe id="lp-planner-frame" title="'+(mode==='idea'?'Plan your project':LearnPathUI.hasPassport(c)?'My Learning Passport':'Set goals and plan')+'" src="assets/planner.html?v=20261108-6" style="width:100%;height:900px;border:0;display:block" scrolling="no"></iframe>';
   window._plannerContext={mode:mode,contract:c,overview:!!overview&&LearnPathUI.hasPassport(c),passportReady:LearnPathUI.hasPassport(c),readOnly:false,supportProfile:supportedPlan(c)?supportProfile:null,extraProducts:extra,resume:LearnPathNavigation.resume(),catalogProducts:mode==='idea'?catalog:null,identity:{name:c&&c.studentName||CU.displayName,photo:c&&c.studentId!==CU.uid?c.studentPhoto||'':UP.avatarUrl||CU.photoURL||c&&c.studentPhoto||''}};
   setNav('home');
 }
@@ -3592,5 +3594,5 @@ LearnPathNavigation.install({
  open:function(route,args){return ({go:window.go,share:window.openNewPost,unit:window.renderStep1Screen,idea:window.startQuiz,passport:window.renderStep3Screen,resources:window.renderResourcesScreen,savedIdea:renderQuizDone,profile:window.viewProf}[route]||window.go).apply(null,args||[]);}
 });
 </script>
-<script src="assets/compass-scenes.js?v=20261108-5"></script></body>
+<script src="assets/compass-scenes.js?v=20261108-6"></script></body>
 </html>
