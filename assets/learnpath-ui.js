@@ -37,7 +37,8 @@
     if (!c || !c.productType || !(c.submittedAt || c.status === 'pending' || c.status === 'approved')) return false;
     var goals = Object.keys(c.goals || {}).filter(function (key) { return c.goals[key] === true; }).length;
     goals += [...new Set(String(c.goalsOtherText || '').split(/\r?\n/).map(function(t){return t.trim();}).filter(function(t){return /[\p{L}\p{N}]/u.test(t.replace(/^\s*i\s+will\b/i, ''));}))].length;
-    return goals >= 3 && Array.isArray(c.planSteps) && c.planSteps.length >= 3 && c.planSteps.every(function (s) {
+    var supported = c.goalVersion === "grade6-support-goals-20261108-v1";
+    return (supported ? goals === 2 : goals >= 3) && Array.isArray(c.planSteps) && c.planSteps.length >= (supported ? 1 : 3) && c.planSteps.every(function (s) {
       return /[\p{L}\p{N}]/u.test(String(s || '').replace(/^(?:\s*i\s+will\b[\s.…]*)+/i, ''));
     });
   }
