@@ -1,11 +1,11 @@
 /* Reading preferences never grant account eligibility or translate assessment content. */
 (function(){
  const key='learnpath-guided-reading-v1',sizes=new WeakMap();let observer,options,prefs={tr:false,large:false};
- const selectors='h1,h2,.lp-instruction-tr,.intro,.lp-grade-note,.lp-rubric-instruction,.lp-share-header p,.lp-peer-written h3,.passport-document-topic,.passport-product,.passport-holder strong,.passport-row dd,.lp-rubric-heading,.rub-sentence,.support-ending,.choice strong,.product-option strong,.category-button strong,.contract-goal>span,.goal-card label>span,.support-plan-choice>span,.radio:not(.support-binary)>span,.lp-word-choice>span,.lp-unit-question legend,.lp-unit-question .qo,.fl,.support-helper,.compass-speech,.lp-share-guide-copy,.lp-share-focus-item legend,.lp-focus-answer span,.lp-average-ending,.passport-project-goals li,.passport-plan-section li';
+ const selectors='.lp-reflection-question>div:first-child,.lp-reflection-question .qo,.lp-reflection-question .goal-row>span:last-child,.lp-reflection-instruction,h1,h2,.lp-instruction-tr,.intro,.lp-grade-note,.lp-rubric-instruction,.lp-share-header p,.lp-peer-written h3,.passport-document-topic,.passport-product,.passport-holder strong,.passport-row dd,.lp-rubric-heading,.rub-sentence,.support-ending,.choice strong,.product-option strong,.category-button strong,.contract-goal>span,.goal-card label>span,.support-plan-choice>span,.radio:not(.support-binary)>span,.lp-word-choice>span,.lp-unit-question legend,.lp-unit-question .qo,.fl,.support-helper,.compass-speech,.lp-share-guide-copy,.lp-share-focus-item legend,.lp-focus-answer span,.lp-average-ending,.passport-project-goals li,.passport-plan-section li';
  function load(){try{const v=JSON.parse(localStorage.getItem(key));prefs={tr:v?.tr===true,large:v?.large===true};}catch{prefs={tr:false,large:false};}}
  function enlarge(){
   const scope=document.querySelector(options.scope)||document.body;
-  const nodes=Array.from(scope.querySelectorAll(selectors)),unitInstruction=scope.querySelector('#word-check-list')?.previousElementSibling;if(unitInstruction)nodes.push(unitInstruction);
+  const nodes=Array.from(scope.querySelectorAll(selectors)).concat(options.variant==='host'?Array.from(document.querySelectorAll('#eval-modal-card '+selectors.split(',').join(',#eval-modal-card '))):[]),unitInstruction=scope.querySelector('#word-check-list')?.previousElementSibling;if(unitInstruction)nodes.push(unitInstruction);
   nodes.forEach(el=>{
    if(el.closest('.sample,[data-reading-detail],.lp-reading-tools,svg')||el.querySelector(selectors))return;
    if(!sizes.has(el)){sizes.set(el,parseFloat(getComputedStyle(el).fontSize));el.style.setProperty('--lp-reading-base',sizes.get(el)+'px');el.dataset.lpScalable='true';}
