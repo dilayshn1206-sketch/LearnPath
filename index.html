@@ -254,8 +254,8 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
 .rub-sentence{font-size:13px}
 .rub-chevron{background:none;border:none;color:var(--th);cursor:pointer;font-size:12px;padding:4px 6px;flex-shrink:0}
 </style>
-<link rel="stylesheet" href="assets/learnpath.css?v=20261108-2">
-<link rel="stylesheet" href="assets/compass-scenes.css?v=20261108-2"></head>
+<link rel="stylesheet" href="assets/learnpath.css?v=20261108-3">
+<link rel="stylesheet" href="assets/compass-scenes.css?v=20261108-3"></head>
 <body>
 
 <div id="auth">
@@ -310,11 +310,11 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
   <div class="modal-card" id="result-popup-card" style="text-align:center;padding:26px 20px"></div>
 </div>
 
-<script src="assets/learnpath-ui.js?v=20261108-2"></script>
-<script src="assets/rubric-v2.js?v=20261108-2"></script><script src="assets/share-guide.js?v=20261108-2"></script><script src="assets/vendor/jszip-3.10.1.min.js"></script><script src="assets/project-previews.js?v=20261108-2"></script>
-<script src="assets/navigation.js?v=20261108-2"></script>
+<script src="assets/learnpath-ui.js?v=20261108-3"></script>
+<script src="assets/rubric-v2.js?v=20261108-3"></script><script src="assets/share-guide.js?v=20261108-3"></script><script src="assets/vendor/jszip-3.10.1.min.js"></script><script src="assets/project-previews.js?v=20261108-3"></script>
+<script src="assets/navigation.js?v=20261108-3"></script>
 <script type="module">
-import {auth,db,storage,rpc,ref,set,get,push,onValue,update,remove,sref,uploadBytesResumable,getDownloadURL,deleteObject,onAuthStateChanged,signInWithPopup,signOut} from './assets/supabase-backend.js?v=20261108-2';
+import {auth,db,storage,rpc,ref,set,get,push,onValue,update,remove,sref,uploadBytesResumable,getDownloadURL,deleteObject,onAuthStateChanged,signInWithPopup,signOut} from './assets/supabase-backend.js?v=20261108-3';
 const prov={};
 let CU=null,UP=null;
 let myGid=null,myGname=null,userCoins=0;
@@ -336,7 +336,7 @@ const LEGACY_CATALOG_DEFAULTS={
 async function ensureCatalogSeeded(){
   try{
     var snap=await get(ref(db,"ideaCatalog"));
-    if(snap.exists())return;
+    if(snap.exists()&&Object.keys(snap.val()||{}).length)return;
     var seed={};
     ["written","spoken","visual"].forEach(function(cat){
       seed[cat]={};
@@ -347,37 +347,32 @@ async function ensureCatalogSeeded(){
     console.error("ensureCatalogSeeded failed:",e);
   }
 }
-async function loadCatalog(){
-  try{
-    var snap=await get(ref(db,"ideaCatalog"));
-    var raw=snap.exists()?snap.val():{};
-    var out={written:[],spoken:[],visual:[]};
-    ["written","spoken","visual"].forEach(function(cat){
-      var items=raw[cat]||{};
-      var legacy=false;
-      Object.keys(items).forEach(function(id){
-        if(LEGACY_CATALOG_DEFAULTS[id]===items[id].name){legacy=true;return;}
-        out[cat].push({id:id,name:items[id].name,active:items[id].active!==false});
-      });
-      if(legacy&&!DEFAULT_CATALOG[cat].some(function(pair){return Object.hasOwn(items,pair[0]);})){
-        out[cat]=DEFAULT_CATALOG[cat].map(function(pair){return {id:pair[0],name:pair[1],active:true};}).concat(out[cat]);
-      }
-    });
-    // if nothing came back from the DB (e.g. permission issue), fall back to built-in defaults so the quiz still works
-    if(!out.written.length&&!out.spoken.length&&!out.visual.length){
-      ["written","spoken","visual"].forEach(function(cat){
-        out[cat]=DEFAULT_CATALOG[cat].map(function(pair){return {id:pair[0],name:pair[1],active:true};});
-      });
+function catalogExampleUrl(value){
+  var text=String(value||'').trim();if(!text)return '';
+  try{var url=new URL(text);return ['https:','http:'].includes(url.protocol)&&!url.username&&!url.password?url.href:'';}catch{return '';}
+}
+function resolvedCatalog(raw){
+  raw=raw&&typeof raw==='object'?raw:{};
+  var out={written:[],spoken:[],visual:[]};
+  for(var cat of Object.keys(out)){
+    var items=raw[cat]&&typeof raw[cat]==='object'?raw[cat]:{};
+    var legacy=Object.entries(items).some(function(pair){return pair[1]&&LEGACY_CATALOG_DEFAULTS[pair[0]]===pair[1].name;});
+    var merged=new Map();
+    if(legacy||!Object.hasOwn(raw,cat))DEFAULT_CATALOG[cat].forEach(function(pair){merged.set(pair[0],{id:pair[0],name:pair[1],active:true,exampleUrl:''});});
+    for(var id of Object.keys(items)){
+      var item=items[id];if(!item||typeof item!=='object')continue;
+      if(LEGACY_CATALOG_DEFAULTS[id]===item.name)continue;
+      if(item.deleted===true){merged.delete(id);continue;}
+      if(typeof item.name!=='string'||!item.name.trim())continue;
+      merged.set(id,{id:id,name:item.name,active:item.active!==false,exampleUrl:catalogExampleUrl(item.exampleUrl)});
     }
-    return out;
-  }catch(e){
-    console.error("loadCatalog failed, using built-in defaults:",e);
-    var out2={written:[],spoken:[],visual:[]};
-    ["written","spoken","visual"].forEach(function(cat){
-      out2[cat]=DEFAULT_CATALOG[cat].map(function(pair){return {id:pair[0],name:pair[1],active:true};});
-    });
-    return out2;
+    out[cat]=Array.from(merged.values());
   }
+  return out;
+}
+async function loadCatalog(){
+  try{var snap=await get(ref(db,'ideaCatalog'));var out=resolvedCatalog(snap.exists()?snap.val():{});window._lastIdeaCatalog=out;return out;}
+  catch(error){console.error('Could not load product options:',error);return resolvedCatalog({});}
 }
 function productById(catalog,id){for(var c in catalog){var f=catalog[c].find(function(p){return p.id===id;});if(f)return f;}return null;}
 function catOfProduct(catalog,id){for(var c in catalog){if(catalog[c].some(function(p){return p.id===id;}))return c;}return "written";}
@@ -2122,7 +2117,8 @@ window.chooseProduct=async function(id,name,cat){
 function renderQuizDone(){
   LearnPathNavigation.enter('savedIdea');
   var mc=document.getElementById("mc");
-  mc.innerHTML=LearnPathUI.productLaunch(contractData.productType);
+  var cached=window._lastIdeaCatalog||{};var item=(cached[contractData.category]||[]).find(function(item){return item.id===contractData.productId;});
+  mc.innerHTML=LearnPathUI.productLaunch(contractData.productType,item?.exampleUrl||'');
 }
 
 // ── PAGE 4: PROFILE ──
@@ -2275,7 +2271,7 @@ function installTeacherWorkspace(){
   let page = 'overview';
   const css = document.createElement('link');
   css.rel = 'stylesheet';
-  css.href = 'assets/teacher-workspace.css?v=20261108-2';
+  css.href = 'assets/teacher-workspace.css?v=20261108-3';
   document.head.append(css);
   document.body.classList.add('teacher-workspace');
 
@@ -2368,17 +2364,40 @@ function installTeacherWorkspace(){
       title.textContent=CAT_LABELS[key];
       card.append(title);
       for(const item of catalog[key]){
+        const wrapper=document.createElement('section');wrapper.className='teacher-product-item';wrapper.dataset.productId=item.id;
         const row=document.createElement('div');row.className='teacher-product-row';
-        const name=document.createElement('span');name.textContent=item.name;
-        row.append(name,button('Remove',()=>deleteCatalogItem(key,item.id)));
-        card.append(row);
+        const name=document.createElement('strong');name.textContent=item.name;
+        const controls=document.createElement('div');controls.className='teacher-product-actions';
+        const edit=button('Edit',()=>{editor.hidden=!editor.hidden;edit.setAttribute('aria-expanded',String(!editor.hidden));if(!editor.hidden)nameInput.focus();});edit.setAttribute('aria-label','Edit '+item.name);edit.setAttribute('aria-expanded','false');
+        const removeButton=button('Remove',async()=>{removeButton.disabled=true;edit.disabled=true;try{await deleteCatalogItem(key,item.id);}catch(error){status.textContent=error.message||'Could not remove this product. Try again.';}finally{removeButton.disabled=false;edit.disabled=false;}});removeButton.setAttribute('aria-label','Remove '+item.name);
+        controls.append(edit,removeButton);row.append(name,controls);
+        const editor=document.createElement('form');editor.className='teacher-product-editor';editor.hidden=true;editor.noValidate=true;
+        function field(labelText,id,value,type='text'){
+          const label=document.createElement('label');label.htmlFor=id;label.textContent=labelText;
+          const input=document.createElement('input');input.className='fi';input.id=id;input.type=type;input.value=value;input.maxLength=type==='url'?2000:120;
+          editor.append(label,input);return input;
+        }
+        const nameInput=field('Product name','catalog-name-'+key+'-'+item.id,item.name);
+        const urlInput=field('Example link (?)','catalog-link-'+key+'-'+item.id,item.exampleUrl||'','url');urlInput.placeholder='https://…';
+        const hint=document.createElement('p');hint.className='teacher-product-hint';hint.textContent='Students open this address from ?. Leave blank for a Google search.';
+        const visibleLabel=document.createElement('label');visibleLabel.className='teacher-product-visible';const visible=document.createElement('input');visible.type='checkbox';visible.checked=item.active;visibleLabel.append(visible,document.createTextNode(' Students can choose this product'));
+        const status=document.createElement('p');status.className='teacher-product-status';status.setAttribute('role','status');
+        const save=document.createElement('button');save.type='submit';save.className='btn btp';save.textContent='Save changes';
+        const cancel=button('Cancel',()=>{editor.hidden=true;nameInput.value=item.name;urlInput.value=item.exampleUrl||'';visible.checked=item.active;status.textContent='';edit.setAttribute('aria-expanded','false');edit.focus();});
+        const actions=document.createElement('div');actions.className='teacher-product-actions';actions.append(save,cancel);
+        editor.append(hint,visibleLabel,actions);
+        editor.onsubmit=async event=>{event.preventDefault();save.disabled=true;removeButton.disabled=true;status.textContent='Saving…';try{await saveCatalogItem(key,item.id,nameInput.value,urlInput.value,visible.checked);await renderTIdeas();toast('Product updated.');}catch(error){status.textContent=error.message||'Could not save. Your changes are still here.';}finally{save.disabled=false;removeButton.disabled=false;}};
+        wrapper.append(row,editor,status);card.append(wrapper);
       }
-      const form=document.createElement('form');form.className='teacher-product-add';
-      const input=document.createElement('input');input.className='fi';input.id='new-idea-'+key;
-      input.setAttribute('aria-label','New '+CAT_LABELS[key]+' option');input.placeholder='Another product';
+      const form=document.createElement('form');form.className='teacher-product-add';form.noValidate=true;
+      const nameLabel=document.createElement('label');nameLabel.htmlFor='new-idea-'+key;nameLabel.textContent='New product';
+      const input=document.createElement('input');input.className='fi';input.id='new-idea-'+key;input.maxLength=120;input.placeholder='Product name';
+      const linkLabel=document.createElement('label');linkLabel.htmlFor='new-idea-link-'+key;linkLabel.textContent='Example link (?) · optional';
+      const link=document.createElement('input');link.className='fi';link.id='new-idea-link-'+key;link.type='url';link.maxLength=2000;link.placeholder='https://…';
       const add=document.createElement('button');add.className='btn btp';add.type='submit';add.textContent='Add';
-      form.onsubmit=async event=>{event.preventDefault();add.disabled=true;try{await addCatalogItem(key);}finally{add.disabled=false;}};
-      form.append(input,add);card.append(form);columns.append(card);
+      const status=document.createElement('p');status.className='teacher-product-status';status.setAttribute('role','status');
+      form.onsubmit=async event=>{event.preventDefault();add.disabled=true;status.textContent='';try{await addCatalogItem(key);}catch(error){status.textContent=error.message||'Could not add this product. Your text is still here.';}finally{add.disabled=false;}};
+      form.append(nameLabel,input,linkLabel,link,add,status);card.append(form);columns.append(card);
     }
     mc.append(columns);
   };
@@ -3035,18 +3054,28 @@ async function renderTIdeas(){
   });
   mc.innerHTML=header+html;
 }
+function validateCatalogEdit(cat,id,name,exampleUrl){
+  if(!Object.hasOwn(CAT_LABELS,cat)||!/^[a-zA-Z0-9_-]{1,160}$/.test(id))throw new Error('Reopen the product options and try again.');
+  if(!String(name||'').trim()||String(name).trim().length>120)throw new Error('Write a product name (up to 120 characters).');
+  if(String(exampleUrl||'').trim()&&(!catalogExampleUrl(exampleUrl)||String(exampleUrl).length>2000))throw new Error('Paste a complete http:// or https:// example link.');
+}
+async function saveCatalogItem(cat,id,name,exampleUrl,active){
+  validateCatalogEdit(cat,id,name,exampleUrl);
+  await update(ref(db,'ideaCatalog/'+cat+'/'+id),{name:name.trim(),exampleUrl:catalogExampleUrl(exampleUrl),active:active!==false,deleted:false,updatedAt:Date.now()});
+}
 window.deleteCatalogItem=async function(cat,id){
-  await remove(ref(db,"ideaCatalog/"+cat+"/"+id));
-  renderTIdeas();
+  var item=(await loadCatalog())[cat]?.find(function(item){return item.id===id;});if(!item){await renderTIdeas();return;}
+  validateCatalogEdit(cat,id,item.name,item.exampleUrl);
+  // Preserve an explicit removal so virtual legacy defaults cannot return.
+  await update(ref(db,'ideaCatalog/'+cat+'/'+id),{name:item.name,active:false,deleted:true,exampleUrl:item.exampleUrl||'',updatedAt:Date.now()});
+  await renderTIdeas();toast('Product removed. Saved student plans are kept.');
 };
 window.addCatalogItem=async function(cat){
-  var inp=document.getElementById("new-idea-"+cat);
-  var name=(inp?inp.value:"").trim();
-  if(!name){toast("Write an option name first!");return;}
-  var id=name.toLowerCase().replace(/[^a-z0-9]+/g,"_").replace(/^_+|_+$/g,"")+"_"+Date.now().toString(36).slice(-4);
-  await set(ref(db,"ideaCatalog/"+cat+"/"+id),{name:name,active:true});
-  toast("Added!");
-  renderTIdeas();
+  var input=document.getElementById('new-idea-'+cat),link=document.getElementById('new-idea-link-'+cat);
+  var name=(input?.value||'').trim();
+  var id=(name.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'').slice(0,80)||'product')+'_'+crypto.randomUUID().slice(0,8);
+  await saveCatalogItem(cat,id,name,link?.value||'',true);
+  toast('Product added.');await renderTIdeas();
 };
 
 // ── TEACHER: RESOURCES MANAGER ──
@@ -3456,8 +3485,8 @@ async function mountPlanner(mode,c,overview){
     ['written','spoken','visual'].forEach(function(cat){extra[cat]=(catalog[cat]||[]).filter(function(item){var original=DEFAULT_CATALOG[cat].find(function(pair){return pair[0]===item.id;});return item.active&&(!original||original[1]!==item.name);});});
   }
   var mc=document.getElementById('mc');
-  mc.innerHTML=(isLockedStep(mode==='idea'?'step2':'step3')?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">← Back to Home</button>')+'<iframe id="lp-planner-frame" title="'+(mode==='idea'?'Plan your project':LearnPathUI.hasPassport(c)?'My Learning Passport':'Set goals and plan')+'" src="assets/planner.html?v=20261108-2" style="width:100%;height:900px;border:0;display:block" scrolling="no"></iframe>';
-  window._plannerContext={mode:mode,contract:c,overview:!!overview&&LearnPathUI.hasPassport(c),passportReady:LearnPathUI.hasPassport(c),readOnly:false,extraProducts:extra,resume:LearnPathNavigation.resume(),identity:{name:c&&c.studentName||CU.displayName,photo:c&&c.studentId!==CU.uid?c.studentPhoto||'':UP.avatarUrl||CU.photoURL||c&&c.studentPhoto||''}};
+  mc.innerHTML=(isLockedStep(mode==='idea'?'step2':'step3')?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">← Back to Home</button>')+'<iframe id="lp-planner-frame" title="'+(mode==='idea'?'Plan your project':LearnPathUI.hasPassport(c)?'My Learning Passport':'Set goals and plan')+'" src="assets/planner.html?v=20261108-3" style="width:100%;height:900px;border:0;display:block" scrolling="no"></iframe>';
+  window._plannerContext={mode:mode,contract:c,overview:!!overview&&LearnPathUI.hasPassport(c),passportReady:LearnPathUI.hasPassport(c),readOnly:false,extraProducts:extra,resume:LearnPathNavigation.resume(),catalogProducts:mode==='idea'?catalog:null,identity:{name:c&&c.studentName||CU.displayName,photo:c&&c.studentId!==CU.uid?c.studentPhoto||'':UP.avatarUrl||CU.photoURL||c&&c.studentPhoto||''}};
   setNav('home');
 }
 window.addEventListener('message',async function(event){
@@ -3526,5 +3555,5 @@ LearnPathNavigation.install({
  open:function(route,args){return ({go:window.go,share:window.openNewPost,unit:window.renderStep1Screen,idea:window.startQuiz,passport:window.renderStep3Screen,resources:window.renderResourcesScreen,savedIdea:renderQuizDone,profile:window.viewProf}[route]||window.go).apply(null,args||[]);}
 });
 </script>
-<script src="assets/compass-scenes.js?v=20261108-2"></script></body>
+<script src="assets/compass-scenes.js?v=20261108-3"></script></body>
 </html>
