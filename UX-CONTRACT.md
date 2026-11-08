@@ -179,3 +179,8 @@ The owner approved publishing the saved animation-panel choices (revision 188). 
 - Goal version `grade6-support-goals-20261108-v1`: exactly two of three project goals, at least one selected plan action. Standard/historical requirements remain three goals and three steps.
 - Rubric version `grade6-support-binary-20261108-v1`: five criteria, stored indices 0/1 with points 1/3, presented high option first. Help never assigns an answer. New scores are grouped by version, never averaged with the earlier four/three-step instruments. Written scaffolds offer three prompts per field and remain editable.
 - Real eligibility tests roll back entirely; integration tests use fictional records and block external network. Learner testing with the school accounts still requires their own first Google sign-in.
+
+## Unit and feedback follow-up (2026-11-08)
+- Guided unit scope is ten teacher-ordered words / three questions; standard and submitted historical checks remain unchanged. Each saved guided snapshot records guided-unit-10x3-v1.
+- Teacher legacy catalog entries remain manageable under Previous product options. Removal marks deleted/active:false without rewriting saved learner plans. Only explicitly edited legacy options can become new student choices.
+- Classmate criterion matches are visible on load, computed per criterion and rubric version, nearest level with half rounded upwards. Compact overall score cards and a prominent See feedback button share the existing two-column comments.

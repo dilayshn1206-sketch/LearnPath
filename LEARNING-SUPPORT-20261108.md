@@ -46,3 +46,16 @@ requirements only for the eligible caller; standard minimums remain unchanged.
 The local 14-page comparison panel retains previous versions and review notes.
 Changes can be reversed through Git history and by disabling the private
 allowlist; saved response versions must remain readable during any rollback.
+
+## Follow-up: unit and visible feedback
+Guided initial unit checks now use the first ten teacher-ordered words and first
+three grammar questions; checked words remain honest known/unknown choices, not
+a requirement to claim ten known words. New records carry guided-unit-10x3-v1;
+submitted historical question snapshots remain authoritative. Standard checks
+retain all words and questions. The repeated guided check uses the same scope.
+
+Teacher Project options includes legacy products in a Previous product options
+disclosure with real Edit/Remove actions, rather than only hiding those records.
+Classmate criterion averages now appear automatically, with the matching
+descriptor, level, stars and colour. Overall score boxes are compact; See feedback
+opens the retained two-column written comments.
