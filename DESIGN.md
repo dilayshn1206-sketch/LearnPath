@@ -183,3 +183,6 @@ topics, visual-first formats with other ways available, three tools, two goals
 out of three and checkbox planning. Show one rubric question with two explicit
 endings at a time, three/one SVG stars, no automatic scores and calm motion.
 No learner identities or diagnostic labels in frontend assets.
+
+## Reflection and actionable feedback (2026-11-08)
+Keep the existing star/color cards, with large teal See details actions within compact score boxes. Use the established cream task paper and teal progress bar for reflection journeys: one main question on the left, the approved original Compass on the right, and a stable back/next footer. Name/date are quiet metadata rather than repeated form fields. Questions, original response scales and teacher-pushed session behavior are preserved. No new animation assets or assessed content.

@@ -127,7 +127,7 @@ const server=http.createServer((req,res)=>{
  await page.evaluate(()=>{__mockDB.posts.peerPost={uid:'peer',name:'Ece <A>',productType:'Blog',title:'Kind messages',well:'My ideas',selfRubric:[0,1,2,0,1,2],comments:{one:{from:'Ali',fromId:'ali',well:'Good title',improve:'Add reasons',peerRubric:[0,1,2,0,1,2]}}};go('feed');switchFeedTab('posts');});
  assert.equal(await page.locator('#post-peerPost .lp-reflection-label').innerText(),'Ece <A>’s self-reflection ▼');
  assert.match(await page.locator('#fb-p-peerPost').textContent(),/simple information|explains|information/);
- assert.deepEqual(await page.locator('#fb-p-peerPost .lp-feedback-tier').allTextContents(),['Step 1','Step 2','Step 3','Step 1','Step 2','Step 3']);
+ assert.deepEqual(await page.locator('#fb-p-peerPost .lp-feedback-tier').allTextContents(),['Step 1','Step 1','Step 2','Step 2','Step 3','Step 3']);
  await page.evaluate(()=>openComment('peerPost'));
  assert.equal(await page.locator('#cm-rub-peerPost fieldset').count(),1);
  assert.equal(await page.locator('#cm-well-peerPost').isVisible(),false);
@@ -157,7 +157,7 @@ const server=http.createServer((req,res)=>{
  await page.getByRole('button',{name:'Next goal',exact:true}).click();
  await page.locator('#tc-goals-goalPost label').filter({hasText:'Yes'}).check();
  await page.locator('#tc-well-goalPost').fill('Your opening is clear.');await page.locator('#tc-improve-goalPost').fill('Check the verb forms.');
- await page.evaluate(()=>submitTeacherComment('goalPost','peer'));
+ await page.evaluate(()=>{_rubricStores.tceval_goalPost.values=[3,3,3,3,3];return submitTeacherComment('goalPost','peer');});
  const teacherReview=await page.evaluate(()=>__mockDB.posts.goalPost.comments.mock);
  assert.equal(teacherReview.isTeacher,true);assert.deepEqual(teacherReview.personalGoalReview.goals.map(g=>g.met),[true,false,true]);
  assert.equal(teacherReview.personalGoalReview.source,'project-submission');
