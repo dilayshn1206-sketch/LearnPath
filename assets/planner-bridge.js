@@ -21,6 +21,7 @@ function receipt(){
 const draftRender=render;
 render=function(){
  draftRender();
+ if(host?.revisionRequested){const notice=document.createElement('p');notice.className='passport-notice';notice.setAttribute('role','status');notice.textContent='Your teacher reopened this step. Your saved choices are here. Change what you need, then send your plan again.';$('#screen').prepend(notice);}
  if(host?.mode==='idea'&&host.contract?.productType&&!passport?.active){
   document.body.classList.toggle('saved-idea-review',state.step===4);
   if(state.step===4){$('.heading .eyebrow').textContent='Project idea · Saved';$('.heading .intro').textContent='Your choices are saved. Use Edit to change one part, or continue to your plan.';$('#next').textContent='Continue to my plan →';document.querySelectorAll('.focus-goals li').forEach((li,i)=>{if(host.contract.weaknessTips?.[i])li.textContent=host.contract.weaknessTips[i];});}
@@ -102,7 +103,7 @@ new ResizeObserver(reportHeight).observe(document.body);
   }else
   for(const category of groups){for(const item of host.extraProducts[category.id]||[]){if(retiredProduct(item.id,item.name)){const archived=formats.find(f=>f[0]===item.id);if(archived)archived[1]=item.name;continue;}const exists=category.formats.find(f=>f[0]===item.id);if(exists)exists[1]=item.name;else{const format=[item.id,item.name,'A project format from your teacher.'];category.formats.push(format);formats.push(format);}}}
   enableLearningSupport();
-  if(host.mode==='idea'&&host.contract?.productType)hydrateIdea(host.contract);
+  if(host.mode==='idea'&&host.contract?.productType){hydrateIdea(host.contract);if(host.revisionRequested){state.step=0;state.returnToIdeaReview=false;}}
   if(host.mode==='passport'){
    const c=host.contract;
    state={...state,step:4,topic:'own',topicOwn:c.topic,category:c.category,format:'own',formatOwn:c.productType,tools:c.platforms||['unsure'],toolOwn:c.platformsOtherText||'',weakness:c.weakness||'ideas',saved:true};
@@ -110,7 +111,7 @@ new ResizeObserver(reportHeight).observe(document.body);
    if(host.identity){passport.studentName=host.identity.name;passport.studentPhoto=host.identity.photo;}
    lastPatch=JSON.stringify(patch());
   }
-  if(host.resume&&window.restorePlannerNavigation)restorePlannerNavigation(host.resume);
+  if(host.resume&&!host.revisionRequested&&window.restorePlannerNavigation)restorePlannerNavigation(host.resume);
   render();if(host.mode==='idea'&&!host.contract?.productType&&$('#next'))$('#next').textContent='Continue →';
  }catch(error){$('#screen').innerHTML='<h1>Could not open your plan</h1><p>'+esc(error.message)+'</p>';}
 })();

@@ -198,3 +198,6 @@ Only two reading tools: Turkish instructions and larger main text. Preferences p
 
 ## Peer/self support parity (2026-11-08)
 Guided peer evaluation uses the same paced selector, required answers, progress, reading tools and editable three-prompt written scaffolds as self-reflection. Peer instructions refer to the classmate and change at the written-feedback stage; questions and options stay English. Missing first answers cannot be skipped. Descriptor versions and teacher/standard rubrics remain unchanged.
+
+## Teacher-requested revisions (2026-11-08)
+The shared Reopen steps 2 & 3 action appears in All students and full-plan review. A native dialog lets the teacher select either or both steps, saves one contract update through the existing teacher-authorized path, and preserves all saved content, submissions, posts and scores. Cancellation and failures leave the record unchanged; duplicate submission is disabled. The revisionRequest metadata is a re-entry hint, never a new editing permission. Requested steps open their prefilled forms, with a home reminder, until the learner sends their plan again or the teacher approves it. Completed work without a revision request keeps its summary-first behavior. Standard and guided planners follow the same request.
