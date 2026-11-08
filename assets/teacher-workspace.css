@@ -79,3 +79,14 @@
 .teacher-drag-ghost {position:fixed;z-index:10000;width:200px;margin:0;pointer-events:none;opacity:.9;box-shadow:0 8px 20px #142d4b33;}
 
 .teacher-product-row strong{min-width:0;overflow-wrap:anywhere;font-size:15px}.teacher-product-actions{display:flex;gap:6px;flex-shrink:0}.teacher-product-editor{padding:10px 0;border-top:1px solid var(--gb)}.teacher-product-editor label,.teacher-product-add label{display:block;font-size:13px;font-weight:700;margin:8px 0 4px}.teacher-product-editor input.fi,.teacher-product-add input{width:100%;min-height:42px;font-size:15px}.teacher-product-hint{font-size:12px;line-height:1.5;color:var(--tm);margin:7px 0}.teacher-product-status{font-size:13px;line-height:1.45;color:#9d283b;margin:5px 0;overflow-wrap:anywhere}.teacher-product-editor .teacher-product-visible{display:flex;align-items:center;gap:7px;font-weight:400;line-height:1.4;margin:12px 0}.teacher-product-visible input{width:18px;height:18px;accent-color:var(--p)}.teacher-product-add{display:block;border-top:1px solid var(--gb);padding-top:8px}.teacher-product-add button{margin-top:10px}.teacher-product-editor[hidden]{display:none}
+.teacher-workspace .srow{flex-wrap:wrap;gap:7px}
+.teacher-reopen{font-size:13px;min-height:40px;padding:7px 10px}
+.teacher-revision-status{color:var(--p);font-size:12px}
+.teacher-reopen-dialog{border:1px solid var(--gb);color:var(--tx);margin:auto;width:min(420px,calc(100vw - 32px))}
+.teacher-reopen-dialog::backdrop{background:rgba(20,45,75,.5)}
+.teacher-reopen-dialog h2{font-size:22px;margin:0 0 10px}
+.teacher-reopen-dialog p{font-size:15px;line-height:1.5}
+.teacher-reopen-choice{display:flex;align-items:center;gap:10px;min-height:48px;font-size:16px;cursor:pointer}
+.teacher-reopen-choice input{width:20px;height:20px;accent-color:var(--p)}
+.teacher-reopen-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+#teacher-reopen-status{min-height:24px;color:var(--tm)}
