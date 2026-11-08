@@ -79,7 +79,7 @@ const server = http.createServer((request, response) => {
     await page.getByRole('button', {name:'More', exact:true}).click();
     await page.getByRole('button', {name:'Project options', exact:true}).click();
     await page.locator('.teacher-product-options').waitFor();
-    assert.equal(await page.locator('.teacher-product-row').count(), 9);
+    assert.equal(await page.locator('.teacher-product-item:not([data-legacy])').count(), 9);
     await page.getByRole('button', {name:'More', exact:true}).click();
     await page.getByRole('button', {name:'Unit and grammar', exact:true}).click();
     await page.locator('#gq-image-3').waitFor();
