@@ -59,3 +59,10 @@ disclosure with real Edit/Remove actions, rather than only hiding those records.
 Classmate criterion averages now appear automatically, with the matching
 descriptor, level, stars and colour. Overall score boxes are compact; See feedback
 opens the retained two-column written comments.
+
+## Reading controls
+The two tools are Türkçe yönerge and Yazıyı büyüt. The same reading utility is
+used by the host, planner and local comparison. New DOM content is marked for
+main-text scaling after render; reference/example panels are excluded. Local
+preferences synchronize across same-origin frames and remain distinct from
+Supabase account eligibility. No speech API or text-to-speech controls are used.
