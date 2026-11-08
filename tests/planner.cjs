@@ -17,7 +17,7 @@ const server=http.createServer((req,res)=>{
  const browser=await chromium.launch({executablePath:process.env.CHROME_BIN,headless:true,args:['--disable-gpu']});
  const ctx=await browser.newContext({viewport:{width:1024,height:768}});
  await ctx.route('**/*',r=>r.request().url().startsWith('http://127.0.0.1:')?r.continue():r.abort());
- await ctx.addInitScript(bootstrap);const page=await ctx.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await ctx.addInitScript({content:'('+bootstrap.toString()+')();window.__mockDB.ideaCatalog='+JSON.stringify({"written":{"blog":{"name":"Blog","active":true},"story":{"name":"Story / diary","active":true},"written_interview":{"name":"Written interview","active":true}},"spoken":{"podcast":{"name":"Podcast / audio","active":true},"talk":{"name":"Short talk","active":true},"roleplay":{"name":"Role-play","active":true}},"visual":{"poster":{"name":"Poster","active":true},"comic":{"name":"Comic","active":true},"infographic":{"name":"Infographic","active":true}}})+';'});const page=await ctx.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
  try{
  await page.goto('http://127.0.0.1:'+server.address().port+'/index.html');
  await page.locator('.step-card').first().waitFor();

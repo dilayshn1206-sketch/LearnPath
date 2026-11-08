@@ -96,7 +96,10 @@ new ResizeObserver(reportHeight).observe(document.body);
 (async()=>{
  try{
   host=await request('load');
-  // Keep teacher-added or renamed formats alongside the twelve approved formats.
+  // The host catalog owns new choices; format history remains readable.
+  if(host.catalogProducts){
+    for(const category of groups){category.formats=(host.catalogProducts[category.id]||[]).filter(item=>item.active!==false&&!retiredProduct(item.id,item.name)).map(item=>{let entry=formats.find(f=>f[0]===item.id);if(!entry){entry=[item.id,item.name,'A project format from your teacher.'];formats.push(entry);}entry[1]=item.name;entry[3]=item.exampleUrl||'';return entry;});}
+  }else
   for(const category of groups){for(const item of host.extraProducts[category.id]||[]){if(retiredProduct(item.id,item.name)){const archived=formats.find(f=>f[0]===item.id);if(archived)archived[1]=item.name;continue;}const exists=category.formats.find(f=>f[0]===item.id);if(exists)exists[1]=item.name;else{const format=[item.id,item.name,'A project format from your teacher.'];category.formats.push(format);formats.push(format);}}}
   if(host.mode==='idea'&&host.contract?.productType)hydrateIdea(host.contract);
   if(host.mode==='passport'){

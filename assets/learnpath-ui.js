@@ -41,7 +41,7 @@
       return /[\p{L}\p{N}]/u.test(String(s || '').replace(/^(?:\s*i\s+will\b[\s.…]*)+/i, ''));
     });
   }
-  function productLaunch(product) {
+  function productLaunch(product, exampleUrl) {
     var name = String(product || 'Your project');
     var key = name.toLowerCase();
     var formats = [
@@ -63,6 +63,7 @@
     var plural = match ? match[1] : name + ' examples';
     var prompt = match ? match[2] : 'How is it organised? What helps you understand its message?';
     var search = 'https://www.google.com/search?q=' + encodeURIComponent(plural + ' examples for students digital citizenship');
+    try{var destination=new URL(exampleUrl);if(['https:','http:'].includes(destination.protocol)&&!destination.username&&!destination.password)search=destination.href;}catch{}
     return '<section class="lp-product-launch" aria-labelledby="lp-launch-title">'
       + '<div class="lp-launch-guide"><div class="lp-clock'+(paused?' paused':'')+'" role="img" aria-label="Compass learning companion"></div>'
       + '<button type="button" class="lp-motion-toggle" aria-pressed="'+paused+'" onclick="LearnPathUI.toggleMotion()">'+(paused?'Play animation':'Pause animation')+'</button></div>'
