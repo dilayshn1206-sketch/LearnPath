@@ -15,7 +15,7 @@
   [[well,['used clear pictures','used my own sentences','used unit words'],selfMode?'I ':'You '],[improve,['check the spelling','add a clear example','organise the parts'],selfMode?'Next time, I will ':'Next time, you could ']].forEach(([id,options,prefix])=>{
    const input=document.getElementById(id);if(!input||document.querySelector('[data-support-for="'+id+'"]'))return;
    const bank=document.createElement('div');bank.className='lp-support-word-bank';bank.dataset.supportFor=id;
-   options.forEach(text=>{const b=document.createElement('button');b.type='button';b.className='btn bts';b.textContent=text;b.onclick=()=>{input.value=prefix+(selfMode?text:text.replace('my own','your own'))+'.';input.dispatchEvent(new Event('input',{bubbles:true}));};bank.appendChild(b);});input.before(bank);
+   options.forEach(text=>{const b=document.createElement('button');b.type='button';b.className='btn bts';b.textContent=selfMode?text:text.replace('my own','your own');b.onclick=()=>{input.value=prefix+(selfMode?text:text.replace('my own','your own'))+'.';input.dispatchEvent(new Event('input',{bubbles:true}));};bank.appendChild(b);});input.before(bank);
   });
  }
 function art(kind,esc){const top='<svg viewBox="0 0 280 160" role="img" aria-label="'+esc(kind)+' example"><rect width="280" height="160" rx="14" fill="#e5f0ed"/>';const bottom='</svg>';let body='';
