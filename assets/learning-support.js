@@ -9,7 +9,7 @@
  const peerLabels=[['My classmate used their own sentences.','My classmate used class sentences.'],['My classmate used sentences.','My classmate used short phrases or single words.'],['The work has interesting details and examples.','The work does not have examples/details.'],['The message is clear.','The message is not clear.'],['Correct grammar and words.','Not correct grammar and words.']];
  function rubric(q,ls){return areas.map((area,i)=>({area,q:q[i],support:true,levels:[{label:ls[i][1],points:1},{label:ls[i][0],points:3}]}));}
  const self=rubric(questions,labels),peer=rubric(peerQuestions,peerLabels);
- function stars(value){return '<span class="lp-support-stars" role="img" aria-label="'+value+' stars">'+Array.from({length:3},(_,i)=>'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 3.1 6.3 7 .9-5 4.9 1.2 7-6.3-3.3-6.3 3.3 1.2-7-5-4.9 7-.9Z" fill="'+(i<value?'#dca631':'#e8edef')+'" stroke="#ad7419"/></svg>').join('')+'</span>';}
+ function stars(value,max=3){return '<span class="lp-support-stars" role="img" aria-label="'+value+' stars">'+Array.from({length:max},(_,i)=>'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 3.1 6.3 7 .9-5 4.9 1.2 7-6.3-3.3-6.3 3.3 1.2-7-5-4.9 7-.9Z" fill="'+(i<value?'#dca631':'#e8edef')+'" stroke="#ad7419"/></svg>').join('')+'</span>';}
  function emphasize(text,esc){return String(text).split(/(not clear|not correct|clear|correct)/gi).map((p,i)=>i%2?'<strong>'+esc(p)+'</strong>':esc(p)).join('');}
  function written(well,improve,selfMode){
   [[well,['used clear pictures','used my own sentences','used unit words'],selfMode?'I ':'You '],[improve,['check the spelling','add a clear example','organise the parts'],selfMode?'Next time, I will ':'Next time, you could ']].forEach(([id,options,prefix])=>{
