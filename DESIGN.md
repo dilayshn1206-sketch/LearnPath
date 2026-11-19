@@ -8,6 +8,9 @@ Full-body previews use teal task paper and an illustrated gold compass coin.
 The tablet topbar avatar is 72px and the welcome paper adds a larger left-side
 character. WebP assets retain alpha transparency. Classic collection owns the
 earlier character and accessory rendering.
+The shared avatar renders one anatomy pose. Held objects and gripping paws stay
+above clothing; headwear uses isolated transparent artwork. A padded stage keeps
+headwear inside the preview. See WARDROBE-LAYERS-20261119.md.
 
 ## Compass-led choices (2026-11-02)
 Use compact topic/product label-and-icon cards; explain through short keyword
