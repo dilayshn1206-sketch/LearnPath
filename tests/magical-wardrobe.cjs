@@ -5,7 +5,7 @@ const {JSDOM} = require('jsdom');
 const root = path.resolve(__dirname,'..');
 const html = fs.readFileSync(path.join(root,'index.html'),'utf8');
 const app = html.match(/<script type="module">([\s\S]*?)<\/script>/)[1].replace(/^import[^\r\n]+;\r?\n/gm,'');
-const wardrobe = fs.readFileSync(path.join(root,'assets/magical-wardrobe.js'),'utf8').replace(/^export /gm,'');
+const wardrobe = (fs.readFileSync(path.join(root,'assets/magical-wardrobe-layers.js'),'utf8')+'\n'+fs.readFileSync(path.join(root,'assets/magical-wardrobe.js'),'utf8').replace(/^import[^\r\n]+;\r?\n/gm,'')).replace(/^export /gm,'');
 const dom = new JSDOM(html.replace(/<script[\s\S]*?<\/script>/g,''),{runScripts:'dangerously',url:'https://example.test/LearnPath/'});
 const w = dom.window;
 const data = {users:{student:{role:'student',name:'Ada',avatarAnimal:'magic-hedgehog'}},ownedAccessories:{student:{}},coins:{student:28}};
@@ -66,12 +66,29 @@ w.__magicTest.start();
   assert.equal(data.users.student.avatarItem,'magic-camera');
   assert.equal(calls.filter(id=>id==='magic-camera').length,1);
   await w.openCoins();
-  assert.equal(w.document.querySelectorAll('.mw-dressing .mw-layer').length,2);
+  assert.equal(w.document.querySelectorAll('.mw-dressing .mw-body').length,1);
+  assert.equal(w.document.querySelectorAll('.mw-dressing .mw-headwear').length,1);
   await w.magicChooseAnimal('magic-starlion');
   assert.equal(data.users.student.avatarAnimal,'magic-hedgehog');
   assert.equal(data.coins.student,8);
   assert.ok(w.document.querySelector('#uav .mw-avatar'));
   assert.equal(w.MagicalWardrobe.items.length,15);
+  // Across every outfit/head/held combination, only one anatomy is rendered.
+  for(const animal of w.MagicalWardrobe.animals) {
+    for(const outfit of w.MagicalWardrobe.items.filter(x=>x.slot==='outfit')) {
+      for(const head of w.MagicalWardrobe.items.filter(x=>x.slot==='head')) {
+        for(const held of w.MagicalWardrobe.items.filter(x=>x.slot==='item')) {
+          const sample=w.document.createElement('div');
+          sample.innerHTML=w.MagicalWardrobe.avatar({avatarAnimal:animal.id,avatarOutfit:outfit.id,avatarHead:head.id,avatarItem:held.id});
+          assert.equal(sample.querySelectorAll('.mw-body').length,1);
+          assert.equal(sample.querySelectorAll('.mw-outfit').length,1);
+          assert.equal(sample.querySelectorAll('.mw-headwear').length,1);
+          assert.ok(sample.querySelector('.mw-headwear').style.backgroundImage.includes('magic-layers-'));
+          assert.equal(sample.querySelector('.mw-body').style.backgroundPosition,sample.querySelector('.mw-foreground').style.backgroundPosition);
+        }
+      }
+    }
+  }
   console.log('Wardrobe save, reload, concurrent click, retry, owned items and insufficient balance OK');
   dom.window.close();
 })().catch(error=>{console.error(error);dom.window.close();process.exitCode=1;});
