@@ -18,6 +18,8 @@ response libraries. The shared planning sidebar now reads “Ask your friends or
 ask Google.” This applies to standard and supported learners. The approved
 Compass idle mascot remains visible above this help message. Keep selection,
 saved plans, teacher example links and non-chat task guidance unchanged.
+Topic cards show the owner's six topic-specific keyword lines below their
+titles in smaller, muted text (2026-11-19). Product cards remain title-only.
 Use compact topic/product label-and-icon cards; explain through short keyword
 bullets in the right-hand conversation. Keep the existing navy/teal paper style.
 The speech-bubble invitation is a real focus button. Breakdance is a bounded
