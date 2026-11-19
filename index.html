@@ -1732,6 +1732,7 @@ window.renderStep1Screen=async function(){
   var myGrammarAnswers=(gaSnap.exists()&&gaSnap.val().answers)||{};
   var grammarRecord=gaSnap.exists()?gaSnap.val():{};
   var myGrammarSubmitted=gaSnap.exists()&&gaSnap.val().submitted;
+  window._unitGrammarSubmitted=!!myGrammarSubmitted;
 
   var html=locked?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">&#8592; Back to Home</button>';
   html+='<div class="card" style="background:linear-gradient(135deg,var(--p),var(--pd));color:#fff;box-shadow:0 4px 0 var(--pd)">';
@@ -1768,6 +1769,9 @@ window.renderStep1Screen=async function(){
   var gQs=(myGrammarSubmitted&&grammarRecord.questions)||info.grammarQuestions||[];
   if(supportProfile===LearnPathSupport.profile&&!myGrammarSubmitted)gQs=gQs.slice(0,3);
   window._unitGrammarQuestions=gQs;
+  var grammarDraft=unitGrammarDraft();
+  if(!myGrammarSubmitted)Object.assign(myGrammarAnswers,grammarDraft.unsaved);
+  else grammarDraft.unsaved={};
   if(gQs.length){
     html+='<div class="card"><h2 class="ctitle mb8">Grammar Practice</h2>';
     html+='<p class="lp-grade-note">Choose one answer for each question, then check your answers.</p>';
@@ -1791,12 +1795,12 @@ window.renderStep1Screen=async function(){
       if(myGrammarSubmitted)html+=window.LearnPathUI.grammarFeedback(q,myGrammarAnswers[qi]);
       html+='</fieldset>';
     });
-    html+='<p id="grammar-error" class="lp-unit-error" role="alert"></p>';
+    html+='<p id="grammar-save-status" role="status" aria-live="polite"></p><button type="button" id="grammar-retry" class="btn bts" onclick="retryGrammarSaves()" hidden>Retry saving</button><p id="grammar-error" class="lp-unit-error" role="alert"></p>';
     if(!myGrammarSubmitted)html+='<button id="grammar-submit" class="btn btg btf" onclick="submitGrammarAnswers()">Check my answers</button>';
     html+='</div>';
   }
 
-  mc.innerHTML=html;setNav("home");
+  mc.innerHTML=html;setNav("home");refreshGrammarSaveStatus();
 };
 
 window._myWordChecks=null;
@@ -1821,24 +1825,53 @@ window.submitWordChecks=async function(){
   try{var record=Object.assign(unitWordRecord(),{submittedAt:Date.now(),stage:'before-project'});record.wordsToLearn=record.words.filter(function(word,i){return !record.checked[i];});await update(ref(db,"wordChecks/"+CU.uid),record);var host=document.getElementById('words-to-learn');if(host)host.innerHTML=wordsToLearnHTML(record);toast("Word check submitted!");}
   catch(e){toast('Could not submit your word check. Please try again.');}
 };
+function unitGrammarDraft(){
+  window._unitGrammarDrafts=window._unitGrammarDrafts||new Map();
+  var key=CU.uid+':'+String(window._unitContentVersion||'');
+  if(!window._unitGrammarDrafts.has(key))window._unitGrammarDrafts.set(key,{unsaved:{},pending:0,queue:Promise.resolve(),saved:false});
+  return window._unitGrammarDrafts.get(key);
+}
+function refreshGrammarSaveStatus(){
+  var status=document.getElementById('grammar-save-status');if(!status)return;
+  var draft=unitGrammarDraft(),failed=Object.keys(draft.unsaved).length>0&&!draft.pending;
+  status.textContent=draft.pending?'Saving your answers…':failed?'Your choice is still here. Retry saving before you continue.':draft.saved?'Answers saved.':'';
+  var retry=document.getElementById('grammar-retry');if(retry)retry.hidden=!failed;
+  var submit=document.getElementById('grammar-submit');if(submit)submit.disabled=draft.pending>0;
+}
 window.pickGrammarAnswer=async function(qi,oi){
-  try{
-    var snap=await get(ref(db,"grammarAnswers/"+CU.uid));
-    if(snap.exists()&&snap.val().submitted)return;
-    var answers=(snap.exists()&&snap.val().answers)||{};
-    answers[qi]=oi;
-    await set(ref(db,"grammarAnswers/"+CU.uid),{answers:answers,questions:window._unitGrammarQuestions||[],assessmentVersion:supportProfile===LearnPathSupport.profile?'guided-unit-10x3-v1':'standard',contentVersion:window._unitContentVersion,submitted:false,studentName:CU.displayName});
-    var scrollY=window.scrollY;
-    await renderStep1Screen();window.scrollTo(0,scrollY);
-    var buttons=document.querySelectorAll('.lp-unit-question');
-    if(buttons[qi])buttons[qi].querySelectorAll('button.qo')[oi].focus({preventScroll:true});
-  }catch(e){toast('Could not save your answer. Please try again.');}
+  if(window._unitGrammarSubmitted)return;
+  var q=(window._unitGrammarQuestions||[])[qi];
+  if(!q||!Number.isInteger(oi)||oi<0||oi>=q.options.length)return;
+  var draft=unitGrammarDraft(),uid=CU.uid;
+  var patch={questions:window._unitGrammarQuestions||[],assessmentVersion:supportProfile===LearnPathSupport.profile?'guided-unit-10x3-v1':'standard',contentVersion:window._unitContentVersion,submitted:false,studentName:CU.displayName};
+  patch['answers/'+qi]=oi;draft.unsaved[qi]=oi;draft.pending++;
+  var question=document.querySelectorAll('.lp-unit-question')[qi];
+  if(question)question.querySelectorAll('button.qo').forEach(function(button,i){button.classList.toggle('sel',i===oi);button.setAttribute('aria-pressed',String(i===oi));button.style.cssText=i===oi?'border-color:var(--p);background:var(--pl);color:var(--pd)':'';});
+  var error=document.getElementById('grammar-error');if(error)error.textContent='';
+  refreshGrammarSaveStatus();
+  var save=draft.queue.then(async function(){
+    var snap=await get(ref(db,'grammarAnswers/'+uid));
+    if(snap.exists()&&snap.val().submitted)throw new Error('These answers have already been submitted. Reopen the unit to see your feedback.');
+    // The server merges this one answer under its row lock, including across tabs.
+    await update(ref(db,'grammarAnswers/'+uid),patch);
+    if(draft.unsaved[qi]===oi)delete draft.unsaved[qi];draft.saved=true;
+  });
+  draft.queue=save.catch(function(){});
+  try{await save;}catch(e){console.warn('Grammar answer save failed',e);}
+  finally{draft.pending--;refreshGrammarSaveStatus();}
+};
+window.retryGrammarSaves=async function(){
+  var entries=Object.entries(unitGrammarDraft().unsaved);
+  await Promise.all(entries.map(function(entry){return pickGrammarAnswer(Number(entry[0]),entry[1]);}));
 };
 window.submitGrammarAnswers=async function(){
   var button=document.getElementById('grammar-submit');
   if(button&&button.disabled)return;
   if(button)button.disabled=true;
   try{
+    var draft=unitGrammarDraft();await draft.queue;
+    if(Object.keys(draft.unsaved).length)await retryGrammarSaves();
+    if(Object.keys(draft.unsaved).length){refreshGrammarSaveStatus();return;}
     var snap=await get(ref(db,"grammarAnswers/"+CU.uid));
     if(snap.exists()&&snap.val().submitted)return;
     var answers=(snap.exists()&&snap.val().answers)||{};
