@@ -1410,22 +1410,26 @@ function feedbackGroups(comments,label,prefix){
 }
 function averageMatchesHTML(group,ownProject){
  var html='<div class="lp-average-criteria">';
- var tips=['Make new sentences with the words we learned, and add your own details.','Use words to connect your sentences and paragraphs.','Give examples, details and pictures. Make it interesting.','Make your message easy to understand.','Check your grammar, words and punctuation.'];
- var praise=['You successfully used the language we learned to talk about your own ideas.','You successfully used words to connect your paragraphs and sentences.','You successfully added examples, details and pictures to make it interesting.','Your message was easy to understand.','You successfully used correct words, grammar and punctuation.'];
- // Compare the unrounded source average. Exactly 65% belongs to the success band.
- var successful=group.stats.overall!==null&&group.stats.overall/group.stats.maxSteps>=0.65;
- var areaIndex={'Sharing Ideas':0,'Words and Sentences':1,'Impact':2,'Easy to Understand':3,'English':4,'Ideas':0,'Order':1,'Clear English':3,'Words':4,'When he/she gets stuck':2};
+ var tips=['Make new sentences with the words we learned, and add your own details.','Connect your sentences with words like and, but and because.','Add details, examples or pictures to keep your audience interested.','Make each part of your message clear. Ask someone to check that they understand it.','Check your words and grammar, and correct mistakes.'];
+ var progress=['You changed words in class sentences to share your own ideas.','You used simple sentences. Next, link them with and, but or because.','You kept your audience interested during several parts of your work.','Most of your message was easy to understand.','You used words and grammar with a few mistakes. Check those mistakes next.'];
+ var praise=['You made new sentences and added your own details.','You linked simple sentences with words like and, but and because.','You kept your audience interested from start to finish with details, examples or pictures.','Your whole message was easy to understand.','You used words and grammar correctly throughout your work.'];
+ var areaIndex={'Sharing Ideas':0,'Words and Sentences':1,'Impact':2,'Easy to Understand':3,'English':4};
  var matches=(group.rubric||[]).map(function(item,ai){var values=group.stats.perArea[ai];if(!values?.length)return null;var average=values.reduce(function(a,b){return a+b;},0)/values.length,level=Math.max(0,Math.min(item.levels.length-1,Math.round(average))),sourcePoints=item.support?1+2*average:average+1,sourceMax=item.support?3:item.levels.length,points=Math.max(1,Math.min(4,Math.round(sourcePoints/sourceMax*4)));return {item:item,ai:ai,level:level,points:points,average:sourcePoints/sourceMax};}).filter(Boolean).sort(function(a,b){return a.average-b.average||a.ai-b.ai;});
  matches.forEach(function(match){var item=match.item,ai=match.ai,level=match.level,points=match.points,key=areaIndex[item.area];
  var copy=LearnPathRubrics.sentence(item,level);
- if(ownProject)copy=key!==undefined?(successful?praise[key]:tips[key]):successful?'You successfully used language that suited your audience.':'Use words that suit your audience and situation.';
+ // Each criterion determines its own guidance, never the project's overall score.
+ // Even a positive result must not claim a higher skill than its matched descriptor.
+ if(ownProject&&key!==undefined)copy=match.average<0.65||points<=2?tips[key]:(points===4?praise[key]:progress[key]);
+ if(ownProject&&item.support&&key!==undefined&&match.average>=0.65&&points>2){var supportPraise=['You used your own sentences.','You used sentences to share your ideas.','You added interesting details and examples.','Your message was clear.','You used correct words and grammar.'];var supportProgress=['You are using more of your own sentences.','You are using sentences to share your ideas.','You are adding details and examples.','Your message is becoming clearer.','Your words and grammar are becoming more accurate.'];copy=points===4?supportPraise[key]:supportProgress[key];}
  html+='<p class="lp-average-match" data-criterion="'+ai+'" data-matched-level="'+level+'" data-tier="'+(points-1)+'"><strong>'+esc(item.area)+' <span class="lp-feedback-tier">Step '+points+'</span> '+LearnPathSupport.stars(points,4)+'</strong><span class="lp-average-ending">'+esc(copy)+'</span></p>';});
  return html+'</div>';
 }
 function buildCommentSummary(post,comments){
  if(!comments.length)return '';
  var teacher=comments.filter(function(c){return c.isTeacher===true;}),peers=comments.filter(function(c){return c.isTeacher!==true;});
- var groups=feedbackGroups(teacher,'Teacher','fb-t-'+post.id).concat(feedbackGroups(peers,'Classmates’ average','fb-p-'+post.id)),allId='fb-all-'+post.id;
+ var current=function(cm){return cm.peerRubricVersion===LearnPathRubrics.version||cm.peerRubricVersion===LearnPathSupport.rubricVersion;};
+ var earlier=comments.filter(function(cm){return !current(cm);});
+ var groups=feedbackGroups(teacher.filter(current),'Teacher','fb-t-'+post.id).concat(feedbackGroups(peers.filter(current),'Classmates’ average','fb-p-'+post.id)),allId='fb-all-'+post.id;
  var html='<section class="lp-feedback-summary"><h3>Feedback Summary</h3><div class="lp-feedback-scores">';
  groups.forEach(function(group){var stats=group.stats;html+='<div class="lp-feedback-score"><span>'+group.label+'</span>';
   if(stats.overall===null)html+='<strong>'+(stats.count?'Written feedback only':'Not yet')+'</strong>';
@@ -1434,9 +1438,13 @@ function buildCommentSummary(post,comments){
   html+='<button type="button" class="lp-score-details" aria-expanded="false" aria-controls="'+(stats.overall===null?allId:group.id)+'" '+(!stats.count?'disabled title="No feedback yet" ':'')+'onclick="toggleFeedbackDetails(this)">See details</button></div>';
  });html+='</div>';
  groups.forEach(function(group){if(group.stats.overall===null)return;
-  html+='<section id="'+group.id+'" class="lp-classmate-matches" hidden><h4>'+group.label+'</h4><p class="lp-average-caption">Lowest stars first · '+(post.uid===CU.uid?(group.stats.overall/group.stats.maxSteps>=0.65?'what you did well':'what to try next'):'average feedback')+(group.version===LearnPathRubrics.legacyVersion?' · earlier rubric, shown out of 4 stars':'')+'.</p>';
+  html+='<section id="'+group.id+'" class="lp-classmate-matches" hidden><h4>'+group.label+'</h4><p class="lp-average-caption">Lowest stars first · '+(post.uid===CU.uid?'your strengths and next steps':'average feedback')+'.</p>';
   html+=averageMatchesHTML(group,post.uid===CU.uid)+'</section>';
  });
+ if(earlier.length){
+  if(!groups.some(function(g){return g.stats.overall!==null;}))html+='<section class="lp-current-rubric-pending"><h4>Current rubric · 4 stars</h4><p>No ratings with the current rubric yet.</p><div class="lp-average-criteria">'+PEER_RUBRIC.map(function(item,ai){return '<p class="lp-average-match" data-criterion="'+ai+'"><strong>'+esc(item.area)+' '+LearnPathSupport.stars(0,4)+'</strong><span class="lp-average-ending">Not rated yet</span></p>';}).join('')+'</div></section>';
+  html+='<details class="lp-earlier-assessments"><summary>Earlier assessments ('+earlier.length+')</summary><p>These ratings used a different rubric. They are saved separately and are not included in the current rubric averages.</p></details>';
+ }
  teacher.forEach(function(cm){html+=personalGoalFeedback(cm);});
  html+='<button type="button" class="lp-feedback-details lp-written-feedback-toggle" onclick="toggleCat(\''+allId+'\')">See feedback ('+comments.length+')</button><div id="'+allId+'" style="display:none"><div class="lp-written-feedback-columns">';
  [['well','Good points'],['improve','To improve']].forEach(function(column){html+='<section><h4>'+column[1]+'</h4>';var written=comments.filter(function(cm){return !!cm[column[0]];});if(!written.length)html+='<p class="lp-feedback-empty">No comments yet.</p>';written.forEach(function(cm){html+='<p class="lp-written-feedback"><span>'+esc(cm[column[0]])+'</span><small>'+esc(cm.isTeacher?'Teacher · '+(cm.from||'Teacher'):cm.from||'Classmate')+'</small></p>';});html+='</section>';});
@@ -1495,8 +1503,8 @@ function buildPostHTML(post){
   if(isTeacherViewer&&!alreadyCommented){
     html+='<div id="tcform-'+post.id+'" style="display:none;padding:10px 13px;border-top:1px solid var(--gb)">';
     html+='<div id="tc-rub-'+post.id+'"></div>';
-    html+='<div class="fg"><label class="fl">Good points</label><textarea class="fta" id="tc-well-'+post.id+'" style="min-height:44px"></textarea></div>';
-    html+='<div class="fg"><label class="fl">To improve</label><textarea class="fta" id="tc-improve-'+post.id+'" style="min-height:44px"></textarea></div>';
+    html+='<div class="fg"><label class="fl">One thing they did well</label><textarea class="fta" placeholder="I …" id="tc-well-'+post.id+'" style="min-height:44px"></textarea></div>';
+    html+='<div class="fg"><label class="fl">Their next step</label><textarea class="fta" placeholder="Next time, they can …" id="tc-improve-'+post.id+'" style="min-height:44px"></textarea></div>';
     html+='<button class="btn btg" style="font-size:12px;padding:7px 13px" onclick="submitTeacherComment(\''+post.id+'\',\''+esc(post.uid)+'\')">Save Evaluation</button>';
     html+='</div>';
   } else if(!isTeacherViewer&&!alreadyCommented){
@@ -1513,6 +1521,7 @@ function buildPostHTML(post){
 
 function renderRubricReadonly(rubric,values){
   if(!rubric)return '<p>Rubric version unavailable. Your saved reflection is retained.</p>';
+  if(rubric!==SELF_RUBRIC&&rubric!==PEER_RUBRIC&&rubric!==LearnPathSupport.self&&rubric!==LearnPathSupport.peer)return '<p class="lp-earlier-rubric-note">This reflection used an earlier rubric. Your original answers are saved separately; the current rubric has five categories and four levels.</p>';
   var html='<div class="card" style="background:var(--gl);border:none">';
   rubric.forEach(function(item,ai){
     var li=values[ai];
@@ -1567,7 +1576,7 @@ function requireStudentRubric(key){
  toast('Choose one ending in each of the five categories.');return false;
 }
 window.pickRubricLevel=function(key,ai,li){var store=window._rubricStores[key];if(!store)return;if(!Number.isInteger(li)||!store.rubric[ai]||li<0||li>=store.rubric[ai].levels.length)return;store.error='';store.values[ai]=li;renderRubricBlock(store.containerId,store.rubric,store.values,key);var input=document.getElementById('rubric-'+key+'-'+ai+'-'+li);if(input)input.focus({preventScroll:true});};
-window.rubricGo=function(key,index){var store=window._rubricStores[key];if(!store)return;if(store.rubric[0]?.support&&index>store.index&&!Number.isInteger(store.values[store.index])){store.error='Choose one answer first.';renderRubricBlock(store.containerId,store.rubric,store.values,key);return;}store.index=index;store.review=false;renderRubricBlock(store.containerId,store.rubric,store.values,key);var heading=document.querySelector('#'+CSS.escape(store.containerId)+' .lp-rubric-heading');if(heading)heading.focus();};
+window.rubricGo=function(key,index){var store=window._rubricStores[key];if(!store)return;if((supportProfile===LearnPathSupport.profile||store.rubric[0]?.support)&&index>store.index&&!Number.isInteger(store.values[store.index])){store.error='Choose one answer first.';renderRubricBlock(store.containerId,store.rubric,store.values,key);return;}store.index=index;store.review=false;renderRubricBlock(store.containerId,store.rubric,store.values,key);var heading=document.querySelector('#'+CSS.escape(store.containerId)+' .lp-rubric-heading');if(heading)heading.focus();};
 window.rubricReview=function(key){var store=window._rubricStores[key];if(!store)return;store.review=true;renderRubricBlock(store.containerId,store.rubric,store.values,key);};
 
 function shareGoalSnapshot(c){var out={};['grade','goalVersion','topic','productType','category','weakness','weaknessTips','goals','goalsOtherText','planSteps','createdAt','submittedAt'].forEach(function(k){if(c[k]!==undefined)out[k]=c[k];});return JSON.parse(JSON.stringify(out));}
@@ -1603,7 +1612,7 @@ window.openNewPost=async function(){
   ['Your work','Self-reflection','Share'].forEach(function(label,i){html+='<button type="button" data-share-stage="'+i+'" onclick="setShareStage('+i+')"><span>'+(i+1)+'</span>'+label+'</button>';});html+='</nav>';
   html+='<div class="lp-share-layout"><section class="card lp-share-paper"><section data-share-panel="0"><h2>What are you sharing?</h2><div class="fg"><label class="fl" for="np-post-type">Project stage</label><select class="fi" id="np-post-type"><option value="draft">Draft project</option><option value="final">Final project</option></select></div><div class="fg"><label class="fl" for="np-title">Title of this piece of work</label><input class="fi" id="np-title" placeholder="Give your project a title"></div><div class="fg"><label class="fl" for="np-link">Link to your work</label><input class="fi" id="np-link" placeholder="Google Drive / YouTube / Canva…"></div><details class="lp-share-link-help"><summary>How to copy a link</summary><p>Google Drive → Share → Copy link · YouTube → Share · Canva → Share → Copy link</p></details><div class="fg"><label class="fl" for="np-file">Or attach a photo, video, PDF or audio file (up to 100 MB)</label><input type="file" class="fi" id="np-file" onchange="attachNewPostFile(this)"><div id="np-file-preview"></div></div></section>';
   html+='<section data-share-panel="1" hidden><h2>Self-reflection</h2><div id="np-rub-rows"></div></section><section data-share-panel="2" hidden><h2>One last look</h2><p id="np-work-summary"></p><div class="lp-share-written"><div class="fg"><label class="fl" for="np-well">One thing I did well *</label><textarea class="fta" id="np-well" placeholder="I …"></textarea></div><div class="fg"><label class="fl" for="np-improve">My next step *</label><textarea class="fta" id="np-improve" placeholder="Next time, I will …"></textarea></div></div></section>';
-  html+='<footer class="lp-share-actions"><button type="button" class="btn bts" id="np-back" onclick="shareBack()">Back</button><details class="lp-self-help"><summary>How to answer</summary><div class="lp-self-help-copy"><p>'+esc(supportProfile===LearnPathSupport.profile?'Look at your work. Choose the description that fits each question.':LearnPathRubrics.selfInstruction)+'</p><p lang="tr">'+esc(LearnPathRubrics.selfInstructionTR)+'</p></div></details><button type="button" class="btn btp" id="np-continue" onclick="shareNext()">Continue →</button><button type="button" class="btn btp" id="np-share-btn" onclick="submitPost()" hidden>Share my work</button></footer></section><aside id="lp-share-compass" class="lp-share-compass" aria-label="Compass project guide"></aside></div>';
+  html+='<footer class="lp-share-actions"><button type="button" class="btn bts" id="np-back" onclick="shareBack()">Back</button><details class="lp-self-help"><summary>How to answer</summary><div class="lp-self-help-copy"><p>'+esc(LearnPathRubrics.selfInstruction)+'</p><p lang="tr">'+esc(LearnPathRubrics.selfInstructionTR)+'</p></div></details><button type="button" class="btn btp" id="np-continue" onclick="shareNext()">Continue →</button><button type="button" class="btn btp" id="np-share-btn" onclick="submitPost()" hidden>Share my work</button></footer></section><aside id="lp-share-compass" class="lp-share-compass" aria-label="Compass project guide"></aside></div>';
   mc.innerHTML=html;window._rubricStores.newpost={values:new Array(SELF_RUBRIC.length).fill(null),rubric:activeRubric(true),containerId:'np-rub-rows',index:0};
   renderRubricBlock('np-rub-rows',activeRubric(true),window._rubricStores.newpost.values,'newpost');setShareStage(0);if(supportProfile===LearnPathSupport.profile)LearnPathSupport.written('np-well','np-improve',true);window.scrollTo({top:0,behavior:'auto'});
 };

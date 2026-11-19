@@ -33,11 +33,17 @@ new mascot frames, audio, emoji or map changes. Keep the original motion control
 ## Four-step student evaluation (2026-11-02)
 Update (2026-11-19): feedback details always show four star outlines. Average each
 criterion's valid received ratings before rounding to the nearest star. Historical
-three-point and supported binary ratings keep their original stored scale and
-percentages; normalize only their displayed stars to four. Never reinterpret old
-categories as the newer instrument. Keep lowest-to-highest order and tier colors.
-On the learner's own project, each source's unrounded overall result determines
-the copy: below 65% shows action directions; 65% and above shows success statements.
+three-point six-category ratings remain stored as historical assessments,
+separate from the current results. Never map old categories or ratings onto the
+new instrument. If no current ratings exist, show the five current categories as
+not rated yet. Standard self, peer and teacher assessments use the exact supplied
+five-by-four instrument and its version. Supported accounts retain their approved
+two-choice instrument and version, alongside reading and instruction assistance.
+Supported results remain separate from standard results and remain current.
+Keep lowest-to-highest order and tier colors. On the learner's own project each
+criterion's unrounded mean determines the copy: below 65% shows action directions;
+65% and above acknowledges only the skill evidenced at the matched level. Never
+give success copy to a one/two-star criterion, nor a four-star claim to three stars.
 Other learners' projects retain their original matched rubric descriptions. Teacher
 and classmate groups remain separate; missing ratings never count as zero.
 Keep one category at a time. Show its sentence stem once above four readable radio
