@@ -126,8 +126,8 @@ const server=http.createServer((req,res)=>{
  assert.equal(checklist.version,2);
  await page.evaluate(()=>{__mockDB.posts.peerPost={uid:'peer',name:'Ece <A>',productType:'Blog',title:'Kind messages',well:'My ideas',selfRubric:[0,1,2,0,1,2],comments:{one:{from:'Ali',fromId:'ali',well:'Good title',improve:'Add reasons',peerRubric:[0,1,2,0,1,2]}}};go('feed');switchFeedTab('posts');});
  assert.equal(await page.locator('#post-peerPost .lp-reflection-label').innerText(),'Ece <A>’s self-reflection ▼');
- assert.match(await page.locator('#fb-p-peerPost').textContent(),/simple information|explains|information/);
- assert.deepEqual(await page.locator('#fb-p-peerPost .lp-feedback-tier').allTextContents(),['Step 1','Step 1','Step 3','Step 3','Step 4','Step 4']);
+ assert.match(await page.locator('#post-peerPost .lp-earlier-assessments').textContent(),/different rubric/);
+ assert.equal(await page.locator('#post-peerPost .lp-current-rubric-pending .lp-average-match').count(),5);
  await page.evaluate(()=>openComment('peerPost'));
  assert.equal(await page.locator('#cm-rub-peerPost fieldset').count(),1);
  assert.equal(await page.locator('#cm-well-peerPost').isVisible(),false);
