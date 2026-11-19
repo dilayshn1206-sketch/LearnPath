@@ -19,8 +19,8 @@ const server=http.createServer((req,res)=>{
   const ctx=await browser.newContext({viewport:{width:1024,height:768}}),errors=[],loaded=[];
   await ctx.route('**/*',r=>r.request().url().startsWith('http://127.0.0.1:')?r.continue():r.abort());
   await ctx.addInitScript(bootstrap);
-  const wardrobe=(fs.readFileSync(path.join(root,'assets/magical-wardrobe-layers.js'),'utf8')+'\n'+fs.readFileSync(path.join(root,'assets/magical-wardrobe.js'),'utf8').replace(/^import[^\r\n]+;\r?\n/gm,'')).replace(/^export /gm,'');
-  await ctx.addInitScript('(function(){'+wardrobe+';window.MagicalWardrobe={animals,items,isAnimal,fieldForSlot,coin,avatar,shop};})();');
+  const wardrobe=(fs.readFileSync(path.join(root,'assets/magical-wardrobe-layers.js'),'utf8')+'\n'+fs.readFileSync(path.join(root,'assets/magical-wardrobe-parts.js'),'utf8')+'\n'+fs.readFileSync(path.join(root,'assets/magical-wardrobe.js'),'utf8').replace(/^import[^\r\n]+;\r?\n/gm,'')).replace(/^export /gm,'');
+  await ctx.addInitScript('(function(){'+wardrobe+';window.MagicalWardrobe={animals,items,isAnimal,fieldForSlot,coin,avatar,preload,shop};})();');
   const page=await ctx.newPage();page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>loaded.push(r.url()));
   await page.goto('http://127.0.0.1:'+server.address().port+'/index.html');await page.locator('.lp-welcome').waitFor();
   await page.evaluate(g=>{if(g)supportProfile=LearnPathSupport.profile;return startQuiz();},guided);

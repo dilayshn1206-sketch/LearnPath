@@ -5,7 +5,7 @@ const {JSDOM} = require('jsdom');
 const root = path.resolve(__dirname,'..');
 const html = fs.readFileSync(path.join(root,'index.html'),'utf8');
 const app = html.match(/<script type="module">([\s\S]*?)<\/script>/)[1].replace(/^import[^\r\n]+;\r?\n/gm,'');
-const wardrobe = (fs.readFileSync(path.join(root,'assets/magical-wardrobe-layers.js'),'utf8')+'\n'+fs.readFileSync(path.join(root,'assets/magical-wardrobe.js'),'utf8').replace(/^import[^\r\n]+;\r?\n/gm,'')).replace(/^export /gm,'');
+const wardrobe = (fs.readFileSync(path.join(root,'assets/magical-wardrobe-layers.js'),'utf8')+'\n'+fs.readFileSync(path.join(root,'assets/magical-wardrobe-parts.js'),'utf8')+'\n'+fs.readFileSync(path.join(root,'assets/magical-wardrobe.js'),'utf8').replace(/^import[^\r\n]+;\r?\n/gm,'')).replace(/^export /gm,'');
 const dom = new JSDOM(html.replace(/<script[\s\S]*?<\/script>/g,''),{runScripts:'dangerously',url:'https://example.test/LearnPath/'});
 const w = dom.window;
 const data = {users:{student:{role:'student',name:'Ada',avatarAnimal:'magic-hedgehog'}},ownedAccessories:{student:{}},coins:{student:28}};
@@ -36,7 +36,7 @@ Object.assign(w,{
     return data.coins.student;
   }
 });
-w.eval('(function(){'+wardrobe+';window.MagicalWardrobe={animals,items,isAnimal,fieldForSlot,coin,avatar,shop};})();');
+w.eval('(function(){'+wardrobe+';window.MagicalWardrobe={animals,items,isAnimal,fieldForSlot,coin,avatar,preload,shop};})();');
 w.eval(fs.readFileSync(path.join(root,'assets/learnpath-ui.js'),'utf8'));
 w.eval(fs.readFileSync(path.join(root,'assets/learning-support.js'),'utf8'));
 w.eval(fs.readFileSync(path.join(root,'assets/rubric-v2.js'),'utf8'));
@@ -73,18 +73,38 @@ w.__magicTest.start();
   assert.equal(data.coins.student,8);
   assert.ok(w.document.querySelector('#uav .mw-avatar'));
   assert.equal(w.MagicalWardrobe.items.length,15);
+  assert.equal(w.document.querySelectorAll('.mw-tabs button').length,5);
+  assert.doesNotMatch(w.document.querySelector('.mw-tabs').textContent,/Classic collection/);
+  const realPreload=w.MagicalWardrobe.preload,loads=[];
+  w.MagicalWardrobe.preload=()=>new Promise(resolve=>loads.push(resolve));
+  const capeTry=w.magicTryItem('magic-cape'),headTry=w.magicTryItem('magic-tiny-orbit');
+  loads[1]();await headTry;loads[0]();await capeTry;
+  assert.equal(w.document.querySelector('.mw-dressing .mw-body').dataset.outfit,'magic-cape');
+  assert.equal(w.document.querySelectorAll('.mw-dressing .mw-headwear').length,1);
+  w.magicClearPreview();
+  const canceledTry=w.magicTryItem('magic-cape');w.magicClearPreview();loads[2]();await canceledTry;
+  assert.equal(w.document.querySelector('.mw-dressing .mw-body').dataset.outfit,'');
+  w.MagicalWardrobe.preload=realPreload;
+  const purchasesBeforeTry=calls.length;
+  await Promise.all(w.MagicalWardrobe.items.map(item=>w.magicTryItem(item.id)));
+  assert.equal(w.document.querySelector('.mw-dressing .mw-body').dataset.outfit,'magic-raincoat');
+  assert.equal(w.document.querySelectorAll('.mw-dressing .mw-prop').length,1);
+  assert.equal(w.document.querySelectorAll('.mw-dressing .mw-headwear').length,1);
+  assert.equal(calls.length,purchasesBeforeTry);
+  w.magicClearPreview();
   // Across every outfit/head/held combination, only one anatomy is rendered.
   for(const animal of w.MagicalWardrobe.animals) {
-    for(const outfit of w.MagicalWardrobe.items.filter(x=>x.slot==='outfit')) {
-      for(const head of w.MagicalWardrobe.items.filter(x=>x.slot==='head')) {
-        for(const held of w.MagicalWardrobe.items.filter(x=>x.slot==='item')) {
+    for(const outfit of [null,...w.MagicalWardrobe.items.filter(x=>x.slot==='outfit')]) {
+      for(const head of [null,...w.MagicalWardrobe.items.filter(x=>x.slot==='head')]) {
+        for(const held of [null,...w.MagicalWardrobe.items.filter(x=>x.slot==='item')]) {
           const sample=w.document.createElement('div');
-          sample.innerHTML=w.MagicalWardrobe.avatar({avatarAnimal:animal.id,avatarOutfit:outfit.id,avatarHead:head.id,avatarItem:held.id});
+          sample.innerHTML=w.MagicalWardrobe.avatar({avatarAnimal:animal.id,avatarOutfit:outfit?.id,avatarHead:head?.id,avatarItem:held?.id});
           assert.equal(sample.querySelectorAll('.mw-body').length,1);
-          assert.equal(sample.querySelectorAll('.mw-outfit').length,1);
-          assert.equal(sample.querySelectorAll('.mw-headwear').length,1);
-          assert.ok(sample.querySelector('.mw-headwear').style.backgroundImage.includes('magic-layers-'));
-          assert.equal(sample.querySelector('.mw-body').style.backgroundPosition,sample.querySelector('.mw-foreground').style.backgroundPosition);
+          assert.equal(sample.querySelector('.mw-body').dataset.outfit,outfit?.id||'');
+          assert.equal(sample.querySelectorAll('.mw-prop').length,held?1:0);
+          assert.equal(sample.querySelectorAll('.mw-headwear').length,head?1:0);
+          if(head)assert.ok(sample.querySelector('.mw-headwear').style.backgroundImage.includes('magic-heads-'));
+          assert.equal(sample.querySelectorAll('.mw-foreground').length,0);
         }
       }
     }

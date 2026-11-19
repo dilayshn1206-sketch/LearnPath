@@ -17,8 +17,9 @@ const server=http.createServer((req,res)=>{
  const browser=await chromium.launch({executablePath:process.env.CHROME_BIN,headless:true,args:['--disable-gpu']});
  const ctx=await browser.newContext({viewport:{width:1024,height:768}});
  await ctx.route('**/*',r=>r.request().url().startsWith('http://127.0.0.1:')?r.continue():r.abort());
- await ctx.addInitScript({content:'('+bootstrap.toString()+')();window.__mockDB.ideaCatalog='+JSON.stringify({"written":{"blog":{"name":"Blog","active":true},"story":{"name":"Story / diary","active":true},"written_interview":{"name":"Written interview","active":true}},"spoken":{"podcast":{"name":"Podcast / audio","active":true},"talk":{"name":"Short talk","active":true},"roleplay":{"name":"Role-play","active":true}},"visual":{"poster":{"name":"Poster","active":true},"comic":{"name":"Comic","active":true},"infographic":{"name":"Infographic","active":true}}})+';'});await ctx.addInitScript("(function(){"+(fs.readFileSync(path.join(root,'assets/magical-wardrobe-layers.js'),'utf8')+'\n'+fs.readFileSync(path.join(root,'assets/magical-wardrobe.js'),'utf8').replace(/^import[^\r\n]+;\r?\n/gm,'')).replace(/^export /gm,'')+";window.MagicalWardrobe={animals,items,isAnimal,fieldForSlot,coin,avatar,shop};})();");const page=await ctx.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await ctx.addInitScript({content:'('+bootstrap.toString()+')();window.__mockDB.ideaCatalog='+JSON.stringify({"written":{"blog":{"name":"Blog","active":true},"story":{"name":"Story / diary","active":true},"written_interview":{"name":"Written interview","active":true}},"spoken":{"podcast":{"name":"Podcast / audio","active":true},"talk":{"name":"Short talk","active":true},"roleplay":{"name":"Role-play","active":true}},"visual":{"poster":{"name":"Poster","active":true},"comic":{"name":"Comic","active":true},"infographic":{"name":"Infographic","active":true}}})+';'});await ctx.addInitScript("(function(){"+(fs.readFileSync(path.join(root,'assets/magical-wardrobe-layers.js'),'utf8')+'\n'+fs.readFileSync(path.join(root,'assets/magical-wardrobe-parts.js'),'utf8')+'\n'+fs.readFileSync(path.join(root,'assets/magical-wardrobe.js'),'utf8').replace(/^import[^\r\n]+;\r?\n/gm,'')).replace(/^export /gm,'')+";window.MagicalWardrobe={animals,items,isAnimal,fieldForSlot,coin,avatar,preload,shop};})();");const page=await ctx.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
  try{
+ await page.addInitScript(()=>window.addEventListener('message',event=>{if(event.data?.learnpathNavigation&&event.data.snapshot)window.__plannerCheckpoint=event.data.snapshot.state;}));
  await page.goto('http://127.0.0.1:'+server.address().port+'/index.html');
  await page.locator('.step-card').first().waitFor();
  await page.evaluate(()=>startQuiz());
@@ -29,11 +30,15 @@ const server=http.createServer((req,res)=>{
  assert.equal(await f.locator('.choice .topic-hints').count(),6);
  await f.locator('[data-choice="own"]').click();await f.locator('#topic-own').fill('Screen Time');await f.locator('#next').click();
  assert.match(await f.locator('.context').innerText(),/Screen Time/);
+ assert.ok((await f.locator('.product-example-link').all()).length>0);
+ for(const help of await f.locator('.product-example-link').all())assert.match(new URL(await help.getAttribute('href')).searchParams.get('q'),/Screen Time/);
  await f.locator('#back').click();
  await f.locator('[data-choice="privacy"]').click();await f.locator('#next').click();
+ await page.waitForFunction(()=>window.__plannerCheckpoint?.step===1&&window.__plannerCheckpoint.topic==='privacy');
  await page.goBack();await f.locator('[data-choice="privacy"]').waitFor();
  assert.equal(await f.locator('[data-choice="privacy"]').getAttribute('aria-pressed'),'true');
  await page.goForward();await f.locator('[data-product]').first().waitFor();
+ for(const help of await f.locator('.product-example-link').all())assert.match(new URL(await help.getAttribute('href')).searchParams.get('q'),/Sharing safely online/);
  assert.equal(await f.locator('#chat-input,.chat-log').count(),0);
  assert.ok(await f.locator('[data-product]').count()>=9);assert.equal(await f.locator('[data-product="howto"],[data-product="interview"],[data-product="slides"]').count(),0);assert.equal(await f.locator('.product-option small').count(),0);
  await f.locator('[data-product="podcast"]').click();await f.locator('#next').click();
