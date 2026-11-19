@@ -30,8 +30,6 @@ render=function(){
  }
  if(passport?.active&&passport.step===2&&!passport.returnToOverview)$('#passport-next')?.classList.add('send-teacher');
  if(!passport?.active&&state.step===4&&$('#next')&&!host?.contract?.productType)$('#next').textContent='Save my project idea';
- document.querySelectorAll('.demo-label').forEach(el=>el.textContent='Guided help · prepared replies');
- document.querySelectorAll('.chat-footnote').forEach(el=>el.textContent='Ask a follow-up or tell me what you want to change.');
  document.querySelectorAll('.contract-guide .hint').forEach(el=>el.textContent='Your teacher will review your Learning Passport.');
  document.querySelectorAll('.reminder-explainer').forEach(el=>el.textContent='Use the My Learning Passport tab on LearnPath to return to your plan.');
  if(passport?.view==='overview'){

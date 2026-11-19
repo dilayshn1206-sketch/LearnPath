@@ -293,3 +293,8 @@ body[data-compass-hidden="true"] .lp-compass-dancer .lp-clock{animation-play-sta
 #motion::before {content:'Ⅱ';font-size:18px;}
 #motion[aria-pressed=true]::before {content:'▶';font-size:15px;}
 #motion {display:none!important;}
+
+/* Shared non-interactive help replaces the removed conversations. */
+.project-help{align-self:start;position:static;display:block;padding:20px;min-width:0}
+.project-help h2{font-size:20px;margin:0 0 10px}
+.project-help p{font-size:19px;line-height:1.5;margin:0;color:var(--pd)}
