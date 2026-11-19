@@ -31,6 +31,15 @@ wrapper transform around the approved sprite and stops for reading/typing; no
 new mascot frames, audio, emoji or map changes. Keep the original motion control.
 
 ## Four-step student evaluation (2026-11-02)
+Update (2026-11-19): feedback details always show four star outlines. Average each
+criterion's valid received ratings before rounding to the nearest star. Historical
+three-point and supported binary ratings keep their original stored scale and
+percentages; normalize only their displayed stars to four. Never reinterpret old
+categories as the newer instrument. Keep lowest-to-highest order and tier colors.
+On the learner's own project, each source's unrounded overall result determines
+the copy: below 65% shows action directions; 65% and above shows success statements.
+Other learners' projects retain their original matched rubric descriptions. Teacher
+and classmate groups remain separate; missing ratings never count as zero.
 Keep one category at a time. Show its sentence stem once above four readable radio
 rows, each with Step and performance name. At the self-reflection stage, remove
 the duplicate Share header and put bilingual instructions with Compass to leave

@@ -1397,7 +1397,7 @@ function rubricOverallScore(vals,maxSteps){
  return filled.length?filled.reduce(function(a,b){return a+b+1;},0)/filled.length:null;
 }
 function scoreTierLabel(score,maxSteps){return 'Step '+Math.max(1,Math.min(maxSteps||3,Math.round(score)));}
-function scorePercent(score,maxSteps){return Math.round(score/(maxSteps||3)*100);}
+function scorePercent(score,maxSteps){return Math.round((score/(maxSteps||3)+Number.EPSILON)*100);}
 function groupStats(comments,rubric){
  var perArea={},allVals=[],maxSteps=rubric?rubric[0].levels.length:0;
  comments.forEach(function(cm){if(!rubric||!Array.isArray(cm.peerRubric))return;cm.peerRubric.slice(0,rubric.length).forEach(function(v,ai){if(Number.isInteger(v)&&v>=0&&v<maxSteps){allVals.push(v);(perArea[ai]||(perArea[ai]=[])).push(v);}});});
@@ -1408,13 +1408,18 @@ function feedbackGroups(comments,label,prefix){
  if(!comments.length)versions[LearnPathRubrics.version]=[];
  return Object.keys(versions).map(function(version,i){var rubric=recordRubric({peerRubricVersion:version},false);return {label:label,id:prefix+(i?'-'+i:''),rubric:rubric,version:version,stats:groupStats(versions[version],rubric)};});
 }
-function averageMatchesHTML(group){
+function averageMatchesHTML(group,ownProject){
  var html='<div class="lp-average-criteria">';
- var tips=['Create original sentences to talk about the topic.','Use linking words like and, but, because, first and next.','Add details, examples or a surprise element to make it more interesting.','Make your message clear. One part = one main idea.','Check your words and grammar.'];
- var matches=(group.rubric||[]).map(function(item,ai){var values=group.stats.perArea[ai];if(!values?.length)return null;var average=values.reduce(function(a,b){return a+b;},0)/values.length,level=Math.max(0,Math.min(item.levels.length-1,Math.round(average)));return {item:item,ai:ai,level:level,points:item.support?(level?3:1):level+1};}).filter(Boolean).sort(function(a,b){return a.points-b.points||a.ai-b.ai;});
- matches.forEach(function(match){var item=match.item,ai=match.ai,level=match.level,points=match.points,max=item.support?3:item.levels.length,modern=group.version===LearnPathRubrics.version||group.version===LearnPathSupport.rubricVersion;
- var copy=modern?tips[ai]:LearnPathRubrics.sentence(item,level),lead=modern?(points===max?'Keep it up!':item.support?'Try this next:':'To reach 4 stars:'):'';
- html+='<p class="lp-average-match" data-criterion="'+ai+'" data-matched-level="'+level+'" data-tier="'+(item.support?level?3:0:level)+'"><strong>'+esc(item.area)+(item.support?'':' <span class="lp-feedback-tier">Step '+(level+1)+'</span>')+' '+LearnPathSupport.stars(points,max)+'</strong><span class="lp-average-ending">'+(lead?'<b>'+esc(lead)+'</b> ':'')+esc(copy)+'</span></p>';});
+ var tips=['Make new sentences with the words we learned, and add your own details.','Use words to connect your sentences and paragraphs.','Give examples, details and pictures. Make it interesting.','Make your message easy to understand.','Check your grammar, words and punctuation.'];
+ var praise=['You successfully used the language we learned to talk about your own ideas.','You successfully used words to connect your paragraphs and sentences.','You successfully added examples, details and pictures to make it interesting.','Your message was easy to understand.','You successfully used correct words, grammar and punctuation.'];
+ // Compare the unrounded source average. Exactly 65% belongs to the success band.
+ var successful=group.stats.overall!==null&&group.stats.overall/group.stats.maxSteps>=0.65;
+ var areaIndex={'Sharing Ideas':0,'Words and Sentences':1,'Impact':2,'Easy to Understand':3,'English':4,'Ideas':0,'Order':1,'Clear English':3,'Words':4,'When he/she gets stuck':2};
+ var matches=(group.rubric||[]).map(function(item,ai){var values=group.stats.perArea[ai];if(!values?.length)return null;var average=values.reduce(function(a,b){return a+b;},0)/values.length,level=Math.max(0,Math.min(item.levels.length-1,Math.round(average))),sourcePoints=item.support?1+2*average:average+1,sourceMax=item.support?3:item.levels.length,points=Math.max(1,Math.min(4,Math.round(sourcePoints/sourceMax*4)));return {item:item,ai:ai,level:level,points:points,average:sourcePoints/sourceMax};}).filter(Boolean).sort(function(a,b){return a.average-b.average||a.ai-b.ai;});
+ matches.forEach(function(match){var item=match.item,ai=match.ai,level=match.level,points=match.points,key=areaIndex[item.area];
+ var copy=LearnPathRubrics.sentence(item,level);
+ if(ownProject)copy=key!==undefined?(successful?praise[key]:tips[key]):successful?'You successfully used language that suited your audience.':'Use words that suit your audience and situation.';
+ html+='<p class="lp-average-match" data-criterion="'+ai+'" data-matched-level="'+level+'" data-tier="'+(points-1)+'"><strong>'+esc(item.area)+' <span class="lp-feedback-tier">Step '+points+'</span> '+LearnPathSupport.stars(points,4)+'</strong><span class="lp-average-ending">'+esc(copy)+'</span></p>';});
  return html+'</div>';
 }
 function buildCommentSummary(post,comments){
@@ -1424,13 +1429,13 @@ function buildCommentSummary(post,comments){
  var html='<section class="lp-feedback-summary"><h3>Feedback Summary</h3><div class="lp-feedback-scores">';
  groups.forEach(function(group){var stats=group.stats;html+='<div class="lp-feedback-score"><span>'+group.label+'</span>';
   if(stats.overall===null)html+='<strong>'+(stats.count?'Written feedback only':'Not yet')+'</strong>';
-  else html+='<strong>'+scorePercent(stats.overall,stats.maxSteps)+'%</strong><span>'+(group.version===LearnPathSupport.rubricVersion?LearnPathSupport.stars(stats.overall>=2?3:1):scoreTierLabel(stats.overall,stats.maxSteps))+'</span>';
+  else html+='<strong>'+scorePercent(stats.overall,stats.maxSteps)+'%</strong><span>'+LearnPathSupport.stars(Math.max(1,Math.min(4,Math.round(stats.overall/stats.maxSteps*4))),4)+'</span>';
   if(stats.count)html+='<small class="lp-rubric-version-note">'+(group.version===LearnPathSupport.rubricVersion?'5 categories · supported reflection':group.version===LearnPathRubrics.version?'5 categories · 4 Steps':group.rubric?'Earlier rubric · 6 categories · 3 Steps':'Rubric version unavailable')+'</small>';
   html+='<button type="button" class="lp-score-details" aria-expanded="false" aria-controls="'+(stats.overall===null?allId:group.id)+'" '+(!stats.count?'disabled title="No feedback yet" ':'')+'onclick="toggleFeedbackDetails(this)">See details</button></div>';
  });html+='</div>';
  groups.forEach(function(group){if(group.stats.overall===null)return;
-  html+='<section id="'+group.id+'" class="lp-classmate-matches" hidden><h4>'+group.label+'</h4><p class="lp-average-caption">Lowest stars first · '+(group.version===LearnPathRubrics.version?'your next steps towards 4 stars':group.version===LearnPathSupport.rubricVersion?'your next steps':'earlier rubric · original descriptions')+'.</p>';
-  html+=averageMatchesHTML(group)+'</section>';
+  html+='<section id="'+group.id+'" class="lp-classmate-matches" hidden><h4>'+group.label+'</h4><p class="lp-average-caption">Lowest stars first · '+(post.uid===CU.uid?(group.stats.overall/group.stats.maxSteps>=0.65?'what you did well':'what to try next'):'average feedback')+(group.version===LearnPathRubrics.legacyVersion?' · earlier rubric, shown out of 4 stars':'')+'.</p>';
+  html+=averageMatchesHTML(group,post.uid===CU.uid)+'</section>';
  });
  teacher.forEach(function(cm){html+=personalGoalFeedback(cm);});
  html+='<button type="button" class="lp-feedback-details lp-written-feedback-toggle" onclick="toggleCat(\''+allId+'\')">See feedback ('+comments.length+')</button><div id="'+allId+'" style="display:none"><div class="lp-written-feedback-columns">';
