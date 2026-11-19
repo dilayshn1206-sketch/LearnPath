@@ -28,6 +28,7 @@ const server=http.createServer((req,res)=>{
   for(let step=0;step<5;step++){
    await f.locator('.project-help').waitFor();
    assert.equal(await f.locator('.project-help p').innerText(),'Ask your friends or ask Google.');
+   assert.equal(await f.locator('.project-help .lp-clock').isVisible(),true);
    assert.equal(await f.locator('#chat-input,#prepared-guide,.chat-guide,[data-ask-compass],.chat-log').count(),0);
    assert.equal(await f.locator('body').evaluate(el=>el.scrollWidth<=innerWidth+1),true);
    if(step===0){await f.locator('[data-choice="care"]').click();await page.screenshot({path:path.join(root,'verification/no-chat-'+(guided?'guided':'standard')+'.png'),fullPage:true});}
