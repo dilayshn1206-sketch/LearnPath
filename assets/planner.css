@@ -296,5 +296,6 @@ body[data-compass-hidden="true"] .lp-compass-dancer .lp-clock{animation-play-sta
 
 /* Shared non-interactive help replaces the removed conversations. */
 .project-help{align-self:start;position:static;display:block;padding:20px;min-width:0}
+.project-help .lp-clock{display:block;--frame-size:110px;margin:0 auto 14px}
 .project-help h2{font-size:20px;margin:0 0 10px}
 .project-help p{font-size:19px;line-height:1.5;margin:0;color:var(--pd)}
