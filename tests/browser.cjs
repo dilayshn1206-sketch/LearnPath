@@ -25,6 +25,7 @@ const server=http.createServer((req,res)=>{
   const context=await browser.newContext({viewport:{width:1280,height:800},deviceScaleFactor:1});
   await context.route('**/*',r=>r.request().url().startsWith('http://127.0.0.1:')?r.continue():r.abort());
   await context.addInitScript(bootstrap);
+  await context.addInitScript("(function(){"+fs.readFileSync(path.join(root,"assets/magical-wardrobe.js"),"utf8").replace(/^export /gm,"")+";window.MagicalWardrobe={animals,items,isAnimal,fieldForSlot,coin,avatar,shop};})();");
   const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));
   const out=path.join(root,'verification');fs.mkdirSync(out,{recursive:true});
   try{

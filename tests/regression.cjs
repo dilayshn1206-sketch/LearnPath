@@ -19,6 +19,7 @@ function fixture(contract=null){
   const assign=(p,v,merge=false)=>{let keys=p.split('/'),key=keys.pop(),o=data;for(const k of keys)o=o[k]??={};o[key]=merge?{...o[key],...structuredClone(v)}:structuredClone(v);writes.push(p);};
   const snap=(v,key)=>({exists:()=>v!==undefined&&v!==null,val:()=>v===undefined?null:structuredClone(v),key,forEach:fn=>Object.entries(v||{}).forEach(([k,d])=>fn(snap(d,k)))});
   Object.assign(w,{initializeApp:()=>({}),getAuth:()=>({}),getDatabase:()=>({}),getStorage:()=>({}),GoogleAuthProvider:class{},onAuthStateChanged:()=>{},signInWithPopup:async()=>{},signOut:async()=>{},ref:(_db,p)=>p,sref:(_db,p)=>p,get:async p=>snap(read(p)),set:async(p,v)=>assign(p,v),update:async(p,v)=>assign(p,v,true),push:async(p,v)=>{assign(p+'/mock-'+writes.length,v);return {key:'mock'};},remove:async p=>assign(p,null),onValue:()=>()=>{},uploadBytesResumable:()=>{},getDownloadURL:async()=>'',deleteObject:async()=>{},confirm:()=>false});
+  w.eval("(function(){"+fs.readFileSync(path.join(root,"assets/magical-wardrobe.js"),"utf8").replace(/^export /gm,"")+";window.MagicalWardrobe={animals,items,isAnimal,fieldForSlot,coin,avatar,shop};})();");
   w.eval(ui);
   w.eval(fs.readFileSync(path.join(root,'assets/learning-support.js'),'utf8'));
   w.eval(fs.readFileSync(path.join(root,'assets/rubric-v2.js'),'utf8'));
