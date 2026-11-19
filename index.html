@@ -312,7 +312,7 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
   <div class="modal-card" id="result-popup-card" style="text-align:center;padding:26px 20px"></div>
 </div>
 
-<script src="assets/learnpath-ui.js?v=20261108-8"></script>
+<script src="assets/learnpath-ui.js?v=20261119-progress-1"></script>
 <script src="assets/rubric-v2.js?v=20261108-8"></script><script src="assets/share-guide.js?v=20261108-8"></script><script src="assets/vendor/jszip-3.10.1.min.js"></script><script src="assets/project-previews.js?v=20261108-8"></script>
 <script src="assets/navigation.js?v=20261108-8"></script>
 <link rel="stylesheet" href="assets/learning-support.css?v=20261108-8"><script src="assets/learning-support.js?v=20261108-8"></script>
@@ -1728,6 +1728,7 @@ window.renderStep1Screen=async function(){
   var wcSnap=await get(ref(db,"wordChecks/"+CU.uid));
   var savedChecked=(wcSnap.exists()&&wcSnap.val().checked)||[];
   var wordRecord=wcSnap.exists()?wcSnap.val():{};
+  window._unitWordsSubmitted=!!wordRecord.submittedAt;
   var gaSnap=await get(ref(db,"grammarAnswers/"+CU.uid));
   var myGrammarAnswers=(gaSnap.exists()&&gaSnap.val().answers)||{};
   var grammarRecord=gaSnap.exists()?gaSnap.val():{};
@@ -1800,10 +1801,14 @@ window.renderStep1Screen=async function(){
     html+='</div>';
   }
 
-  mc.innerHTML=html;setNav("home");refreshGrammarSaveStatus();
+  mc.innerHTML=html;setNav("home");refreshGrammarSaveStatus();refreshUnitMilestone();
 };
 
 window._myWordChecks=null;
+function refreshUnitMilestone(){
+  var words=(window._unitWordList||[]).length>0,grammar=(window._unitGrammarQuestions||[]).length>0;
+  LearnPathUI.setMilestoneDone(0,(words||grammar)&&(!words||window._unitWordsSubmitted)&&(!grammar||window._unitGrammarSubmitted));
+}
 function unitWordRecord(){
   var words=window._unitWordList||[];
   return {checked:window._wordCheckState||[],words:words,selectedWords:words.filter(function(w,i){return !!window._wordCheckState[i];}),contentVersion:window._unitContentVersion,assessmentVersion:supportProfile===LearnPathSupport.profile?'guided-unit-10x3-v1':'standard',studentName:CU.displayName};
@@ -1818,11 +1823,11 @@ function wordsToLearnHTML(record){
 }
 window.toggleWordCheck=async function(idx){
   window._wordCheckState[idx]=!window._wordCheckState[idx];
-  try{await set(ref(db,"wordChecks/"+CU.uid),unitWordRecord());}
+  try{await set(ref(db,"wordChecks/"+CU.uid),unitWordRecord());window._unitWordsSubmitted=false;refreshUnitMilestone();}
   catch(e){window._wordCheckState[idx]=!window._wordCheckState[idx];var input=document.getElementById('wc-input-'+idx);if(input)input.checked=window._wordCheckState[idx];toast('Could not save your word choice. Please try again.');}
 };
 window.submitWordChecks=async function(){
-  try{var record=Object.assign(unitWordRecord(),{submittedAt:Date.now(),stage:'before-project'});record.wordsToLearn=record.words.filter(function(word,i){return !record.checked[i];});await update(ref(db,"wordChecks/"+CU.uid),record);var host=document.getElementById('words-to-learn');if(host)host.innerHTML=wordsToLearnHTML(record);toast("Word check submitted!");}
+  try{var record=Object.assign(unitWordRecord(),{submittedAt:Date.now(),stage:'before-project'});record.wordsToLearn=record.words.filter(function(word,i){return !record.checked[i];});await update(ref(db,"wordChecks/"+CU.uid),record);window._unitWordsSubmitted=true;refreshUnitMilestone();var host=document.getElementById('words-to-learn');if(host)host.innerHTML=wordsToLearnHTML(record);toast("Word check submitted!");}
   catch(e){toast('Could not submit your word check. Please try again.');}
 };
 function unitGrammarDraft(){
