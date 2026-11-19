@@ -299,3 +299,6 @@ body[data-compass-hidden="true"] .lp-compass-dancer .lp-clock{animation-play-sta
 .project-help .lp-clock{display:block;--frame-size:110px;margin:0 auto 14px}
 .project-help h2{font-size:20px;margin:0 0 10px}
 .project-help p{font-size:19px;line-height:1.5;margin:0;color:var(--pd)}
+
+/* Quiet topic inspiration below the selectable title. */
+.choice.compact-choice .topic-hints{display:block;font-size:12px;font-weight:400;line-height:1.5;color:var(--tm);margin-top:5px}
