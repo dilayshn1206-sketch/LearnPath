@@ -13,6 +13,7 @@ body[data-role=student] #uav{width:72px;height:72px;flex-shrink:0;border-radius:
 .mw-home-animal:focus-visible,.mw-tabs button:focus-visible{outline:3px solid #16787d;outline-offset:3px}
 .mw-home-copy{flex:1;min-width:0}
 .mw-shop{--mw-paper:#fffcf3;--mw-line:#d7e2dc;max-width:1400px;margin:auto}
+body:has(.mw-shop) #lp-map{display:none}
 .mw-shop-heading{display:flex;gap:20px;align-items:center;justify-content:space-between;margin-bottom:16px}
 .mw-shop-heading h1{font-family:var(--font-heading,inherit);font-size:34px;margin:0 0 6px;color:#142d4b}
 .mw-shop-heading p{font-size:18px;margin:0}
