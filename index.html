@@ -256,7 +256,7 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
 .rub-chevron{background:none;border:none;color:var(--th);cursor:pointer;font-size:12px;padding:4px 6px;flex-shrink:0}
 </style>
 <link rel="stylesheet" href="assets/learnpath.css?v=20261108-feedback-1">
-<link rel="stylesheet" href="assets/compass-scenes.css?v=20261108-8"><link rel="stylesheet" href="assets/magical-wardrobe.css?v=20261119-3">
+<link rel="stylesheet" href="assets/compass-scenes.css?v=20261108-8"><link rel="stylesheet" href="assets/magical-wardrobe.css?v=20261119-4">
 </head>
 <body>
 
@@ -320,7 +320,7 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
 <link rel="stylesheet" href="assets/guided-reading.css?v=20261108-8"><script src="assets/guided-reading.js?v=20261108-feedback-1"></script>
 <script src="assets/reflection-journey.js?v=20261108-feedback-1"></script>
 <script type="module">
-import * as MagicalWardrobe from "./assets/magical-wardrobe.js?v=20261119-3";
+import * as MagicalWardrobe from "./assets/magical-wardrobe.js?v=20261119-4";
 import {auth,db,storage,rpc,ref,set,get,push,onValue,update,remove,sref,uploadBytesResumable,getDownloadURL,deleteObject,onAuthStateChanged,signInWithPopup,signOut} from './assets/supabase-backend.js?v=20261108-8';
 const prov={};
 let CU=null,UP=null,supportProfile=null;
@@ -700,6 +700,8 @@ function charPreviewHTML(size){
   return '<div style="width:'+size+'px;height:'+size+'px;border-radius:50%;position:relative;overflow:hidden;background:#fff;border:4px solid #fff;box-shadow:0 4px 0 rgba(0,0,0,.12)">'+avatarLayersHTML(u)+'</div>';
 }
 window.openCoins=async function(){
+  window._currentScreen='coins';
+  var request=++magicPreviewRequest;magicPreview={};magicWantedPreview={};
   var mc=document.getElementById("mc");setNav("profile");
   mc.innerHTML='<div class="loading">Loading...</div>';
   await loadCoins();
@@ -713,6 +715,8 @@ window.openCoins=async function(){
   CHAR.outfit=uv.avatarOutfit||"";
   CHAR.item=uv.avatarItem||"";
   CHAR.owned=osnap.exists()?osnap.val():{};
+  try{await MagicalWardrobe.preload({...magicUser(),avatarAnimal:MagicalWardrobe.isAnimal(CHAR.animal)?CHAR.animal:MagicalWardrobe.animals[0].id});}catch(error){}
+  if(request!==magicPreviewRequest||window._currentScreen!=='coins')return;
   renderShop();
 };
 function renderClassicShop(){
@@ -799,35 +803,51 @@ window.equipAccessory=async function(slot,id,silent){
 
 let magicTab = 'animals';
 let magicPreview = {};
+let magicWantedPreview = {},magicPreviewRequest=0;
 let magicBusy = false;
 let magicMessage = '';
 function magicUser() {
   return {...UP,avatarAnimal:CHAR.animal,avatarHead:CHAR.head,avatarOutfit:CHAR.outfit,avatarItem:CHAR.item};
 }
+function refreshMagicLayout(){
+  var shop=document.querySelector('.mw-shop');if(!shop)return;
+  var top=document.querySelector('.topbar'),bottom=document.getElementById('bnav');
+  shop.style.setProperty('--mw-top',((top?.getBoundingClientRect().height||94)+12)+'px');
+  shop.style.setProperty('--mw-bottom',((bottom?.getBoundingClientRect().height||72)+12)+'px');
+}
+if(typeof ResizeObserver==='function'){
+  var magicLayoutObserver=new ResizeObserver(refreshMagicLayout);
+  ['.topbar','#bnav'].forEach(function(selector){var bar=document.querySelector(selector);if(bar)magicLayoutObserver.observe(bar);});
+}
 function renderShop() {
   window._currentScreen='coins';
   document.body.dataset.sharing='false';
-  if(magicTab==='classic') {
-    renderClassicShop();
-    document.getElementById('mc').insertAdjacentHTML('afterbegin','<button type="button" class="btn bts mb8" onclick="magicShopTab(\'animals\')">Back to magical animals</button>');
-    return;
-  }
   document.getElementById('mc').innerHTML=MagicalWardrobe.shop({user:magicUser(),preview:magicPreview,owned:CHAR.owned,coins:userCoins,tab:magicTab,busy:magicBusy,message:magicMessage});
+  refreshMagicLayout();
 }
 window.magicShopTab=function(tab) {
-  if(!['animals','outfit','head','item','earn','classic'].includes(tab))return;
+  if(!['animals','outfit','head','item','earn'].includes(tab))return;
   magicTab=tab;renderShop();
 };
-window.magicClearPreview=function(){magicPreview={};renderShop();};
-window.magicTryAnimal=function(id) {
+window.magicClearPreview=function(){magicPreviewRequest++;magicPreview={};magicWantedPreview={};renderShop();};
+async function magicPreviewLook(patch,message){
+  var request=++magicPreviewRequest;
+  magicWantedPreview={...magicWantedPreview,...patch};
+  var wanted={...magicWantedPreview};
+  try{
+    await MagicalWardrobe.preload({...magicUser(),...wanted});
+    if(request!==magicPreviewRequest||magicBusy||window._currentScreen!=='coins')return;
+    magicPreview=wanted;magicMessage=message;renderShop();
+  }catch(error){if(request===magicPreviewRequest){magicMessage='Could not load this look. Try again.';toast(magicMessage);}}
+}
+window.magicTryAnimal=async function(id) {
   if(magicBusy || !MagicalWardrobe.isAnimal(id))return;
-  magicPreview.avatarAnimal=id;magicMessage='Trying on a character. Choose it to save.';renderShop();
+  await magicPreviewLook({avatarAnimal:id},'Trying on a character. Choose it to save.');
 };
-window.magicTryItem=function(id) {
+window.magicTryItem=async function(id) {
   var item=MagicalWardrobe.items.find(function(entry){return entry.id===id;});
   if(magicBusy || !item)return;
-  magicPreview[MagicalWardrobe.fieldForSlot(item.slot)]=id;
-  magicMessage='Trying '+item.name+'. Buy or wear it to save.';renderShop();
+  await magicPreviewLook({[MagicalWardrobe.fieldForSlot(item.slot)]:id},'Trying '+item.name+'. Buy or wear it to save.');
 };
 function refreshMagicAvatar() {
   setTopbarAvatar(magicUser());
@@ -835,8 +855,9 @@ function refreshMagicAvatar() {
 }
 async function magicSave(action) {
   if(magicBusy || !CU)return;
+  magicPreviewRequest++;magicWantedPreview={...magicPreview};
   magicBusy=true;magicMessage='Saving your look…';renderShop();
-  try {await action();magicPreview={};magicMessage='Your look is saved.';}
+  try {await action();magicPreview={};magicWantedPreview={};magicMessage='Your look is saved.';}
   catch(error){magicMessage=error.message||'Could not save. Please try again.';toast(magicMessage);}
   finally {magicBusy=false;refreshMagicAvatar();renderShop();}
 }
@@ -844,6 +865,7 @@ window.magicChooseAnimal=async function(id) {
   var animal=MagicalWardrobe.animals.find(function(entry){return entry.id===id;});
   if(!animal)return;
   await magicSave(async function(){
+    await MagicalWardrobe.preload({...magicUser(),avatarAnimal:id});
     if(animal.cost && !CHAR.owned[id]) {
       userCoins=await rpc('lp_purchase',{p_item:id});
       CHAR.owned[id]=true;
@@ -856,13 +878,14 @@ window.magicWearItem=async function(id) {
   var item=MagicalWardrobe.items.find(function(entry){return entry.id===id;});
   if(!item)return;
   await magicSave(async function(){
+    var field=MagicalWardrobe.fieldForSlot(item.slot);
+    var current=magicUser()[field];
+    var next=current===id?null:id;
+    await MagicalWardrobe.preload({...magicUser(),[field]:next});
     if(!CHAR.owned[id]) {
       userCoins=await rpc('lp_purchase',{p_item:id});
       CHAR.owned[id]=true;
     }
-    var field=MagicalWardrobe.fieldForSlot(item.slot);
-    var current=magicUser()[field];
-    var next=current===id?null:id;
     var patch={[field]:next};
     await update(ref(db,'users/'+CU.uid),patch);
     CHAR[item.slot==='head'?'head':item.slot]=next||'';
@@ -3695,7 +3718,7 @@ async function mountPlanner(mode,c,overview){
     ['written','spoken','visual'].forEach(function(cat){extra[cat]=(catalog[cat]||[]).filter(function(item){var original=DEFAULT_CATALOG[cat].find(function(pair){return pair[0]===item.id;});return item.active&&(!original||original[1]!==item.name);});});
   }
   var mc=document.getElementById('mc');
-  mc.innerHTML=(isLockedStep(mode==='idea'?'step2':'step3')?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">← Back to Home</button>')+'<iframe id="lp-planner-frame" title="'+(mode==='idea'?'Plan your project':LearnPathUI.hasPassport(c)?'My Learning Passport':'Set goals and plan')+'" src="assets/planner.html?v=20261119-topic-hints-1" style="width:100%;height:900px;border:0;display:block" scrolling="no"></iframe>';
+  mc.innerHTML=(isLockedStep(mode==='idea'?'step2':'step3')?lockBarHTML():'<button class="btn bts mb8" onclick="go(\'home\')">← Back to Home</button>')+'<iframe id="lp-planner-frame" title="'+(mode==='idea'?'Plan your project':LearnPathUI.hasPassport(c)?'My Learning Passport':'Set goals and plan')+'" src="assets/planner.html?v=20261119-context-1" style="width:100%;height:900px;border:0;display:block" scrolling="no"></iframe>';
   var revisionRequested=revisionSteps(c).includes(mode==='idea'?2:3);
   window._plannerContext={mode:mode,contract:c,overview:!revisionRequested&&!!overview&&LearnPathUI.hasPassport(c),revisionRequested:revisionRequested,passportReady:LearnPathUI.hasPassport(c),readOnly:false,supportProfile:supportedPlan(c)?supportProfile:null,extraProducts:extra,resume:LearnPathNavigation.resume(),catalogProducts:mode==='idea'?catalog:null,identity:{name:c&&c.studentName||CU.displayName,photo:c&&c.studentId!==CU.uid?c.studentPhoto||'':UP.avatarUrl||CU.photoURL||c&&c.studentPhoto||''}};
   setNav('home');

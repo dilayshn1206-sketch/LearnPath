@@ -8,9 +8,11 @@ Full-body previews use teal task paper and an illustrated gold compass coin.
 The tablet topbar avatar is 72px and the welcome paper adds a larger left-side
 character. WebP assets retain alpha transparency. Classic collection owns the
 earlier character and accessory rendering.
-The shared avatar renders one anatomy pose. Held objects and gripping paws stay
-above clothing; headwear uses isolated transparent artwork. A padded stage keeps
-headwear inside the preview. See WARDROBE-LAYERS-20261119.md.
+The shared avatar renders one complete anatomy/costume frame. Limb-free props
+and isolated headwear layer above it. Grounded animals carry props with straps.
+Frames have transparent gutters; the preview stays below the measured topbar
+and above the bottom bar. Art is decoded before a requested look replaces the
+current preview. Classic collection navigation is removed. See WARDROBE-LAYERS-20261119.md.
 
 ## Compass-led choices (2026-11-02)
 Update (2026-11-19): remove all interactive chatbot surfaces and their loaded
@@ -20,6 +22,8 @@ Compass idle mascot remains visible above this help message. Keep selection,
 saved plans, teacher example links and non-chat task guidance unchanged.
 Topic cards show the owner's six topic-specific keyword lines below their
 titles in smaller, muted text (2026-11-19). Product cards remain title-only.
+Product question-mark searches combine product type with the selected topic;
+changing the topic rebuilds these URLs, including custom Google search links.
 Use compact topic/product label-and-icon cards; explain through short keyword
 bullets in the right-hand conversation. Keep the existing navy/teal paper style.
 The speech-bubble invitation is a real focus button. Breakdance is a bounded

@@ -1,8 +1,26 @@
-# Wardrobe layer correction — 2026-11-19
+# Wardrobe correction — 2026-11-19, revision 2
 
-A selected outfit, headwear and held item must compose one animal, not multiple full-body poses. The held-item pose owns anatomy whenever an item is equipped. Clothes and headwear use isolated transparent artwork; only the same held pose may be repainted in the foreground to preserve the gripping paws. Explicit body/outfit/foreground/headwear ordering and an 8% safe area are shared by the shop, saved avatar and home.
+Supersedes the earlier held-pose/clothes overlay. Each animal has one complete
+anatomy and costume bitmap. A held item never replaces that body or its clothes.
 
-Seven cutout atlases are indexed by magical-wardrobe-layers.js. Their ten crop rectangles refer to five clothes and five headwear cells, normalized to species-specific fitting boxes. Original generation files and prompts are retained locally in outputs/coin-magic-review/layer-fix.
+Seven body atlases contain the plain animal and five approved outfits. Seven head
+atlases contain only isolated headwear. Sprite normalization removes neighboring
+fragments and adds transparent gutters. The panda's displaced costume frames use
+the same head/body anchor.
 
-Verification: 875 outfit/headwear/item combinations retain exactly one anatomy layer and same-pose foreground. Browser checks cover persistence, buying/retrying, all seven rendered samples and 1024 × 768 horizontal overflow. The reported otter cape/Tiny Orbit/lantern case is inspected visually. No account data or coin pricing changes.
+The ten-piece prop atlas has no animal anatomy: five objects and their five strap
+variants. Grounded animals carry props by a strap rather than gaining another limb.
 
+Art decodes before a requested look replaces the current preview. The newest Try
+request retains the other requested slots; clearing cancels late image requests.
+The sticky preview fits between measured top and bottom bars. Classic collection
+navigation is removed. IDs, prices, balances and saved equipment are preserved.
+
+Verification: 1,512 distinct combinations plus seven head sweeps, 49 screenshots.
+No layer exceeded its avatar bounds and no script/image decode error occurred.
+All 15 products were rapidly added on all seven animals in a real local browser.
+Preview bounds pass at 1024×768, 1440×667 and 1024×600. Purchase, retry, cancellation,
+persistence and full planner workflow checks passed separately.
+
+Prompts, normalization scripts and contact sheets are kept locally in
+outputs/coin-magic-review/layer-fix/audit-v2. Prior source/art remain in Git history.
