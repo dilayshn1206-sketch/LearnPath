@@ -31,16 +31,7 @@ export const isAnimal = id => animals.some(animal=>animal.id===id);
 export const fieldForSlot = slot => fields[slot];
 export const coin = '<img class="mw-coin" src="assets/magic-coin.webp" alt="" aria-hidden="true">';
 
-import {layerAtlases} from './magical-wardrobe-layers.js?v=20261119-3';
-const bodyTemplates = {
- hedgehog:[[40,48,42,39],[30,48,59,50],[20,48,73,51],[34,48,53,49],[31,17,61,82]],
- rainotter:[[43,29,38,29],[40,29,51,49],[22,29,72,62],[43,29,45,48],[40,0,53,84]],
- moonrabbit:[[46,35,36,36],[25,35,57,53],[17,35,68,53],[37,35,47,53],[27,14,59,74]],
- sunpanda:[[40,36,42,37],[30,36,55,49],[12,36,80,54],[35,36,48,49],[31,10,58,75]],
- cloudowl:[[32,33,48,39],[26,34,63,51],[17,33,73,58],[32,34,57,51],[30,0,60,85]],
- auroradeer:[[52,32,38,39],[36,32,53,47],[17,32,76,58],[40,32,47,46],[39,12,53,66]],
- starlion:[[45,42,44,28],[34,41,56,44],[19,40,73,50],[42,42,49,42],[35,4,62,80]]
-};
+import {wardrobeParts} from './magical-wardrobe-parts.js?v=20261119-4';
 const headTemplates = {
  hedgehog:[[40,10,42,26],[36,8,48,38],[43,5,37,26],[41,3,40,30],[42,3,40,30]],
  rainotter:[[31,-5,40,22],[29,-5,44,31],[34,-8,34,23],[32,-8,40,23],[32,-8,40,23]],
@@ -50,50 +41,44 @@ const headTemplates = {
  auroradeer:[[46,7,40,25],[41,7,47,36],[49,5,34,25],[46,3,40,29],[46,3,40,29]],
  starlion:[[42,-5,43,27],[38,-4,51,40],[46,-7,36,28],[43,-7,43,31],[43,-7,43,31]]
 };
-function bodyFrame(id,row,column,foreground=false,mask='') {
- return '<span class="mw-layer '+(foreground?'mw-foreground':'mw-body')+'" style="background-image:url(assets/magic-fitted-'+id+'.webp);background-position:'+(column*25)+'% '+(row*50)+'%;clip-path:'+(mask||'inset(3% 1% 2% 1%)')+'"></span>';
-}
-function wearable(id,row,column) {
- const atlas=layerAtlases[id];
- const [left,top,width,height]=atlas.frames[row*5+column];
- const [x,y,w,h]=(row===0?bodyTemplates:headTemplates)[id][column];
- return '<span class="mw-piece mw-'+(row===0?'outfit':'headwear')+'" style="left:'+x+'%;top:'+y+'%;width:'+w+'%;height:'+h+'%;background-image:url(assets/magic-layers-'+id+'.webp);background-size:'+(100*atlas.width/width)+'% '+(100*atlas.height/height)+'%;background-position:'+(100*left/(atlas.width-width))+'% '+(100*top/(atlas.height-height))+'%"></span>';
-}
-const heldMasks = {
- hedgehog:['inset(48% 9% 2% 34% round 10%)','inset(50% 9% 10% 35% round 10%)','inset(43% 10% 0 35% round 10%)','inset(26% 0 0 33% round 10%)','inset(46% 7% 3% 34% round 10%)'],
- rainotter:[
- 'polygon(47% 29%,81% 29%,81% 42%,88% 44%,87% 61%,80% 66%,80% 71%,48% 71%,44% 62%,40% 56%,40% 43%,47% 41%)',
- 'polygon(48% 34%,77% 34%,77% 38%,85% 38%,90% 45%,90% 64%,81% 71%,46% 71%,40% 63%,40% 47%,48% 43%)',
- 'polygon(54% 31%,71% 31%,71% 43%,84% 45%,87% 58%,78% 65%,78% 92%,49% 92%,48% 65%,40% 59%,39% 48%,53% 43%)',
- 'polygon(47% 18%,98% 18%,98% 93%,42% 93%,42% 77%,30% 74%,30% 56%,47% 52%)',
- 'polygon(56% 29%,79% 29%,79% 39%,91% 43%,91% 62%,84% 71%,53% 71%,48% 63%,44% 57%,44% 43%,56% 41%)'
- ],
- moonrabbit:['inset(36% 9% 5% 36% round 8%)','inset(45% 6% 17% 39% round 8%)','inset(22% 7% 7% 47% round 8%)','inset(15% 0 0 38% round 8%)','inset(32% 5% 8% 40% round 8%)'],
- sunpanda:['inset(37% 4% 12% 40% round 8%)','inset(41% 3% 15% 37% round 8%)','inset(27% 1% 8% 43% round 8%)','inset(29% 0 0 32% round 8%)','inset(35% 1% 11% 40% round 8%)'],
- cloudowl:['inset(33% 7% 6% 34% round 8%)','inset(39% 3% 13% 30% round 8%)','inset(23% 1% 0 40% round 8%)','inset(20% 0 0 28% round 8%)','inset(28% 0 6% 38% round 8%)'],
- auroradeer:['inset(27% 0 0 48% round 8%)','inset(33% 0 0 42% round 8%)','inset(18% 0 0 48% round 8%)','inset(13% 0 0 44% round 8%)','inset(28% 0 0 48% round 8%)'],
- starlion:['inset(35% 0 0 43% round 8%)','inset(41% 0 0 41% round 8%)','inset(29% 0 0 44% round 8%)','inset(23% 0 0 37% round 8%)','inset(33% 0 0 43% round 8%)']
+const propTargets = {
+ hedgehog:[[44,58,31,37],[43,65,35,29],[50,57,24,40],[44,48,38,49],[49,60,28,35]],
+ rainotter:[[44,42,33,37],[43,43,35,32],[37,47,27,47],[43,33,42,56],[48,42,30,36]],
+ moonrabbit:[[45,38,30,52],[43,38,34,52],[48,37,27,54],[44,36,37,55],[48,38,28,51]],
+ sunpanda:[[42,38,31,48],[40,38,35,49],[46,37,28,52],[41,35,40,55],[45,38,29,49]],
+ cloudowl:[[38,37,34,50],[35,37,38,51],[42,36,30,55],[36,34,44,58],[41,37,32,51]],
+ auroradeer:[[53,40,29,43],[51,40,32,44],[54,39,27,49],[51,38,36,51],[54,40,28,44]],
+ starlion:[[51,47,31,40],[47,47,35,41],[52,45,29,47],[48,44,39,49],[52,47,29,42]]
 };
+function piece(source,atlas,index,rect,classes,extra=''){
+ const [left,top,width,height]=atlas.frames[index],[x,y,w,h]=rect;
+ return '<span class="'+classes+'" '+extra+' style="left:'+x+'%;top:'+y+'%;width:'+w+'%;height:'+h+'%;background-image:url('+source+');background-size:'+(100*atlas.width/width)+'% '+(100*atlas.height/height)+'%;background-position:'+(100*left/(atlas.width-width))+'% '+(100*top/(atlas.height-height))+'%"></span>';
+}
 export function avatar(user) {
  if(!isAnimal(user?.avatarAnimal))return '';
  const id=user.avatarAnimal.slice(6);
- const columns=groups.map(slot=>items.filter(item=>item.slot===slot).findIndex(item=>item.id===user[fields[slot]]));
- const [outfit,head,held]=columns;
- let contents;
- if(held>=0){
-  contents=bodyFrame(id,2,held);
-  if(outfit>=0){
-   contents+=wearable(id,0,outfit);
-   contents+=bodyFrame(id,2,held,true,heldMasks[id][held]);
-  }
- }else if(outfit>=0){
-  contents=bodyFrame(id,0,outfit);
- }else{
-  contents='<img src="assets/magic-'+id+'.webp" alt="" class="mw-base mw-body" loading="lazy">';
- }
- if(head>=0)contents+=wearable(id,1,head);
+ const [outfit,head,held]=groups.map(slot=>items.filter(item=>item.slot===slot).findIndex(item=>item.id===user[fields[slot]]));
+ // The body owns its costume, face and every limb. Accessories never carry anatomy.
+ let contents=piece('assets/magic-bodies-'+id+'.webp',wardrobeParts.bodies[id],outfit+1,[0,0,100,100],'mw-layer mw-body','data-outfit="'+(outfit>=0?items.filter(i=>i.slot==='outfit')[outfit].id:'')+'"');
+ if(held>=0)contents+=piece('assets/magic-props-v2.webp',wardrobeParts.props,(['hedgehog','rainotter'].includes(id)?0:5)+held,id==='rainotter'&&outfit<0&&held===2?[46,39,27,47]:propTargets[id][held],'mw-piece mw-prop');
+ if(head>=0)contents+=piece('assets/magic-heads-'+id+'.webp',wardrobeParts.heads[id],head,headTemplates[id][head],'mw-piece mw-headwear');
  const name=animals.find(animal=>animal.id===user.avatarAnimal).name;
  return '<span class="mw-avatar" role="img" aria-label="'+escapeText(name)+'"><span class="mw-doll">'+contents+'</span></span>';
+}
+const decodedArt=new Map();
+export async function preload(user){
+ if(!isAnimal(user?.avatarAnimal)||typeof Image!=='function')return;
+ const id=user.avatarAnimal.slice(6),sources=['assets/magic-bodies-'+id+'.webp'];
+ if(user.avatarHead)sources.push('assets/magic-heads-'+id+'.webp');
+ if(user.avatarItem)sources.push('assets/magic-props-v2.webp');
+ await Promise.all(sources.map(source=>{
+  if(!decodedArt.has(source)){
+   const art=new Image();art.src=source;
+   const ready=typeof art.decode==='function'?art.decode():Promise.resolve();
+   decodedArt.set(source,ready.catch(error=>{decodedArt.delete(source);throw error;}));
+  }
+  return decodedArt.get(source);
+ }));
 }
 
 function button(label,handler,disabled=false,primary=false) {
@@ -105,7 +90,7 @@ export function shop(state) {
   const previewUser={...state.user,...state.preview,avatarAnimal:state.preview.avatarAnimal||animal};
   let html='<section class="mw-shop"><div class="mw-shop-heading"><div><h1>My magical animal</h1><p>Choose your animal. Try an outfit and make it yours.</p></div><div class="mw-wallet">'+coin+'<strong>'+state.coins+'</strong><span>coins</span></div></div>';
   html+='<nav class="mw-tabs" aria-label="Animal shop">';
-  for(const [id,label] of [['animals','Animals'],['outfit','Outfits'],['head','Accessories'],['item','Things to hold'],['earn','Earn coins'],['classic','Classic collection']]) {
+  for(const [id,label] of [['animals','Animals'],['outfit','Outfits'],['head','Accessories'],['item','Things to hold'],['earn','Earn coins']]) {
     html+='<button type="button" aria-pressed="'+(id===tab)+'" onclick="magicShopTab(\''+id+'\')">'+label+'</button>';
   }
   html+='</nav><div class="mw-shop-layout"><aside class="mw-dressing"><h2>'+escapeText(animals.find(entry=>entry.id===previewUser.avatarAnimal)?.name||'Your animal')+'</h2><div class="mw-large-preview">'+avatar(previewUser)+'</div><p>'+(Object.keys(state.preview).length?'Trying it on':isAnimal(state.user.avatarAnimal)?'Your saved look':'Choose an animal to save your look')+'</p>'+button('Show saved look','magicClearPreview()',state.busy)+'</aside><div class="mw-catalog">';

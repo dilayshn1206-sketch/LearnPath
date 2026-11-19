@@ -4,8 +4,7 @@
 .mw-doll{position:absolute;inset:8%;display:block;isolation:isolate}
 .mw-piece{position:absolute;display:block;background-repeat:no-repeat}
 .mw-body{z-index:0}
-.mw-outfit{z-index:1}
-.mw-foreground{z-index:2}
+.mw-prop{z-index:1}
 .mw-headwear{z-index:3}
 .mw-base{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
 .mw-layer{position:absolute;inset:0;display:block;background-size:500% 300%;background-repeat:no-repeat}
@@ -30,9 +29,9 @@ body:has(.mw-shop) #lp-map{display:none}
 .mw-tabs button{border:1px solid #aecac9;background:white;color:#142d4b;border-radius:12px;padding:12px 17px;min-height:48px;font-size:17px;font-weight:700;cursor:pointer}
 .mw-tabs button[aria-pressed=true]{background:#165c60;color:white;border-color:#165c60}
 .mw-shop-layout{display:grid;grid-template-columns:310px minmax(0,1fr);align-items:start;gap:22px}
-.mw-dressing{position:sticky;top:14px;background:#e6f0e6;border:1px solid #c8ddcd;border-radius:22px;padding:18px;text-align:center}
+.mw-dressing{position:sticky;top:var(--mw-top,106px);background:#e6f0e6;border:1px solid #c8ddcd;border-radius:22px;padding:18px;text-align:center}
 .mw-dressing h2{font-size:25px;margin:0 0 12px}
-.mw-large-preview{width:100%;aspect-ratio:1;margin:auto}
+.mw-large-preview{width:min(100%,max(140px,calc(100dvh - var(--mw-top,106px) - var(--mw-bottom,84px) - 190px)));aspect-ratio:1;margin:auto}
 .mw-dressing p{font-size:16px;margin:12px 0}
 .mw-dressing .btn{font-size:16px;padding:10px 14px}
 .mw-catalog>h2{font-size:25px;margin:0 0 14px}

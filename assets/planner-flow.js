@@ -21,6 +21,16 @@ function bindField(id,key){const el=$('#'+id);if(el){el.value=state[key];el.onin
 function prompt(){const t=topic().toLowerCase();return ({blog:'What opinion or advice about '+t+' would you like to share?',story:'What could happen to your character in a story about '+t+'?',written_interview:'Who could answer your questions about '+t+'?',interview:'Who could you interview about '+t+'? Think of three things you would like to find out.',podcast:'What could two speakers discuss about '+t+'?',talk:'What would you like your audience to understand about '+t+'?',roleplay:'What digital situation could you act out to explore '+t+'?',poster:'What one message about '+t+' should your reader remember?',comic:'What choice could your characters make about '+t+'?',infographic:'What useful information about '+t+' could you organise visually?',howto:'What could you help someone do, step by step, in relation to '+t+'?',slides:'What pictures and short captions could help explain '+t+'?'})[state.format]||'Would you like to write, speak, or show your ideas visually?';}
 function goalsHTML(){return '<section class="focus-goals" aria-labelledby="focus-title"><div class="goals-heading"><div><p class="eyebrow">From “What feels hardest?”</p><h2 id="focus-title">My 3 focus goals</h2></div><button class="edit" data-edit="3">Change my choice</button></div><p class="goals-note">Keep these in sight. They will help you build your Learning Passport next.</p><ol>'+GOALS[state.weakness].map(g=>'<li>'+esc(g)+'</li>').join('')+'</ol></section>';}
 function companion(){return '<aside class="guide project-help"><span class="lp-clock'+(paused?' paused':'')+'" role="img" aria-label="Compass learning companion"></span><h2>Need help?</h2><p>Ask your friends or ask Google.</p></aside>';}
+function productExampleURL(name,custom){
+ const selectedTopic=topic().trim()||'Your Digital Self';
+ const context={identity:'digital identity online profiles',care:'online kindness cyberbullying',balance:'screen time digital wellbeing',privacy:'online privacy internet safety',learning:'creating learning with technology',truth:'media literacy fake news fact checking'}[state.topic]||'';
+ let url;try{url=new URL(custom);if(!['https:','http:'].includes(url.protocol)||url.username||url.password)url=null;}catch{}
+ if(url){
+  if(/(^|\.)google\.[a-z.]+$/.test(url.hostname)&&url.pathname==='/search')url.searchParams.set('q',(url.searchParams.get('q')||name+' examples for students')+' about '+selectedTopic+' '+context);
+  return url.href;
+ }
+ return 'https://www.google.com/search?q='+encodeURIComponent(name+' about '+selectedTopic+' '+context+' examples for students');
+}
 function productColumns(){return ((retiredProduct(state.format,format())||(state.format&&state.format!=='own'&&!groups.some(g=>g.formats.some(f=>f[0]===state.format))))?'<p class="retired-product-note">Your saved product is '+esc(format())+'. You can keep it or choose another format below.</p>':'')+'<div class="product-columns">'+groups.map(g=>'<section class="product-category'+(state.category===g.id?' active':'')+'"><button type="button" class="category-button" data-category="'+g.id+'" aria-pressed="'+(state.category===g.id)+'">'+icon(g.icon)+'<span><strong>'+g.name+'</strong></span></button><div class="category-products">'+g.formats.map(([id,title,desc])=>'<button type="button" class="product-option'+(state.format===id?' selected':'')+'" data-product="'+id+'" aria-pressed="'+(state.format===id)+'"><strong>'+esc(title)+'</strong><span class="selection" aria-hidden="true"></span></button>').join('')+'</div></section>').join('')+'</div><div class="own-topic own-product">'+choices([['own','A product of my own','Another way to share my ideas.']],state.format)+'</div>'+(state.format==='own'?field('format-own','What would you like to make?','Write the product type. Choose Written, Spoken or Visual above.'):'');}
 function pickMulti(list,id){if(id==='unsure')return list.includes(id)?[]:['unsure'];list=list.filter(x=>x!=='unsure');return list.includes(id)?list.filter(x=>x!==id):list.concat(id);}
 function contractDraft(){return {topic:topic(),productId:state.format,productType:format(),category:state.category,weakness:state.weakness,weaknessTips:[...(GOALS[state.weakness]||[])],focusGoals:[...(GOALS[state.weakness]||[])],tools:[...state.tools],toolOther:state.toolOwn};}
@@ -47,10 +57,9 @@ function render(){
   const help=document.createElement('a');help.className='product-example-link';
   help.textContent='?';help.target='_blank';help.rel='noopener noreferrer';
   const custom=formats.find(f=>f[0]===option.dataset.product)?.[3];
-  let destination='';try{const u=new URL(custom);if(['https:','http:'].includes(u.protocol)&&!u.username&&!u.password)destination=u.href;}catch{}
-  help.href=destination||'https://www.google.com/search?q='+encodeURIComponent(name+' examples for students');
-  help.setAttribute('aria-label','See '+name+' examples online');
-  help.title='See '+name+' examples';wrapper.append(help);
+  help.href=productExampleURL(name,custom);
+  help.setAttribute('aria-label','See '+name+' examples about '+topic());
+  help.title=name+' examples · '+topic();wrapper.append(help);
  });
  document.querySelectorAll('[data-choice]').forEach(b=>b.onclick=()=>{const id=b.dataset.choice;if(state.step===0)state.topic=id;if(state.step===1)state.format=id;if(state.step===2)state.tools=pickMulti(state.tools,id);if(state.step===3)state.weakness=id;render();});
  document.querySelectorAll('[data-category]').forEach(b=>b.onclick=()=>{state.category=b.dataset.category;if(state.format!=='own'&&!groups.find(g=>g.id===state.category).formats.some(f=>f[0]===state.format))state.format=null;render();});
