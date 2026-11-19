@@ -26,7 +26,7 @@ const server=http.createServer((req,res)=>{
  await f.locator('.project-help').waitFor();
  assert.equal(await f.locator('.project-help p').innerText(),'Ask your friends or ask Google.');
  assert.equal(await f.locator('#chat-input,#prepared-guide,[data-ask-compass]').count(),0);
- assert.equal(await f.locator('.choice small').count(),0);
+ assert.equal(await f.locator('.choice .topic-hints').count(),6);
  await f.locator('[data-choice="own"]').click();await f.locator('#topic-own').fill('Screen Time');await f.locator('#next').click();
  assert.match(await f.locator('.context').innerText(),/Screen Time/);
  await f.locator('#back').click();
