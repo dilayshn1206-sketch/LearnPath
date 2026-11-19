@@ -74,7 +74,7 @@ export function shop(state) {
   for(const [id,label] of [['animals','Animals'],['outfit','Outfits'],['head','Accessories'],['item','Things to hold'],['earn','Earn coins'],['classic','Classic collection']]) {
     html+='<button type="button" aria-pressed="'+(id===tab)+'" onclick="magicShopTab(\''+id+'\')">'+label+'</button>';
   }
-  html+='</nav><div class="mw-shop-layout"><aside class="mw-dressing"><h2>'+escapeText(animals.find(entry=>entry.id===previewUser.avatarAnimal)?.name||'Your animal')+'</h2><div class="mw-large-preview">'+avatar(previewUser)+'</div><p>'+(Object.keys(state.preview).length?'Trying it on':'Your saved look')+'</p>'+button('Show saved look','magicClearPreview()',state.busy)+'</aside><div class="mw-catalog">';
+  html+='</nav><div class="mw-shop-layout"><aside class="mw-dressing"><h2>'+escapeText(animals.find(entry=>entry.id===previewUser.avatarAnimal)?.name||'Your animal')+'</h2><div class="mw-large-preview">'+avatar(previewUser)+'</div><p>'+(Object.keys(state.preview).length?'Trying it on':isAnimal(state.user.avatarAnimal)?'Your saved look':'Choose an animal to save your look')+'</p>'+button('Show saved look','magicClearPreview()',state.busy)+'</aside><div class="mw-catalog">';
   if(tab==='animals') {
     for(const [paid,title] of [[false,'Choose a free animal'],[true,'Special animals']]) {
       html+='<h2>'+title+'</h2><div class="mw-cards">';
@@ -93,7 +93,7 @@ export function shop(state) {
     for(const entry of items.filter(candidate=>candidate.slot===tab)) {
       const owned=!!state.owned[entry.id];
       const wearing=state.user[fields[tab]]===entry.id;
-      html+='<article class="mw-card"><div class="mw-card-art">'+avatar({avatarAnimal:animal,[fields[tab]]:entry.id})+'</div><h3>'+entry.name+'</h3><div class="mw-price">'+coin+entry.cost+' coins</div><div class="mw-actions">'+button('Try','magicTryItem(\''+entry.id+'\')',state.busy)+button(wearing?'Take off':owned?'Wear':state.coins<entry.cost?(entry.cost-state.coins)+' more coins':'Buy and wear','magicWearItem(\''+entry.id+'\')',state.busy||(!owned&&state.coins<entry.cost),true)+'</div></article>';
+      html+='<article class="mw-card"><div class="mw-card-art">'+avatar({avatarAnimal:previewUser.avatarAnimal,[fields[tab]]:entry.id})+'</div><h3>'+entry.name+'</h3><div class="mw-price">'+coin+entry.cost+' coins</div><div class="mw-actions">'+button('Try','magicTryItem(\''+entry.id+'\')',state.busy)+button(wearing?'Take off':owned?'Wear':state.coins<entry.cost?(entry.cost-state.coins)+' more coins':'Buy and wear','magicWearItem(\''+entry.id+'\')',state.busy||(!owned&&state.coins<entry.cost),true)+'</div></article>';
     }
     html+='</div>';
   } else if(tab==='earn') {
