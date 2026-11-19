@@ -1,0 +1,53 @@
+
+/* Magical wardrobe, with larger full-body characters for landscape tablets. */
+.mw-avatar{position:relative;display:block;width:100%;height:100%;overflow:hidden}
+.mw-base{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.mw-layer{position:absolute;inset:0;display:block;background-size:500% 300%;background-repeat:no-repeat}
+.mw-coin{display:inline-block;width:36px;height:36px;object-fit:contain;vertical-align:middle;flex-shrink:0}
+.coin-pill .lp-coin{width:42px;height:42px;background:none;border:0;border-radius:0}
+.coin-pill .mw-coin{width:42px;height:42px}
+.coin-pill{font-size:20px;font-weight:800;min-height:52px}
+body[data-role=student] .topbar{height:auto;min-height:94px}
+body[data-role=student] #uav{width:72px;height:72px;flex-shrink:0;border-radius:18px;border:1px solid #c9dedb;background:#f5faf5!important}
+.mw-home-animal{width:152px;height:152px;flex:0 0 152px;border:1px solid #c8dfd6;background:#edf6ed;border-radius:24px;padding:5px;cursor:pointer}
+.mw-home-animal:focus-visible,.mw-tabs button:focus-visible{outline:3px solid #16787d;outline-offset:3px}
+.mw-home-copy{flex:1;min-width:0}
+.mw-shop{--mw-paper:#fffcf3;--mw-line:#d7e2dc;max-width:1400px;margin:auto}
+.mw-shop-heading{display:flex;gap:20px;align-items:center;justify-content:space-between;margin-bottom:16px}
+.mw-shop-heading h1{font-family:var(--font-heading,inherit);font-size:34px;margin:0 0 6px;color:#142d4b}
+.mw-shop-heading p{font-size:18px;margin:0}
+.mw-wallet{display:flex;align-items:center;gap:9px;flex-shrink:0;border:1px solid #d8b56a;border-radius:16px;padding:10px 18px;background:#fff5d9}
+.mw-wallet .mw-coin{width:56px;height:56px}
+.mw-wallet strong{font-size:34px}.mw-wallet span{font-size:16px}
+.mw-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 20px}
+.mw-tabs button{border:1px solid #aecac9;background:white;color:#142d4b;border-radius:12px;padding:12px 17px;min-height:48px;font-size:17px;font-weight:700;cursor:pointer}
+.mw-tabs button[aria-pressed=true]{background:#165c60;color:white;border-color:#165c60}
+.mw-shop-layout{display:grid;grid-template-columns:310px minmax(0,1fr);align-items:start;gap:22px}
+.mw-dressing{position:sticky;top:14px;background:#e6f0e6;border:1px solid #c8ddcd;border-radius:22px;padding:18px;text-align:center}
+.mw-dressing h2{font-size:25px;margin:0 0 12px}
+.mw-large-preview{width:100%;aspect-ratio:1;margin:auto}
+.mw-dressing p{font-size:16px;margin:12px 0}
+.mw-dressing .btn{font-size:16px;padding:10px 14px}
+.mw-catalog>h2{font-size:25px;margin:0 0 14px}
+.mw-catalog>h2:not(:first-child){margin-top:26px}
+.mw-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+.mw-card{background:var(--mw-paper);border:1px solid var(--mw-line);border-radius:20px;padding:15px;min-width:0}
+.mw-card-art{width:min(100%,280px);aspect-ratio:1;margin:auto;background:#edf4ee;border-radius:18px;overflow:hidden}
+.mw-special{background:#fff5df;border-color:#e2c27e}.mw-special .mw-card-art{background:#f9f1dd}
+.mw-card h3{font-size:21px;margin:12px 0 5px;color:#142d4b}
+.mw-card p{font-size:16px;color:#4c6375;margin:5px 0 12px}
+.mw-price{display:flex;align-items:center;gap:7px;font-weight:800;font-size:19px;margin:10px 0}
+.mw-price .mw-coin{width:30px;height:30px}
+.mw-actions{display:flex;gap:8px;flex-wrap:wrap}
+.mw-actions .btn{font-size:16px;padding:10px 14px;min-height:46px;flex:1}
+.mw-actions button:disabled{opacity:.62;cursor:default}
+.mw-shop-status{min-height:26px;color:#165c60;font-size:17px}
+.mw-earn{margin:0;background:#fffcf3;border:1px solid #d7e2dc;border-radius:18px;overflow:hidden}
+.mw-earn>div{display:flex;gap:14px;justify-content:space-between;align-items:center;padding:13px 17px;border-bottom:1px solid #e1e8e1}
+.mw-earn>div:last-child{border-bottom:0}.mw-earn dt{font-size:18px}.mw-earn dd{display:flex;align-items:center;gap:6px;margin:0;font-size:21px;font-weight:800;white-space:nowrap}
+.mw-budget{background:#fff4d4;padding:18px;border-radius:16px;border:1px solid #e2c27e;margin-top:16px}
+@media(min-width:1450px){.mw-cards{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:1050px){.mw-shop-layout{grid-template-columns:250px minmax(0,1fr);gap:16px}.mw-card-art{width:min(100%,230px)}.mw-card{padding:12px}.mw-home-animal{width:126px;height:126px;flex-basis:126px}.mw-wallet{padding:8px 12px}}
+@media(max-width:760px){.mw-shop-layout{grid-template-columns:1fr}.mw-dressing{position:static;display:grid;grid-template-columns:150px 1fr;align-items:center;gap:8px}.mw-large-preview{grid-column:1;grid-row:1/4}.mw-dressing h2,.mw-dressing p,.mw-dressing button{grid-column:2}.mw-dressing h2{font-size:21px}.mw-card-art{width:min(100%,250px)}.mw-shop-heading h1{font-size:27px}.mw-shop-heading p{font-size:16px}.mw-wallet .mw-coin{width:38px;height:38px}.mw-wallet strong{font-size:27px}.mw-wallet span{display:none}.mw-tabs button{font-size:15px;padding:10px 12px}.mw-home-animal{width:100px;height:100px;flex-basis:100px}body[data-role=student] #uav{width:56px;height:56px}.mw-cards{gap:10px}.mw-card h3{font-size:18px}.mw-actions .btn{font-size:14px;padding:9px}.lp-welcome{flex-wrap:wrap}.mw-home-copy{flex-basis:calc(100% - 130px)}}
+@media(max-width:420px){.mw-cards{grid-template-columns:1fr}.mw-shop-heading{gap:8px}.mw-dressing{grid-template-columns:130px 1fr}.mw-shop-heading h1{font-size:24px}}
+
