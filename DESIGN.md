@@ -13,6 +13,10 @@ above clothing; headwear uses isolated transparent artwork. A padded stage keeps
 headwear inside the preview. See WARDROBE-LAYERS-20261119.md.
 
 ## Compass-led choices (2026-11-02)
+Update (2026-11-19): remove all interactive chatbot surfaces and their loaded
+response libraries. The shared planning sidebar now reads “Ask your friends or
+ask Google.” This applies to standard and supported learners. Keep selection,
+saved plans, teacher example links and non-chat task guidance unchanged.
 Use compact topic/product label-and-icon cards; explain through short keyword
 bullets in the right-hand conversation. Keep the existing navy/teal paper style.
 The speech-bubble invitation is a real focus button. Breakdance is a bounded
