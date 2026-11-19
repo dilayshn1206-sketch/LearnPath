@@ -135,6 +135,7 @@
       return '<div class="lp-grammar-feedback"><div class="lp-clock'+(paused?' paused':'')+'" role="img" aria-label="Compass learning companion"></div><div><strong>Let’s look at this together.</strong><p>'+escapeText(explanation)+'</p><p>Correct answer: <strong>'+escapeText(question.options[question.correct])+'</strong></p><button type="button" class="lp-motion-toggle" aria-pressed="'+paused+'" onclick="LearnPathUI.toggleMotion()">'+(paused?'Play animation':'Pause animation')+'</button></div></div>';
     },
     setProgress:function (done, unlocked) { states = done.map(Boolean); enabled = unlocked.map(Boolean); drawMap(); },
+    setMilestoneDone:function (index, done) { if(index<0||index>=states.length)return;states[index]=Boolean(done);drawMap(); },
     setRole:function (role) { document.body.dataset.role = role; drawMap(); },
     openResources:function () {
       if(typeof window.renderResourcesScreen==='function') window.renderResourcesScreen();
