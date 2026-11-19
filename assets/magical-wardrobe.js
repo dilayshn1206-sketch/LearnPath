@@ -30,38 +30,72 @@ const escapeText = text => String(text).replace(/[&<>"']/g,ch=>({'&':'&amp;','<'
 export const isAnimal = id => animals.some(animal=>animal.id===id);
 export const fieldForSlot = slot => fields[slot];
 export const coin = '<img class="mw-coin" src="assets/magic-coin.webp" alt="" aria-hidden="true">';
-function layer(id,row,column,mask,feather=false) {
-  return '<span class="mw-layer" style="background-image:url(assets/magic-fitted-'+id+'.webp);background-position:'+(column*25)+'% '+(row*50)+'%;'+(feather?'mask-image:linear-gradient(to bottom,#000 '+(97-headCuts[id])+'%,transparent '+(100-headCuts[id])+'%);':mask?'clip-path:'+mask+';':'clip-path:inset(0 0 2% 0);')+'"></span>';
+
+import {layerAtlases} from './magical-wardrobe-layers.js?v=20261119-3';
+const bodyTemplates = {
+ hedgehog:[[40,48,42,39],[30,48,59,50],[20,48,73,51],[34,48,53,49],[31,17,61,82]],
+ rainotter:[[43,29,38,29],[40,29,51,49],[22,29,72,62],[43,29,45,48],[40,0,53,84]],
+ moonrabbit:[[46,35,36,36],[25,35,57,53],[17,35,68,53],[37,35,47,53],[27,14,59,74]],
+ sunpanda:[[40,36,42,37],[30,36,55,49],[12,36,80,54],[35,36,48,49],[31,10,58,75]],
+ cloudowl:[[32,33,48,39],[26,34,63,51],[17,33,73,58],[32,34,57,51],[30,0,60,85]],
+ auroradeer:[[52,32,38,39],[36,32,53,47],[17,32,76,58],[40,32,47,46],[39,12,53,66]],
+ starlion:[[45,42,44,28],[34,41,56,44],[19,40,73,50],[42,42,49,42],[35,4,62,80]]
+};
+const headTemplates = {
+ hedgehog:[[40,10,42,26],[36,8,48,38],[43,5,37,26],[41,3,40,30],[42,3,40,30]],
+ rainotter:[[31,-5,40,22],[29,-5,44,31],[34,-8,34,23],[32,-8,40,23],[32,-8,40,23]],
+ moonrabbit:[[45,-5,38,25],[39,-5,47,41],[47,-7,34,28],[45,-6,39,30],[46,-6,39,30]],
+ sunpanda:[[36,-4,41,25],[32,-3,48,41],[40,-7,34,28],[38,-6,39,30],[39,-6,39,30]],
+ cloudowl:[[31,-4,44,27],[27,-3,53,41],[37,-7,36,29],[33,-7,42,31],[33,-7,42,31]],
+ auroradeer:[[46,7,40,25],[41,7,47,36],[49,5,34,25],[46,3,40,29],[46,3,40,29]],
+ starlion:[[42,-5,43,27],[38,-4,51,40],[46,-7,36,28],[43,-7,43,31],[43,-7,43,31]]
+};
+function bodyFrame(id,row,column,foreground=false,mask='') {
+ return '<span class="mw-layer '+(foreground?'mw-foreground':'mw-body')+'" style="background-image:url(assets/magic-fitted-'+id+'.webp);background-position:'+(column*25)+'% '+(row*50)+'%;clip-path:'+(mask||'inset(3% 1% 2% 1%)')+'"></span>';
 }
-const headCuts = {hedgehog:47,rainotter:68,moonrabbit:60,sunpanda:63,cloudowl:60,auroradeer:65,starlion:61};
-const propAreas = {
-  hedgehog:['inset(48% 9% 2% 34% round 10%)','inset(50% 9% 10% 35% round 10%)','inset(43% 10% 0 35% round 10%)','inset(26% 0 0 33% round 10%)','inset(46% 7% 3% 34% round 10%)'],
-  rainotter:['inset(29% 10% 28% 38% round 8%)','inset(33% 9% 27% 38% round 8%)','inset(30% 10% 8% 38% round 8%)','inset(17% 0 6% 29% round 8%)','inset(28% 7% 28% 41% round 8%)'],
-  moonrabbit:['inset(36% 9% 5% 36% round 8%)','inset(45% 6% 17% 39% round 8%)','inset(22% 7% 7% 47% round 8%)','inset(15% 0 0 38% round 8%)','inset(32% 5% 8% 40% round 8%)'],
-  sunpanda:['inset(37% 4% 12% 40% round 8%)','inset(41% 3% 15% 37% round 8%)','inset(27% 1% 8% 43% round 8%)','inset(29% 0 0 32% round 8%)','inset(35% 1% 11% 40% round 8%)'],
-  cloudowl:['inset(33% 7% 6% 34% round 8%)','inset(39% 3% 13% 30% round 8%)','inset(23% 1% 0 40% round 8%)','inset(20% 0 0 28% round 8%)','inset(28% 0 6% 38% round 8%)'],
-  auroradeer:['inset(27% 0 0 48% round 8%)','inset(33% 0 0 42% round 8%)','inset(18% 0 0 48% round 8%)','inset(13% 0 0 44% round 8%)','inset(28% 0 0 48% round 8%)'],
-  starlion:['inset(35% 0 0 43% round 8%)','inset(41% 0 0 41% round 8%)','inset(29% 0 0 44% round 8%)','inset(23% 0 0 37% round 8%)','inset(33% 0 0 43% round 8%)']
+function wearable(id,row,column) {
+ const atlas=layerAtlases[id];
+ const [left,top,width,height]=atlas.frames[row*5+column];
+ const [x,y,w,h]=(row===0?bodyTemplates:headTemplates)[id][column];
+ return '<span class="mw-piece mw-'+(row===0?'outfit':'headwear')+'" style="left:'+x+'%;top:'+y+'%;width:'+w+'%;height:'+h+'%;background-image:url(assets/magic-layers-'+id+'.webp);background-size:'+(100*atlas.width/width)+'% '+(100*atlas.height/height)+'%;background-position:'+(100*left/(atlas.width-width))+'% '+(100*top/(atlas.height-height))+'%"></span>';
+}
+const heldMasks = {
+ hedgehog:['inset(48% 9% 2% 34% round 10%)','inset(50% 9% 10% 35% round 10%)','inset(43% 10% 0 35% round 10%)','inset(26% 0 0 33% round 10%)','inset(46% 7% 3% 34% round 10%)'],
+ rainotter:[
+ 'polygon(47% 29%,81% 29%,81% 42%,88% 44%,87% 61%,80% 66%,80% 71%,48% 71%,44% 62%,40% 56%,40% 43%,47% 41%)',
+ 'polygon(48% 34%,77% 34%,77% 38%,85% 38%,90% 45%,90% 64%,81% 71%,46% 71%,40% 63%,40% 47%,48% 43%)',
+ 'polygon(54% 31%,71% 31%,71% 43%,84% 45%,87% 58%,78% 65%,78% 92%,49% 92%,48% 65%,40% 59%,39% 48%,53% 43%)',
+ 'polygon(47% 18%,98% 18%,98% 93%,42% 93%,42% 77%,30% 74%,30% 56%,47% 52%)',
+ 'polygon(56% 29%,79% 29%,79% 39%,91% 43%,91% 62%,84% 71%,53% 71%,48% 63%,44% 57%,44% 43%,56% 41%)'
+ ],
+ moonrabbit:['inset(36% 9% 5% 36% round 8%)','inset(45% 6% 17% 39% round 8%)','inset(22% 7% 7% 47% round 8%)','inset(15% 0 0 38% round 8%)','inset(32% 5% 8% 40% round 8%)'],
+ sunpanda:['inset(37% 4% 12% 40% round 8%)','inset(41% 3% 15% 37% round 8%)','inset(27% 1% 8% 43% round 8%)','inset(29% 0 0 32% round 8%)','inset(35% 1% 11% 40% round 8%)'],
+ cloudowl:['inset(33% 7% 6% 34% round 8%)','inset(39% 3% 13% 30% round 8%)','inset(23% 1% 0 40% round 8%)','inset(20% 0 0 28% round 8%)','inset(28% 0 6% 38% round 8%)'],
+ auroradeer:['inset(27% 0 0 48% round 8%)','inset(33% 0 0 42% round 8%)','inset(18% 0 0 48% round 8%)','inset(13% 0 0 44% round 8%)','inset(28% 0 0 48% round 8%)'],
+ starlion:['inset(35% 0 0 43% round 8%)','inset(41% 0 0 41% round 8%)','inset(29% 0 0 44% round 8%)','inset(23% 0 0 37% round 8%)','inset(33% 0 0 43% round 8%)']
 };
 export function avatar(user) {
-  if(!isAnimal(user?.avatarAnimal)) return '';
-  const id = user.avatarAnimal.slice(6);
-  const equipped = groups.map(slot=>items.find(item=>item.slot===slot && item.id===user[fields[slot]]));
-  const baseRow = equipped.findIndex(Boolean);
-  let contents = '<img src="assets/magic-'+id+'.webp" alt="" class="mw-base" loading="lazy">';
-  if(baseRow>=0) {
-    const column=items.filter(item=>item.slot===groups[baseRow]).indexOf(equipped[baseRow]);
-    contents=layer(id,baseRow,column);
+ if(!isAnimal(user?.avatarAnimal))return '';
+ const id=user.avatarAnimal.slice(6);
+ const columns=groups.map(slot=>items.filter(item=>item.slot===slot).findIndex(item=>item.id===user[fields[slot]]));
+ const [outfit,head,held]=columns;
+ let contents;
+ if(held>=0){
+  contents=bodyFrame(id,2,held);
+  if(outfit>=0){
+   contents+=wearable(id,0,outfit);
+   contents+=bodyFrame(id,2,held,true,heldMasks[id][held]);
   }
-  if(equipped[0] && equipped[1]) {
-    contents+=layer(id,1,items.filter(item=>item.slot==='head').indexOf(equipped[1]),'inset(0 0 '+headCuts[id]+'% 0)',true);
-  }
-  if(equipped[2] && baseRow!==2) {
-    const column=items.filter(item=>item.slot==='item').indexOf(equipped[2]);
-    contents+=layer(id,2,column,propAreas[id][column]);
-  }
-  return '<span class="mw-avatar" role="img" aria-label="'+escapeText(animals.find(animal=>animal.id===user.avatarAnimal).name)+'">'+contents+'</span>';
+ }else if(outfit>=0){
+  contents=bodyFrame(id,0,outfit);
+ }else{
+  contents='<img src="assets/magic-'+id+'.webp" alt="" class="mw-base mw-body" loading="lazy">';
+ }
+ if(head>=0)contents+=wearable(id,1,head);
+ const name=animals.find(animal=>animal.id===user.avatarAnimal).name;
+ return '<span class="mw-avatar" role="img" aria-label="'+escapeText(name)+'"><span class="mw-doll">'+contents+'</span></span>';
 }
+
 function button(label,handler,disabled=false,primary=false) {
   return '<button type="button" class="btn '+(primary?'btp':'bts')+'" onclick="'+handler+'"'+(disabled?' disabled':'')+'>'+label+'</button>';
 }
