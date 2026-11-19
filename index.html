@@ -2953,7 +2953,7 @@ window.resetStudent=async function(uid,name){
     // 4) Reset progress fields on the user record, keep identity + role
     await update(ref(db,"users/"+uid),{
       ideaAnswers:null,completedSteps:null,chosenResources:null,
-      avatarAnimal:null,avatarHead:null,avatarEyes:null,avatarFace:null,
+      avatarAnimal:null,avatarHead:null,avatarEyes:null,avatarFace:null,avatarOutfit:null,avatarItem:null,
       avatarId:null,groupId:null,groupName:null
     });
     toast(name+"'s progress was reset.");
