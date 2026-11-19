@@ -1,5 +1,14 @@
 # LearnPath design
 
+## Magical wardrobe (2026-11-19)
+The shop uses seven illustrated animals with fitted wardrobe atlases. Five starter
+animals are free and two special animals cost 20 and 24 earned coins. Outfit,
+headwear and held-item collections have five choices each, priced at 4, 8 and 15.
+Full-body previews use teal task paper and an illustrated gold compass coin.
+The tablet topbar avatar is 72px and the welcome paper adds a larger left-side
+character. WebP assets retain alpha transparency. Classic collection owns the
+earlier character and accessory rendering.
+
 ## Compass-led choices (2026-11-02)
 Use compact topic/product label-and-icon cards; explain through short keyword
 bullets in the right-hand conversation. Keep the existing navy/teal paper style.

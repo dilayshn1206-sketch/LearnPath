@@ -1,5 +1,13 @@
 # LearnPath UI contract
 
+## Magical wardrobe (2026-11-19)
+- The existing purchase RPC owns atomic coin deductions and repeat-purchase checks.
+- New catalog IDs start with magic-. Avatar outfits and held items persist in
+  avatarOutfit and avatarItem. Ownership and slot checks run on the server.
+- Try changes the local preview. Choose and Wear save explicitly. A failed equip
+  after purchase retains ownership for a charge-free retry.
+- Classic collection exposes earlier characters and purchased accessories.
+
 ## Topic word families (2026-11-08)
 - `compass-topics.js` owns topic-stage word families, short titles and bounded
   in-tab context. The learner chooses an existing category or enters a suggested

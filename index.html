@@ -256,7 +256,8 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
 .rub-chevron{background:none;border:none;color:var(--th);cursor:pointer;font-size:12px;padding:4px 6px;flex-shrink:0}
 </style>
 <link rel="stylesheet" href="assets/learnpath.css?v=20261108-feedback-1">
-<link rel="stylesheet" href="assets/compass-scenes.css?v=20261108-8"></head>
+<link rel="stylesheet" href="assets/compass-scenes.css?v=20261108-8"><link rel="stylesheet" href="assets/magical-wardrobe.css?v=20261119-1">
+</head>
 <body>
 
 <div id="auth">
@@ -286,7 +287,7 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
       <span class="tname">LearnPath</span><span class="lp-grade">Grade 6<span>English Project Learning</span></span>
     </div>
     <div class="uinfo"><button type="button" class="lp-resources" id="lp-resources" onclick="LearnPathUI.openResources()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v15M12 5C8 2 4 3 2 4v15c4-1 7-1 10 1 3-2 6-2 10-1V4c-3-1-6-2-10 1z"/></svg>Resources</button>
-      <button class="coin-pill" id="coin-pill" aria-label="Open your coins and accessories" onclick="openCoins()"><span class="lp-coin" aria-hidden="true">✦</span> <span id="coins-count">0</span></button>
+      <button class="coin-pill" id="coin-pill" aria-label="Open your coins and accessories" onclick="openCoins()"><span class="lp-coin" aria-hidden="true"><img class="mw-coin" src="assets/magic-coin.webp" alt=""></span> <span id="coins-count">0</span></button>
       <span id="uav" class="uav" onclick="go('profile')"></span>
       <span id="uname" class="uname"></span>
       <button class="nbtn" aria-label="Open notifications" onclick="openNotifs()">
@@ -319,6 +320,7 @@ h1,h2,.pt,.cc-title,.ctitle,.tname,.qq,.auth-card h1,.ri h2{font-family:'Baloo 2
 <link rel="stylesheet" href="assets/guided-reading.css?v=20261108-8"><script src="assets/guided-reading.js?v=20261108-feedback-1"></script>
 <script src="assets/reflection-journey.js?v=20261108-feedback-1"></script>
 <script type="module">
+import * as MagicalWardrobe from "./assets/magical-wardrobe.js?v=20261119-1";
 import {auth,db,storage,rpc,ref,set,get,push,onValue,update,remove,sref,uploadBytesResumable,getDownloadURL,deleteObject,onAuthStateChanged,signInWithPopup,signOut} from './assets/supabase-backend.js?v=20261108-8';
 const prov={};
 let CU=null,UP=null,supportProfile=null;
@@ -426,6 +428,7 @@ function animalById(id){return ANIMALS.find(function(a){return a.id===id;})||nul
 function accById(id){return ACCESSORIES.find(function(a){return a.id===id;})||null;}
 // Compose the character: base animal + equipped accessories (face, then eyes, then head on top).
 function avatarLayersHTML(u){
+  if(MagicalWardrobe.isAnimal(u&&u.avatarAnimal))return MagicalWardrobe.avatar(u);
   var an=(u&&u.avatarAnimal)?animalById(u.avatarAnimal):null;
   if(!an)return "";
   var out='<span style="position:absolute;inset:0;display:block">'+an.svg+'</span>';
@@ -435,7 +438,7 @@ function avatarLayersHTML(u){
   });
   return out;
 }
-function hasCharacter(u){return !!(u&&u.avatarAnimal&&animalById(u.avatarAnimal));}
+function hasCharacter(u){return !!(u&&u.avatarAnimal&&(MagicalWardrobe.isAnimal(u.avatarAnimal)||animalById(u.avatarAnimal)));}
 // Returns HTML for a circular avatar for a given user object, at the requested size.
 function avatarMarkup(u,size,borderColor){
   size=size||70;borderColor=borderColor||"var(--p)";
@@ -688,11 +691,11 @@ async function addCoin(){
 async function awardMilestoneOnce(key){await addCoin();}
 
 // Full character state for the current user (animal + owned/equipped accessories).
-var CHAR={animal:"",head:"",eyes:"",face:"",owned:{}};
+var CHAR={animal:"",head:"",eyes:"",face:"",outfit:"",item:"",owned:{}};
 function equippedForSlot(slot){return slot==="head"?CHAR.head:slot==="eyes"?CHAR.eyes:CHAR.face;}
 function charPreviewHTML(size){
   size=size||120;
-  var u={avatarAnimal:CHAR.animal,avatarHead:CHAR.head,avatarEyes:CHAR.eyes,avatarFace:CHAR.face};
+  var u={avatarAnimal:CHAR.animal,avatarHead:CHAR.head,avatarEyes:CHAR.eyes,avatarFace:CHAR.face,avatarOutfit:CHAR.outfit,avatarItem:CHAR.item};
   if(!hasCharacter(u))return '<div style="width:'+size+'px;height:'+size+'px;border-radius:50%;background:var(--pl);display:flex;align-items:center;justify-content:center;color:var(--th);font-size:12px;text-align:center">Pick an<br>animal</div>';
   return '<div style="width:'+size+'px;height:'+size+'px;border-radius:50%;position:relative;overflow:hidden;background:#fff;border:4px solid #fff;box-shadow:0 4px 0 rgba(0,0,0,.12)">'+avatarLayersHTML(u)+'</div>';
 }
@@ -707,10 +710,12 @@ window.openCoins=async function(){
   CHAR.head=uv.avatarHead||"";
   CHAR.eyes=uv.avatarEyes||"";
   CHAR.face=uv.avatarFace||"";
+  CHAR.outfit=uv.avatarOutfit||"";
+  CHAR.item=uv.avatarItem||"";
   CHAR.owned=osnap.exists()?osnap.val():{};
   renderShop();
 };
-function renderShop(){
+function renderClassicShop(){
   var mc=document.getElementById("mc");
   var html='<div class="pt">My Character</div>';
   html+='<div class="ps">Earn coins by completing steps, sharing work, adding resources, and giving feedback. Pick a funny animal, then spend your coins on accessories!</div>';
@@ -790,6 +795,80 @@ window.equipAccessory=async function(slot,id,silent){
   if(!silent)renderShop();else renderShop();
 };
 
+
+
+let magicTab = 'animals';
+let magicPreview = {};
+let magicBusy = false;
+let magicMessage = '';
+function magicUser() {
+  return {...UP,avatarAnimal:CHAR.animal,avatarHead:CHAR.head,avatarOutfit:CHAR.outfit,avatarItem:CHAR.item};
+}
+function renderShop() {
+  window._currentScreen='coins';
+  document.body.dataset.sharing='false';
+  if(magicTab==='classic') {
+    renderClassicShop();
+    document.getElementById('mc').insertAdjacentHTML('afterbegin','<button type="button" class="btn bts mb8" onclick="magicShopTab(\'animals\')">Back to magical animals</button>');
+    return;
+  }
+  document.getElementById('mc').innerHTML=MagicalWardrobe.shop({user:magicUser(),preview:magicPreview,owned:CHAR.owned,coins:userCoins,tab:magicTab,busy:magicBusy,message:magicMessage});
+}
+window.magicShopTab=function(tab) {
+  if(!['animals','outfit','head','item','earn','classic'].includes(tab))return;
+  magicTab=tab;renderShop();
+};
+window.magicClearPreview=function(){magicPreview={};renderShop();};
+window.magicTryAnimal=function(id) {
+  if(magicBusy || !MagicalWardrobe.isAnimal(id))return;
+  magicPreview.avatarAnimal=id;magicMessage='Trying on a character. Choose it to save.';renderShop();
+};
+window.magicTryItem=function(id) {
+  var item=MagicalWardrobe.items.find(function(entry){return entry.id===id;});
+  if(magicBusy || !item)return;
+  magicPreview[MagicalWardrobe.fieldForSlot(item.slot)]=id;
+  magicMessage='Trying '+item.name+'. Buy or wear it to save.';renderShop();
+};
+function refreshMagicAvatar() {
+  setTopbarAvatar(magicUser());
+  var counter=document.getElementById('coins-count');if(counter)counter.textContent=userCoins;
+}
+async function magicSave(action) {
+  if(magicBusy || !CU)return;
+  magicBusy=true;magicMessage='Saving your look…';renderShop();
+  try {await action();magicPreview={};magicMessage='Your look is saved.';}
+  catch(error){magicMessage=error.message||'Could not save. Please try again.';toast(magicMessage);}
+  finally {magicBusy=false;refreshMagicAvatar();renderShop();}
+}
+window.magicChooseAnimal=async function(id) {
+  var animal=MagicalWardrobe.animals.find(function(entry){return entry.id===id;});
+  if(!animal)return;
+  await magicSave(async function(){
+    if(animal.cost && !CHAR.owned[id]) {
+      userCoins=await rpc('lp_purchase',{p_item:id});
+      CHAR.owned[id]=true;
+    }
+    await update(ref(db,'users/'+CU.uid),{avatarAnimal:id});
+    CHAR.animal=id;if(UP)UP.avatarAnimal=id;
+  });
+};
+window.magicWearItem=async function(id) {
+  var item=MagicalWardrobe.items.find(function(entry){return entry.id===id;});
+  if(!item)return;
+  await magicSave(async function(){
+    if(!CHAR.owned[id]) {
+      userCoins=await rpc('lp_purchase',{p_item:id});
+      CHAR.owned[id]=true;
+    }
+    var field=MagicalWardrobe.fieldForSlot(item.slot);
+    var current=magicUser()[field];
+    var next=current===id?null:id;
+    var patch={[field]:next};
+    await update(ref(db,'users/'+CU.uid),patch);
+    CHAR[item.slot==='head'?'head':item.slot]=next||'';
+    if(UP)UP[field]=next;
+  });
+};
 
 // ── STUDENT NAV ──
 var SNAV=[
@@ -1123,7 +1202,7 @@ async function renderHome(){
   var nextAction=!step1Done?"renderStep1Screen()":!hasProduct?"startQuiz()":!step3Done?"renderStep3Screen()":"renderResourcesScreen()";
   var nextLabel=!step1Done?"See what we are learning":!hasProduct?"Find my project":!step3Done?"Plan my project":"Explore resources";
   var waiting=step1Done&&hasProduct&&!step3Unlocked;
-  var html='<section class="lp-welcome"><div><div class="lp-eyebrow">Your learning path · Grade 6</div><h1>Welcome back, '+esc(firstName)+'.</h1>';
+  var html='<section class="lp-welcome"><button type="button" class="mw-home-animal" aria-label="Open my animal and wardrobe" onclick="openCoins()">'+(hasCharacter(UP)?avatarLayersHTML(UP):avatarMarkup(UP,130))+'</button><div class="mw-home-copy"><div class="lp-eyebrow">Your learning path · Grade 6</div><h1>Welcome back, '+esc(firstName)+'.</h1>';
   html+='<p>'+doneCount+' of 4 milestones completed. '+(waiting?'Your idea is saved. Your teacher will help you with the next step.':'Take your next step. Your work stays here when you return.')+'</p>';
   html+='<button type="button" class="btn btp" '+(waiting?'disabled':'onclick="'+nextAction+'"')+'>'+(waiting?'Waiting for teacher grouping':nextLabel+' →')+'</button></div>'+LearnPathUI.mascot()+'</section>';
 
