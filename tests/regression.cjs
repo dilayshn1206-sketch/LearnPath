@@ -111,6 +111,7 @@ function check(name,fn){fn();results.push(name);}
   check('All-known vocabulary displays a clear empty list message',()=>{assert.equal(w.document.querySelectorAll('#words-to-learn li').length,0);assert.match(w.document.getElementById('words-to-learn').textContent,/You know all/);});
   await w.submitGrammarAnswers();
   check('Unanswered grammar never submits and names the missing question',()=>{assert.equal(u.data.grammarAnswers.student,undefined);assert.match(w.document.getElementById('grammar-error').textContent,/question 1/);});
+  check('Word completion alone does not tick a unit with unanswered grammar',()=>assert.equal(w.document.querySelector('.lp-station').classList.contains('done'),false));
   const choices=[0,1,0,0,1];
   const firstQuestion=w.document.querySelector('.lp-unit-question');
   const normalUpdate=w.update;
@@ -127,6 +128,11 @@ function check(name,fn){fn();results.push(name);}
   await w.submitGrammarAnswers();await pause();
   check('Every wrong answer has its exact supplied explanation',()=>{assert.equal(w.document.querySelectorAll('.lp-grammar-feedback').length,5);unit.grammarQuestions.forEach((q,i)=>assert.ok(w.document.getElementById('mc').textContent.includes(q.feedback[choices[i]])));});
   check('Submission preserves question snapshots and prevents subsequent answer edits',()=>{assert.equal(u.data.grammarAnswers.student.submitted,true);assert.deepEqual(u.data.grammarAnswers.student.questions,unit.grammarQuestions);assert.ok([...w.document.querySelectorAll('.lp-unit-question .qo')].every(b=>b.disabled));});
+  check('Unit completion ticks Explore immediately without revisiting Home',()=>assert.equal(w.document.querySelector('.lp-station').classList.contains('done'),true));
+  await w.toggleWordCheck(0);
+  check('Changing a submitted word check clears the tick until resubmission',()=>assert.equal(w.document.querySelector('.lp-station').classList.contains('done'),false));
+  await w.submitWordChecks();
+  check('Resubmitting the final outstanding unit part restores the tick immediately',()=>assert.equal(w.document.querySelector('.lp-station').classList.contains('done'),true));
   check('Feedback safely escapes content and shares the existing pause state',()=>{assert.doesNotMatch(w.LearnPathUI.grammarFeedback({options:['<img>','ok'],correct:1,feedback:['<script>bad</script>']},0),/<script>|<img>/);w.LearnPathUI.toggleMotion();assert.ok([...w.document.querySelectorAll('.lp-grammar-feedback .lp-clock')].every(el=>el.classList.contains('paused')));});
   u.data.grammarAnswers.student={answers:{0:2,1:0,2:1,3:3,4:0},submitted:true,questions:unit.grammarQuestions};
   await w.renderStep1Screen();
