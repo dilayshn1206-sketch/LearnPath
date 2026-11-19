@@ -18,7 +18,7 @@ function fixture(contract=null){
   const read=p=>p.split('/').filter(Boolean).reduce((o,k)=>o?.[k],data);
   const assign=(p,v,merge=false)=>{let keys=p.split('/'),key=keys.pop(),o=data;for(const k of keys)o=o[k]??={};o[key]=merge?{...o[key],...structuredClone(v)}:structuredClone(v);writes.push(p);};
   const snap=(v,key)=>({exists:()=>v!==undefined&&v!==null,val:()=>v===undefined?null:structuredClone(v),key,forEach:fn=>Object.entries(v||{}).forEach(([k,d])=>fn(snap(d,k)))});
-  Object.assign(w,{initializeApp:()=>({}),getAuth:()=>({}),getDatabase:()=>({}),getStorage:()=>({}),GoogleAuthProvider:class{},onAuthStateChanged:()=>{},signInWithPopup:async()=>{},signOut:async()=>{},ref:(_db,p)=>p,sref:(_db,p)=>p,get:async p=>snap(read(p)),set:async(p,v)=>assign(p,v),update:async(p,v)=>assign(p,v,true),push:async(p,v)=>{assign(p+'/mock-'+writes.length,v);return {key:'mock'};},remove:async p=>assign(p,null),onValue:()=>()=>{},uploadBytesResumable:()=>{},getDownloadURL:async()=>'',deleteObject:async()=>{},confirm:()=>false});
+  Object.assign(w,{initializeApp:()=>({}),getAuth:()=>({}),getDatabase:()=>({}),getStorage:()=>({}),GoogleAuthProvider:class{},onAuthStateChanged:()=>{},signInWithPopup:async()=>{},signOut:async()=>{},ref:(_db,p)=>p,sref:(_db,p)=>p,get:async p=>snap(read(p)),set:async(p,v)=>assign(p,v),update:async(p,v)=>{for(const [k,x] of Object.entries(v))assign(p+'/'+k,x);},push:async(p,v)=>{assign(p+'/mock-'+writes.length,v);return {key:'mock'};},remove:async p=>assign(p,null),onValue:()=>()=>{},uploadBytesResumable:()=>{},getDownloadURL:async()=>'',deleteObject:async()=>{},confirm:()=>false});
   w.eval("(function(){"+(fs.readFileSync(path.join(root,'assets/magical-wardrobe-layers.js'),'utf8')+'\n'+fs.readFileSync(path.join(root,'assets/magical-wardrobe.js'),'utf8').replace(/^import[^\r\n]+;\r?\n/gm,'')).replace(/^export /gm,'')+";window.MagicalWardrobe={animals,items,isAnimal,fieldForSlot,coin,avatar,shop};})();");
   w.eval(ui);
   w.eval(fs.readFileSync(path.join(root,'assets/learning-support.js'),'utf8'));
@@ -112,6 +112,17 @@ function check(name,fn){fn();results.push(name);}
   await w.submitGrammarAnswers();
   check('Unanswered grammar never submits and names the missing question',()=>{assert.equal(u.data.grammarAnswers.student,undefined);assert.match(w.document.getElementById('grammar-error').textContent,/question 1/);});
   const choices=[0,1,0,0,1];
+  const firstQuestion=w.document.querySelector('.lp-unit-question');
+  const normalUpdate=w.update;
+  w.update=async(p,v)=>{await new Promise(r=>setTimeout(r,5));return normalUpdate(p,v);};
+  await Promise.all([w.pickGrammarAnswer(0,2),w.pickGrammarAnswer(1,0),w.pickGrammarAnswer(2,1),w.pickGrammarAnswer(0,1),w.pickGrammarAnswer(0,2)]);
+  check('Rapid grammar choices preserve all answers and the latest same-question choice',()=>{assert.deepEqual(u.data.grammarAnswers.student.answers,{0:2,1:0,2:1});assert.equal(w.document.querySelector('.lp-unit-question'),firstQuestion);assert.match(w.document.getElementById('grammar-save-status').textContent,/Answers saved/);});
+  w.update=async()=>{throw new Error('Synthetic offline save');};
+  await w.pickGrammarAnswer(2,3);
+  await w.renderStep1Screen();
+  check('Failed save retains the selected answer and exposes an explicit retry',()=>{assert.equal(u.data.grammarAnswers.student.answers[2],1);assert.equal(w.document.getElementById('grammar-retry').hidden,false);assert.equal(w.document.querySelectorAll('.lp-unit-question')[2].querySelectorAll('.qo')[3].getAttribute('aria-pressed'),'true');});
+  w.update=normalUpdate;await w.retryGrammarSaves();
+  check('Retry saves the retained draft without replacing other answers',()=>{assert.deepEqual(u.data.grammarAnswers.student.answers,{0:2,1:0,2:3});assert.equal(w.document.getElementById('grammar-retry').hidden,true);});
   for(let i=0;i<choices.length;i++)await w.pickGrammarAnswer(i,choices[i]);
   await w.submitGrammarAnswers();await pause();
   check('Every wrong answer has its exact supplied explanation',()=>{assert.equal(w.document.querySelectorAll('.lp-grammar-feedback').length,5);unit.grammarQuestions.forEach((q,i)=>assert.ok(w.document.getElementById('mc').textContent.includes(q.feedback[choices[i]])));});
