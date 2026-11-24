@@ -45,10 +45,13 @@ const headLandmarks = {
 };
 // Local contact points on each isolated accessory, not its image-box center.
 const headContacts = [[1.15,.55,.66],[1.3,.55,.46],[1.0,.55,.78],[1.08,.50,.72],[1.08,.55,.70]];
+// The helmet's open face must span both eyes, not just the narrower forehead.
+const helmetFits={hedgehog:[1.45,1,-1],rainotter:[1.4,1,0],moonrabbit:[1.5,2,0],sunpanda:[1.45,2,0],cloudowl:[1.3,0,0],auroradeer:[1.45,2,0],starlion:[1.4,1,0]};
 function headPlacement(id,body,head){
  const [x,y,skull]=headLandmarks[id][body],[scale,ax,ay]=headContacts[head];
- const frame=wardrobeParts.heads[id].frames[head],w=skull*scale,h=w*frame[3]/frame[2];
- return [x-w*ax,y-h*ay,w,h];
+ const fit=head===1?helmetFits[id]:[scale,0,0];
+ const frame=wardrobeParts.heads[id].frames[head],w=skull*fit[0],h=w*frame[3]/frame[2];
+ return [x+fit[1]-w*ax,y+fit[2]-h*ay,w,h];
 }
 function containPiece(atlas,index,rect){
  const frame=atlas.frames[index],[x,y,bw,bh]=rect,scale=Math.min(bw/frame[2],bh/frame[3]),w=frame[2]*scale,h=frame[3]*scale;
