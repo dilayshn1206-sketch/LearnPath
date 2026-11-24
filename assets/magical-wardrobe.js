@@ -32,13 +32,13 @@ export const fieldForSlot = slot => fields[slot];
 export const coin = '<img class="mw-coin" src="assets/magic-coin.webp" alt="" aria-hidden="true">';
 
 import {wardrobeParts} from './magical-wardrobe-parts.js?v=20261119-4';
-// Forehead contact point and skull width measured separately in each body frame:
+// Forehead contact and skull-width fitting landmarks calibrated per body frame:
 // plain, scarf, jacket, cape, vest, raincoat. Ears, antlers and mane aren't skull width.
 const headLandmarks = {
  hedgehog:[[65,25,31],[65,26,31],[65,26,31],[65,26,31],[65,26,31],[65,25,36]],
  rainotter:[[52,11,27],[51,11,27],[48.5,10,28],[50,10.5,27],[49,10,27],[50,10.5,29]],
  moonrabbit:[[65,11,29],[63,12,29],[64,12,28],[65,12,28],[64,12,28],[65,12,28]],
- sunpanda:[[57,12,27],[56,13,27],[56,12,27],[56,12,27],[57,12,27],[57,12,28]],
+ sunpanda:[[64,13,29],[73,13,29],[64,13,29],[55,13,29],[60,13,29],[51,13,29]],
  cloudowl:[[54,10,36],[54,12,36],[54,12,36],[54,12,36],[54,12,36],[54,12,37]],
  auroradeer:[[66,25,19],[67,25,20],[66,25,20],[65,25,20],[66,25,20],[66,25,20]],
  starlion:[[66,14,30],[65,14,30],[65,14,30],[66,14,30],[65,14,30],[66,15,32]]
@@ -50,7 +50,7 @@ const helmetFits={hedgehog:[1.45,1,-1],rainotter:[1.4,1,0],moonrabbit:[1.5,2,0],
 function headPlacement(id,body,head){
  const [x,y,skull]=headLandmarks[id][body],[scale,ax,ay]=headContacts[head];
  const fit=head===1?helmetFits[id]:[scale,0,0];
- const contactX=head===1&&id==='moonrabbit'?(body===0?.67:.70):ax;
+ const contactX=head===1&&id==='moonrabbit'?(body===0?.67:.70):head===1&&id==='sunpanda'?.65:ax;
  const frame=wardrobeParts.heads[id].frames[head],w=skull*fit[0],h=w*frame[3]/frame[2];
  return [x+fit[1]-w*contactX,y+fit[2]-h*ay,w,h];
 }
@@ -67,6 +67,9 @@ const propTargets = {
  auroradeer:[[53,40,29,43],[51,40,32,44],[54,39,27,49],[51,38,36,51],[54,40,28,44]],
  starlion:[[51,47,31,40],[47,47,35,41],[52,45,29,47],[48,44,39,49],[52,47,29,42]]
 };
+// Red-panda costume frames translate the entire pose. Follow the measured neck
+// shift instead of attaching every prop to one species-wide rectangle.
+const propPoseOffsets={sunpanda:[[0,0],[9,0],[0,0],[-9,0],[-4,0],[-13,0]]};
 function piece(source,atlas,index,rect,classes,extra=''){
  const [left,top,width,height]=atlas.frames[index],[x,y,w,h]=rect;
  return '<span class="'+classes+'" '+extra+' style="left:'+x+'%;top:'+y+'%;width:'+w+'%;height:'+h+'%;background-image:url('+source+');background-size:'+(100*atlas.width/width)+'% '+(100*atlas.height/height)+'%;background-position:'+(100*left/(atlas.width-width))+'% '+(100*top/(atlas.height-height))+'%"></span>';
@@ -77,7 +80,7 @@ export function avatar(user) {
  const [outfit,head,held]=groups.map(slot=>items.filter(item=>item.slot===slot).findIndex(item=>item.id===user[fields[slot]]));
  // The body owns its costume, face and every limb. Accessories never carry anatomy.
  let contents=piece('assets/magic-bodies-'+id+'.webp',wardrobeParts.bodies[id],outfit+1,[0,0,100,100],'mw-layer mw-body','data-outfit="'+(outfit>=0?items.filter(i=>i.slot==='outfit')[outfit].id:'')+'"');
- if(held>=0){const prop=(['hedgehog','rainotter'].includes(id)?0:5)+held;contents+=piece('assets/magic-props-v2.webp',wardrobeParts.props,prop,containPiece(wardrobeParts.props,prop,id==='rainotter'&&outfit<0&&held===2?[46,39,27,47]:propTargets[id][held]),'mw-piece mw-prop');}
+ if(held>=0){const prop=(['hedgehog','rainotter'].includes(id)?0:5)+held,target=(id==='rainotter'&&outfit<0&&held===2?[46,39,27,47]:propTargets[id][held]).slice(),offset=propPoseOffsets[id]?.[outfit+1]||[0,0];target[0]+=offset[0];target[1]+=offset[1];contents+=piece('assets/magic-props-v2.webp',wardrobeParts.props,prop,containPiece(wardrobeParts.props,prop,target),'mw-piece mw-prop');}
  if(head>=0)contents+=piece('assets/magic-heads-'+id+'.webp',wardrobeParts.heads[id],head,headPlacement(id,outfit+1,head),'mw-piece mw-headwear');
  const name=animals.find(animal=>animal.id===user.avatarAnimal).name;
  return '<span class="mw-avatar" role="img" aria-label="'+escapeText(name)+'"><span class="mw-doll">'+contents+'</span></span>';
