@@ -13,6 +13,10 @@ and isolated headwear layer above it. Grounded animals carry props with straps.
 Frames have transparent gutters; the preview stays below the measured topbar
 and above the bottom bar. Art is decoded before a requested look replaces the
 current preview. Classic collection navigation is removed. See WARDROBE-LAYERS-20261119.md.
+Headwear fitting uses a forehead contact point and skull width for each of the
+42 animal/costume frames, rather than fixed species-wide boxes. Ears, antlers and
+mane are excluded from skull width. Headwear and props preserve their source aspect
+ratio. Keep six percent additional headroom without reducing the character scale.
 
 ## Compass-led choices (2026-11-02)
 Update (2026-11-19): remove all interactive chatbot surfaces and their loaded
