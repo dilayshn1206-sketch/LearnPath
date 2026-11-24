@@ -50,8 +50,9 @@ const helmetFits={hedgehog:[1.45,1,-1],rainotter:[1.4,1,0],moonrabbit:[1.5,2,0],
 function headPlacement(id,body,head){
  const [x,y,skull]=headLandmarks[id][body],[scale,ax,ay]=headContacts[head];
  const fit=head===1?helmetFits[id]:[scale,0,0];
+ const contactX=head===1&&id==='moonrabbit'?(body===0?.67:.70):ax;
  const frame=wardrobeParts.heads[id].frames[head],w=skull*fit[0],h=w*frame[3]/frame[2];
- return [x+fit[1]-w*ax,y+fit[2]-h*ay,w,h];
+ return [x+fit[1]-w*contactX,y+fit[2]-h*ay,w,h];
 }
 function containPiece(atlas,index,rect){
  const frame=atlas.frames[index],[x,y,bw,bh]=rect,scale=Math.min(bw/frame[2],bh/frame[3]),w=frame[2]*scale,h=frame[3]*scale;
