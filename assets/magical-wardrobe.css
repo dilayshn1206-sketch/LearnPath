@@ -1,7 +1,7 @@
 
 /* Magical wardrobe, with larger full-body characters for landscape tablets. */
 .mw-avatar{position:relative;display:block;width:100%;height:100%;overflow:hidden}
-.mw-doll{position:absolute;inset:8%;display:block;isolation:isolate}
+.mw-doll{position:absolute;inset:14% 8% 2%;display:block;isolation:isolate}
 .mw-piece{position:absolute;display:block;background-repeat:no-repeat}
 .mw-body{z-index:0}
 .mw-prop{z-index:1}

@@ -32,15 +32,28 @@ export const fieldForSlot = slot => fields[slot];
 export const coin = '<img class="mw-coin" src="assets/magic-coin.webp" alt="" aria-hidden="true">';
 
 import {wardrobeParts} from './magical-wardrobe-parts.js?v=20261119-4';
-const headTemplates = {
- hedgehog:[[40,10,42,26],[36,8,48,38],[43,5,37,26],[41,3,40,30],[42,3,40,30]],
- rainotter:[[31,-5,40,22],[29,-5,44,31],[34,-8,34,23],[32,-8,40,23],[32,-8,40,23]],
- moonrabbit:[[45,-5,38,25],[39,-5,47,41],[47,-7,34,28],[45,-6,39,30],[46,-6,39,30]],
- sunpanda:[[36,-4,41,25],[32,-3,48,41],[40,-7,34,28],[38,-6,39,30],[39,-6,39,30]],
- cloudowl:[[31,-4,44,27],[27,-3,53,41],[37,-7,36,29],[33,-7,42,31],[33,-7,42,31]],
- auroradeer:[[46,7,40,25],[41,7,47,36],[49,5,34,25],[46,3,40,29],[46,3,40,29]],
- starlion:[[42,-5,43,27],[38,-4,51,40],[46,-7,36,28],[43,-7,43,31],[43,-7,43,31]]
+// Forehead contact point and skull width measured separately in each body frame:
+// plain, scarf, jacket, cape, vest, raincoat. Ears, antlers and mane aren't skull width.
+const headLandmarks = {
+ hedgehog:[[65,25,31],[65,26,31],[65,26,31],[65,26,31],[65,26,31],[65,25,36]],
+ rainotter:[[52,11,27],[51,11,27],[48.5,10,28],[50,10.5,27],[49,10,27],[50,10.5,29]],
+ moonrabbit:[[65,11,29],[63,12,29],[64,12,28],[65,12,28],[64,12,28],[65,12,28]],
+ sunpanda:[[57,12,27],[56,13,27],[56,12,27],[56,12,27],[57,12,27],[57,12,28]],
+ cloudowl:[[54,10,36],[54,12,36],[54,12,36],[54,12,36],[54,12,36],[54,12,37]],
+ auroradeer:[[66,25,19],[67,25,20],[66,25,20],[65,25,20],[66,25,20],[66,25,20]],
+ starlion:[[66,14,30],[65,14,30],[65,14,30],[66,14,30],[65,14,30],[66,15,32]]
 };
+// Local contact points on each isolated accessory, not its image-box center.
+const headContacts = [[1.15,.55,.66],[1.3,.55,.46],[1.0,.55,.78],[1.08,.50,.72],[1.08,.55,.70]];
+function headPlacement(id,body,head){
+ const [x,y,skull]=headLandmarks[id][body],[scale,ax,ay]=headContacts[head];
+ const frame=wardrobeParts.heads[id].frames[head],w=skull*scale,h=w*frame[3]/frame[2];
+ return [x-w*ax,y-h*ay,w,h];
+}
+function containPiece(atlas,index,rect){
+ const frame=atlas.frames[index],[x,y,bw,bh]=rect,scale=Math.min(bw/frame[2],bh/frame[3]),w=frame[2]*scale,h=frame[3]*scale;
+ return [x+(bw-w)/2,y,w,h];
+}
 const propTargets = {
  hedgehog:[[44,58,31,37],[43,65,35,29],[50,57,24,40],[44,48,38,49],[49,60,28,35]],
  rainotter:[[44,42,33,37],[43,43,35,32],[37,47,27,47],[43,33,42,56],[48,42,30,36]],
@@ -60,8 +73,8 @@ export function avatar(user) {
  const [outfit,head,held]=groups.map(slot=>items.filter(item=>item.slot===slot).findIndex(item=>item.id===user[fields[slot]]));
  // The body owns its costume, face and every limb. Accessories never carry anatomy.
  let contents=piece('assets/magic-bodies-'+id+'.webp',wardrobeParts.bodies[id],outfit+1,[0,0,100,100],'mw-layer mw-body','data-outfit="'+(outfit>=0?items.filter(i=>i.slot==='outfit')[outfit].id:'')+'"');
- if(held>=0)contents+=piece('assets/magic-props-v2.webp',wardrobeParts.props,(['hedgehog','rainotter'].includes(id)?0:5)+held,id==='rainotter'&&outfit<0&&held===2?[46,39,27,47]:propTargets[id][held],'mw-piece mw-prop');
- if(head>=0)contents+=piece('assets/magic-heads-'+id+'.webp',wardrobeParts.heads[id],head,headTemplates[id][head],'mw-piece mw-headwear');
+ if(held>=0){const prop=(['hedgehog','rainotter'].includes(id)?0:5)+held;contents+=piece('assets/magic-props-v2.webp',wardrobeParts.props,prop,containPiece(wardrobeParts.props,prop,id==='rainotter'&&outfit<0&&held===2?[46,39,27,47]:propTargets[id][held]),'mw-piece mw-prop');}
+ if(head>=0)contents+=piece('assets/magic-heads-'+id+'.webp',wardrobeParts.heads[id],head,headPlacement(id,outfit+1,head),'mw-piece mw-headwear');
  const name=animals.find(animal=>animal.id===user.avatarAnimal).name;
  return '<span class="mw-avatar" role="img" aria-label="'+escapeText(name)+'"><span class="mw-doll">'+contents+'</span></span>';
 }
