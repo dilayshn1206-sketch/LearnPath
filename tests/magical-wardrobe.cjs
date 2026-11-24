@@ -3,6 +3,8 @@ const path = require('node:path');
 const assert = require('node:assert/strict');
 const {JSDOM} = require('jsdom');
 const root = path.resolve(__dirname,'..');
+const partsSource=fs.readFileSync(path.join(root,'assets/magical-wardrobe-parts.js'),'utf8');
+const parts=JSON.parse(partsSource.slice(partsSource.indexOf('{'),partsSource.lastIndexOf('}')+1));
 const html = fs.readFileSync(path.join(root,'index.html'),'utf8');
 const app = html.match(/<script type="module">([\s\S]*?)<\/script>/)[1].replace(/^import[^\r\n]+;\r?\n/gm,'');
 const wardrobe = (fs.readFileSync(path.join(root,'assets/magical-wardrobe-layers.js'),'utf8')+'\n'+fs.readFileSync(path.join(root,'assets/magical-wardrobe-parts.js'),'utf8')+'\n'+fs.readFileSync(path.join(root,'assets/magical-wardrobe.js'),'utf8').replace(/^import[^\r\n]+;\r?\n/gm,'')).replace(/^export /gm,'');
@@ -103,7 +105,15 @@ w.__magicTest.start();
           assert.equal(sample.querySelector('.mw-body').dataset.outfit,outfit?.id||'');
           assert.equal(sample.querySelectorAll('.mw-prop').length,held?1:0);
           assert.equal(sample.querySelectorAll('.mw-headwear').length,head?1:0);
-          if(head)assert.ok(sample.querySelector('.mw-headwear').style.backgroundImage.includes('magic-heads-'));
+          if(head){
+            const art=sample.querySelector('.mw-headwear'),index=w.MagicalWardrobe.items.filter(x=>x.slot==='head').findIndex(x=>x.id===head.id),frame=parts.heads[animal.id.slice(6)].frames[index];
+            assert.ok(art.style.backgroundImage.includes('magic-heads-'));
+            assert.ok(Math.abs(parseFloat(art.style.width)/parseFloat(art.style.height)-frame[2]/frame[3])<1e-5,'Headwear must keep the source aspect ratio');
+          }
+          if(held){
+            const art=sample.querySelector('.mw-prop'),base=w.MagicalWardrobe.items.filter(x=>x.slot==='item').findIndex(x=>x.id===held.id),index=(['magic-hedgehog','magic-rainotter'].includes(animal.id)?0:5)+base,frame=parts.props.frames[index];
+            assert.ok(Math.abs(parseFloat(art.style.width)/parseFloat(art.style.height)-frame[2]/frame[3])<1e-5,'Held items must keep the source aspect ratio');
+          }
           assert.equal(sample.querySelectorAll('.mw-foreground').length,0);
         }
       }
