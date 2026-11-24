@@ -17,6 +17,10 @@ Headwear fitting uses a forehead contact point and skull width for each of the
 42 animal/costume frames, rather than fixed species-wide boxes. Ears, antlers and
 mane are excluded from skull width. Headwear and props preserve their source aspect
 ratio. Keep six percent additional headroom without reducing the character scale.
+Transform validation (2026-11-24, local): the red-panda atlas translates the head
+and torso differently across costume frames. Its six head registrations and prop
+offsets are now calibrated against the original body art. Validate pupil regions
+as well as bounds; preserve the current coin/ownership and preview behavior.
 
 ## Compass-led choices (2026-11-02)
 Update (2026-11-19): remove all interactive chatbot surfaces and their loaded

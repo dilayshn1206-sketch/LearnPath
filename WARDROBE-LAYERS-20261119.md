@@ -1,7 +1,15 @@
-# Wardrobe correction — 2026-11-19, revision 3
+# Wardrobe correction — revision 4, local Transform validation 2026-11-24
+
+The three-trial Transform exercise reproduced the rabbit's covered pupil and
+revealed incorrect red-panda registration. The six panda body frames have distinct
+forehead coordinates; prop registration follows separately checked torso shifts.
+Thirty panda headwear/costume pairs pass both protected pupil regions. Existing
+purchase/preview tests and all-combination bounds/aspect checks also pass. Evidence
+and the rejected controls are in outputs/transform-evaluation-20261124. These local
+changes are not evidence that a live release completed.
 
 Revision 3: the old species-wide rectangles passed bounds checks but did not prove
-that headwear fitted the illustrated skull. Replace them with 42 measured forehead
+that headwear fitted the illustrated skull. Replace them with 42 per-pose forehead
 and skull-width landmarks (seven animals × six costume states), plus contact points
 on each accessory. Scale uniformly using the actual crop dimensions. The helmet
 contact follows the opening above the eyes, rather than the enclosing image box.
